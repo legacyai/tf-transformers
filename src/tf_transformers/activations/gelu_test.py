@@ -18,7 +18,8 @@ from __future__ import absolute_import, division, print_function
 
 import tensorflow as tf
 from official.modeling import activations
-from tensorflow.python.keras import keras_parameterized  # pylint: disable=g-direct-tensorflow-import
+from tensorflow.python.keras import \
+    keras_parameterized  # pylint: disable=g-direct-tensorflow-import
 
 
 @keras_parameterized.run_all_keras_modes

@@ -4,12 +4,9 @@ import tensorflow as tf
 
 from tf_transformers.data import TFProcessor
 from tf_transformers.data.squad_utils_sp import (
-    _compute_softmax,
-    _get_best_indexes,
+    _compute_softmax, _get_best_indexes,
     convert_question_context_to_standard_format,
-    example_to_features_using_fast_sp_alignment_test,
-    post_clean_train_squad,
-)
+    example_to_features_using_fast_sp_alignment_test, post_clean_train_squad)
 from tf_transformers.utils.tokenization import BasicTokenizer
 
 

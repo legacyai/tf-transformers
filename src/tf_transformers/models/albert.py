@@ -5,8 +5,10 @@ from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer
-from tf_transformers.layers import MLMLayer, OnDeviceEmbedding, SimplePositionEmbedding, dense_einsum
-from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
+from tf_transformers.layers import (MLMLayer, OnDeviceEmbedding,
+                                    SimplePositionEmbedding, dense_einsum)
+from tf_transformers.layers.mask import (CausalMask, CrossAttentionMask,
+                                         SelfAttentionMask, prefix_mask)
 from tf_transformers.layers.transformer import TransformerBERT
 
 logging.set_verbosity("INFO")

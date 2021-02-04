@@ -6,7 +6,8 @@ import tensorflow as tf
 
 from tf_transformers.core import LegacyLayer
 from tf_transformers.layers import dense_einsum
-from tf_transformers.layers.attention import BlockMultiHeadAttention, MultiHeadAttention
+from tf_transformers.layers.attention import (BlockMultiHeadAttention,
+                                              MultiHeadAttention)
 
 
 class TransformerBERT(LegacyLayer):

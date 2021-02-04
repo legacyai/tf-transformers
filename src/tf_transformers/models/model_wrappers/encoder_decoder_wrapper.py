@@ -2,7 +2,8 @@ import tensorflow as tf
 from absl import logging
 
 from tf_transformers.models import EncoderDecoder
-from tf_transformers.utils import get_config, get_model_wrapper, validate_model_name
+from tf_transformers.utils import (get_config, get_model_wrapper,
+                                   validate_model_name)
 
 logging.set_verbosity("INFO")
 
@@ -39,7 +40,8 @@ def EncoderDecoderModel(
         if encoder_model_name or decoder_model_name:
             raise ValueError(
                 "When `model_name` is set, EncoderDecoderModel will be initialized using  `model_name`. \
-                    Please use `encoder_model_name` and `decoder_model_name` to use 2 different architecture for EncoderDecodeModel"
+                    Please use `encoder_model_name` and `decoder_model_name` \
+                    to use 2 different architecture for EncoderDecodeModel"
             )
     if model_checkpoint_dir:
         if encoder_checkpoint_dir:

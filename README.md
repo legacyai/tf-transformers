@@ -45,12 +45,12 @@ tf-transformers is designed to harness the full power of Tensorflow 2, to make i
 
 All / Most NLP downstream tasks can be integrated into Tranformer based models with much ease. All the models can be trained using ```model.fit```, which supports GPU, multi-GPU, TPU.
 
-## Unique Features 
+## Unique Features
 - Faster text generation using Tensorflow2. Faster than PyTorch in most experiments (V100 GPU). ```80%``` faster compared to existing TF based libararies (relative difference) Refer [benchmark code](tests/notebooks/benchmarks/).
 - Complete TFlite support for BERT, RoBERTA, T5, Albert, mt5 for all down stream tasks except text-generation
 - Faster sentence-piece alignment (no more LCS overhead)
 - Variable batch text generation for Encoder only models like GPT2
-- No more hassle of writing long codes for TFRecords. minimal and simple. 
+- No more hassle of writing long codes for TFRecords. minimal and simple.
 - Off the shelf support for auto-batching ```tf.data.dataset``` or ```tf.ragged```tensors
 - Pass dictionary outputs directly to loss functions inside ```tf.keras.Model.fit``` using ```model.compile2``` . Refer [examples]() or [blog]()
 - Multiple mask modes like ```causal```, ```user-defined```, ```prefix``` by changing one argument . Refer [examples]() or [blog]()
@@ -129,7 +129,7 @@ The model itself is a regular [Pytorch `nn.Module`](https://pytorch.org/docs/sta
 ## Why should I use tf-transformers?
 
 1. Use state-of-the-art models in Production, with less than 10 lines of code.
-    - High performance models, better tha all official Tensorflow based models 
+    - High performance models, better tha all official Tensorflow based models
     - Very simple classes for all downstream tasks
     - Complete TFlite support for all tasks except text-generation
 
@@ -149,7 +149,7 @@ The model itself is a regular [Pytorch `nn.Module`](https://pytorch.org/docs/sta
 
 This repository is tested on Python 3.7+, and Tensorflow 2.4.0
 
-Recommended to use a [virtual environment](https://docs.python.org/3/library/venv.html). 
+Recommended to use a [virtual environment](https://docs.python.org/3/library/venv.html).
 
 Assuming Tensorflow 2.0 is installed
 
@@ -191,5 +191,5 @@ These implementations have been tested on several datasets (see the example scri
 
 ## Citation
 
-Nothing here yet :-) . 
+Nothing here yet :-) .
 ```

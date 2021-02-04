@@ -1,7 +1,8 @@
 import tensorflow as tf
 from absl import logging
 
-from tf_transformers.core.legacy_compile import LossesContainer, MetricsContainer
+from tf_transformers.core.legacy_compile import (LossesContainer,
+                                                 MetricsContainer)
 from tf_transformers.core.legacy_module import LegacyModuleCustom
 
 logging.set_verbosity("INFO")

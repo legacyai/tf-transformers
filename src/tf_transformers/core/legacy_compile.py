@@ -18,7 +18,8 @@ from __future__ import absolute_import, division, print_function
 import copy
 
 import six
-from tensorflow.python.distribute import distribution_strategy_context as ds_context
+from tensorflow.python.distribute import \
+    distribution_strategy_context as ds_context
 from tensorflow.python.keras import losses as losses_mod
 from tensorflow.python.keras import metrics as metrics_mod
 from tensorflow.python.keras.utils import losses_utils

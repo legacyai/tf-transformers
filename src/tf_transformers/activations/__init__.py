@@ -14,5 +14,6 @@
 # ==============================================================================
 """Activations package definition."""
 from tf_transformers.activations.gelu import gelu
-from tf_transformers.activations.swish import hard_swish, identity, simple_swish
+from tf_transformers.activations.swish import (hard_swish, identity,
+                                               simple_swish)
 from tf_transformers.activations.utils import get_activation

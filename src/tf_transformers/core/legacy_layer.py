@@ -2,7 +2,8 @@ import tensorflow as tf
 from absl import logging
 
 from tf_transformers.core.legacy_model import LegacyModel
-from tf_transformers.layers import MLMLayer, OnDeviceEmbedding, SimplePositionEmbedding
+from tf_transformers.layers import (MLMLayer, OnDeviceEmbedding,
+                                    SimplePositionEmbedding)
 
 
 class LegacyLayer(tf.keras.layers.Layer):

@@ -2,7 +2,8 @@ import tensorflow as tf
 from absl import logging
 
 from tf_transformers.models import EncoderDecoder, T5Encoder
-from tf_transformers.utils import get_config, get_model_wrapper, validate_model_name
+from tf_transformers.utils import (get_config, get_model_wrapper,
+                                   validate_model_name)
 
 logging.set_verbosity("INFO")
 allowed_model_names = ["t5_small", "t5_base"]
