@@ -67,7 +67,7 @@ def mT5Model(
     model_checkpoint_dir=None,
     batch_size=None,
     encoder_sequence_length=None,
-    decoder_sequence_length=None,    
+    decoder_sequence_length=None,
     decoder_mask_mode='causal',
 ):
     """Wrapper for Model

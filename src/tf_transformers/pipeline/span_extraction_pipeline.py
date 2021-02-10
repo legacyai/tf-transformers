@@ -1,11 +1,13 @@
 
-import tensorflow as tf
 import collections
-from tf_transformers.data.squad_utils_sp import *
-from tf_transformers.data.squad_utils_sp import _get_best_indexes, _compute_softmax
-from tf_transformers.utils.tokenization import BasicTokenizer
-from tf_transformers.data import TFProcessor
 
+import tensorflow as tf
+
+from tf_transformers.data import TFProcessor
+from tf_transformers.data.squad_utils_sp import *
+from tf_transformers.data.squad_utils_sp import (_compute_softmax,
+                                                 _get_best_indexes)
+from tf_transformers.utils.tokenization import BasicTokenizer
 
 
 def extract_from_dict(dict_items, key):
@@ -16,15 +18,15 @@ def extract_from_dict(dict_items, key):
 
 class Span_Extraction_Pipeline():
 
-    def __init__(self, model, 
-                tokenizer, 
-                tokenizer_fn, 
-                SPECIAL_PIECE, 
-                n_best_size, 
-                n_best, 
-                max_answer_length, 
+    def __init__(self, model,
+                tokenizer,
+                tokenizer_fn,
+                SPECIAL_PIECE,
+                n_best_size,
+                n_best,
+                max_answer_length,
                 max_seq_length,
-                max_query_length, 
+                max_query_length,
                 doc_stride,
                 batch_size=32):
 
@@ -41,7 +43,7 @@ class Span_Extraction_Pipeline():
         self.max_query_length = max_query_length
         self.doc_stride = doc_stride
         self.batch_size = batch_size
-        
+
 
     def get_model_fn(self, model):
         self.model_fn = None
@@ -58,7 +60,7 @@ class Span_Extraction_Pipeline():
                 self.model_fn = model_fn
         if self.model_fn is None:
             raise ValueError("Please check the type of your model")
-    
+
     def run(self, dataset):
         start_logits = []
         end_logits = []
@@ -78,15 +80,15 @@ class Span_Extraction_Pipeline():
             end_logits_unstacked.extend(tf.unstack(batch_logits))
 
         return start_logits_unstacked, end_logits_unstacked
-    
+
     def convert_to_features(self, dev_examples):
         """Convert examples to features"""
-        qas_id_examples = {ex['qas_id']: ex for ex in dev_examples} 
+        qas_id_examples = {ex['qas_id']: ex for ex in dev_examples}
         dev_examples_cleaned = post_clean_train_squad(dev_examples, self.basic_tokenizer, is_training=False)
         qas_id_info, dev_features = example_to_features_using_fast_sp_alignment_test(self.tokenizer,
             dev_examples_cleaned, self.max_seq_length, self.max_query_length, self.doc_stride, self.SPECIAL_PIECE
         )
-        
+
     def convert_features_to_dataset(self, dev_features):
         """Feaures to TF dataset"""
         # for TFProcessor
@@ -99,11 +101,11 @@ class Span_Extraction_Pipeline():
         dev_dataset  = tf_processor.process(parse_fn=local_parser())
         self.dev_dataset = dev_dataset  = tf_processor.auto_batch(dev_dataset, batch_size = self.batch_size)
         return dev_dataset
-    
+
     def post_process(self, dev_features, qas_id_info, start_logits_unstacked, end_ogits_unstacked):
         # List of qa_ids per feature
         # List of doc_offset, for shifting when an example gets splitted due to length
-        qas_id_list = extract_from_dict(dev_features, 'qas_id')  
+        qas_id_list = extract_from_dict(dev_features, 'qas_id')
         doc_offset_list = extract_from_dict(dev_features, 'doc_offset')
 
         # Group by qas_id -> predictions , because multiple feature may come from
@@ -121,7 +123,7 @@ class Span_Extraction_Pipeline():
                                                     'feature_length': [len(feature['input_ids'])],
                                                     'doc_offset': [doc_offset_list[i]],
                                                     'passage_start_pos': [feature['input_ids'].index(self.tokenizer.sep_token) + 1],
-                                                    'start_logits': [start_logits_unstacked[i]], 
+                                                    'start_logits': [start_logits_unstacked[i]],
                                                     'end_logits': [end_logits_unstacked[i]]}
 
             else:
@@ -225,9 +227,9 @@ class Span_Extraction_Pipeline():
                 qas_id_answer[qas_id] = ""
                 skipped_null.append(qas_id)
             final_result[qas_id]['answers'] = answer_dict
-    
+
     def __call__(self, questions, contexts, qas_ids=[]):
-        
+
         # If qas_id is empty, we assign positions as id
         if qas_ids == []:
             qas_ids = [i for i in range(len(questions))]
@@ -241,8 +243,6 @@ class Span_Extraction_Pipeline():
         final_result = self.post_process(dev_features, qas_id_info, start_logits_unstacked, end_ogits_unstacked)
         return final_result
 
-        
-        
 
 
 
@@ -251,4 +251,6 @@ class Span_Extraction_Pipeline():
 
 
 
-            
+
+
+

@@ -35,7 +35,7 @@ def modelWrapper(model_name, **kwargs):
     if config_kwargs:
         for _kwarg in config_kwargs:
             del kwargs[_kwarg]
-            
+
     if "is_training" not in kwargs:
         kwargs["is_training"] = False
         kwargs["pipeline_mode"] = None

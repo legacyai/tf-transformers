@@ -1,18 +1,19 @@
 
 from tf_transformers.utils import fast_sp_alignment
 
+
 def get_tokens_labels(
     aligned_words, orig_to_new_index, label_tokens, sub_words_mapped, label_pad_token="[PAD]"
 ):
     """
     convert each sub word into labels
-    If a word is split into multiple sub words, 
-    then first sub word is assigned with label and other sub words will be padded 
+    If a word is split into multiple sub words,
+    then first sub word is assigned with label and other sub words will be padded
     """
     aligned_labels = [label_pad_token] * len(aligned_words)
     for original_pos, new_pos in enumerate(orig_to_new_index):
         aligned_labels[new_pos] = label_tokens[original_pos]
-        
+
     flat_tokens = []
     flat_labels = []
 
@@ -29,7 +30,7 @@ def get_tokens_labels(
         temp_l[0] = _align_label
         flat_tokens.extend(temp_w)
         flat_labels.extend(temp_l)
-        
+
     return flat_tokens, flat_labels
 
 
@@ -37,7 +38,7 @@ def get_tokens_labels(
 def fast_tokenize_and_align_sentence_for_ner(
     sentence, word_tokens, SPECIAL_PIECE, is_training=False, label_tokens = None, label_pad_token = None
 ):
-        
+
     """
     align sentence sub words and labels using fast_sp
     """
@@ -45,10 +46,10 @@ def fast_tokenize_and_align_sentence_for_ner(
     orig_to_new_index, aligned_words, sub_words_mapped = fast_sp_alignment(
             sentence, tokenizer, SPECIAL_PIECE
         )
-    
+
     if is_training:
-        flat_tokens, flat_labels = get_tokens_labels(aligned_words, 
-                                                     orig_to_new_index, 
+        flat_tokens, flat_labels = get_tokens_labels(aligned_words,
+                                                     orig_to_new_index,
                                                      label_tokens, sub_words_mapped, label_pad_token
         )
         return aligned_words, sub_words_mapped, flat_tokens, flat_labels

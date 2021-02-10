@@ -1,5 +1,6 @@
 import tensorflow as tf
-from tf_transformers.core import LegacyModel, LegacyLayer
+
+from tf_transformers.core import LegacyLayer, LegacyModel
 
 
 class Token_Classification_Model(LegacyLayer):
@@ -24,7 +25,7 @@ class Token_Classification_Model(LegacyLayer):
             for token_embeddings in result["all_layer_token_embeddings"]:
                 outputs = self.logits_layer(token_embeddings)
                 token_logits.append(outputs)
-            return {'token_logits': token_logits}            
+            return {'token_logits': token_logits}
 
         else:
             # last layer token embeddings
@@ -33,10 +34,10 @@ class Token_Classification_Model(LegacyLayer):
             return {
                     "token_logits": outputs
             }
-        
+
     def get_model(self):
         layer_output = self(self.model.input)
         model = LegacyModel(inputs=self.model.input, outputs=layer_output, name='token_classification')
         model.model_config = self.model_config
         return model
-        
+

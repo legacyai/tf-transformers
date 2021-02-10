@@ -1,6 +1,7 @@
 
-import tensorflow as tf
 import collections
+
+import tensorflow as tf
 
 from tf_transformers.data import TFProcessor
 
@@ -13,9 +14,9 @@ def extract_from_dict(dict_items, key):
 
 class Token_Classification_Pipeline():
 
-    def __init__(self, model, 
-                tokenizer, 
-                tokenizer_fn, 
+    def __init__(self, model,
+                tokenizer,
+                tokenizer_fn,
                 SPECIAL_PIECE,
                 label_map,
                 max_seq_length,
@@ -26,10 +27,10 @@ class Token_Classification_Pipeline():
         self.tokenizer_fn = tokenizer_fn
         self.SPECIAL_PIECE = SPECIAL_PIECE
         self.label_map = label_map
-        
+
         self.max_seq_length = max_seq_length
         self.batch_size = batch_size
-        
+
 
 
     def get_model_fn(self, model):
@@ -47,7 +48,7 @@ class Token_Classification_Pipeline():
                 self.model_fn = model_fn
         if self.model_fn is None:
             raise ValueError("Please check the type of your model")
-    
+
     def run(self, dataset):
         token_logits = []
         for batch_inputs in dataset:
@@ -61,7 +62,7 @@ class Token_Classification_Pipeline():
             token_logits_unstacked.extend(tf.unstack(batch_logits))
 
         return token_logits_unstacked
-    
+
     def convert_to_features(self, dev_examples):
         """Convert examples to features"""
         dev_features = []
@@ -76,7 +77,7 @@ class Token_Classification_Pipeline():
             result['sub_words_mapped'] = sub_words_mapped
             dev_features.append(result)
         return dev_features
-        
+
     def convert_features_to_dataset(self, dev_features):
         """Feaures to TF dataset"""
         # for TFProcessor
@@ -91,9 +92,9 @@ class Token_Classification_Pipeline():
         dev_dataset  = tf_processor.process(parse_fn=local_parser())
         self.dev_dataset = dev_dataset  = tf_processor.auto_batch(dev_dataset, batch_size = self.batch_size)
         return dev_dataset
-    
+
     def post_process(self, sentences, dev_features, token_logits_unstacked):
-        
+
         final_results = []
         for i in range(len(sentences)):
             slot_logits = token_logits_unstacked[i][1:-1] # to avoid CLS and SEP
@@ -115,18 +116,18 @@ class Token_Classification_Pipeline():
 
             predicted_labels = [self.label_map[idx.numpy()] for idx in predicted_ids]
             predicted_probs = tf.nn.softmax(predicted_probs).numpy()
-            
+
             assert len(dev_features[i]['word_tokens']) == len(predicted_labels) == len(predicted_probs)
-            final_results.append({'sentence': sentences[i], 
+            final_results.append({'sentence': sentences[i],
                                   'original_words': dev_features[i]['word_tokens'],
                                   'predicted_labels': predicted_labels,
                                   'predicted_probs': predicted_probs})
         return final_results
-    
+
     def __call__(self, sentences):
-        
+
         dev_features = self.convert_to_features(sentences)
         dev_dataset = self.convert_features_to_dataset(dev_features)
-        token_logits_unstacked = self.run(dev_dataset)        
+        token_logits_unstacked = self.run(dev_dataset)
         final_result = self.post_process(sentences, dev_features, token_logits_unstacked)
         return final_result
