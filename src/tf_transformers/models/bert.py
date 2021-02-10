@@ -457,6 +457,11 @@ class BERTEncoder(LegacyLayer):
         # batch_size x sequence_length x embedding_size
         token_embeddings = encoder_outputs[-1]
 
+        all_cls_output = []
+        for per_layer_token_embeddings in encoder_outputs:
+            per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(per_layer_token_embeddings)
+            all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
+
         # MLM Projection
         if self.use_mlm_layer:
             token_embeddings = self.mlm_layer(token_embeddings)
@@ -491,6 +496,7 @@ class BERTEncoder(LegacyLayer):
 
         if self.return_all_layer_token_embeddings:
             result["all_layer_token_embeddings"] = encoder_outputs
+            result['all_layer_cls_output'] = all_cls_output
         return result
 
     def call_cross_attention_encoder(self, inputs):

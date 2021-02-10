@@ -48,7 +48,7 @@ def modelWrapper(model_name, **kwargs):
         # Hard set, In the decoder model (bidirectional has to be false)
         if kwargs["is_decoder"] is True:
             config["bidirectional"] = False
-            kwargs["mask_mode"] = "causal"
+            # kwargs["mask_mode"] = "causal"
             kwargs["name"] = name + "_decoder"
 
     tf.keras.backend.clear_session()
@@ -65,7 +65,10 @@ def mT5Model(
     use_dropout=False,
     pipeline_mode=None,
     model_checkpoint_dir=None,
+    batch_size=None,
     encoder_sequence_length=None,
+    decoder_sequence_length=None,    
+    decoder_mask_mode='causal',
 ):
     """Wrapper for Model
 
@@ -89,11 +92,15 @@ def mT5Model(
 
     encoder_kwargs["is_training"] = is_training
     decoder_kwargs["is_training"] = is_training
+    encoder_kwargs['batch_size'] = batch_size
+    decoder_kwargs['batch_size'] = batch_size
+    encoder_kwargs['sequence_length'] = encoder_sequence_length
     encoder_kwargs["mask_mode"] = "user_defined"
 
     encoder_kwargs["use_dropout"] = use_dropout
     decoder_kwargs["use_dropout"] = use_dropout
-    decoder_kwargs["mask_mode"] = "causal"
+    decoder_kwargs["mask_mode"] = decoder_mask_mode
+    decoder_kwargs['sequence_length'] = decoder_sequence_length
     decoder_kwargs["is_decoder"] = True
 
     model_name = model_name.replace("-", "_")  # replace - with _

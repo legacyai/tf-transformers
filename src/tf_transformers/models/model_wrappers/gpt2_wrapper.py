@@ -24,10 +24,17 @@ def modelWrapper(model_name, **kwargs):
     validate_model_name(model_name, allowed_model_names)
     config = get_config("tf_transformers.models.model_configs.gpt2", model_name)
 
+    config_kwargs = []
     for _kwarg in kwargs:
         if _kwarg in config:
-            config["_kwarg"] = kwargs[_kwarg]
+            config[_kwarg] = kwargs[_kwarg]
             logging.info("Overwride {} with {}".format(_kwarg, kwargs[_kwarg]))
+            config_kwargs.append(_kwarg)
+
+    # If it is in kwargs, Keras Layer will throw error
+    if config_kwargs:
+        for _kwarg in config_kwargs:
+            del kwargs[_kwarg]
 
     if "is_training" not in kwargs:
         kwargs["is_training"] = False
