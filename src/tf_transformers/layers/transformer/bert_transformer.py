@@ -6,8 +6,7 @@ import tensorflow as tf
 
 from tf_transformers.core import LegacyLayer
 from tf_transformers.layers import dense_einsum
-from tf_transformers.layers.attention import (BlockMultiHeadAttention,
-                                              MultiHeadAttention)
+from tf_transformers.layers.attention import BigBirdAttention, BlockMultiHeadAttention, MultiHeadAttention
 
 
 class TransformerBERT(LegacyLayer):
@@ -26,6 +25,7 @@ class TransformerBERT(LegacyLayer):
         num_attention_heads,
         intermediate_size,
         intermediate_activation,
+        attention_head_size=None,
         attention_cfg=None,
         dropout_rate=0.0,
         attention_dropout_rate=0.0,
@@ -42,6 +42,8 @@ class TransformerBERT(LegacyLayer):
         layer_norm_epsilon=None,
         cross_attention_inside_encoder=False,
         attention_type="full_attention",  # ['full_attention', 'block_attention']
+        block_size=64,
+        num_rand_blocks=3,
         name="transformer",
         **kwargs,
     ):
@@ -88,6 +90,9 @@ class TransformerBERT(LegacyLayer):
         self._share_attention_layers = share_attention_layers
         self._cross_attention_inside_encoder = cross_attention_inside_encoder
         self._attention_type = attention_type
+        self._attention_head_size = attention_head_size
+        self._num_rand_blocks = num_rand_blocks
+        self._from_block_size = self._to_block_size = block_size
 
         if self._is_decoder is None:
             raise ValueError(
@@ -106,12 +111,13 @@ class TransformerBERT(LegacyLayer):
             raise ValueError("TransformerBERT expects a three-dimensional input of " "shape [batch, sequence, width].")
         batch_size, sequence_length, hidden_size = input_tensor_shape
 
-        if hidden_size % self._num_heads != 0:
-            raise ValueError(
-                "The input size (%d) is not a multiple of the number of attention "
-                "heads (%d)" % (hidden_size, self._num_heads)
-            )
-        self._attention_head_size = int(hidden_size // self._num_heads)
+        if not self._attention_head_size:
+            if hidden_size % self._num_heads != 0:
+                raise ValueError(
+                    "The input size (%d) is not a multiple of the number of attention "
+                    "heads (%d)" % (hidden_size, self._num_heads)
+                )
+            self._attention_head_size = int(hidden_size // self._num_heads)
 
         if self._attention_type == "full_attention":
 
@@ -136,6 +142,26 @@ class TransformerBERT(LegacyLayer):
             self._attention_layer = BlockMultiHeadAttention(
                 num_heads=self._num_heads,
                 head_size=self._attention_head_size,
+                dropout_rate=self._attention_dropout_rate,
+                kernel_initializer=self._kernel_initializer,
+                bias_initializer=self._bias_initializer,
+                kernel_regularizer=self._kernel_regularizer,
+                bias_regularizer=self._bias_regularizer,
+                activity_regularizer=self._activity_regularizer,
+                kernel_constraint=self._kernel_constraint,
+                bias_constraint=self._bias_constraint,
+                is_training=self.is_training,
+                use_dropout=self.use_dropout,
+                name="self_attention",
+            )
+
+        if self._attention_type == "bigbird":
+            self._attention_layer = BigBirdAttention(
+                num_heads=self._num_heads,
+                head_size=self._attention_head_size,
+                num_rand_blocks=self._num_rand_blocks,
+                from_block_size=self._from_block_size,
+                to_block_size=self._to_block_size,
                 dropout_rate=self._attention_dropout_rate,
                 kernel_initializer=self._kernel_initializer,
                 bias_initializer=self._bias_initializer,
@@ -314,6 +340,7 @@ class TransformerBERT(LegacyLayer):
         """
         input_tensor, attention_mask = inputs
 
+        # For bigbird (attention_mask is input_mask) 2D
         # No pre norm for GPT2
         # input_tensor_norm = self._pre_attention_norm(input_tensor)
         attention_inputs = [input_tensor, input_tensor]

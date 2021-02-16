@@ -69,62 +69,7 @@ Here are a few examples:
 - [Translation with T5](https://huggingface.co/t5-base?text=My+name+is+Wolfgang+and+I+live+in+Berlin)
 
 
-## Quick tour
 
-To immediately use a model on a given text, we provide the `pipeline` API. Pipelines group together a pretrained model with the preprocessing that was used during that model training. Here is how to quickly use a pipeline to classify positive versus negative texts
-
-```python
->>> from transformers import pipeline
-
-# Allocate a pipeline for sentiment-analysis
->>> classifier = pipeline('sentiment-analysis')
->>> classifier('We are very happy to include pipeline into the transformers repository.')
-[{'label': 'POSITIVE', 'score': 0.9978193640708923}]
-```
-
-The second line of code downloads and caches the pretrained model used by the pipeline, the third line evaluates it on the given text. Here the answer is "positive" with a confidence of 99.8%.
-
-This is another example of pipeline used for that can extract question answers from some context:
-
-``` python
->>> from transformers import pipeline
-
-# Allocate a pipeline for question-answering
->>> question_answerer = pipeline('question-answering')
->>> question_answerer({
-...     'question': 'What is the name of the repository ?',
-...     'context': 'Pipeline have been included in the huggingface/transformers repository'
-... })
-{'score': 0.5135612454720828, 'start': 35, 'end': 59, 'answer': 'huggingface/transformers'}
-
-```
-
-On top of the answer, the pretrained model used here returned its confidence score, along with the start position and its end position in the tokenized sentence. You can learn more about the tasks supported by the `pipeline` API in [this tutorial](https://huggingface.co/transformers/task_summary.html).
-
-To download and use any of the pretrained models on your given task, you just need to use those three lines of codes (PyTorch version):
-```python
->>> from transformers import AutoTokenizer, AutoModel
-
->>> tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
->>> model = AutoModel.from_pretrained("bert-base-uncased")
-
->>> inputs = tokenizer("Hello world!", return_tensors="pt")
->>> outputs = model(**inputs)
-```
-or for TensorFlow:
-```python
->>> from transformers import AutoTokenizer, TFAutoModel
-
->>> tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
->>> model = TFAutoModel.from_pretrained("bert-base-uncased")
-
->>> inputs = tokenizer("Hello world!", return_tensors="tf")
->>> outputs = model(**inputs)
-```
-
-The tokenizer is responsible for all the preprocessing the pretrained model expects, and can be called directly on one (or list) of texts (as we can see on the fourth line of both code examples). It will output a dictionary you can directly pass to your model (which is done on the fifth line).
-
-The model itself is a regular [Pytorch `nn.Module`](https://pytorch.org/docs/stable/nn.html#torch.nn.Module) or a [TensorFlow `tf.keras.Model`](https://www.tensorflow.org/api_docs/python/tf/keras/Model) (depending on your backend) which you can use normally. For instance, [this tutorial](https://huggingface.co/transformers/training.html) explains how to integrate such a model in classic PyTorch or TensorFlow training loop, or how to use our `Trainer` API to quickly fine-tune the on a new dataset.
 
 ## Why should I use tf-transformers?
 
@@ -174,20 +119,13 @@ tf-transformers currently provides the following architectures .
 ultilingual BERT into [DistilmBERT](https://github.com/huggingface/transformers/tree/master/examples/distillation) and a German version of DistilBERT.
 **[T5](https://huggingface.co/transformers/model_doc/t5.html)** (from Google AI) released with the paper [Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683) by Colin Raffel and Noam Shazeer and Adam Roberts and Katherine Lee and Sharan Narang and Michael Matena and Yanqi Zhou and Wei Li and Peter J. Liu.
 
-These implementations have been tested on several datasets (see the example scripts) and should match the performances of the original implementations. You can find more details on the performances in the Examples section of the [documentation](https://huggingface.co/transformers/examples.html).
 
 
-## Learn more
+## Credits
 
-| Section | Description |
-|-|-|
-| [Documentation](https://huggingface.co/transformers/) | Full API documentation and tutorials |
-| [Task summary](https://huggingface.co/transformers/task_summary.html) | Tasks supported by 🤗 Transformers |
-| [Preprocessing tutorial](https://huggingface.co/transformers/preprocessing.html) | Using the `Tokenizer` class to prepare data for the models |
-| [Training and fine-tuning](https://huggingface.co/transformers/training.html) | Using the models provided by 🤗 Transformers in a PyTorch/TensorFlow training loop and the `Trainer` API |
-| [Quick tour: Fine-tuning/usage scripts](https://github.com/huggingface/transformers/tree/master/examples) | Example scripts for fine-tuning models on a wide range of tasks |
-| [Model sharing and uploading](https://huggingface.co/transformers/model_sharing.html) | Upload and share your fine-tuned models with the community |
-| [Migration](https://huggingface.co/transformers/migration.html) | Migrate to 🤗 Transformers from `pytorch-transformers` or `pytorch-pretrained-bert` |
+I want to give credits to [Tensorflow NLP official repository](https://github.com/tensorflow/models/tree/master/official/nlp). I used November 2020 version of master branch ( where ```tf.keras.Network```) was used for models. I have modified that by large extend now.
+
+Apart from that, I have used many common scripts from many open repos. I might not be able to recall everything as it is. But still credit goes to them  too.
 
 ## Citation
 

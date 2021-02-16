@@ -5,10 +5,8 @@ from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer
-from tf_transformers.layers import (MLMLayer, OnDeviceEmbedding,
-                                    SimplePositionEmbedding, dense_einsum)
-from tf_transformers.layers.mask import (CausalMask, CrossAttentionMask,
-                                         SelfAttentionMask, prefix_mask)
+from tf_transformers.layers import MLMLayer, OnDeviceEmbedding, SimplePositionEmbedding, dense_einsum
+from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerBERT
 
 logging.set_verbosity("INFO")
@@ -49,6 +47,7 @@ class AlbertEncoder(LegacyLayer):
         encoder_positional_embedding_layer=None,
         use_mlm_layer=False,
         return_all_layer_token_embeddings=True,
+        attention_type="full_attention",
         **kwargs,
     ):
         """
@@ -118,6 +117,7 @@ class AlbertEncoder(LegacyLayer):
         self.use_mlm_layer = use_mlm_layer
         self.cross_attention_inside_encoder = cross_attention_inside_encoder
         self.return_all_layer_token_embeddings = return_all_layer_token_embeddings
+        self.attention_type = attention_type
 
         if not name.startswith("tf_transformers"):
             kwargs["name"] = "tf_transformers/" + self.model_name
@@ -191,6 +191,7 @@ class AlbertEncoder(LegacyLayer):
             share_attention_layers=share_attention_layers,
             layer_norm_epsilon=self.layer_norm_epsilon,
             cross_attention_inside_encoder=self.cross_attention_inside_encoder,
+            attention_type=self.attention_type,
             name="transformer/layer",
         )
 
@@ -508,7 +509,9 @@ class AlbertEncoder(LegacyLayer):
 
         all_cls_output = []
         for per_layer_token_embeddings in encoder_outputs:
-            per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(per_layer_token_embeddings)
+            per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
+                per_layer_token_embeddings
+            )
             all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
 
         # MLM Projection
@@ -547,7 +550,7 @@ class AlbertEncoder(LegacyLayer):
 
         if self.return_all_layer_token_embeddings:
             result["all_layer_token_embeddings"] = encoder_outputs
-            result['all_layer_cls_output'] = all_cls_output
+            result["all_layer_cls_output"] = all_cls_output
         return result
 
     def call_cross_attention_encoder(self, inputs):

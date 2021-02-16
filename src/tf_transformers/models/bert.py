@@ -5,10 +5,8 @@ from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer
-from tf_transformers.layers import (MLMLayer, OnDeviceEmbedding,
-                                    SimplePositionEmbedding)
-from tf_transformers.layers.mask import (CausalMask, CrossAttentionMask,
-                                         SelfAttentionMask, prefix_mask)
+from tf_transformers.layers import MLMLayer, OnDeviceEmbedding, SimplePositionEmbedding
+from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerBERT
 
 logging.set_verbosity("INFO")
@@ -48,6 +46,9 @@ class BERTEncoder(LegacyLayer):
         encoder_positional_embedding_layer=None,
         use_mlm_layer=False,
         return_all_layer_token_embeddings=True,
+        num_rand_blocks=3,  # for bigbird
+        block_size=64,  # for bigbird
+        attention_type="full_attention",
         **kwargs,
     ):
         """
@@ -113,6 +114,7 @@ class BERTEncoder(LegacyLayer):
         self.use_mlm_layer = use_mlm_layer
         self.cross_attention_inside_encoder = cross_attention_inside_encoder
         self.return_all_layer_token_embeddings = return_all_layer_token_embeddings
+        self.attention_type = attention_type
 
         if not name.startswith("tf_transformers"):
             kwargs["name"] = "tf_transformers/" + self.model_name
@@ -176,6 +178,9 @@ class BERTEncoder(LegacyLayer):
                 share_attention_layers=share_attention_layers,
                 layer_norm_epsilon=self.layer_norm_epsilon,
                 cross_attention_inside_encoder=self.cross_attention_inside_encoder,
+                attention_type=self.attention_type,
+                num_rand_blocks=num_rand_blocks,
+                block_size=block_size,
                 name="transformer/layer_%d" % i,
             )
             self._transformer_layers.append(layer)
@@ -459,7 +464,9 @@ class BERTEncoder(LegacyLayer):
 
         all_cls_output = []
         for per_layer_token_embeddings in encoder_outputs:
-            per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(per_layer_token_embeddings)
+            per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
+                per_layer_token_embeddings
+            )
             all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
 
         # MLM Projection
@@ -496,7 +503,96 @@ class BERTEncoder(LegacyLayer):
 
         if self.return_all_layer_token_embeddings:
             result["all_layer_token_embeddings"] = encoder_outputs
-            result['all_layer_cls_output'] = all_cls_output
+            result["all_layer_cls_output"] = all_cls_output
+        return result
+
+    def call_training_bigbird(self, inputs):
+        """Forward Pass for BERT
+
+        Args:
+            inputs: dict
+            inputs is a dict with keys  [`input_ids` , `input_mask`, `input_type_ids`].
+            These keys might or might not be present based on `mask_mode` and other criterias
+
+        """
+        input_ids = inputs["input_ids"]
+        # When `mask_mode` is `causal` , input_mask is not required
+        if self.mask_mode in ["user_defined", "prefix"]:
+            input_mask = inputs["input_mask"]
+        # Default True in BERT
+        if self.use_type_embeddings:
+            input_type_ids = inputs["input_type_ids"]
+
+        sequence_length = tf.shape(input_ids)[1]
+        word_embeddings = self._embedding_layer(input_ids)
+        embeddings = word_embeddings
+        # Add word_embeddings + position_embeddings + type_embeddings
+        if self.use_type_embeddings:
+            type_embeddings = self._type_embeddings(input_type_ids)
+            embeddings = embeddings + type_embeddings
+        if self.use_positonal_embeddings:
+            positional_embeddings = self._position_embedding_layer(tf.range(sequence_length))
+            embeddings = embeddings + positional_embeddings
+
+        # Norm + dropout
+        embeddings = self._embedding_norm(embeddings)
+        embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
+
+        encoder_outputs = []
+        for i in range(self.num_hidden_layers):
+            layer = self._transformer_layers[i]
+            embeddings, _, _ = layer([embeddings, input_mask])
+            encoder_outputs.append(embeddings)
+
+        # First word of last layer outputs [CLS]
+        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(encoder_outputs[-1])
+        # batch_size x embedding_size
+        cls_output = self._pooler_layer(cls_token_tensor)
+        # batch_size x sequence_length x embedding_size
+        token_embeddings = encoder_outputs[-1]
+
+        all_cls_output = []
+        for per_layer_token_embeddings in encoder_outputs:
+            per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
+                per_layer_token_embeddings
+            )
+            all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
+
+        # MLM Projection
+        if self.use_mlm_layer:
+            token_embeddings = self.mlm_layer(token_embeddings)
+            # token --> vocab ( batch_size x sequence_length x vocab_size)
+            token_logits = (
+                tf.matmul(
+                    token_embeddings,
+                    self.get_embedding_table(),
+                    transpose_b=True,
+                    name="token_logits",
+                )
+                + self._last_logits_bias
+            )
+        else:
+
+            # token --> vocab ( batch_size x sequence_length x vocab_size)
+            token_logits = tf.matmul(
+                token_embeddings,
+                self.get_embedding_table(),
+                transpose_b=True,
+                name="token_logits",
+            )
+
+        last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
+
+        result = {
+            "cls_output": cls_output,
+            "token_embeddings": token_embeddings,
+            "token_logits": token_logits,
+            "last_token_logits": last_token_logits,
+        }
+
+        if self.return_all_layer_token_embeddings:
+            result["all_layer_token_embeddings"] = encoder_outputs
+            result["all_layer_cls_output"] = all_cls_output
         return result
 
     def call_cross_attention_encoder(self, inputs):

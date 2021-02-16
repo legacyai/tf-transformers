@@ -5,10 +5,8 @@ from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer
-from tf_transformers.layers import (MLMLayer, OnDeviceEmbedding,
-                                    SimplePositionEmbedding)
-from tf_transformers.layers.mask import (CausalMask, CrossAttentionMask,
-                                         SelfAttentionMask, prefix_mask)
+from tf_transformers.layers import MLMLayer, OnDeviceEmbedding, SimplePositionEmbedding
+from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerBERT
 
 logging.set_verbosity("INFO")
@@ -461,9 +459,10 @@ class ROBERTAEncoder(LegacyLayer):
 
         all_cls_output = []
         for per_layer_token_embeddings in encoder_outputs:
-            per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(per_layer_token_embeddings)
+            per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
+                per_layer_token_embeddings
+            )
             all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
-
 
         # MLM Projection
         if self.use_mlm_layer:
@@ -499,7 +498,7 @@ class ROBERTAEncoder(LegacyLayer):
 
         if self.return_all_layer_token_embeddings:
             result["all_layer_token_embeddings"] = encoder_outputs
-            result['all_layer_cls_output'] = all_cls_output
+            result["all_layer_cls_output"] = all_cls_output
         return result
 
     def call_cross_attention_encoder(self, inputs):

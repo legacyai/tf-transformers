@@ -2,8 +2,7 @@ import tensorflow as tf
 from absl import logging
 
 from tf_transformers.core.legacy_model import LegacyModel
-from tf_transformers.layers import (MLMLayer, OnDeviceEmbedding,
-                                    SimplePositionEmbedding)
+from tf_transformers.layers import MLMLayer, OnDeviceEmbedding, SimplePositionEmbedding
 
 
 class LegacyLayer(tf.keras.layers.Layer):
@@ -136,6 +135,15 @@ class LegacyLayer(tf.keras.layers.Layer):
         return self._embedding_layer, self._type_embeddings, self._position_embedding_layer
 
     def get_call_method(self):
+
+        try:
+            # For BigBird (BigBrid supports only is_training, means no cache)
+            if self.attention_type == "bigbird":
+                method = self.call_training_bigbird
+                return method
+        except:
+            pass
+
         # Training Pipeline
         if self.is_training:
             # Decoder Mode Training

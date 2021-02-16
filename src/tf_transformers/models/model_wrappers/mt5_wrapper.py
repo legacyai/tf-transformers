@@ -2,8 +2,7 @@ import tensorflow as tf
 from absl import logging
 
 from tf_transformers.models import EncoderDecoder, mT5Encoder
-from tf_transformers.utils import (get_config, get_model_wrapper,
-                                   validate_model_name)
+from tf_transformers.utils import get_config, get_model_wrapper, validate_model_name
 
 logging.set_verbosity("INFO")
 allowed_model_names = ["mt5_small"]
@@ -68,7 +67,7 @@ def mT5Model(
     batch_size=None,
     encoder_sequence_length=None,
     decoder_sequence_length=None,
-    decoder_mask_mode='causal',
+    decoder_mask_mode="causal",
 ):
     """Wrapper for Model
 
@@ -92,15 +91,15 @@ def mT5Model(
 
     encoder_kwargs["is_training"] = is_training
     decoder_kwargs["is_training"] = is_training
-    encoder_kwargs['batch_size'] = batch_size
-    decoder_kwargs['batch_size'] = batch_size
-    encoder_kwargs['sequence_length'] = encoder_sequence_length
+    encoder_kwargs["batch_size"] = batch_size
+    decoder_kwargs["batch_size"] = batch_size
+    encoder_kwargs["sequence_length"] = encoder_sequence_length
     encoder_kwargs["mask_mode"] = "user_defined"
 
     encoder_kwargs["use_dropout"] = use_dropout
     decoder_kwargs["use_dropout"] = use_dropout
     decoder_kwargs["mask_mode"] = decoder_mask_mode
-    decoder_kwargs['sequence_length'] = decoder_sequence_length
+    decoder_kwargs["sequence_length"] = decoder_sequence_length
     decoder_kwargs["is_decoder"] = True
 
     model_name = model_name.replace("-", "_")  # replace - with _
