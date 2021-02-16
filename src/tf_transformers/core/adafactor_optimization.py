@@ -186,7 +186,7 @@ def noise_from_step_num():
     return tf.mod(ret, 1.0)
 
 
-class AdafactorOptimizer(tf.train.Optimizer):
+class AdafactorOptimizer(tf.keras.optimizers.Optimizer):
     """Optimizer that implements the Adafactor algorithm.
 
     Adafactor is described in https://arxiv.org/abs/1804.04235.
