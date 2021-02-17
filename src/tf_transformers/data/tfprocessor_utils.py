@@ -40,10 +40,10 @@ class TFProcessor(object):
         # element_spec = tf_dataset.element_spec
         dataset = tf_dataset.batch(batch_size, drop_remainder=drop_remainder)
         dataset = dataset.map(pad_ragged, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        # fmt: off
         if x_keys and y_keys:
-            dataset = dataset.map(
-                lambda x: separate_x_y(x, x_keys, y_keys), num_parallel_calls=tf.data.experimental.AUTOTUNE
-            )
+            dataset = dataset.map(lambda x: separate_x_y(x, x_keys, y_keys), num_parallel_calls=tf.data.experimental.AUTOTUNE)  # noqa
+        # fmt: on
         if shuffle:
             dataset = dataset.shuffle(shuffle_buffer_size, seed=None, reshuffle_each_iteration=True)
         dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
