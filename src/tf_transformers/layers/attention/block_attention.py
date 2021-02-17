@@ -10,6 +10,8 @@ from tf_transformers.core import LegacyLayer
 from tf_transformers.layers import dense_einsum
 from tf_transformers.layers.mask import masked_softmax
 from tf_transformers.utils import tf_utils
+from tf_transformers.layers.mask import SelfAttentionMask
+
 
 # Lets HARDCODE few things
 max_allowed_sequence_length = 512
