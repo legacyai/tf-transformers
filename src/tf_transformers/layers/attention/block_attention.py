@@ -242,7 +242,9 @@ class BlockMultiHeadAttention(LegacyLayer):
             local_attention_mask = SelfAttentionMask()(
                 [tf.random.uniform(shape=(batch_size, to_block_size, 1)), input_mask_block]
             )
-            attention_probs_local = _masked_softmax([tf.concat(non_zero_block_output, axis=-1), local_attention_mask])
+            attention_probs_local = self._masked_softmax(
+                [tf.concat(non_zero_block_output, axis=-1), local_attention_mask]
+            )
 
             value_blocks_local = tf.concat(value_blocks_local, axis=2)
             context_layer_local = tf.matmul(attention_probs_local, value_blocks_local)
