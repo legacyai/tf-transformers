@@ -205,6 +205,49 @@ class BlockMultiHeadAttention(LegacyLayer):
         attention_probs = tf.concat(all_blocks, axis=2)
         return qk_index_pos, attention_probs
 
+    def block_wise_full_calculations(self, query_tensor, key_tensor, value_tensor, input_mask):
+        """Entire end to end attention and context cacluation happens here"""
+
+        query_blocks = tf.split(query_tensor, axis=2, num_or_size_splits=from_seq_length // from_block_size)
+        key_blocks = tf.split(key_tensor, axis=2, num_or_size_splits=to_seq_length // to_block_size)
+        value_blocks = tf.split(value_tensor, axis=2, num_or_size_splits=to_seq_length // to_block_size)
+        qk_index_pos = get_qk_index_pos(len(query_blocks), len(key_blocks))
+
+        all_blocks = []
+        input_mask_split = tf.split(input_mask, axis=1, num_or_size_splits=len(query_blocks))
+
+        for q_index, q_block in enumerate(query_blocks):
+            block_output = []
+            non_zero_block_output = []
+            attention_mask_block = []
+            zero_block_output = []
+            input_mask_block = []
+            value_blocks_local = []
+            zero_tensor = tf.zeros(
+                (batch_size, self._num_heads, from_seq_length // from_block_size, to_seq_length // to_block_size)
+            )
+            for k_index, k_block in enumerate(key_blocks):
+
+                if qk_index_pos[q_index][k_index] == 1:
+                    qk_block = tf.matmul(q_block, k_block, transpose_b=True)
+                    non_zero_block_output.append(qk_block)
+                    input_mask_block.append(input_mask_split[k_index])
+                    value_blocks_local.append(value_blocks[k_index])
+
+            input_mask_block = tf.concat(input_mask_block, axis=1)
+            local_batch_size, _ = tf.shape(input_mask_block)
+
+            local_attention_mask = SelfAttentionMask()(
+                [tf.random.uniform(shape=(local_batch_size, to_block_size, 1)), input_mask_block]
+            )
+            attention_probs_local = _masked_softmax([tf.concat(non_zero_block_output, axis=-1), local_attention_mask])
+
+            value_blocks_local = tf.concat(value_blocks_local, axis=2)
+            context_layer_local = tf.matmul(attention_probs_local, value_blocks_local)
+            all_blocks.append(context_layer_local)
+
+        return tf.concat(all_blocks, axis=2)
+
     def block_wise_context_caculation(self, qk_index_pos, attention_probs, value_tensor):
         """"""
         batch_size = tf.shape(value_tensor)[0]
@@ -394,8 +437,10 @@ class BlockMultiHeadAttention(LegacyLayer):
 
         # context_layer = tf.matmul(attention_probs, value_tensor)
 
-        qk_index_pos, attention_probs = self.block_wise_attention_scores(query_tensor, key_tensor, attention_mask)
-        context_layer = self.block_wise_context_caculation(qk_index_pos, attention_probs, value_tensor)
+        # qk_index_pos, attention_probs = self.block_wise_attention_scores(query_tensor, key_tensor, attention_mask)
+        # context_layer = self.block_wise_context_caculation(qk_index_pos, attention_probs, value_tensor)
+
+        context_layer = self.block_wise_full_calculations(query_tensor, key_tensor, value_tensor, attention_mask)
         return self.merge_attention_heads(context_layer), key_tensor, value_tensor
 
     def call(self, inputs, cache_key=None, cache_value=None):

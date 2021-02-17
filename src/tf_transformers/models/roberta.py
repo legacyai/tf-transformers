@@ -435,14 +435,17 @@ class ROBERTAEncoder(LegacyLayer):
         embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
 
-        # Initialize `attention_mask` as empty list
-        attention_mask = []
-        if self.mask_mode == "user_defined":
-            attention_mask = SelfAttentionMask()([embeddings, input_mask])
-        if self.mask_mode == "prefix":
-            attention_mask = tf.map_fn(prefix_mask, input_mask, dtype=tf.float32)
-        if self.mask_mode == "causal":
-            attention_mask = CausalMask()(embeddings)
+        if self.attention_type == "block_attention" or self.attention_type == "bigbird":
+            attention_mask = input_mask
+        else:
+            # Initialize `attention_mask` as empty list
+            attention_mask = []
+            if self.mask_mode == "user_defined":
+                attention_mask = SelfAttentionMask()([embeddings, input_mask])
+            if self.mask_mode == "prefix":
+                attention_mask = tf.map_fn(prefix_mask, input_mask, dtype=tf.float32)
+            if self.mask_mode == "causal":
+                attention_mask = CausalMask()(embeddings)
 
         encoder_outputs = []
         for i in range(self.num_hidden_layers):
