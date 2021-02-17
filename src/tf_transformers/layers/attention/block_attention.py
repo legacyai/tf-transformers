@@ -208,6 +208,7 @@ class BlockMultiHeadAttention(LegacyLayer):
     def block_wise_full_calculations(self, query_tensor, key_tensor, value_tensor, input_mask):
         """Entire end to end attention and context cacluation happens here"""
 
+        batch_size = tf.shape(query_tensor)[0]
         query_blocks = tf.split(query_tensor, axis=2, num_or_size_splits=from_seq_length // from_block_size)
         key_blocks = tf.split(key_tensor, axis=2, num_or_size_splits=to_seq_length // to_block_size)
         value_blocks = tf.split(value_tensor, axis=2, num_or_size_splits=to_seq_length // to_block_size)
