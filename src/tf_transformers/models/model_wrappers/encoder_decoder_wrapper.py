@@ -2,8 +2,7 @@ import tensorflow as tf
 from absl import logging
 
 from tf_transformers.models import EncoderDecoder
-from tf_transformers.utils import (get_config, get_model_wrapper,
-                                   validate_model_name)
+from tf_transformers.utils import get_config, get_model_wrapper, validate_model_name
 
 logging.set_verbosity("INFO")
 
@@ -20,12 +19,11 @@ def EncoderDecoderModel(
     warm_start_decoder=True,
     share_attention_layers=True,
     share_encoder_embeddings=False,
-    use_mlm_layer_encoder=False,
-    use_mlm_layer_decoder=False,
     name=None,
     pipeline_mode=None,
     encoder_sequence_length=None,
     return_all_layer_token_embeddings=False,
+    **kwargs,
 ):
     """Wrapper for Model
 
@@ -36,6 +34,8 @@ def EncoderDecoderModel(
         [type]: [description]
     """
 
+    # If model name is given, encoder and decoder
+    # will be initiated from the same model
     if model_name:
         if encoder_model_name or decoder_model_name:
             raise ValueError(
@@ -56,6 +56,9 @@ def EncoderDecoderModel(
         encoder_model_name = encoder_model_name.replace("-", "_")  # replace - with _
         decoder_model_name = decoder_model_name.replace("-", "_")  # replace - with _
 
+    # We cannot share encoder embeddings
+    # if models are different. Yes, there is a possibility
+    # that two diferent models share same embedding
     if share_encoder_embeddings:
         if encoder_model_name != decoder_model_name:
             raise ValueError("We can `share_encoder_embeddings` only if encoder and decoder are same models")
@@ -63,6 +66,8 @@ def EncoderDecoderModel(
     encoder_kwargs = {}
     decoder_kwargs = {}
 
+    # pipeline-mode is reqired only for decoder
+    # in the case of encoder decoder models
     if is_training is False:
         if pipeline_mode == "auto-regressive":
             decoder_kwargs["pipeline_mode"] = "auto-regressive"
@@ -75,8 +80,6 @@ def EncoderDecoderModel(
     decoder_kwargs["is_training"] = is_training
     encoder_kwargs["mask_mode"] = encoder_mask_mode
     encoder_kwargs["return_all_layer_token_embeddings"] = False
-    if use_mlm_layer_encoder:
-        encoder_kwargs["use_mlm_layer"] = True
 
     encoder_kwargs["use_dropout"] = use_dropout
     decoder_kwargs["use_dropout"] = use_dropout
@@ -86,6 +89,22 @@ def EncoderDecoderModel(
 
     if share_attention_layers is False:
         decoder_kwargs["share_attention_layers"] = False
+
+    # Now Lets iterate over kwargs and separate
+    # encoder and decoder kwargs because same attributes
+    # are avilable for both . So, anything that starts with
+    # encoder is encoder kwargs and decoder is decoder kwargs
+
+    for _kwarg in kwargs:
+        if _kwarg.startswith("encoder_"):
+            _k = _kwarg.split("encoder_")[1]
+            encoder_kwargs[_k] = kwargs[_kwarg]
+            continue
+        if _kwarg.startswith("decoder_"):
+            _k = _kwarg.split("decoder_")[1]
+            decoder_kwargs[_k] = kwargs[_kwarg]
+            continue
+
     encoder_class = get_model_wrapper(encoder_model_name)
     decoder_class = get_model_wrapper(decoder_model_name)
 
