@@ -117,7 +117,7 @@ class Similarity_Model(LegacyLayer):
         else:
             inputs = self.encoder.input
 
-        layer_output = self(input)
-        model = LegacyModel(inputs=input, outputs=layer_output, name="similarity_model")
+        layer_output = self(inputs)
+        model = LegacyModel(inputs=inputs, outputs=layer_output, name="similarity_model")
         model.model_config = self.encoder.model_config
         return model
