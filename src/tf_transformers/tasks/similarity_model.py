@@ -8,10 +8,11 @@ class Similarity_Model(LegacyLayer):
         super(Similarity_Model, self).__init__(**kwargs)
         self.is_training = is_training
         if siamese:
-            logging.info("Siamese Architecture initiated")
             self.encoder = encoder
             self.decoder = encoder
         else:
+            if decoder is None:
+                raise ValueError("When siamese = False, decoder has to be provided. Provided decoder = None.")
             self.encoder = encoder
             self.decoder = decoder
 
