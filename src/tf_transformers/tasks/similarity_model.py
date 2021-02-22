@@ -3,8 +3,9 @@ from tf_transformers.core import LegacyModel, LegacyLayer
 
 
 class Similarity_Model(LegacyLayer):
-    def __init__(self, encoder, decoder=None, is_training=True, initializer="glorot_uniform", siamese=False):
-        super(Similarity_Model, self).__init__()
+    def __init__(self, encoder, decoder=None, is_training=True, initializer="glorot_uniform", siamese=False, **kwargs):
+        kwargs["is_training"] = is_training
+        super(Similarity_Model, self).__init__(**kwargs)
         self.is_training = is_training
         if siamese:
             logging.info("Siamese Architecture initiated")
