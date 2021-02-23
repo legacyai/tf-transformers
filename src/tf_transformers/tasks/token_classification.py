@@ -5,7 +5,7 @@ from tf_transformers.core import LegacyLayer, LegacyModel
 
 class Token_Classification_Model(LegacyLayer):
     def __init__(self, model, token_vocab_size, use_all_layers=False, activation=None, **kwargs):
-        super(Token_Classification, self).__init__(**kwargs)
+        super(Token_Classification_Model, self).__init__(**kwargs)
         self.model = model
         if isinstance(model, LegacyModel):
             self.model_config = model.model_config
