@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-def cross_entropy_loss_fast(labels, logits, label_weights=None):
+def cross_entropy_loss(labels, logits, label_weights=None):
     """
     logits: (.. , vocab_size)
     labels: (.. ) rank should be less than logits

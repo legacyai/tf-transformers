@@ -375,11 +375,9 @@ class TFReader(object):
 
         Args:
             tf_dataset : TF dataset
-            batch_size : batch size
             x_keys (optional): List of key names. We will filter based on this.
             y_keys (optional): List of key names.
             shuffle (bool, optional): [description]. Defaults to False.
-            drop_remainder (bool, optional): [description]. Defaults to False.
             shuffle_buffer_size (int, optional): [description]. Defaults to 10000.
 
         Returns:

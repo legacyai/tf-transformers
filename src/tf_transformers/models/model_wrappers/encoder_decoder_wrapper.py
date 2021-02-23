@@ -21,7 +21,6 @@ def EncoderDecoderModel(
     share_encoder_embeddings=False,
     name=None,
     pipeline_mode=None,
-    encoder_sequence_length=None,
     return_all_layer_token_embeddings=False,
     **kwargs,
 ):
@@ -76,6 +75,13 @@ def EncoderDecoderModel(
             is_training = True
             use_dropout = False
 
+    if "encoder_sequence_length" not in kwargs:
+        encoder_sequence_length = None
+    else:
+        encoder_sequence_length = kwargs["encoder_sequence_length"]
+    if "decoder_use_mlm_layer" not in kwargs:
+        decoder_kwargs["use_mlm_layer"] = True
+
     encoder_kwargs["is_training"] = is_training
     decoder_kwargs["is_training"] = is_training
     encoder_kwargs["mask_mode"] = encoder_mask_mode
@@ -107,7 +113,6 @@ def EncoderDecoderModel(
 
     encoder_class = get_model_wrapper(encoder_model_name)
     decoder_class = get_model_wrapper(decoder_model_name)
-
     encoder_layer, encoder_model, encoder_config = encoder_class(encoder_model_name, **encoder_kwargs)
     if share_encoder_embeddings:
         decoder_kwargs["share_encoder_embeddings"] = True
@@ -117,8 +122,6 @@ def EncoderDecoderModel(
         if encoder_layer.use_positonal_embeddings:
             decoder_kwargs["encoder_positional_embedding_layer"] = encoder_layer._position_embedding_layer
 
-    if use_mlm_layer_decoder:
-        decoder_kwargs["use_mlm_layer"] = True
     decoder_layer, decoder_model, decoder_config = decoder_class(decoder_model_name, **decoder_kwargs)
 
     if encoder_checkpoint_dir:

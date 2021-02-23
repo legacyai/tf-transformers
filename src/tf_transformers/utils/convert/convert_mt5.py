@@ -4,7 +4,7 @@ from absl import logging
 logging.set_verbosity("INFO")
 
 
-def convert_t5_hf_to_tf_transformers(model_hf, model_tf_transformers, config):
+def convert_mt5_hf_to_tf_transformers(model_hf, model_tf_transformers, config):
     # Encoder Side
     # From vars (Transformer variables)
     from_model_vars = [
@@ -15,7 +15,7 @@ def convert_t5_hf_to_tf_transformers(model_hf, model_tf_transformers, config):
         "tfm_t5model/encoder/block_._{}/layer_._0/layer_norm/weight:0",
         "tfm_t5model/encoder/block_._{}/layer_._1/DenseReluDense/wi_0/kernel:0",
         "tfm_t5model/encoder/block_._{}/layer_._1/DenseReluDense/wo/kernel:0",
-        "tfm_t5model/encoder/block_._{}/layer_._1/DenseReluDense/wi_1/kernel:0"
+        "tfm_t5model/encoder/block_._{}/layer_._1/DenseReluDense/wi_1/kernel:0",
         "tfm_t5model/encoder/block_._{}/layer_._1/layer_norm/weight:0",
     ]
 
@@ -38,17 +38,16 @@ def convert_t5_hf_to_tf_transformers(model_hf, model_tf_transformers, config):
     for index in range(len(from_model_vars)):
         for i in range(config["num_hidden_layers"]):
             mapping_dict[from_model_vars[index].format(i)] = to_model_vars[index].format(i)
-
     # Only Layer 0
     mapping_dict[
-        "tf_mt5model/encoder/block_._0/layer_._0/SelfAttention/relative_attention_bias/embeddings:0"
+        "tfm_t5model/encoder/block_._0/layer_._0/SelfAttention/relative_attention_bias/embeddings:0"
     ] = "tf_transformers/mt5_encoder/transformer/layer_0/self_attention/relative_attention_bias/embeddings:0"
     # Word Embedding
     mapping_dict["shared/shared/weight:0"] = "tf_transformers/mt5_encoder/word_embeddings/embeddings:0"
     # Final Layer Norm weight
     mapping_dict[
-        "tf_mt5model/encoder/final_layer_norm/weight:0"
-    ] = "tf_transformers/m t5_encoder/last_layer_norm/weight:0"
+        "tfm_t5model/encoder/final_layer_norm/weight:0"
+    ] = "tf_transformers/mt5_encoder/last_layer_norm/weight:0"
 
     from_to_variable_dict = {var.name: var for var in model_hf.variables}
     # del model_hf
@@ -62,7 +61,6 @@ def convert_t5_hf_to_tf_transformers(model_hf, model_tf_transformers, config):
     assigned_map = []
     assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
-
         index = tf_transformers_model_index_dict[legacy_var]
         # If not in mapping_dict, then mostly it is from attention layer
         if "query/kernel:0" in legacy_var or "key/kernel:0" in legacy_var or "value/kernel:0" in legacy_var:
@@ -88,20 +86,20 @@ def convert_t5_hf_to_tf_transformers(model_hf, model_tf_transformers, config):
     # Decoder Side
     # From vars (Transformer variables)
     from_model_vars = [
-        "tf_mt5model/decoder/block_._{}/layer_._0/SelfAttention/q/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._0/SelfAttention/k/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._0/SelfAttention/v/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._0/SelfAttention/o/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._0/layer_norm/weight:0",
-        "tf_mt5model/decoder/block_._{}/layer_._1/EncDecAttention/q/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._1/EncDecAttention/k/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._1/EncDecAttention/v/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._1/EncDecAttention/o/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._1/layer_norm/weight:0",
-        "tf_mt5model/decoder/block_._{}/layer_._2/DenseReluDense/wi_0/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._2/DenseReluDense/wo/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._2/DenseReluDense/wi_1/kernel:0",
-        "tf_mt5model/decoder/block_._{}/layer_._2/layer_norm/weight:0",
+        "tfm_t5model/decoder/block_._{}/layer_._0/SelfAttention/q/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._0/SelfAttention/k/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._0/SelfAttention/v/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._0/SelfAttention/o/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._0/layer_norm/weight:0",
+        "tfm_t5model/decoder/block_._{}/layer_._1/EncDecAttention/q/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._1/EncDecAttention/k/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._1/EncDecAttention/v/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._1/EncDecAttention/o/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._1/layer_norm/weight:0",
+        "tfm_t5model/decoder/block_._{}/layer_._2/DenseReluDense/wi_0/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._2/DenseReluDense/wo/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._2/DenseReluDense/wi_1/kernel:0",
+        "tfm_t5model/decoder/block_._{}/layer_._2/layer_norm/weight:0",
     ]
 
     to_model_vars = [
@@ -131,14 +129,14 @@ def convert_t5_hf_to_tf_transformers(model_hf, model_tf_transformers, config):
 
     # Only Layer 0
     mapping_dict[
-        "tf_mt5model/decoder/block_._0/layer_._0/SelfAttention/relative_attention_bias/embeddings:0"
+        "tfm_t5model/decoder/block_._0/layer_._0/SelfAttention/relative_attention_bias/embeddings:0"
     ] = "tf_transformers/mt5_decoder/transformer/layer_0/self_attention/relative_attention_bias/embeddings:0"
     mapping_dict[
-        "tf_mt5model/decoder/block_._0/layer_._1/EncDecAttention/relative_attention_bias/embeddings:0"
-    ] = "tf_transformers/m/transformer/layer_0/cross_attention/relative_attention_bias/embeddings:0"
+        "tfm_t5model/decoder/block_._0/layer_._1/EncDecAttention/relative_attention_bias/embeddings:0"
+    ] = "tf_transformers/mt5_decoder/transformer/layer_0/cross_attention/relative_attention_bias/embeddings:0"
     # Final Layer Norm weight
     mapping_dict[
-        "tf_mt5model/decoder/final_layer_norm/weight:0"
+        "tfm_t5model/decoder/final_layer_norm/weight:0"
     ] = "tf_transformers/mt5_decoder/last_layer_norm/weight:0"
 
     from_to_variable_dict = {var.name: var for var in model_hf.variables}
@@ -153,7 +151,6 @@ def convert_t5_hf_to_tf_transformers(model_hf, model_tf_transformers, config):
     assigned_map = []
     assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
-
         index = tf_transformers_model_index_dict[legacy_var]
         # If not in mapping_dict, then mostly it is from attention layer
         if "query/kernel:0" in legacy_var or "key/kernel:0" in legacy_var or "value/kernel:0" in legacy_var:
@@ -172,7 +169,7 @@ def convert_t5_hf_to_tf_transformers(model_hf, model_tf_transformers, config):
             continue
         if (
             original_var
-            == "tf_t5model/decoder/block_._0/layer_._1/EncDecAttention/relative_attention_bias/embeddings:0"
+            == "tfm_t5model/decoder/block_._0/layer_._1/EncDecAttention/relative_attention_bias/embeddings:0"
         ):
             if original_var not in from_to_variable_dict:
                 model_tf_transformers.variables[index].assign(tf.zeros_like(model_tf_transformers.variables[index]))
