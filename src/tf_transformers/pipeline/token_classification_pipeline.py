@@ -1,7 +1,5 @@
 import collections
-
 import tensorflow as tf
-
 from tf_transformers.data import TFProcessor
 
 
