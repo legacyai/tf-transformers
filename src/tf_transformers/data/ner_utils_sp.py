@@ -30,7 +30,7 @@ def get_tokens_labels(aligned_words, orig_to_new_index, label_tokens, sub_words_
 
 
 def fast_tokenize_and_align_sentence_for_ner(
-    sentence, word_tokens, SPECIAL_PIECE, is_training=False, label_tokens=None, label_pad_token=None
+    tokenizer, sentence, word_tokens, SPECIAL_PIECE, is_training=False, label_tokens=None, label_pad_token=None
 ):
 
     """
