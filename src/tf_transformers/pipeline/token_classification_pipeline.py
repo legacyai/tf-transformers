@@ -31,7 +31,7 @@ class Token_Classification_Pipeline:
             self.model_fn = model
         else:
             # saved model
-            if "saved_model" in str(type(self.model)):
+            if "saved_model" in str(type(model)):
                 # Extract signature
                 self.model_pb = model.signatures["serving_default"]
 
@@ -62,7 +62,13 @@ class Token_Classification_Pipeline:
         for sentence in dev_examples:
             word_tokens = sentence.split(" ")
             aligned_words, sub_words_mapped, flat_tokens, orig_to_new_index = fast_tokenize_and_align_sentence_for_ner(
-                sentence, word_tokens, self.SPECIAL_PIECE, is_training=False, label_tokens=None, label_pad_token=None
+                self.tokenizer,
+                sentence,
+                word_tokens,
+                self.SPECIAL_PIECE,
+                is_training=False,
+                label_tokens=None,
+                label_pad_token=None,
             )
             result = {}
             result["word_tokens"] = word_tokens
@@ -76,7 +82,6 @@ class Token_Classification_Pipeline:
         # for TFProcessor
         def local_parser():
             for f in dev_features:
-                print(f)
                 result = tokenizer_fn(f)
                 yield result
 
