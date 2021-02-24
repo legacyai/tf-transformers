@@ -368,6 +368,7 @@ class TransformerBERT(LegacyLayer):
         # Use float32 in keras layer norm for numeric stability
         if self.dtype == tf.float16:
             layer_output = tf.cast(layer_output, tf.float32)
+            attention_output = tf.cast(attention_output, dtype=tf.float32)
         layer_output = self._output_layer_norm(layer_output + attention_output)
         return layer_output, key, value
 
