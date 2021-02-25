@@ -369,7 +369,7 @@ class TransformerBERT(LegacyLayer):
         if self.dtype == tf.float16:
             layer_output = tf.cast(layer_output, tf.float32)
             attention_output = tf.cast(attention_output, dtype=tf.float32)
-        layer_output = self._output_layer_norm(layer_output + attention_output)
+        layer_output = self._output_layer_norm(tf.cast(layer_output, dtype=tf.float32) + attention_output)
         return layer_output, key, value
 
     def call_cross_attention_in_encoder(self, inputs, mode, cache_key=None, cache_value=None):
