@@ -21,7 +21,7 @@ def SimpleTrainer(
     steps_per_call=100,
     gradient_accumulation_steps=1,
 ):
-    """Simple trainer
+    """Simple trainer / Gradient accumulation steps
 
     Args:
         model ([type]): [description]
