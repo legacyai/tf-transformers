@@ -4,7 +4,7 @@ from tf_transformers.core import LegacyModel, LegacyLayer
 
 class Classification_Model(LegacyLayer):
     def __init__(self, model, num_classes, use_all_layers=False, activation=None, **kwargs):
-        super(Classification, self).__init__(**kwargs)
+        super(Classification_Model, self).__init__(**kwargs)
         self.model = model
         if isinstance(model, LegacyModel):
             self.model_config = model.model_config

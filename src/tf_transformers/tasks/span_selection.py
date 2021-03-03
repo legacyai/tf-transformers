@@ -4,7 +4,7 @@ from tf_transformers.core import LegacyModel, LegacyLayer
 
 class Span_Selection_Model(LegacyLayer):
     def __init__(self, model, use_all_layers=False, activation=None, **kwargs):
-        super(SpanSelectionModel, self).__init__(**kwargs)
+        super(Span_Selection_Model, self).__init__(**kwargs)
         self.model = model
         if isinstance(model, LegacyModel):
             self.model_config = model.model_config
