@@ -530,17 +530,12 @@ class AlbertEncoder(LegacyLayer):
                 + self._last_logits_bias
             )
         else:
-            print("token embeddings", token_embeddings.dtype)
             policy = tf.keras.mixed_precision.experimental.global_policy()
-            print("Policy", policy.name)
-            if policy.name == 'mixed_float16':
+            if policy.name == "mixed_float16":
                 policy = tf.float16
-                #token_embeddings = tf.cast(token_embeddings, policy)
-            print("token embeddings", token_embeddings.dtype)
+                # token_embeddings = tf.cast(token_embeddings, policy)
             token_embeddings_projected = self._lower_embedding_projection(token_embeddings)
-            print("token embeddings projected", token_embeddings_projected.dtype)
             # # token --> vocab ( batch_size x sequence_length x vocab_size)
-            print("Done")
             token_logits = tf.matmul(
                 tf.cast(token_embeddings_projected, tf.float32),
                 self.get_embedding_table(),
@@ -668,7 +663,6 @@ class AlbertEncoder(LegacyLayer):
             )
         else:
             token_embeddings_projected = self._lower_embedding_projection(token_embeddings)
-            print("Token embeddings projected", token_embeddings_projected)
             # # token --> vocab ( batch_size x sequence_length x vocab_size)
             token_logits = tf.matmul(
                 token_embeddings_projected,
