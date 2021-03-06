@@ -186,7 +186,7 @@ def SimpleTrainer(
     gradient_accumulation_steps=None,
 ):
     if gradient_accumulation_steps:
-        SimpleTrainerGradientAccumulation(
+        loss_holder = SimpleTrainerGradientAccumulation(
             model,
             optimizer,
             loss_fn,
@@ -197,5 +197,9 @@ def SimpleTrainer(
             steps_per_call,
             gradient_accumulation_steps,
         )
+        return loss_holder
     else:
-        Trainer(model, optimizer, loss_fn, dataset, epochs, num_train_examples, batch_size, steps_per_call)
+        loss_holder = Trainer(
+            model, optimizer, loss_fn, dataset, epochs, num_train_examples, batch_size, steps_per_call
+        )
+        return loss_holder
