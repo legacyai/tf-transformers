@@ -222,12 +222,20 @@ class AlbertEncoder(LegacyLayer):
                 name="mlm_layer",
             )
 
-            self._last_logits_bias = self.add_weight(
-                "tf_transformers/last_logits_bias",
-                shape=(self.vocab_size,),
-                dtype=tf.float32,
-                trainable=True,
-            )
+        self._last_logits_bias = self.add_weight(
+            "tf_transformers/last_logits_bias",
+            shape=(self.vocab_size,),
+            dtype=tf.float32,
+            trainable=True,
+        )
+
+        # Embedding Norm
+        self._last_layer_norm = tf.keras.layers.LayerNormalization(
+            name="last/layer_norm",
+            axis=-1,
+            epsilon=self.layer_norm_epsilon,
+            dtype=tf.float32,
+        )
         self.call_fn = self.get_call_method()
         # Initialize model
         self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
@@ -535,12 +543,16 @@ class AlbertEncoder(LegacyLayer):
                 policy = tf.float16
                 # token_embeddings = tf.cast(token_embeddings, policy)
             token_embeddings_projected = self._lower_embedding_projection(token_embeddings)
+            token_embeddings_projected = self._last_layer_norm(token_embeddings_projected)
             # # token --> vocab ( batch_size x sequence_length x vocab_size)
-            token_logits = tf.matmul(
-                tf.cast(token_embeddings_projected, tf.float32),
-                self.get_embedding_table(),
-                transpose_b=True,
-                name="token_logits",
+            token_logits = (
+                tf.matmul(
+                    tf.cast(token_embeddings_projected, tf.float32),
+                    self.get_embedding_table(),
+                    transpose_b=True,
+                    name="token_logits",
+                )
+                + self._last_logits_bias
             )
 
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
