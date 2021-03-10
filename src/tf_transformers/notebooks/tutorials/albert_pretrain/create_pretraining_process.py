@@ -57,6 +57,7 @@ class TrainingInstance(object):
 
 def parse_instances(instances, tokenizer, max_seq_length, max_predictions_per_seq):
     """Create TF example files from `TrainingInstance`s."""
+    all_results = []
     for (inst_index, instance) in enumerate(instances):
         input_ids = tokenizer.convert_tokens_to_ids(instance.tokens)
         input_mask = [1] * len(input_ids)
@@ -72,7 +73,7 @@ def parse_instances(instances, tokenizer, max_seq_length, max_predictions_per_se
 
         masked_lm_positions = list(instance.masked_lm_positions)
         masked_lm_ids = tokenizer.convert_tokens_to_ids(instance.masked_lm_labels)
-        masked_lm_weights = [1.0] * len(masked_lm_ids)
+        masked_lm_weights = [1] * len(masked_lm_ids)
 
         # multiplier = 1 + int(do_permutation)
         multiplier = 1
@@ -94,7 +95,8 @@ def parse_instances(instances, tokenizer, max_seq_length, max_predictions_per_se
         result["masked_lm_labels_mask"] = masked_lm_weights
         result["sentence_order_label"] = sentence_order_label
 
-        return result
+        all_results.append(result)
+    return all_results
 
 
 def create_instances_from_document(
@@ -106,6 +108,12 @@ def create_instances_from_document(
     max_predictions_per_seq,
     vocab_words,
     rng,
+    do_whole_word_mask,
+    ngram,
+    favor_shorter_ngram,
+    spm_model_file,
+    random_next_sentence=False,
+    do_permutation=False
 ):
     """Creates `TrainingInstance`s for a single document."""
     document = all_documents[document_index]
@@ -209,7 +217,8 @@ def create_instances_from_document(
                 segment_ids.append(1)
 
                 (tokens, masked_lm_positions, masked_lm_labels, token_boundary) = create_masked_lm_predictions(
-                    tokens, masked_lm_prob, max_predictions_per_seq, vocab_words, rng
+                    tokens, masked_lm_prob, max_predictions_per_seq, vocab_words, rng, do_whole_word_mask, spm_model_file, ngram,
+                    favor_shorter_ngram,do_permutation
                 )
                 instance = TrainingInstance(
                     tokens=tokens,
@@ -258,14 +267,14 @@ def _is_start_piece_bert(piece):
     return not six.ensure_str(piece).startswith("##")
 
 
-def is_start_piece(piece):
+def is_start_piece(piece, spm_model_file):
     if spm_model_file:
         return _is_start_piece_sp(piece)
     else:
         return _is_start_piece_bert(piece)
 
 
-def create_masked_lm_predictions(tokens, masked_lm_prob, max_predictions_per_seq, vocab_words, rng):
+def create_masked_lm_predictions(tokens, masked_lm_prob, max_predictions_per_seq, vocab_words, rng, do_whole_word_mask, spm_model_file, ngram, favor_shorter_ngram, do_permutation):
     """Creates the predictions for the masked LM objective."""
 
     cand_indexes = []
@@ -284,11 +293,11 @@ def create_masked_lm_predictions(tokens, masked_lm_prob, max_predictions_per_seq
         # Note that Whole Word Masking does *not* change the training code
         # at all -- we still predict each WordPiece independently, softmaxed
         # over the entire vocabulary.
-        if do_whole_word_mask and len(cand_indexes) >= 1 and not is_start_piece(token):
+        if do_whole_word_mask and len(cand_indexes) >= 1 and not is_start_piece(token, spm_model_file):
             cand_indexes[-1].append(i)
         else:
             cand_indexes.append([i])
-            if is_start_piece(token):
+            if is_start_piece(token, spm_model_file):
                 token_boundary[i] = 1
 
     output_tokens = list(tokens)
