@@ -38,6 +38,8 @@ def Trainer(model, optimizer, loss_fn, dataset, epochs, num_train_examples, batc
             optimizer.apply_gradients(zip(grads, model.variables))
             # training_loss.update_state(loss * strategy.num_replicas_in_sync)
             training_loss.update_state(loss)
+            current_lr = optimizer._decayed_lr(tf.float32)
+            learning_rate_holder.update_state(current_lr)
 
         for _ in tf.range(tf.convert_to_tensor(steps_per_call)):
             batch_inputs, batch_labels = next(iterator)
@@ -51,16 +53,20 @@ def Trainer(model, optimizer, loss_fn, dataset, epochs, num_train_examples, batc
     training_loss = tf.keras.metrics.Mean(
         "training_loss", dtype=tf.float32
     )  # We store loss here and reset after every global steps
-
+    learning_rate_holder = tf.keras.metrics.Mean(
+        "learning_rate_holder", dtype=tf.float32
+    )  # We store loss here and reset after every global steps
     loss_holder = []
+    learning_rate_holder_history = []
     for step_iter in tqdm(range(GLOBAL_STEP)):
         start_time = time.time()
         train(iter_dataset)
         end_time = time.time()
         loss_holder.append(training_loss.result())
+        learning_rate_holder_history.append(learning_rate_holder.result())
         logging.info(
-            "Global step {}, time {} seconds, loss {}".format(
-                step_iter, round(end_time - start_time, 4), loss_holder[-1]
+            "Global step {}, time {} seconds, loss {}, learning_rate {}".format(
+                step_iter, round(end_time - start_time, 4), loss_holder[-1], learning_rate_holder_history[-1]
             )
         )
         training_loss.reset_states()

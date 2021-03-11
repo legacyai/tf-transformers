@@ -20,6 +20,7 @@ import re
 
 import tensorflow as tf
 import tensorflow_addons.optimizers as tfa_optimizers
+import tensorflow_addons as tfa
 from absl import logging
 
 from tf_transformers.core.adafactor_optimization import AdafactorOptimizer
@@ -164,7 +165,7 @@ def create_optimizer(
             beta_1=0.9,
             beta_2=adam_beta_2,
             epsilon=adam_epsilon,
-            exclude_from_weight_decay=["layer_norm", "bias"],
+            exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"],
         )
     elif optimizer_type == "lamb":
         logging.info("using Lamb optimizer")
@@ -174,7 +175,7 @@ def create_optimizer(
             beta_1=0.9,
             beta_2=0.999,
             epsilon=1e-6,
-            exclude_from_weight_decay=["layer_norm", "bias"],
+            exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"],
         )
     else:
         raise ValueError("Unsupported optimizer type: ", optimizer_type)
