@@ -52,7 +52,7 @@ class Span_Extraction_Pipeline:
             self.model_fn = model
         else:
             # saved model
-            if "saved_model" in str(type(self.model)):
+            if "saved_model" in str(type(model)):
                 # Extract signature
                 self.model_pb = model.signatures["serving_default"]
 
@@ -95,6 +95,7 @@ class Span_Extraction_Pipeline:
             self.doc_stride,
             self.SPECIAL_PIECE,
         )
+        return qas_id_info, dev_features, qas_id_examples
 
     def convert_features_to_dataset(self, dev_features):
         """Feaures to TF dataset"""
@@ -109,7 +110,7 @@ class Span_Extraction_Pipeline:
         self.dev_dataset = dev_dataset = tf_processor.auto_batch(dev_dataset, batch_size=self.batch_size)
         return dev_dataset
 
-    def post_process(self, dev_features, qas_id_info, start_logits_unstacked, end_ogits_unstacked):
+    def post_process(self, dev_features, qas_id_info, start_logits_unstacked, end_logits_unstacked, qas_id_examples):
         # List of qa_ids per feature
         # List of doc_offset, for shifting when an example gets splitted due to length
         qas_id_list = extract_from_dict(dev_features, "qas_id")
@@ -201,7 +202,6 @@ class Span_Extraction_Pipeline:
             prelim_predictions = sorted(
                 prelim_predictions, key=lambda x: (x.start_log_prob + x.end_log_prob), reverse=True
             )
-
             answer_dict = {}
             answer_dict[qas_id] = []
             total_scores = []
@@ -212,10 +212,10 @@ class Span_Extraction_Pipeline:
                     try:
                         tok_to_orig_index = current_example["tok_to_orig_index"]
                         reverse_start_index_align = tok_to_orig_index[
-                            prelim_predictions[best_index].start_index + example_features[best_index]["doc_offset"]
+                            prelim_predictions[top_n].start_index + example_features[best_index]["doc_offset"]
                         ]  # aligned index
                         reverse_end_index_align = tok_to_orig_index[
-                            prelim_predictions[best_index].end_index + example_features[best_index]["doc_offset"]
+                            prelim_predictions[top_n].end_index + example_features[best_index]["doc_offset"]
                         ]
 
                         predicted_words = [
@@ -244,6 +244,7 @@ class Span_Extraction_Pipeline:
                 qas_id_answer[qas_id] = ""
                 skipped_null.append(qas_id)
             final_result[qas_id]["answers"] = answer_dict
+            return final_result
 
     def __call__(self, questions, contexts, qas_ids=[]):
 
@@ -254,8 +255,12 @@ class Span_Extraction_Pipeline:
         assert len(questions) == len(contexts) == len(qas_ids)
 
         dev_examples = convert_question_context_to_standard_format(questions, contexts, qas_ids)
-        qas_id_info, dev_features = self.convert_to_features(dev_examples)
+        qas_id_info, dev_features, qas_id_examples = self.convert_to_features(dev_examples)
         dev_dataset = self.convert_features_to_dataset(dev_features)
+        #self.dev_features = dev_features
+        #self.qas_id_info = qas_id_info
+        #self.qas_id_examples = qas_id_examples
+        
         start_logits_unstacked, end_logits_unstacked = self.run(dev_dataset)
-        final_result = self.post_process(dev_features, qas_id_info, start_logits_unstacked, end_ogits_unstacked)
+        final_result = self.post_process(dev_features, qas_id_info, start_logits_unstacked, end_logits_unstacked, qas_id_examples)
         return final_result
