@@ -53,7 +53,7 @@ The evaluation is based on average of 5 runs, with different **batch_size**, **b
 
 <p align="left">
     <br>
-    <img src="../tf-transformers/tests/notebooks/benchmarks/gpt2/gpt2_greedy_sample.png" width="900"/>
+    <img src="tests/notebooks/benchmarks/gpt2/gpt2_greedy_sample.png" width="900"/>
     <br>
 <p>
 
@@ -61,7 +61,7 @@ The evaluation is based on average of 5 runs, with different **batch_size**, **b
 
 <p align="left">
     <br>
-    <img src="../tf-transformers/tests/notebooks/benchmarks/gpt2/gpt2_beam_sample.png" width="900"/>
+    <img src="tests/notebooks/benchmarks/gpt2/gpt2_beam_sample.png" width="900"/>
     <br>
 <p>
 
@@ -69,7 +69,7 @@ The evaluation is based on average of 5 runs, with different **batch_size**, **b
 
 <p align="left">
     <br>
-    <img src="../tf-transformers/tests/notebooks/benchmarks/gpt2/gpt2_topk_top_p_sample.png" width="900"/>
+    <img src="tests/notebooks/benchmarks/gpt2/gpt2_topk_top_p_sample.png" width="900"/>
     <br>
 <p>
 
@@ -77,7 +77,7 @@ The evaluation is based on average of 5 runs, with different **batch_size**, **b
 
 <p align="left">
     <br>
-    <img src="../tf-transformers/tests/notebooks/benchmarks/gpt2/greedy.png" width="500"/>
+    <img src="tests/notebooks/benchmarks/gpt2/greedy.png" width="500"/>
     <br>
 <p>
 
