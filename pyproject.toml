@@ -25,6 +25,8 @@ codecov = "^2.1.11"
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 pylint = "^2.6.0"
+coverage = {extras = ["toml"], version = "^5.5"}
+pytest-cov = "^2.11.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
