@@ -1,0 +1,6 @@
+[flake8]
+select = B,B9,C,E,F,I,W
+# F401 - imported but unused
+ignore = E203,W503,F401,C901,E722,F821,F841,F403,F405
+max-complexity = 10
+max-line-length = 120

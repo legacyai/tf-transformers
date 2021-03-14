@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "tf-transformers"
+version = "0.1.0"
+description = "NLP with Transformer based models on Tensorflow 2.0"
+authors = ["Sarath R Nair <s4sarath@gmail.com>"]
+maintainers = ["Sarath R Nair <s4sarath@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = ""
+repository = ""
+documentation = ""
+keywords = [
+    "tensorflow",
+    "transformers",
+    "nlp",
+    "keras",
+    "bert",
+    "deep learning"
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+codecov = "^2.1.11"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+pylint = "^2.6.0"
+coverage = {extras = ["toml"], version = "^5.5"}
+pytest-cov = "^2.11.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+target-version = ['py37']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''

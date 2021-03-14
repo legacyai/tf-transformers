@@ -1,0 +1,17 @@
+config = {
+    "attention_probs_dropout_prob": 0.1,
+    "hidden_act": "gelu",
+    "intermediate_act": "gelu",
+    "hidden_dropout_prob": 0.1,
+    "embedding_size": 1024,
+    "initializer_range": 0.02,
+    "intermediate_size": 3072,
+    "max_position_embeddings": 512,
+    "num_attention_heads": 16,
+    "attention_head_size": 64,
+    "num_hidden_layers": 24,
+    "type_vocab_size": 1,
+    "vocab_size": 50265,
+    "layer_norm_epsilon": 1e-05,
+    "mask_mode": "user_defined",
+}
