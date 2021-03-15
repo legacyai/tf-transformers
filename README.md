@@ -115,20 +115,21 @@ I am providing some basic tutorials here, which covers basics of tf-transformers
 
 Start by converting **HuggingFace** models (base models only) to **tf-transformers** models.
 
-Here are a few examples:
-- [Basics of tf-transformers](Coming Soon)
+Here are a few examples : Jupyter Notebooks:
+
+- [Basics of tf-transformers](src/tf_transformers/notebooks/tutorials/basics.ipynb)
 - [Convert HuggingFace Models ( BERT, Albert, Roberta, GPT2, t5, mt5) to tf-transformers checkpoints](src/tf_transformers/notebooks/conversion_scripts/)
-- [Name Entity Recognition + Albert + TFlite + Joint Loss](src/tf_transformers/notebooks/tutorials/ner_albert.ipynb)
-- [Squad v1.1 + Roberta + TFlite](src/tf_transformers/notebooks/tutorials/squad_roberta.ipynb)
+- [Name Entity Recognition + Albert + TFlite + Joint Loss + Pipeline](src/tf_transformers/notebooks/tutorials/ner_albert.ipynb)
+- [Squad v1.1 + Roberta + TFlite + Pipeline](src/tf_transformers/notebooks/tutorials/squad_roberta.ipynb)
 - [Roberta2Roberta Encoder Decoder + XSUM + Summarisation](src/tf_transformers/notebooks/tutorials/seq2seq_summarization.ipynb)
 - [Squad v1.1 + T5 + Text Generation](src/tf_transformers/notebooks/tutorials/t5_squad_as_generation.ipynb)
-- [Squad v1.1 + T5 + Span Selection + TFlite](src/tf_transformers/notebooks/tutorials/t5_squad_span_selection.ipynb)
+- [Squad v1.1 + T5 + Span Selection + TFlite + Pipeline](src/tf_transformers/notebooks/tutorials/t5_squad_span_selection.ipynb)
 - [Albert + GLUE + Joint Loss - Glue Score 81.0 on 14 M parameter + 5 layers](src/tf_transformers/notebooks/tutorials/joint_loss_experiments)
-- [Albert + Squad + Joint Loss - EM/F1 78.1/87.0 on 14 M parameter + 5 layers](src/tf_transformers/notebooks/tutorials/joint_loss_experiments/squad.ioynb)
+- [Albert + Squad + Joint Loss - EM/F1 78.1/87.0 on 14 M parameter + 5 layers](src/tf_transformers/notebooks/tutorials/joint_loss_experiments/squad.ipynb)
 - [Squad v1.1 + GPT2 + Causal Masking EM/F1 37.36/50.20] (Coming Soon)
 - [Squad v1.1 + GPT2 + Prefix Masking EM/F1 47.52/63.20](Coming Soon)
 - BERT + STS-B + Regression (Coming Soon)
-- Albert + MNLI + Classification
+- [BERT + COLA  + Text Classification + TFlite + Pipeline](src/tf_transformers/notebooks/tutorials/)
 
 ## Why should I use tf-transformers?
 
@@ -208,10 +209,129 @@ Assuming poetry is installed. If not ```pip install poetry``` .
 
 ```poetry install```
 
+### Pipeline
+
+Pipeline in tf-transformers is different from HuggingFace. Here, pipeline for specific tasks expects a **model** and **tokenizer_fn**. Because in an ideal scenario, no one will be able to understand whats the kind of **pre-processing** we want to do to our inputs. Please refer above tutorial notebooks for examples.
+
+**Token Classificaton Pipeline (NER)**
+``` python
+
+from tf_transformers.pipeline import Token_Classification_Pipeline
+
+def tokenizer_fn(feature):
+    """
+    feature: tokenized text (tokenizer.tokenize)
+    """
+    result = {}
+    result["input_ids"] = tokenizer.convert_tokens_to_ids([tokenizer.cls_token] +  feature['input_ids'] + [tokenizer.bos_token])
+    result["input_mask"] = [1] * len(result["input_ids"])
+    result["input_type_ids"] = [0] * len(result["input_ids"])
+    return result
+
+# load Keras/ Serialized Model
+model_ner = # Load Model
+slot_map_reverse = # dictionary index - entity mapping
+pipeline = Token_Classification_Pipeline( model = model_ner,
+                tokenizer = tokenizer,
+                tokenizer_fn = tokenizer_fn,
+                SPECIAL_PIECE = SPIECE_UNDERLINE,
+                label_map = slot_map_reverse,
+                max_seq_length = 128,
+                batch_size=32)
+
+sentences = ['I would love to listen to Carnatic music by Yesudas',
+            'Play Carnatic Fusion by Various Artists',
+            'Please book 2 tickets from Bangalore to Kerala']
+result = pipeline(sentences)
+```
+
+**Span Selection Pipeline (QA)**
+``` python
+
+from tf_transformers.pipeline import Span_Extraction_Pipeline
+
+def tokenizer_fn(features):
+    """
+    features: dict of tokenized text
+    Convert them into ids
+    """
+
+    result = {}
+    input_ids = tokenizer.convert_tokens_to_ids(features['input_ids'])
+    input_type_ids = tf.zeros_like(input_ids).numpy().tolist()
+    input_mask = tf.ones_like(input_ids).numpy().tolist()
+    result['input_ids'] = input_ids
+    result['input_type_ids'] = input_type_ids
+    result['input_mask'] = input_mask
+    return result
+
+model = # Load keras/ saved_model
+# Span Extraction Pipeline
+pipeline = Span_Extraction_Pipeline(model = model,
+                tokenizer = tokenizer,
+                tokenizer_fn = tokenizer_fn,
+                SPECIAL_PIECE = ROBERTA_SPECIAL_PEICE,
+                n_best_size = 20,
+                n_best = 5,
+                max_answer_length = 30,
+                max_seq_length = 384,
+                max_query_length=64,
+                doc_stride=20)
+
+
+questions = ['When was Kerala formed?']
+contexts = ['''Kerala (English: /ˈkɛrələ/; Malayalam: [ke:ɾɐɭɐm] About this soundlisten (help·info)) is a state on the southwestern Malabar Coast of India. It was formed on 1 November 1956, following the passage of the States Reorganisation Act, by combining Malayalam-speaking regions of the erstwhile states of Travancore-Cochin and Madras. Spread over 38,863 km2 (15,005 sq mi), Kerala is the twenty-first largest Indian state by area. It is bordered by Karnataka to the north and northeast, Tamil Nadu to the east and south, and the Lakshadweep Sea[14] to the west. With 33,387,677 inhabitants as per the 2011 Census, Kerala is the thirteenth-largest Indian state by population. It is divided into 14 districts with the capital being Thiruvananthapuram. Malayalam is the most widely spoken language and is also the official language of the state.[15]''']
+result = pipeline(questions=questions, contexts=contexts)
+
+```
+
+**Classification Model Pipeline**
+``` python
+from tf_transformers.pipeline import Classification_Pipeline
+from tf_transformers.data import pad_dataset_normal
+
+tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+max_seq_length = 128
+
+@pad_dataset_normal
+def tokenizer_fn(texts):
+    """
+    feature: tokenized text (tokenizer.tokenize)
+    pad_dataset_noral will automatically pad it.
+    """
+    input_ids = []
+    input_type_ids = []
+    input_mask = []
+    for text in texts:
+        input_ids_ex = [tokenizer.cls_token] + tokenizer.tokenize(text)[: max_seq_length-2] + [tokenizer.sep_token] # -2 to add CLS and SEP
+        input_ids_ex = tokenizer.convert_tokens_to_ids(input_ids_ex)
+        input_mask_ex = [1] * len(input_ids_ex)
+        input_type_ids_ex = [0] * len(input_ids_ex)
+
+        input_ids.append(input_ids_ex)
+        input_type_ids.append(input_type_ids_ex)
+        input_mask.append(input_mask_ex)
+
+    result = {}
+    result['input_ids'] = input_ids
+    result['input_type_ids'] = input_type_ids
+    result['input_mask'] = input_mask
+    return result
+
+model = # Load keras/ saved_model
+label_map_reverse = {0: 'unacceptable', 1: 'acceptable'}
+pipeline = Classification_Pipeline( model = model,
+                tokenizer_fn = tokenizer_fn,
+                label_map = label_map_reverse,
+                batch_size=32)
+
+sentences = ['In which way is Sandy very anxious to see if the students will be able to solve the homework problem?',
+            'The book was written by John.',
+            'Play Carnatic Fusion by Various Artists',
+            'She voted herself.']
+result = pipeline(sentences)
+```
 ## Supported Models architectures
-
-
-
 
 tf-transformers currently provides the following architectures .
 1. **[ALBERT](https://huggingface.co/transformers/model_doc/albert.html)** (from Google Research and the Toyota Technological Institute at Chicago) released with the paper [ALBERT: A Lite BERT for Self-supervised Learning of Language Representations](https://arxiv.org/abs/1909.11942), by Zhenzhong Lan, Mingda Chen, Sebastian Goodman, Kevin Gimpel, Piyush Sharma, Radu Soricut.
