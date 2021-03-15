@@ -18,12 +18,21 @@ limitations under the License.
     <br>
     <img src="src/logo2.png" width="400"/>
     <br>
-<p>
+</p>
 
-[![Tests](https://github.com/legacyai/tf-transformers/workflows/Tests/badge.svg)](https://github.com/legacyai/tf-transformers/actions?workflow=Tests)
-[![codecov](https://codecov.io/gh/legacyai/tf-transformers/branch/main/graph/badge.svg?token=9TZ10G9GL6)](https://codecov.io/gh/legacyai/tf-transformers)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+<p align="center">
+<a href="https://github.com/legacyai/tf-transformers/actions?workflow=Tests">
+        <img alt="Tests" src="https://github.com/legacyai/tf-transformers/workflows/Tests/badge.svg">
+</a>
 
+<a href="https://codecov.io/gh/legacyai/tf-transformers">
+        <img alt="Coverage" src="https://codecov.io/gh/legacyai/tf-transformers/branch/main/graph/badge.svg?token=9TZ10G9GL6">
+</a>
+
+<a href="https://opensource.org/licenses/Apache-2.0">
+        <img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
+</a>
+</p>
 
 <h3 align="center">
 <p>tf-transformers: faster and easier state-of-the-art NLP in TensorFlow 2.0
