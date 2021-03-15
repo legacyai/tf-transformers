@@ -20,6 +20,11 @@ limitations under the License.
     <br>
 <p>
 
+[![Tests](https://github.com/legacyai/tf-transformers/workflows/Tests/badge.svg)](https://github.com/legacyai/tf-transformers/actions?workflow=Tests)
+[![codecov](https://codecov.io/gh/legacyai/tf-transformers/branch/main/graph/badge.svg?token=9TZ10G9GL6)](https://codecov.io/gh/legacyai/tf-transformers)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+
 <h3 align="center">
 <p>tf-transformers: faster and easier state-of-the-art NLP in TensorFlow 2.0
 </h3>
@@ -35,8 +40,8 @@ All / Most NLP downstream tasks can be integrated into Tranformer based models w
 - **Variable batch text generation** for Encoder only models like GPT2
 - No more hassle of writing long codes for **TFRecords. minimal and simple**.
 - Off the shelf support for auto-batching **tf.data.dataset** or **tf.ragged** tensors
-- Pass dictionary outputs directly to loss functions inside ```tf.keras.Model.fit``` using **model.compile2** . Refer [examples]() or [blog]()
-- Multiple mask modes like **causal**, **user-defined**, **prefix** by changing one argument . Refer [examples]() or [blog]()
+- Pass dictionary outputs directly to loss functions inside ```tf.keras.Model.fit``` using **model.compile2** . Refer [examples](src/tf_transformers/notebooks/tutorials/) or [blog](https://legacyai-org.medium.com/tf-transformers-f7722536ba61)
+- Multiple mask modes like **causal**, **user-defined**, **prefix** by changing one argument . Refer [examples](src/tf_transformers/notebooks/tutorials/) or [blog](https://legacyai-org.medium.com/tf-transformers-f7722536ba61)
 
 
 ## Performance Benchmarks
@@ -81,12 +86,25 @@ The evaluation is based on average of 5 runs, with different **batch_size**, **b
     <br>
 <p>
 
-[Codes to reproduce GPT2 benchmark experiments](../tests/notebooks/benchmarks/gpt2)
+[Codes to reproduce GPT2 benchmark experiments](tests/notebooks/benchmarks/gpt2)
 
-[Codes to reproduce T5 benchmark experiments](../tests/notebooks/benchmarks/t5)
+[Codes to reproduce T5 benchmark experiments](tests/notebooks/benchmarks/t5)
+
+## QuickStart
+
+I am providing some basic tutorials here, which covers basics of tf-transformers and how can we use it for other downstream tasks. All/most tutorials has following structure:
+
+* Introduction About the Problem
+* Prepare Training Data
+* Load Model and asociated downstream Tasks
+* Define Optimizer, Loss
+* Train using Keras and CustomTrainer
+* Evaluate Using Dev data
+* In Producton - Secton defines how can we use ```tf.saved_model``` in production + pipelines
 
 ## Production Ready Tutorials
 
+Start by converting **HuggingFace** models (base models only) to **tf-transformers** models.
 
 Here are a few examples:
 - [Basics of tf-transformers](Coming Soon)
@@ -95,11 +113,13 @@ Here are a few examples:
 - [Squad v1.1 + Roberta + TFlite](src/tf_transformers/notebooks/tutorials/squad_roberta.ipynb)
 - [Roberta2Roberta Encoder Decoder + XSUM + Summarisation](src/tf_transformers/notebooks/tutorials/seq2seq_summarization.ipynb)
 - [Squad v1.1 + T5 + Text Generation](src/tf_transformers/notebooks/tutorials/t5_squad_as_generation.ipynb)
-- [Squad v1.1 + T5 + Span Selection](src/tf_transformers/notebooks/tutorials/t5_squad_span_selection.ipynb)
+- [Squad v1.1 + T5 + Span Selection + TFlite](src/tf_transformers/notebooks/tutorials/t5_squad_span_selection.ipynb)
 - [Albert + GLUE + Joint Loss - Glue Score 81.0 on 14 M parameter + 5 layers](src/tf_transformers/notebooks/tutorials/joint_loss_experiments)
 - [Albert + Squad + Joint Loss - EM/F1 78.1/87.0 on 14 M parameter + 5 layers](src/tf_transformers/notebooks/tutorials/joint_loss_experiments/squad.ioynb)
 - [Squad v1.1 + GPT2 + Causal Masking EM/F1 37.36/50.20] (Coming Soon)
 - [Squad v1.1 + GPT2 + Prefix Masking EM/F1 47.52/63.20](Coming Soon)
+- BERT + STS-B + Regression (Coming Soon)
+- Albert + MNLI + Classification
 
 ## Why should I use tf-transformers?
 
@@ -169,6 +189,15 @@ Assuming Tensorflow 2.0 is installed
 pip install tf-transformers
 ```
 
+### From Github
+
+Assuming poetry is installed. If not ```pip install poetry``` .
+
+```git clone https://github.com/legacyai/tf-transformers.git```
+
+```cd tf-transformers```
+
+```poetry install```
 
 ## Supported Models architectures
 
@@ -185,11 +214,13 @@ tf-transformers currently provides the following architectures .
 7. **[RoBERTa](https://huggingface.co/transformers/model_doc/roberta.html)** (from Facebook), released together with the paper a [Robustly Optimized BERT Pretraining Approach](https://arxiv.org/abs/1907.11692) by Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer Levy, Mike Lewis, Luke Zettlemoyer, Veselin Stoyanov.
 8. **[T5](https://huggingface.co/transformers/model_doc/t5.html)** (from Google AI) released with the paper [Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683) by Colin Raffel and Noam Shazeer and Adam Roberts and Katherine Lee and Sharan Narang and Michael Matena and Yanqi Zhou and Wei Li and Peter J. Liu.
 
+## Note
 
+```tf-transformers``` is a personal project. This has nothing to do with any organization. So, I might not be able to host equivalent ```checkpoints``` of all base models. As a result, there is a [**conversion**](src/tf_transformers/notebooks/conversion_scripts) notebooks, to convert above mentioned architectures from **HuggingFace** to **tf-transformers**.
 
 ## Credits
 
-I want to give credits to [Tensorflow NLP official repository](https://github.com/tensorflow/models/tree/master/official/nlp). I used November 2020 version of master branch ( where ```tf.keras.Network```) was used for models. I have modified that by large extend now.
+I want to give credits to [Tensorflow NLP official repository](https://github.com/tensorflow/models/tree/master/official/nlp). I used November 2019 version of master branch ( where ```tf.keras.Network```) was used for models. I have modified that by large extend now.
 
 Apart from that, I have used many common scripts from many open repos. I might not be able to recall everything as it is. But still credit goes to them  too.
 
