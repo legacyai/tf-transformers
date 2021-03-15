@@ -72,7 +72,7 @@ class TFWriter(object):
     def __init__(
         self,
         schema,
-        file_name,
+        file_name="file",
         model_dir=None,
         tag="dev",
         n_files=10,
