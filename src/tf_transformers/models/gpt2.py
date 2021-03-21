@@ -7,10 +7,8 @@ from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer
-from tf_transformers.layers import (GPT2LayerNormalization, MLMLayer,
-                                    OnDeviceEmbedding, SimplePositionEmbedding)
-from tf_transformers.layers.mask import (CausalMask, CrossAttentionMask,
-                                         SelfAttentionMask, prefix_mask)
+from tf_transformers.layers import GPT2LayerNormalization, MLMLayer, OnDeviceEmbedding, SimplePositionEmbedding
+from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerGPT2
 
 logging.set_verbosity("INFO")

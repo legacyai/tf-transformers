@@ -5,10 +5,8 @@ from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer
-from tf_transformers.layers import (OnDeviceEmbedding, SimplePositionEmbedding,
-                                    T5LayerNormalization)
-from tf_transformers.layers.mask import (CausalMask, SelfAttentionMask,
-                                         prefix_mask)
+from tf_transformers.layers import OnDeviceEmbedding, SimplePositionEmbedding, T5LayerNormalization
+from tf_transformers.layers.mask import CausalMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerT5
 
 logging.set_verbosity("INFO")

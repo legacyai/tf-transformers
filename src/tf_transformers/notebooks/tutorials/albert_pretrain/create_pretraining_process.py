@@ -113,7 +113,7 @@ def create_instances_from_document(
     favor_shorter_ngram,
     spm_model_file,
     random_next_sentence=False,
-    do_permutation=False
+    do_permutation=False,
 ):
     """Creates `TrainingInstance`s for a single document."""
     document = all_documents[document_index]
@@ -217,8 +217,16 @@ def create_instances_from_document(
                 segment_ids.append(1)
 
                 (tokens, masked_lm_positions, masked_lm_labels, token_boundary) = create_masked_lm_predictions(
-                    tokens, masked_lm_prob, max_predictions_per_seq, vocab_words, rng, do_whole_word_mask, spm_model_file, ngram,
-                    favor_shorter_ngram,do_permutation
+                    tokens,
+                    masked_lm_prob,
+                    max_predictions_per_seq,
+                    vocab_words,
+                    rng,
+                    do_whole_word_mask,
+                    spm_model_file,
+                    ngram,
+                    favor_shorter_ngram,
+                    do_permutation,
                 )
                 instance = TrainingInstance(
                     tokens=tokens,
@@ -274,7 +282,18 @@ def is_start_piece(piece, spm_model_file):
         return _is_start_piece_bert(piece)
 
 
-def create_masked_lm_predictions(tokens, masked_lm_prob, max_predictions_per_seq, vocab_words, rng, do_whole_word_mask, spm_model_file, ngram, favor_shorter_ngram, do_permutation):
+def create_masked_lm_predictions(
+    tokens,
+    masked_lm_prob,
+    max_predictions_per_seq,
+    vocab_words,
+    rng,
+    do_whole_word_mask,
+    spm_model_file,
+    ngram,
+    favor_shorter_ngram,
+    do_permutation,
+):
     """Creates the predictions for the masked LM objective."""
 
     cand_indexes = []
