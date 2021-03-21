@@ -257,10 +257,12 @@ class Span_Extraction_Pipeline:
         dev_examples = convert_question_context_to_standard_format(questions, contexts, qas_ids)
         qas_id_info, dev_features, qas_id_examples = self.convert_to_features(dev_examples)
         dev_dataset = self.convert_features_to_dataset(dev_features)
-        #self.dev_features = dev_features
-        #self.qas_id_info = qas_id_info
-        #self.qas_id_examples = qas_id_examples
-        
+        # self.dev_features = dev_features
+        # self.qas_id_info = qas_id_info
+        # self.qas_id_examples = qas_id_examples
+
         start_logits_unstacked, end_logits_unstacked = self.run(dev_dataset)
-        final_result = self.post_process(dev_features, qas_id_info, start_logits_unstacked, end_logits_unstacked, qas_id_examples)
+        final_result = self.post_process(
+            dev_features, qas_id_info, start_logits_unstacked, end_logits_unstacked, qas_id_examples
+        )
         return final_result

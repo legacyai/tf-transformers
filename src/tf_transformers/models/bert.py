@@ -212,12 +212,15 @@ class BERTEncoder(LegacyLayer):
         logging.info("Initialized Variables")
 
     def call_predict(self, inputs):
-        """Inputs will be pass to this method, when is_training = False.
-        The need to cache the past `key` and `value` tensors are necessary
-        while predicting, to make the inference/NLG
-        faster in case of AutoRegressive Decoding.
+        """[summary]
 
+        Args:
+            inputs ([type]): [description]
+
+        Returns:
+            [type]: [description]
         """
+
         input_ids_mod = inputs["input_ids"]
         all_cache_key = inputs["all_cache_key"]
         all_cache_value = inputs["all_cache_value"]
