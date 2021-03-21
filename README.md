@@ -189,7 +189,7 @@ Benchmark Results
 
 ### With pip
 
-This repository is tested on Python 3.7+, and Tensorflow 2.4.0
+This repository is tested on Python 3.7+, and Tensorflow 2.3.1
 
 Recommended to use a [virtual environment](https://docs.python.org/3/library/venv.html).
 
