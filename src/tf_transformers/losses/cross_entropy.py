@@ -16,7 +16,6 @@ def cross_entropy_loss(labels, logits, label_weights=None):
         label_weights = tf.ones_like(labels)
     per_example_loss = per_example_loss * tf.cast(label_weights, per_example_loss.dtype)
     numerator = tf.reduce_sum(per_example_loss)
-    denominator = tf.cast(tf.reduce_sum(label_weights), numerator.dtype)
     denominator = tf.reduce_sum(label_weights)
     loss = tf.math.divide_no_nan(numerator, tf.cast(denominator, numerator.dtype))
     return loss
