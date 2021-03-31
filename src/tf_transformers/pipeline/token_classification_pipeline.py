@@ -1,6 +1,6 @@
 import collections
 import tensorflow as tf
-from tf_transformers.data import TFProcessor
+from tf_transformers.data import TFProcessor, fast_tokenize_and_align_sentence_for_ner
 
 
 def extract_from_dict(dict_items, key):
@@ -80,7 +80,7 @@ class Token_Classification_Pipeline:
         # for TFProcessor
         def local_parser():
             for f in dev_features:
-                result = tokenizer_fn(f)
+                result = self.tokenizer_fn(f)
                 yield result
 
         # Create dataset
