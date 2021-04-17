@@ -6,27 +6,25 @@ import tensorflow as tf
 
 from tf_transformers.core import LegacyLayer
 from tf_transformers.layers import dense_einsum
-from tf_transformers.layers.attention import BigBirdAttention, BlockMultiHeadAttention, MultiHeadAttention
+from tf_transformers.layers.attention import MultiHeadAttention
 
 
 class TransformerBERT(LegacyLayer):
     """Transformer
 
     This layer implements the Transformer from "Attention Is All You Need".
-    (https://arxiv.org/abs/1706.03762), with a customizable attention layer
-    option. Users can pass a class to `attention_cls` and associated config to
-    `attention_cfg`, in which case the scaffold will instantiate the class with
-    the config, or pass a class instance to `attention_cls`.
+    (https://arxiv.org/abs/1706.03762).
 
     """
 
     def __init__(
         self,
+        hidden_size,
         num_attention_heads,
         intermediate_size,
         intermediate_activation,
+        use_auto_regressive,
         attention_head_size=None,
-        attention_cfg=None,
         dropout_rate=0.0,
         attention_dropout_rate=0.0,
         kernel_initializer="glorot_uniform",
@@ -37,13 +35,11 @@ class TransformerBERT(LegacyLayer):
         kernel_constraint=None,
         bias_constraint=None,
         use_bias=True,
-        is_decoder=None,
+        use_decoder=False,
         share_attention_layers=True,
         layer_norm_epsilon=None,
-        cross_attention_inside_encoder=False,
-        attention_type="full_attention",  # ['full_attention', 'block_attention']
-        block_size=64,
-        num_rand_blocks=3,
+        is_training=False,
+        use_dropout=False,
         name="transformer",
         **kwargs,
     ):
@@ -70,14 +66,15 @@ class TransformerBERT(LegacyLayer):
                 inside encoder.
             is_decoder: bool
         """
-        kwargs["name"] = name
-        super(TransformerBERT, self).__init__(**kwargs)
-        self._attention_cfg = attention_cfg
+        super(TransformerBERT, self).__init__(name=name, is_training=is_training, use_dropout=use_dropout, **kwargs)
+        # mostly embedding_size is same as projecting after attention
+        self._hidden_size = hidden_size
         self._num_heads = num_attention_heads
         self._intermediate_size = intermediate_size
         self._intermediate_activation = intermediate_activation
-        self._attention_dropout_rate = attention_dropout_rate
+        self._attention_head_size = attention_head_size
         self._dropout_rate = dropout_rate
+        self._attention_dropout_rate = attention_dropout_rate
         self._kernel_initializer = tf.keras.initializers.get(kernel_initializer)
         self._bias_initializer = tf.keras.initializers.get(bias_initializer)
         self._kernel_regularizer = tf.keras.regularizers.get(kernel_regularizer)
@@ -85,110 +82,69 @@ class TransformerBERT(LegacyLayer):
         self._kernel_constraint = tf.keras.constraints.get(kernel_constraint)
         self._bias_constraint = tf.keras.constraints.get(bias_constraint)
         self._use_bias = use_bias
-        self._is_decoder = is_decoder
+        self._use_decoder = use_decoder
         self._layer_norm_epsilon = layer_norm_epsilon
-        self._share_attention_layers = share_attention_layers
-        self._cross_attention_inside_encoder = cross_attention_inside_encoder
-        self._attention_type = attention_type
-        self._attention_head_size = attention_head_size
-        self._num_rand_blocks = num_rand_blocks
-        self._from_block_size = self._to_block_size = block_size
-
-        if self._is_decoder is None:
-            raise ValueError(
-                "`is_decoder` should be set to bool. You have \
-                to set it where you call the transformer layers"
-            )
+        self._is_training = is_training
+        self._use_dropout = use_dropout
+        self._use_auto_regressive = use_auto_regressive
 
     def build(self, input_shape):
-        """
+        """Build variables based on shape at run time.
+
         Args:
-            input_shape: [word_embeddings (3D), attention_mask(3D)]
+            input_shape ([input_word_embeddings 3D, attention_mask 3D]): input_word_embeddings
+            (b x s x h) and attention_mask (b x 1 x s)
+
+        Raises:
+            ValueError: [description]
+            ValueError: [description]
         """
         input_tensor = input_shape[0]
         input_tensor_shape = tf.TensorShape(input_tensor)
-        if len(input_tensor_shape) != 3:
-            raise ValueError("TransformerBERT expects a three-dimensional input of " "shape [batch, sequence, width].")
-        batch_size, sequence_length, hidden_size = input_tensor_shape
+        batch_size, sequence_length, embedding_size = input_tensor_shape
 
         if not self._attention_head_size:
-            if hidden_size % self._num_heads != 0:
+            # If attention_head is None, then make sure
+            # it can be inferred from (embedding_size // self._num_heads)
+            if embedding_size % self._num_heads != 0:
                 raise ValueError(
                     "The input size (%d) is not a multiple of the number of attention "
-                    "heads (%d)" % (hidden_size, self._num_heads)
+                    "heads (%d)" % (embedding_size, self._num_heads)
                 )
-            self._attention_head_size = int(hidden_size // self._num_heads)
+            self._attention_head_size = int(embedding_size // self._num_heads)
 
-        if self._attention_type == "full_attention":
-
-            self._attention_layer = MultiHeadAttention(
-                num_heads=self._num_heads,
-                head_size=self._attention_head_size,
-                dropout_rate=self._attention_dropout_rate,
-                kernel_initializer=self._kernel_initializer,
-                bias_initializer=self._bias_initializer,
-                kernel_regularizer=self._kernel_regularizer,
-                bias_regularizer=self._bias_regularizer,
-                activity_regularizer=self._activity_regularizer,
-                kernel_constraint=self._kernel_constraint,
-                bias_constraint=self._bias_constraint,
-                is_training=self.is_training,
-                use_dropout=self.use_dropout,
-                name="self_attention",
-            )
-
-        if self._attention_type == "block_attention":
-
-            self._attention_layer = BlockMultiHeadAttention(
-                num_heads=self._num_heads,
-                head_size=self._attention_head_size,
-                dropout_rate=self._attention_dropout_rate,
-                kernel_initializer=self._kernel_initializer,
-                bias_initializer=self._bias_initializer,
-                kernel_regularizer=self._kernel_regularizer,
-                bias_regularizer=self._bias_regularizer,
-                activity_regularizer=self._activity_regularizer,
-                kernel_constraint=self._kernel_constraint,
-                bias_constraint=self._bias_constraint,
-                is_training=self.is_training,
-                use_dropout=self.use_dropout,
-                name="self_attention",
-            )
-
-        if self._attention_type == "bigbird":
-            self._attention_layer = BigBirdAttention(
-                num_heads=self._num_heads,
-                head_size=self._attention_head_size,
-                num_rand_blocks=self._num_rand_blocks,
-                from_block_size=self._from_block_size,
-                to_block_size=self._to_block_size,
-                dropout_rate=self._attention_dropout_rate,
-                kernel_initializer=self._kernel_initializer,
-                bias_initializer=self._bias_initializer,
-                kernel_regularizer=self._kernel_regularizer,
-                bias_regularizer=self._bias_regularizer,
-                activity_regularizer=self._activity_regularizer,
-                kernel_constraint=self._kernel_constraint,
-                bias_constraint=self._bias_constraint,
-                is_training=self.is_training,
-                use_dropout=self.use_dropout,
-                name="self_attention",
-            )
-
-        self._attention_output_dense = dense_einsum.DenseEinsum(
-            output_shape=hidden_size,
-            kernel_initializer=self._kernel_initializer,
+        # Common kwargs
+        common_kwargs = dict(
             bias_initializer=self._bias_initializer,
             kernel_regularizer=self._kernel_regularizer,
             bias_regularizer=self._bias_regularizer,
             activity_regularizer=self._activity_regularizer,
             kernel_constraint=self._kernel_constraint,
             bias_constraint=self._bias_constraint,
-            name="self_attention_output",
         )
 
+        # Self Attention Layer
+        self._attention_layer = MultiHeadAttention(
+            num_heads=self._num_heads,
+            head_size=self._attention_head_size,
+            dropout_rate=self._attention_dropout_rate,
+            name="self_attention",
+            is_training=self._is_training,
+            use_decoder=self._use_decoder,
+            use_auto_regressive=self._use_auto_regressive,
+            use_dropout=self._use_dropout,
+            **common_kwargs,
+        )
+
+        # Dense layer
+        self._attention_output_dense = dense_einsum.DenseEinsum(
+            output_shape=self._hidden_size, name="self_attention_output", **common_kwargs
+        )
+
+        # Attention Dropout
         self._attention_dropout = tf.keras.layers.Dropout(rate=self._dropout_rate)
 
+        # Self Attention Norm
         self._attention_layer_norm = tf.keras.layers.LayerNormalization(
             name="self_attention_layer_norm",
             axis=-1,
@@ -196,38 +152,25 @@ class TransformerBERT(LegacyLayer):
             dtype=tf.float32,
         )
 
-        # If we have cross attention inside encoder
-        if self._cross_attention_inside_encoder:
-
-            # Hard setting is_training to True, as we do not have to use cache here
+        # Cross Attention for Decoder
+        if self._use_decoder:
+            # Cross Attention layer
             self._cross_attention_layer = MultiHeadAttention(
                 num_heads=self._num_heads,
                 head_size=self._attention_head_size,
                 dropout_rate=self._attention_dropout_rate,
-                kernel_initializer=self._kernel_initializer,
-                bias_initializer=self._bias_initializer,
-                kernel_regularizer=self._kernel_regularizer,
-                bias_regularizer=self._bias_regularizer,
-                activity_regularizer=self._activity_regularizer,
-                kernel_constraint=self._kernel_constraint,
-                bias_constraint=self._bias_constraint,
-                is_training=self.is_training,
-                use_dropout=self.use_dropout,
                 name="cross_attention",
+                is_training=self._is_training,
+                use_auto_regressive=self._use_auto_regressive,
+                use_decoder=self._use_decoder,
+                use_dropout=self._use_dropout,
+                **common_kwargs,
             )
-
+            # Dense
             self._cross_attention_output_dense = dense_einsum.DenseEinsum(
-                output_shape=hidden_size,
-                kernel_initializer=self._kernel_initializer,
-                bias_initializer=self._bias_initializer,
-                kernel_regularizer=self._kernel_regularizer,
-                bias_regularizer=self._bias_regularizer,
-                activity_regularizer=self._activity_regularizer,
-                kernel_constraint=self._kernel_constraint,
-                bias_constraint=self._bias_constraint,
-                name="cross_attention_output",
+                output_shape=self._hidden_size, name="cross_attention_output", **common_kwargs
             )
-
+            # Norm
             self._cross_attention_layer_norm = tf.keras.layers.LayerNormalization(
                 name="cross_attention_layer_norm",
                 axis=-1,
@@ -235,88 +178,28 @@ class TransformerBERT(LegacyLayer):
                 dtype=tf.float32,
             )
 
-        if self._is_decoder:
-            if self._share_attention_layers:
-                self._cross_attention_layer = self._attention_layer
-                self._cross_attention_output_dense = self._attention_output_dense
-                self._cross_attention_layer_norm = self._attention_layer_norm
-
-            else:
-                # Hard setting is_training to True, as we do not have to use cache here
-                self._cross_attention_layer = MultiHeadAttention(
-                    num_heads=self._num_heads,
-                    head_size=self._attention_head_size,
-                    dropout_rate=self._attention_dropout_rate,
-                    kernel_initializer=self._kernel_initializer,
-                    bias_initializer=self._bias_initializer,
-                    kernel_regularizer=self._kernel_regularizer,
-                    bias_regularizer=self._bias_regularizer,
-                    activity_regularizer=self._activity_regularizer,
-                    kernel_constraint=self._kernel_constraint,
-                    bias_constraint=self._bias_constraint,
-                    is_training=self.is_training,
-                    use_dropout=self.use_dropout,
-                    name="cross_attention",
-                )
-
-                self._cross_attention_output_dense = dense_einsum.DenseEinsum(
-                    output_shape=hidden_size,
-                    kernel_initializer=self._kernel_initializer,
-                    bias_initializer=self._bias_initializer,
-                    kernel_regularizer=self._kernel_regularizer,
-                    bias_regularizer=self._bias_regularizer,
-                    activity_regularizer=self._activity_regularizer,
-                    kernel_constraint=self._kernel_constraint,
-                    bias_constraint=self._bias_constraint,
-                    name="cross_attention_output",
-                )
-
-                self._cross_attention_layer_norm = tf.keras.layers.LayerNormalization(
-                    name="cross_attention_layer_norm",
-                    axis=-1,
-                    epsilon=self._layer_norm_epsilon,
-                    dtype=tf.float32,
-                )
-
+        # Main Dense Layer after Attention
         self._intermediate_dense = dense_einsum.DenseEinsum(
             output_shape=self._intermediate_size,
             activation=self._intermediate_activation,
-            kernel_initializer=self._kernel_initializer,
-            bias_initializer=self._bias_initializer,
-            kernel_regularizer=self._kernel_regularizer,
-            bias_regularizer=self._bias_regularizer,
-            activity_regularizer=self._activity_regularizer,
-            kernel_constraint=self._kernel_constraint,
-            bias_constraint=self._bias_constraint,
             # This layer is always float32 for numeric stability.
             dtype=tf.float32,
             name="intermediate",
+            **common_kwargs,
         )
-
-        self._output_dense = dense_einsum.DenseEinsum(
-            output_shape=hidden_size,
-            kernel_initializer=self._kernel_initializer,
-            bias_initializer=self._bias_initializer,
-            kernel_regularizer=self._kernel_regularizer,
-            bias_regularizer=self._bias_regularizer,
-            activity_regularizer=self._activity_regularizer,
-            kernel_constraint=self._kernel_constraint,
-            bias_constraint=self._bias_constraint,
-            name="output",
-        )
+        # intermediate Dense
+        self._output_dense = dense_einsum.DenseEinsum(output_shape=self._hidden_size, name="output", **common_kwargs)
         self._output_dropout = tf.keras.layers.Dropout(rate=self._dropout_rate)
 
         # Use float32 in layernorm for numeric stability.
         self._output_layer_norm = tf.keras.layers.LayerNormalization(
-            name="output_layer_norm",
-            axis=-1,
-            epsilon=self._layer_norm_epsilon,
-            dtype=tf.float32,
+            name="output_layer_norm", axis=-1, epsilon=self._layer_norm_epsilon, dtype=tf.float32
         )
         super(TransformerBERT, self).build(input_shape)
 
     def get_config(self):
         config = {
+            "hidden_size": self._hidden_size,
             "num_attention_heads": self._num_heads,
             "intermediate_size": self._intermediate_size,
             "intermediate_activation": self._intermediate_activation,
@@ -330,137 +213,37 @@ class TransformerBERT(LegacyLayer):
             "kernel_constraint": tf.keras.constraints.serialize(self._kernel_constraint),
             "bias_constraint": tf.keras.constraints.serialize(self._bias_constraint),
             "is_training": self.is_training,
+            "use_auto_regressive": self._use_auto_regressive,
         }
         base_config = super(TransformerBERT, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
-    def call_training(self, inputs, cache_key=None, cache_value=None):
+    def call_encoder(self, inputs, cache_key=None, cache_value=None):
         """
         Training pipeline
         """
+
+        # b x s x h   # b x s x s
         input_tensor, attention_mask = inputs
-
-        # For bigbird (attention_mask is input_mask) 2D
-        # No pre norm for GPT2
-        # input_tensor_norm = self._pre_attention_norm(input_tensor)
+        # [from_tensor, to_tensor]
         attention_inputs = [input_tensor, input_tensor]
-
         if attention_mask is not None:
             attention_inputs.append(attention_mask)
+
+        # attention_inputs = [from_tensor, to_tensor, attention_mask]
         attention_output, key, value = self._attention_layer(
             attention_inputs, cache_key=cache_key, cache_value=cache_value
         )
+
         attention_output = self._attention_output_dense(attention_output)
-        attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
-        # Use float32 in keras layer norm and the gelu activation in the
-        # intermediate dense layer for numeric stability
-        if self.dtype == tf.float16:
-            input_tensor = tf.cast(input_tensor, tf.float32)
-            attention_output = tf.cast(attention_output, tf.float32)
+        attention_output = self._attention_dropout(attention_output, training=self._use_dropout)
 
         attention_output = self._attention_layer_norm(input_tensor + attention_output)
         intermediate_output = self._intermediate_dense(attention_output)
         layer_output = self._output_dense(intermediate_output)
         layer_output = self._output_dropout(layer_output)
-        # During mixed precision training, attention_output is from layer norm and
-        # is always fp32 for now. Cast layer_output to fp32 for the subsequent
-        # add.
-        # Use float32 in keras layer norm for numeric stability
-        if self.dtype == tf.float16:
-            layer_output = tf.cast(layer_output, tf.float32)
-            attention_output = tf.cast(attention_output, dtype=tf.float32)
-        layer_output = self._output_layer_norm(tf.cast(layer_output, dtype=tf.float32) + attention_output)
-        return layer_output, key, value
 
-    def call_cross_attention_in_encoder(self, inputs, mode, cache_key=None, cache_value=None):
-        """
-        inputs: dict keys:
-                if self.is_training:
-                    encoder_input_ids, decoder_input_ids
-                    optional -> encoder_input_mask, decoder_input_mask, encoder_input_type_ids \
-                        decoder_input_type_ids,
-                else:
-
-        Training pipeline
-        """
-
-        def calculate_self_attention(input_tensor, attention_mask):
-            # Encoder
-            # input_tensor_norm = self._pre_attention_norm(input_tensor)
-            attention_inputs = [input_tensor, input_tensor]
-
-            if attention_mask is not None:
-                attention_inputs.append(attention_mask)
-
-            # Do not worry about cache_key
-            # When is_training = True, it will have value
-            # and compute update_cache in self attention
-            attention_output, key, value = self._attention_layer(
-                attention_inputs, cache_key=cache_key, cache_value=cache_value
-            )
-            attention_output = self._attention_output_dense(attention_output)
-            attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
-            # Use float32 in keras layer norm and the gelu activation in the
-            # intermediate dense layer for numeric stability
-            if self.dtype == tf.float16:
-                input_tensor = tf.cast(input_tensor, tf.float32)
-                attention_output = tf.cast(attention_output, tf.float32)
-            attention_output = self._attention_layer_norm(input_tensor + attention_output)
-            return attention_output, key, value
-
-        (
-            input_tensor,
-            attention_mask,
-            decoder_encoder_mask,  # None when  mode == 'encoder'
-            encoder_attention_output,  # None when mode == 'encoder'
-        ) = inputs
-        if mode == "encoder":
-            encoder_attention_output, _, _ = calculate_self_attention(input_tensor, attention_mask)
-            return encoder_attention_output, _, _
-        if mode == "decoder":
-            (
-                decoder_attention_output,
-                key,
-                value,
-            ) = calculate_self_attention(input_tensor, attention_mask)
-
-        decoder_cross_attention_inputs = [
-            decoder_attention_output,
-            encoder_attention_output,
-            decoder_encoder_mask,
-        ]
-        # When is_training is True
-        if cache_key is not None:
-            cache_key_temp = tf.zeros_like(cache_key)
-            cache_value_temp = tf.zeros_like(cache_value)
-        else:
-            cache_key_temp = None
-            cache_value_temp = None
-
-        cross_attention_output, _, _ = self._cross_attention_layer(
-            decoder_cross_attention_inputs, cache_key=cache_key_temp, cache_value=cache_value_temp
-        )
-
-        cross_attention_output = self._cross_attention_output_dense(cross_attention_output)
-        cross_attention_output = self._attention_dropout(cross_attention_output, training=self.use_dropout)
-        cross_attention_output = self._cross_attention_layer_norm(decoder_attention_output + cross_attention_output)
-
-        # Use float32 in keras layer norm and the gelu activation in the
-        # intermediate dense layer for numeric stability
-        if self.dtype == tf.float16:
-            decoder_attention_output = tf.cast(decoder_attention_output, tf.float32)
-            cross_attention_output = tf.cast(cross_attention_output, tf.float32)
-
-        intermediate_output = self._intermediate_dense(cross_attention_output)
-        layer_output = self._output_dense(intermediate_output)
-        layer_output = self._output_dropout(layer_output)
-        # During mixed precision training, attention_output is from layer norm and
-        # is always fp32 for now. Cast layer_output to fp32 for the subsequent
-        # add.
-        # Use float32 in keras layer norm for numeric stability
-        if self.dtype == tf.float16:
-            layer_output = tf.cast(layer_output, tf.float32)
-        layer_output = self._output_layer_norm(layer_output + cross_attention_output)
+        layer_output = self._output_layer_norm(layer_output + attention_output)
         return layer_output, key, value
 
     def call_decoder(self, inputs, cache_key=None, cache_value=None):
@@ -469,39 +252,35 @@ class TransformerBERT(LegacyLayer):
         """
         input_tensor, attention_mask, encoder_output, decoder_encoder_mask = inputs
 
+        # Decoder Self Attention
         attention_inputs = [input_tensor, input_tensor]
-
         if attention_mask is not None:
             attention_inputs.append(attention_mask)
         attention_output, key, value = self._attention_layer(
             attention_inputs, cache_key=cache_key, cache_value=cache_value
         )
 
+        # Self Attention Dense + Norm
         attention_output = self._attention_output_dense(attention_output)
         attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
         attention_output = self._attention_layer_norm(attention_output + input_tensor)
-        # Use float32 in keras layer norm and the gelu activation in the
-        # intermediate dense layer for numeric stability
-        if self.dtype == tf.float16:
-            input_tensor = tf.cast(input_tensor, tf.float32)
-            attention_output = tf.cast(attention_output, tf.float32)
 
-        if self._is_decoder:
+        if self._use_decoder:
+            # Cross Attention
             attention_output_copy = tf.identity(attention_output, name="attention_output_copy")
             attention_inputs_for_decoder = [
                 attention_output_copy,
                 encoder_output,
                 decoder_encoder_mask,
             ]
-
-            # This is required, if we share the parameters
-            if cache_key is not None:
+            # For auto-regressive we need this
+            # cache_key has to be zeros, because nothng
+            # to cache in cross_attention
+            cache_key_cross = None
+            cache_value_cross = None
+            if cache_key is not None and self._use_auto_regressive:
                 cache_key_cross = tf.zeros_like(cache_key)
                 cache_value_cross = tf.zeros_like(cache_value)
-            else:
-                cache_key_cross = None
-                cache_value_cross = None
-
             attention_output, _, _ = self._cross_attention_layer(
                 attention_inputs_for_decoder, cache_key=cache_key_cross, cache_value=cache_value_cross
             )
@@ -509,54 +288,30 @@ class TransformerBERT(LegacyLayer):
             attention_output = self._cross_attention_output_dense(attention_output)
             attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
             attention_output = self._cross_attention_layer_norm(attention_output_copy + attention_output)
-            # Use float32 in keras layer norm and the gelu activation in the
-            # intermediate dense layer for numeric stability
-            if self.dtype == tf.float16:
-                attention_output_copy = tf.cast(attention_output_copy, tf.float32)
-                attention_output = tf.cast(attention_output, tf.float32)
+
+        # Last Projection
         intermediate_output = self._intermediate_dense(attention_output)
         layer_output = self._output_dense(intermediate_output)
         layer_output = self._output_dropout(layer_output)
-        # During mixed precision training, attention_output is from layer norm and
-        # is always fp32 for now. Cast layer_output to fp32 for the subsequent
-        # add.
-        # Use float32 in keras layer norm for numeric stability
-        if self.dtype == tf.float16:
-            layer_output = tf.cast(layer_output, tf.float32)
         layer_output = self._output_layer_norm(layer_output + attention_output)
 
         return layer_output, key, value
 
     def call(self, inputs, mode="encoder", cache_key=None, cache_value=None):
-        """
+        """Call
+
         Args:
-            # Scalar dimensions referenced here:
-            #   B = batch size (number of sequences)
-            #   F = `from_tensor` sequence length
-            #   T = `to_tensor` sequence length
-            #   N = `num_attention_heads`
-            #   H = `size_per_head`
-            #   E = N * H
-            # `query_tensor` = [B, F, N ,H]
-            inputs: list, [input_embeddings, attention_mask]
-                          [B x F x E, B x F x F]
+            inputs ([embeddings 3D, attention_mask 3D]): List of [embeddings,
+                                                                attention_mask]
+            mode (str, optional): [description]. Defaults to "encoder".
+            cache_key ([type], optional): [description]. Defaults to None.
+            cache_value ([type], optional): [description]. Defaults to None.
 
         Returns:
-            list: [layer_output, key, value]
-                  if cache = None:
-                    [B x E,      B x N x F x H , B x N x F x H]
-                  else:
-                    [B x E,      B x N x (F+T) x H , B x N x (F+T) x H]
-                    (F+T) means , we will add the current (F) to cached key and value of length (T)
-
+            [type]: [description]
         """
-        if self._is_decoder:
+        if self._use_decoder:
             outputs = self.call_decoder(inputs, cache_key=cache_key, cache_value=cache_value)
-
-        elif self._cross_attention_inside_encoder:
-            outputs = self.call_cross_attention_in_encoder(
-                inputs, mode=mode, cache_key=cache_key, cache_value=cache_value
-            )
         else:
-            outputs = self.call_training(inputs, cache_key=cache_key, cache_value=cache_value)
+            outputs = self.call_encoder(inputs, cache_key=cache_key, cache_value=cache_value)
         return outputs

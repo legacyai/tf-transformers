@@ -1,4 +1,4 @@
-# Copyright 2019 The TensorFlow Authors. All Rights Reserved.
+# Copyright 2021 The TensorFlow and tf-transformers Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,188 +12,85 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+# ==============================================================================
+
 """Keras-based positional embedding layer."""
-# from __future__ import google_type_annotations
-# pylint: disable=g-classes-have-attributes
-from __future__ import absolute_import, division, print_function
 
 import tensorflow as tf
-
 from tf_transformers.utils import tf_utils
 
 
-@tf.keras.utils.register_keras_serializable(package="Text")
+@tf.keras.utils.register_keras_serializable(package="legacyai.text")
 class PositionEmbedding(tf.keras.layers.Layer):
     """Creates a positional embedding.
 
-    This layer creates a positional embedding as described in "BERT: Pre-training
-    of Deep Bidirectional Transformers for Language Understanding"
+    This layer creates a positional embedding as described in "BERT":
     (https://arxiv.org/abs/1810.04805).
-
-    This layer can be set up to either create a statically shaped slice or a
-    dynamically shaped slice. If `use_dynamic_slicing` is True, the input tensor
-    can have a dynamic 1st dimension, while if `use_dynamic_slicing` is False the
-    input size must be fixed.
-
-    Arguments:
-      use_dynamic_slicing: Whether to use the dynamic slicing path.
-      max_sequence_length: The maximum size of the dynamic sequence. Only
-        applicable if `use_dynamic_slicing` is True.
-      initializer: The initializer to use for the embedding weights. Defaults to
-        "glorot_uniform".
     """
 
-    def __init__(self, initializer="glorot_uniform", use_dynamic_slicing=False, max_sequence_length=None, **kwargs):
-        # We need to have a default dtype of float32, since the inputs (which Keras
-        # usually uses to infer the dtype) will always be int32.
-        if "dtype" not in kwargs:
-            kwargs["dtype"] = "float32"
-
-        super(PositionEmbedding, self).__init__(**kwargs)
-        if use_dynamic_slicing and max_sequence_length is None:
-            raise ValueError("If `use_dynamic_slicing` is True, `max_sequence_length` must be set.")
+    def __init__(
+        self,
+        max_sequence_length,
+        embedding_width,
+        initializer="glorot_uniform",
+        name="positional_embeddings",
+        dtype=tf.float32,
+        **kwargs,
+    ):
+        """
+        Args:
+            max_sequence_length ([int]): Max allowed sequence length (512 in BERT)
+            embedding_width ([type]): Output size of the embedding layer.
+            initializer (str, optional): The initializer to use for the
+            embedding weights. Defaults to "glorot_uniform".
+            name (str, optional): name of the layer. Defaults to "positional_embeddings".
+            dtype ([type], optional): [description]. Defaults to tf.float32.
+        """
+        super(PositionEmbedding, self).__init__(name=name, dtype=dtype, **kwargs)
         self._max_sequence_length = max_sequence_length
-        self._initializer = tf.keras.initializers.get(initializer)
-        self._use_dynamic_slicing = use_dynamic_slicing
+        self._embedding_width = embedding_width
+        self._initializer = initializer
 
     def get_config(self):
+        """Config based on init arguments
+
+        Returns:
+            [dict]: Dict of all init arguments
+        """
         config = {
             "max_sequence_length": self._max_sequence_length,
-            "initializer": tf.keras.initializers.serialize(self._initializer),
-            "use_dynamic_slicing": self._use_dynamic_slicing,
+            "embedding_width": self._embedding_width,
+            "initializer": self._initializer,
+            "name": self._name,
+            "dtype": self._dtype,
         }
         base_config = super(PositionEmbedding, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
     def build(self, input_shape):
-        """Implements build() for the layer."""
-        dimension_list = input_shape.as_list()
+        """Build embeddings on run time (once)
 
-        if len(dimension_list) != 3:
-            raise ValueError(
-                "PositionEmbedding expects a 3-dimensional input tensor " "of shape [batch, sequence, width]"
-            )
-        seq_length = dimension_list[1]
-        width = dimension_list[2]
-
-        # If we are not using dynamic slicing, we must assume that the sequence
-        # length is fixed and max_sequence_length should not be specified.
-        if not self._use_dynamic_slicing:
-            if seq_length is None:
-                raise ValueError(
-                    "PositionEmbedding must have `use_dynamic_slicing` set "
-                    "to True (and max_sequence_length set) when the "
-                    "sequence (1st) dimension of the input is None."
-                )
-            if self._max_sequence_length is not None:
-                raise ValueError(
-                    "When `use_dynamic_slicing` is False, max_sequence_length should "
-                    "not be specified and we ought to use seq_length to get the "
-                    "variable shape."
-                )
-
-        if self._max_sequence_length is not None:
-            weight_sequence_length = self._max_sequence_length
-        else:
-            weight_sequence_length = seq_length
-
-        self._position_embeddings = self.add_weight(
-            "embeddings",
-            shape=[weight_sequence_length, width],
-            initializer=self._initializer,
-        )
-
-        super(PositionEmbedding, self).build(input_shape)
-
-    def call(self, inputs, past_length=0):
-        """Implements call() for the layer."""
-        if self._use_dynamic_slicing:
-            input_shape = tf_utils.get_shape_list(inputs, expected_rank=3)
-            seq_length = input_shape[1]
-            width = input_shape[2]
-
-            # If input = (3 x 5 x 7) (batch x sequence x width) and past_length = 0 ,
-            # output is equivalent to tf.gather([0,1,2,3,4], self._position_embeddings)
-
-            # If input = (3 x 5 x 7) (batch x sequence x width) and past_length = 2 ,
-            # output is equivalent to tf.gather([2,3,4], self._position_embeddings)
-
-            # tf.shape(position_embeddings)[0] = seq_length - past_length
-
-            position_embeddings = tf.expand_dims(
-                tf.slice(self._position_embeddings, [0, 0], [seq_length, width])[past_length:],
-                axis=0,
-            )
-        else:
-            position_embeddings = tf.expand_dims(self._position_embeddings, axis=0)
-
-        return position_embeddings
-
-
-@tf.keras.utils.register_keras_serializable(package="Text")
-class SimplePositionEmbedding(tf.keras.layers.Layer):
-    """Creates a positional embedding.
-
-    This layer creates a positional embedding as described in "BERT: Pre-training
-    of Deep Bidirectional Transformers for Language Understanding"
-    (https://arxiv.org/abs/1810.04805).
-
-    This layer can be set up to either create a statically shaped slice or a
-    dynamically shaped slice. If `use_dynamic_slicing` is True, the input tensor
-    can have a dynamic 1st dimension, while if `use_dynamic_slicing` is False the
-    input size must be fixed.
-
-    Arguments:
-      max_sequence_length: The maximum size of the dynamic sequence. Only
-        applicable if `use_dynamic_slicing` is True.
-      initializer: The initializer to use for the embedding weights. Defaults to
-        "glorot_uniform".
-    """
-
-    def __init__(
-        self,
-        initializer="glorot_uniform",
-        max_sequence_length=None,
-        embedding_width=None,
-        name="position_embeddings",
-        **kwargs,
-    ):
-        # We need to have a default dtype of float32, since the inputs (which Keras
-        # usually uses to infer the dtype) will always be int32.
-        kwargs["name"] = name
-        if "dtype" not in kwargs:
-            kwargs["dtype"] = "float32"
-
-        super(SimplePositionEmbedding, self).__init__(**kwargs)
-        self._max_sequence_length = max_sequence_length
-        self._embedding_width = embedding_width
-        self._initializer = tf.keras.initializers.get(initializer)
-
-    def build(self, input_shape):
-
-        self._position_embeddings = self.add_weight(
+        Args:
+            input_shape ([TensorShape or List of TensorShape]): Shape of inputs
+        """
+        self.embeddings = self.add_weight(
             "embeddings",
             shape=[self._max_sequence_length, self._embedding_width],
             initializer=self._initializer,
         )
 
-        super(SimplePositionEmbedding, self).build(input_shape)
+        super(PositionEmbedding, self).build(input_shape)
 
-    def get_config(self):
-        config = {
-            "max_sequence_length": self._max_sequence_length,
-            "embedding_width": self._embedding_width,
-            "initializer": tf.keras.initializers.serialize(self._initializer),
-        }
-        base_config = super(SimplePositionEmbedding, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+    def call(self, inputs):
+        """Call
 
-    def call(self, input):
+        Args:
+            inputs ([tf.Tensor]): input ids 1D (tf.range(sequence_length))
 
-        """Implements call() for the layer.
-        Arguments:
-          input: a 1D tensor
+        Returns:
+            [tf.Tensor]: embeddings 3D (b x s x h)
         """
-        # CHANGED
-        position_embeddings = tf.expand_dims(tf.gather(tf.identity(self._position_embeddings), input), 0)
+        # REPLACED (tf.identity for TFlite)
+        position_embeddings = tf.gather(tf.identity(self.embeddings), inputs)
+        position_embeddings = tf.expand_dims(position_embeddings, 0)
         return position_embeddings

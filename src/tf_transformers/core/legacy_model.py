@@ -135,7 +135,7 @@ class LegacyModel(tf.keras.Model):
         status = checkpoint.restore(manager.latest_checkpoint)
         # Important
         if status.assert_existing_objects_matched():
-            logging.info("Succesful: Model checkpoints matched")
+            logging.info("Successful: Model checkpoints matched and loaded from {}".format(checkpoint_dir))
         else:
             logging.info("Failed to load the checkpoint. Status Assertion Failed.")
 
@@ -158,7 +158,7 @@ class LegacyModel(tf.keras.Model):
         checkpoint = tf.train.Checkpoint(model=self)
         manager = tf.train.CheckpointManager(checkpoint, directory=checkpoint_dir, max_to_keep=1)
         manager.save()
-        logging.info("Saved model at {}".format(manager.latest_checkpoint))
+        logging.info("Successful: Saved model at {}".format(manager.latest_checkpoint))
 
     def save_as_serialize_module(self, directory, overwrite=False):
         """Save as tf.saved_model.save (.pb)

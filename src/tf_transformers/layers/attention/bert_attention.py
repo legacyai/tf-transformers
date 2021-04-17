@@ -35,6 +35,9 @@ class MultiHeadAttention(LegacyLayer):
         self,
         num_heads,
         head_size,
+        is_training,
+        use_auto_regressive,
+        use_decoder=False,
         dropout_rate=0.0,
         kernel_initializer="glorot_uniform",
         bias_initializer="zeros",
@@ -60,9 +63,12 @@ class MultiHeadAttention(LegacyLayer):
             bias_constraint: Constraint for dense layer kernels.
         """
         kwargs["name"] = name
-        super(MultiHeadAttention, self).__init__(**kwargs)
+        super(MultiHeadAttention, self).__init__(is_training=is_training, **kwargs)
         self._num_heads = num_heads
         self._head_size = head_size
+        self._is_training = is_training
+        self._use_auto_regressive = use_auto_regressive
+        self._use_decoder = use_decoder
         self._dropout_rate = dropout_rate
         self._kernel_initializer = tf.keras.initializers.get(kernel_initializer)
         self._bias_initializer = tf.keras.initializers.get(bias_initializer)
@@ -70,7 +76,6 @@ class MultiHeadAttention(LegacyLayer):
         self._bias_regularizer = tf.keras.regularizers.get(bias_regularizer)
         self._kernel_constraint = tf.keras.constraints.get(kernel_constraint)
         self._bias_constraint = tf.keras.constraints.get(bias_constraint)
-
         self._query_dense = dense_einsum.DenseEinsum(
             output_shape=(self._num_heads, self._head_size),
             kernel_initializer=self._kernel_initializer,
@@ -213,7 +218,6 @@ class MultiHeadAttention(LegacyLayer):
             query_tensor = tf.transpose(query_tensor, [0, 2, 1, 3])
             key_tensor = tf.transpose(key_tensor, [0, 2, 1, 3])
             value_tensor = tf.transpose(value_tensor, [0, 2, 1, 3])
-
             key_tensor, value_tensor = self._update_cache(
                 key_tensor, value_tensor, cache_key, cache_value, decode_loop_step=None
             )
@@ -222,7 +226,6 @@ class MultiHeadAttention(LegacyLayer):
         query_tensor, key_tensor, value_tensor = tf.cond(
             tf.equal(tf.reduce_sum(cache_key), 0.0), lambda: left(), lambda: right()
         )
-
         # Scalar dimensions referenced here:
         #   B = batch size (number of sequences)
         #   F = `from_tensor` sequence length
@@ -276,9 +279,8 @@ class MultiHeadAttention(LegacyLayer):
         query_tensor = tf.transpose(query_tensor, [0, 2, 1, 3])
         key_tensor = tf.transpose(key_tensor, [0, 2, 1, 3])
         value_tensor = tf.transpose(value_tensor, [0, 2, 1, 3])
-
         # attention_scores = tf.einsum(
-        #     "BNFH,BNTH->BNFT",  query_tensor, key_tensor)
+        #      "BNFH,BNTH->BNFT",  query_tensor, key_tensor)
 
         attention_scores = tf.matmul(query_tensor, key_tensor, transpose_b=True)
         attention_scores = tf.multiply(attention_scores, 1.0 / math.sqrt(float(self._head_size)))
@@ -294,9 +296,10 @@ class MultiHeadAttention(LegacyLayer):
         return self.merge_attention_heads(context_layer), key_tensor, value_tensor
 
     def call(self, inputs, cache_key=None, cache_value=None):
-        if self.is_training:
-            attention_states, key_tensor, value_tensor = self.call_training(inputs)
+        # For decoder this function is used for training and inference
+        if (self._is_training is False and self._use_auto_regressive) or cache_key is not None:
+            attention_states, key_tensor, value_tensor = self.call_predict(inputs, cache_key, cache_value)
             return attention_states, key_tensor, value_tensor
         else:
-            attention_states, key_tensor, value_tensor = self.call_predict(inputs, cache_key, cache_value)
+            attention_states, key_tensor, value_tensor = self.call_training(inputs)
             return attention_states, key_tensor, value_tensor

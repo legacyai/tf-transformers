@@ -8,7 +8,7 @@ logging.set_verbosity("INFO")
 allowed_model_names = ["bert_base_cased", "bert_base_uncased", "bert_large_cased", "bert_large_uncased"]
 
 
-def modelWrapper(model_name, **kwargs):
+def BrtModel(model_name, **kwargs):
     """Wrapper for Model
 
     Args:
