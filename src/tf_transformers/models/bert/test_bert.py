@@ -95,6 +95,7 @@ def test_main(model_name):
         pass
 
     test_hf_to_tf_conversion()
+    # test_auto_regressive_encoder
 
 
 def main(_):

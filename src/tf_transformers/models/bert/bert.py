@@ -554,6 +554,117 @@ class BERTEncoder(LegacyLayer):
             "last_token_logits": last_token_logits,
         }
 
+    def call_decoder(self, inputs):
+        """Forward pass of an Decoder
+
+        Args:
+            inputs ([dict of tf.Tensor]): This is the input to the model.
+
+            'input_ids'         --> tf.int32 (b x s)
+            'input_mask'        --> tf.int32 (b x s) # optional
+            'input_type_ids'    --> tf.int32 (b x s) # optional
+
+            'encoder_hidden_states' --> tf.float32 (b x s x h)
+            'decoder_encoder_mask'  --> tf.float32 (b x es x ds)
+
+        Returns:
+            [dict of tf.Tensor]: Output from the model
+
+            'cls_output'        --> tf.float32 (b x s) # optional
+            'token_embeddings'  --> tf.float32 (b x s x h)
+            'all_layer_token_embeddings' --> tf.float32 (List of (b x s x h)
+                                              from all layers)
+            'all_layer_cls_output'       --> tf.float32 (List of (b x s)
+                                              from all layers)
+        """
+        input_ids = inputs["input_ids"]
+        encoder_output = inputs["encoder_hidden_states"]
+        decoder_encoder_mask = inputs["decoder_encoder_mask"]
+
+        # 1. Collect Word Embeddings
+        sequence_length = tf.shape(input_ids)[1]
+        embeddings = self._embedding_layer(input_ids)
+        # Add word_embeddings + position_embeddings + type_embeddings
+        if self._type_embeddings_layer:
+            input_type_ids = inputs["input_type_ids"]
+            type_embeddings = self._type_embeddings_layer(input_type_ids)
+            embeddings = embeddings + type_embeddings
+        if self._positional_embedding_layer:
+            positional_embeddings = self._positional_embedding_layer(tf.range(sequence_length))
+            embeddings = embeddings + positional_embeddings
+
+        # 2. Norm + dropout
+        embeddings = self._embedding_norm(embeddings)
+        embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
+        # Initialize `attention_mask` as empty list
+        attention_mask = []
+
+        # 3. Attention  Mask
+        attention_mask = []
+        if self._mask_mode == "user_defined":
+            input_mask = inputs["input_mask"]
+            attention_mask = SelfAttentionMask()([embeddings, input_mask])
+        if self._mask_mode == "prefix":
+            input_mask = inputs["input_mask"]
+            attention_mask = tf.map_fn(prefix_mask, input_mask, dtype=tf.float32)
+        if self._mask_mode == "causal":
+            attention_mask = CausalMask()(embeddings)
+
+        # Trasformer Outputs
+        decoder_outputs = []
+        for i in range(self._config_dict["num_hidden_layers"]):
+            layer = self._transformer_layers[i]
+            embeddings, _key, _value = layer([embeddings, attention_mask, encoder_output, decoder_encoder_mask])
+            decoder_outputs.append(embeddings)
+
+        # First word of last layer outputs [CLS]
+        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(decoder_outputs[-1])
+        # batch_size x embedding_size
+        cls_output = self._pooler_layer(cls_token_tensor)
+        # batch_size x sequence_length x embedding_size
+        token_embeddings = decoder_outputs[-1]
+
+        # check for masked lm positions
+        # only for encoder forward pass. This is for MaskedLM training
+        if "masked_lm_positions" in inputs:
+            masked_lm_positions = inputs["masked_lm_positions"]
+        else:
+            masked_lm_positions = None
+        # MaskedLM layer only project it and normalize (b x s x h)
+        token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
+        token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
+        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
+        token_logits = self._masked_lm_bias(token_logits)
+        last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
+
+        result = {
+            "cls_output": cls_output,
+            "token_embeddings": token_embeddings,
+            "token_logits": token_logits,
+            "last_token_logits": last_token_logits,
+        }
+
+        if self._return_all_layer_outputs:
+            all_cls_output = []
+            all_token_logits = []
+            for per_layer_token_embeddings in decoder_outputs:
+                per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
+                    per_layer_token_embeddings
+                )
+                all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
+
+                # token logits per layer
+                layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
+                layer_token_logits = tf.matmul(layer_token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
+                layer_token_logits = tf.nn.bias_add(layer_token_logits, self._masked_lm_bias)
+                all_token_logits.append(layer_token_logits)
+
+            result["all_layer_token_embeddings"] = encoder_outputs
+            result["all_layer_cls_output"] = all_cls_output
+            result["all_layer_token_logits"] = all_token_logits
+
+        return result
+
     def call_decoder_auto_regressive(self, inputs):
         """Decoder when auto_regressive is True.
 
@@ -705,117 +816,6 @@ class BERTEncoder(LegacyLayer):
             "all_cache_value": all_cache_value,
             "last_token_logits": last_token_logits,
         }
-
-    def call_decoder(self, inputs):
-        """Forward pass of an Decoder
-
-        Args:
-            inputs ([dict of tf.Tensor]): This is the input to the model.
-
-            'input_ids'         --> tf.int32 (b x s)
-            'input_mask'        --> tf.int32 (b x s) # optional
-            'input_type_ids'    --> tf.int32 (b x s) # optional
-
-            'encoder_hidden_states' --> tf.float32 (b x s x h)
-            'decoder_encoder_mask'  --> tf.float32 (b x es x ds)
-
-        Returns:
-            [dict of tf.Tensor]: Output from the model
-
-            'cls_output'        --> tf.float32 (b x s) # optional
-            'token_embeddings'  --> tf.float32 (b x s x h)
-            'all_layer_token_embeddings' --> tf.float32 (List of (b x s x h)
-                                              from all layers)
-            'all_layer_cls_output'       --> tf.float32 (List of (b x s)
-                                              from all layers)
-        """
-        input_ids = inputs["input_ids"]
-        encoder_output = inputs["encoder_hidden_states"]
-        decoder_encoder_mask = inputs["decoder_encoder_mask"]
-
-        # 1. Collect Word Embeddings
-        sequence_length = tf.shape(input_ids)[1]
-        embeddings = self._embedding_layer(input_ids)
-        # Add word_embeddings + position_embeddings + type_embeddings
-        if self._type_embeddings_layer:
-            input_type_ids = inputs["input_type_ids"]
-            type_embeddings = self._type_embeddings_layer(input_type_ids)
-            embeddings = embeddings + type_embeddings
-        if self._positional_embedding_layer:
-            positional_embeddings = self._positional_embedding_layer(tf.range(sequence_length))
-            embeddings = embeddings + positional_embeddings
-
-        # 2. Norm + dropout
-        embeddings = self._embedding_norm(embeddings)
-        embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
-        # Initialize `attention_mask` as empty list
-        attention_mask = []
-
-        # 3. Attention  Mask
-        attention_mask = []
-        if self._mask_mode == "user_defined":
-            input_mask = inputs["input_mask"]
-            attention_mask = SelfAttentionMask()([embeddings, input_mask])
-        if self._mask_mode == "prefix":
-            input_mask = inputs["input_mask"]
-            attention_mask = tf.map_fn(prefix_mask, input_mask, dtype=tf.float32)
-        if self._mask_mode == "causal":
-            attention_mask = CausalMask()(embeddings)
-
-        # Trasformer Outputs
-        decoder_outputs = []
-        for i in range(self._config_dict["num_hidden_layers"]):
-            layer = self._transformer_layers[i]
-            embeddings, _key, _value = layer([embeddings, attention_mask, encoder_output, decoder_encoder_mask])
-            decoder_outputs.append(embeddings)
-
-        # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(decoder_outputs[-1])
-        # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
-        # batch_size x sequence_length x embedding_size
-        token_embeddings = decoder_outputs[-1]
-
-        # check for masked lm positions
-        # only for encoder forward pass. This is for MaskedLM training
-        if "masked_lm_positions" in inputs:
-            masked_lm_positions = inputs["masked_lm_positions"]
-        else:
-            masked_lm_positions = None
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
-        token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
-        token_logits = self._masked_lm_bias(token_logits)
-        last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
-
-        result = {
-            "cls_output": cls_output,
-            "token_embeddings": token_embeddings,
-            "token_logits": token_logits,
-            "last_token_logits": last_token_logits,
-        }
-
-        if self._return_all_layer_outputs:
-            all_cls_output = []
-            all_token_logits = []
-            for per_layer_token_embeddings in decoder_outputs:
-                per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
-                    per_layer_token_embeddings
-                )
-                all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
-
-                # token logits per layer
-                layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
-                layer_token_logits = tf.matmul(layer_token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-                layer_token_logits = tf.nn.bias_add(layer_token_logits, self._masked_lm_bias)
-                all_token_logits.append(layer_token_logits)
-
-            result["all_layer_token_embeddings"] = encoder_outputs
-            result["all_layer_cls_output"] = all_cls_output
-            result["all_layer_token_logits"] = all_token_logits
-
-        return result
 
     def call(self, inputs):
         """Forward Pass.

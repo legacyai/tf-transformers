@@ -234,7 +234,6 @@ class TransformerBERT(LegacyLayer):
         attention_output, key, value = self._attention_layer(
             attention_inputs, cache_key=cache_key, cache_value=cache_value
         )
-
         attention_output = self._attention_output_dense(attention_output)
         attention_output = self._attention_dropout(attention_output, training=self._use_dropout)
 
