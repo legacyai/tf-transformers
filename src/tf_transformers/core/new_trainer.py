@@ -1,5 +1,5 @@
 import tensorflow as tf 
-
+import time
 
 def trainer(model,
             batch_size,
@@ -108,33 +108,41 @@ def trainer(model,
             
     history = {}
     for epoch in range(epochs):
+        epoch_loss = []
         for step in range(steps_per_epoch // steps_per_call):
 
             steps_covered = (step+1) * steps_per_call
+            start_time = time.time()
             train(dataset_iterator)
-            training_loss_holder.append(training_loss.result())
+            end_time   = time.time()
+            epoch_loss.append(training_loss.result())
             training_loss.reset_states()
             learning_rate_holder_history.append(learning_rate_holder.result())
             learning_rate_holder.reset_states()
-            print("Epoch {} --- Step {}/{} --- LR ---{} Loss {}".format(epoch, 
+            print("Epoch {} --- Step {}/{} --- LR --- {} Loss {} --- Time {} seconds ".format(epoch+1, 
                                                                steps_covered, 
                                                                steps_per_epoch,
                                                                learning_rate_holder_history[-1], 
-                                                               training_loss_holder[-1]), end="\r")
+                                                               epoch_loss[-1], 
+                                                               end_time-start_time), end="\r")
             # Do after provided steps
             if validation_interval_steps:
                 if steps_covered % validation_interval_steps == 0:
+                    start_time = time.time()
                     val_result = do_validation(validation_dataset)
+                    end_time = time.time()
                     validation_loss_holder.append(val_result['val_loss'])
                     validation_score.append(val_result['val_score'])
                     validation_steps.append(steps_covered)
-                    print("Epoch {} --- validation Step {} --- Loss {} --- eval score {}".format(epoch, 
+                    print("Epoch {} --- validation Step {} --- Loss {} --- eval score {} Time {} seconds ".format(epoch, 
                                                                     steps_covered, 
                                                                     steps_per_epoch, 
                                                                     validation_loss_holder[-1], 
-                                                                    validation_score[-1]), end="\r")
+                                                                    validation_score[-1], 
+                                                                    end_time-start_time), end="\r")
                     manager.save()
-                
+            training_loss_holder.extend(epoch_loss)
+            print("Epoch {} --- mean Loss".format(epoch+1, tf.reduce_mean(epoch_loss)))
         # Do after every epoch
         if validation_dataset:
             val_result = do_validation(validation_dataset)
