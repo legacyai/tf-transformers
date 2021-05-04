@@ -23,7 +23,7 @@ def Trainer(model, optimizer, loss_fn, dataset, epochs, num_train_examples, batc
     Returns:
         [type]: [description]
     """
-
+    
     @tf.function
     def train(iterator):
         """The step function for one training step"""

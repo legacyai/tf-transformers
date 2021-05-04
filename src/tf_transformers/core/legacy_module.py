@@ -31,7 +31,8 @@ class LegacyModuleCustom(tf.Module):
         return self.model(kwargs)
 
     def save(self, save_dir, signature_name="serving_default"):
-        call_output = self.__call__.get_concrete_function(**self.model.input)
+        input_spec = {name: keras_input.type_spec for name, keras_input in self.model.input.items() }
+        call_output = self.__call__.get_concrete_function(**input_spec)
         tf.saved_model.save(self, save_dir, signatures={signature_name: call_output})
 
 
@@ -45,7 +46,8 @@ class LegacyModule(tf.Module):
         return self.model(kwargs)
 
     def save(self, save_dir, signature_name="serving_default"):
-        call_output = self.__call__.get_concrete_function(**self.model.input)
+        input_spec = {name: keras_input.type_spec for name, keras_input in self.model.input.items() }
+        call_output = self.__call__.get_concrete_function(**input_spec)
         tf.saved_model.save(self, save_dir, signatures={signature_name: call_output})
 
 
