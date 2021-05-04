@@ -1,3 +1,5 @@
+# from tensorflow.python.framework.ops import disable_eager_execution
+# disable_eager_execution()
 import tensorflow as tf
 
 
@@ -19,6 +21,10 @@ class LegacyModuleCustom(tf.Module):
         self.config["attention_head_size"] = tf.Variable(
             model_config["attention_head_size"], name="attention_head_size"
         )
+        
+        self.config["embedding_size"] = tf.constant(768, name="embedding_size2")
+        self.embedding_size = tf.Variable(768, name="embedding_size2")
+
 
     @tf.function
     def __call__(self, **kwargs):
