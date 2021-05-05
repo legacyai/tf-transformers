@@ -93,6 +93,7 @@ class EncoderDecoder(LegacyLayer):
         encoder,
         decoder,
         share_embeddings=False,
+        share_encoder=True,
         is_training=False,
         use_dropout=False,
         encoder_sequence_length=None,
@@ -127,7 +128,7 @@ class EncoderDecoder(LegacyLayer):
             share_embedding_layers(self._encoder, self._decoder)
 
         if self._share_encoder:
-            share_encoder_layers(encoder_layer, decoder_layer)
+            share_encoder_layers(self._encoder, self._decoder)
 
         super(EncoderDecoder, self).__init__(
             is_training=self._is_training, use_dropout=self._use_dropout, name=self._model_name, **kwargs

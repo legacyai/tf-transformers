@@ -60,8 +60,8 @@ class ModelWrapper:
             except:
                 logging.info("Failed to convert model from huggingface")
                 pass
-
-        model.save_checkpoint(str(self.model_path))
+        # TO DO
+        model.save_checkpoint(str(self.model_path), overwrite=True)
         logging.info(
             "Successful: Asserted and Converted `{}` from HF and saved it in cache folder {}".format(
                 hf_model_name, str(self.model_path)

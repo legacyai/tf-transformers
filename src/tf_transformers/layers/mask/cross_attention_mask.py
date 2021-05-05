@@ -38,7 +38,7 @@ class CrossAttentionMask(tf.keras.layers.Layer):
         # We need to have a default dtype of float32, since the inputs (which Keras
         # usually uses to infer the dtype) will always be int32.
         if "dtype" not in kwargs:
-            kwargs["dtype"] = "float32"
+            kwargs["dtype"] = tf_utils.get_dtype()
 
         super(CrossAttentionMask, self).__init__(**kwargs)
         self._dtype = kwargs["dtype"]

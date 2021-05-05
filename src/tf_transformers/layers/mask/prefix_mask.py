@@ -1,11 +1,12 @@
 import tensorflow as tf
 
 
-def attention_mask_square(nd, *, dtype=tf.float32):
+def attention_mask_square(nd):
     """1's in the lower triangle, counting from the lower right corner.
 
     Same as tf.matrix_band_part(tf.ones([nd, ns]), -1, ns-nd), but doesn't produce garbage on TPUs.
     """
+    dtype = tf_utils.get_dtype()
     ns = nd
     i = tf.range(nd)[:, None]
     j = tf.range(ns)
@@ -55,9 +56,10 @@ def prefix_mask(mask):
 
     Finally merge (input_ones_mask and [input_to_output_zero_mask, output_upper_triangular_mask])
     """
-    mask = tf.cast(mask, tf.float32)
+    dtype = tf_utils.get_dtype()
+    mask = tf.cast(mask, dtype)
     n_input_words = tf.reduce_sum(mask)  # total no of ones
-    n_output_words = tf.reduce_sum(tf.cast(tf.equal(mask, 0), tf.float32))  # total number of zeros
+    n_output_words = tf.reduce_sum(tf.cast(tf.equal(mask, 0), dtype))  # total number of zeros
 
     # input_to_input and output_to_input_words_mask
     input_ones_mask = tf.ones((n_input_words + n_output_words, n_input_words))

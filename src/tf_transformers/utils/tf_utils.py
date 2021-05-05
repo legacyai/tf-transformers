@@ -171,3 +171,11 @@ def assert_rank(tensor, expected_rank, name=None):
             "For the tensor `%s`, the actual tensor rank `%d` (shape = %s) is not "
             "equal to the expected tensor rank `%s`" % (name, actual_rank, str(tensor.shape), str(expected_rank))
         )
+
+
+def get_dtype():
+    dtype = tf.float32
+    policy = tf.keras.mixed_precision.experimental.global_policy()
+    if policy.name == "mixed_float16":
+        dtype = tf.float16
+    return dtype

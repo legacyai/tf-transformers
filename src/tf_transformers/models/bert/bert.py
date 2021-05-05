@@ -6,6 +6,7 @@ from tf_transformers.core import LegacyLayer, LegacyModel
 from tf_transformers.layers import OnDeviceEmbedding, PositionEmbedding, MaskedLM, BiasLayer
 from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerBERT
+from tf_transformers.utils import tf_utils
 
 logging.set_verbosity("INFO")
 
@@ -312,7 +313,9 @@ class BERTEncoder(LegacyLayer):
             masked_lm_positions = None
         # MaskedLM layer only project it and normalize (b x s x h)
         token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
-        token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
+        token_logits = tf.matmul(
+            token_embeddings_mlm, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
+        )
         # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
         token_logits = self._masked_lm_bias(token_logits)
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
@@ -335,8 +338,12 @@ class BERTEncoder(LegacyLayer):
 
                 # token logits per layer
                 layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
-                layer_token_logits = tf.matmul(layer_token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-                layer_token_logits = tf.nn.bias_add(layer_token_logits, self._masked_lm_bias)
+                layer_token_logits = tf.matmul(
+                    layer_token_embeddings_mlm,
+                    tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
+                    transpose_b=True,
+                )
+                layer_token_logits = self._masked_lm_bias(layer_token_logits)
                 all_token_logits.append(layer_token_logits)
 
             result["all_layer_token_embeddings"] = encoder_outputs
@@ -632,8 +639,9 @@ class BERTEncoder(LegacyLayer):
             masked_lm_positions = None
         # MaskedLM layer only project it and normalize (b x s x h)
         token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
-        token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
+        token_logits = tf.matmul(
+            token_embeddings_mlm, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
+        )
         token_logits = self._masked_lm_bias(token_logits)
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
@@ -655,8 +663,12 @@ class BERTEncoder(LegacyLayer):
 
                 # token logits per layer
                 layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
-                layer_token_logits = tf.matmul(layer_token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-                layer_token_logits = tf.nn.bias_add(layer_token_logits, self._masked_lm_bias)
+                layer_token_logits = tf.matmul(
+                    token_embeddings_mlm,
+                    tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
+                    transpose_b=True,
+                )
+                layer_token_logits = self._masked_lm_bias(layer_token_logits)
                 all_token_logits.append(layer_token_logits)
 
             result["all_layer_token_embeddings"] = encoder_outputs

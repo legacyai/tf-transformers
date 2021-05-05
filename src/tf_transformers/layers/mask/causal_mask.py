@@ -22,11 +22,12 @@ import tensorflow as tf
 from tf_transformers.utils import tf_utils
 
 
-def attention_mask_square(nd, *, dtype=tf.float32):
+def attention_mask_square(nd):
     """1's in the lower triangle, counting from the lower right corner.
 
     Same as tf.matrix_band_part(tf.ones([nd, ns]), -1, ns-nd), but doesn't produce garbage on TPUs.
     """
+    dtype = tf_utils.get_dtype()
     ns = nd
     i = tf.range(nd)[:, None]
     j = tf.range(ns)

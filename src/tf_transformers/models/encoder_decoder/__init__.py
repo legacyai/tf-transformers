@@ -1,0 +1,1 @@
+from tf_transformers.models.encoder_decoder.encoder_decoder import EncoderDecoder

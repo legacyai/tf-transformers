@@ -7,6 +7,7 @@ import tensorflow as tf
 from tf_transformers.core import LegacyLayer
 from tf_transformers.layers import dense_einsum
 from tf_transformers.layers.attention import MultiHeadAttention
+from tf_transformers.utils import tf_utils
 
 
 class TransformerBERT(LegacyLayer):
@@ -236,12 +237,12 @@ class TransformerBERT(LegacyLayer):
         )
         attention_output = self._attention_output_dense(attention_output)
         attention_output = self._attention_dropout(attention_output, training=self._use_dropout)
-
         attention_output = self._attention_layer_norm(input_tensor + attention_output)
+        # mixed precision stability requires Normalization to be in tf.ffloat32
+        attention_output = tf.cast(attention_output, dtype=tf_utils.get_dtype())
         intermediate_output = self._intermediate_dense(attention_output)
         layer_output = self._output_dense(intermediate_output)
         layer_output = self._output_dropout(layer_output)
-
         layer_output = self._output_layer_norm(layer_output + attention_output)
         return layer_output, key, value
 
@@ -286,14 +287,15 @@ class TransformerBERT(LegacyLayer):
 
             attention_output = self._cross_attention_output_dense(attention_output)
             attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
+            attention_output_copy = tf.cast(attention_output_copy, dtype=tf_utils.get_dtype())
             attention_output = self._cross_attention_layer_norm(attention_output_copy + attention_output)
-
+            attention_output = tf.cast(attention_output, dtype=tf_utils.get_dtype())
         # Last Projection
         intermediate_output = self._intermediate_dense(attention_output)
         layer_output = self._output_dense(intermediate_output)
         layer_output = self._output_dropout(layer_output)
         layer_output = self._output_layer_norm(layer_output + attention_output)
-
+        layer_output = tf.cast(layer_output, dtype=tf_utils.get_dtype())
         return layer_output, key, value
 
     def call(self, inputs, mode="encoder", cache_key=None, cache_value=None):
