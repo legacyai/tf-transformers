@@ -160,7 +160,7 @@ class BlockMultiHeadAttention(LegacyLayer):
         return dict(list(base_config.items()) + list(config.items()))
 
     def block_wise_attention_scores(self, query_tensor, key_tensor, attention_mask):
-        """"""
+        """ """
 
         batch_size = tf.shape(query_tensor)[0]
         query_blocks = tf.split(query_tensor, axis=2, num_or_size_splits=from_seq_length // from_block_size)
@@ -253,7 +253,7 @@ class BlockMultiHeadAttention(LegacyLayer):
         return tf.concat(all_blocks, axis=2)
 
     def block_wise_context_caculation(self, qk_index_pos, attention_probs, value_tensor):
-        """"""
+        """ """
         batch_size = tf.shape(value_tensor)[0]
         attention_probs_q_split = tf.split(attention_probs, axis=2, num_or_size_splits=from_seq_length // to_block_size)
         value_blocks = tf.split(value_tensor, axis=2, num_or_size_splits=to_seq_length // to_block_size)

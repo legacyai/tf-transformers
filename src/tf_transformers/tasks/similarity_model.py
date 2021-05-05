@@ -17,7 +17,7 @@ class Similarity_Model(LegacyLayer):
             self.decoder = decoder
 
     def get_mean_embeddings(self, token_embeddings, input_mask):
-        """"""
+        """ """
         cls_embeddings = token_embeddings[:, 0, :]  # 0 is CLS (<s>)
         # mask PAD tokens
         token_emb_masked = token_embeddings * tf.cast(tf.expand_dims(input_mask, 2), tf.float32)

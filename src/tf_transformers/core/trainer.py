@@ -5,7 +5,7 @@ from absl import logging
 from tqdm import tqdm
 
 logging.set_verbosity("INFO")
-            
+
 
 def Trainer(model, optimizer, loss_fn, dataset, epochs, num_train_examples, batch_size, steps_per_call=100):
     """Simple trainer
@@ -23,7 +23,7 @@ def Trainer(model, optimizer, loss_fn, dataset, epochs, num_train_examples, batc
     Returns:
         [type]: [description]
     """
-    
+
     @tf.function
     def train(iterator):
         """The step function for one training step"""

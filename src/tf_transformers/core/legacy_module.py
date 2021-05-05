@@ -21,17 +21,16 @@ class LegacyModuleCustom(tf.Module):
         self.config["attention_head_size"] = tf.Variable(
             model_config["attention_head_size"], name="attention_head_size"
         )
-        
+
         self.config["embedding_size"] = tf.constant(768, name="embedding_size2")
         self.embedding_size = tf.Variable(768, name="embedding_size2")
-
 
     @tf.function
     def __call__(self, **kwargs):
         return self.model(kwargs)
 
     def save(self, save_dir, signature_name="serving_default"):
-        input_spec = {name: keras_input.type_spec for name, keras_input in self.model.input.items() }
+        input_spec = {name: keras_input.type_spec for name, keras_input in self.model.input.items()}
         call_output = self.__call__.get_concrete_function(**input_spec)
         tf.saved_model.save(self, save_dir, signatures={signature_name: call_output})
 
@@ -46,7 +45,7 @@ class LegacyModule(tf.Module):
         return self.model(kwargs)
 
     def save(self, save_dir, signature_name="serving_default"):
-        input_spec = {name: keras_input.type_spec for name, keras_input in self.model.input.items() }
+        input_spec = {name: keras_input.type_spec for name, keras_input in self.model.input.items()}
         call_output = self.__call__.get_concrete_function(**input_spec)
         tf.saved_model.save(self, save_dir, signatures={signature_name: call_output})
 

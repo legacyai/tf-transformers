@@ -102,7 +102,7 @@ class T5LayerNormalization(tf.keras.layers.Layer):
         self.axis = axis
 
     def build(self, input_shape):
-        """Build shared word embedding layer """
+        """Build shared word embedding layer"""
         self.weight = self.add_weight("weight", shape=(input_shape[-1],), initializer=self.beta_initializer)
         super(T5LayerNormalization, self).build(input_shape)
 

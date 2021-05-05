@@ -50,7 +50,7 @@ def _relative_position_bucket(relative_position, bidirectional=True, num_buckets
 
 
 def compute_positional_bias(qlen, klen, bidirectional=True, num_buckets=32):
-    """ Compute binned relative position bias """
+    """Compute binned relative position bias"""
     context_position = tf.range(qlen)[:, None]
     memory_position = tf.range(klen)[None, :]
     relative_position = memory_position - context_position  # shape (qlen, klen)
