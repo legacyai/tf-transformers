@@ -315,13 +315,14 @@ class LegacyLayer(tf.keras.layers.Layer):
                     inputs["all_cache_key"] = all_cache_key
                     inputs["all_cache_value"] = all_cache_value
 
-        layer_outputs = self(inputs)
+        inputs_spec = {k: v.type_spec for k, v in inputs.items()}
+        layer_outputs = self(inputs_spec)
         # We just want to initialize variables
         if initialize_only:
             return inputs, layer_outputs
         # logging.info("Inputs -->")
         # for k, v in inputs.items():
         #     logging.info("{} ---> {}".format(k, v))
-        model = LegacyModel(inputs=inputs, outputs=layer_outputs, name=self.name)
+        model = LegacyModel(inputs=inputs_spec, outputs=layer_outputs, name=self.name)
         model.model_config = self._config_dict
         return model
