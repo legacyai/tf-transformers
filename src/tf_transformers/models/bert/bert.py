@@ -36,6 +36,7 @@ class BERTEncoder(LegacyLayer):
         batch_size=None,
         sequence_length=None,
         use_mlm_layer=True,
+        use_masked_lm_positions=False,
         return_all_layer_outputs=False,
         **kwargs,
     ):
@@ -58,6 +59,7 @@ class BERTEncoder(LegacyLayer):
         self._use_decoder = use_decoder
         self._batch_size = batch_size
         self._sequence_length = sequence_length
+        self._use_masked_lm_positions = use_masked_lm_positions
         self._use_mlm_layer = use_mlm_layer
         self._return_all_layer_outputs = return_all_layer_outputs
 
@@ -79,6 +81,7 @@ class BERTEncoder(LegacyLayer):
             "batch_size": self._batch_size,
             "sequence_length": self._sequence_length,
             "use_mlm_layer": self._use_mlm_layer,
+            "use_masked_lm_positions": self._use_masked_lm_positions,
             "return_all_layer_outputs": self._return_all_layer_outputs,
         }
         # Update config dict with passed config
@@ -165,6 +168,12 @@ class BERTEncoder(LegacyLayer):
             dtype=tf.int32,
             name="input_type_ids",
         )
+        masked_lm_positions = tf.keras.layers.Input(
+            shape=(None,),
+            batch_size=self._batch_size,
+            dtype=tf.int32,
+            name="masked_lm_positions",
+        )
         inputs = {}
         inputs["input_ids"] = input_ids  # Default
         # if mask_mode != 'causal', user has to provde mask
@@ -173,6 +182,9 @@ class BERTEncoder(LegacyLayer):
         # If type mebddings required
         if self._type_embeddings_layer:
             inputs["input_type_ids"] = input_type_ids
+        # if masked_lm_positions
+        if self._use_masked_lm_positions:
+            inputs["masked_lm_positions"] = masked_lm_positions
 
         # Auto Regressive is activated only when is_training=False
         if self._is_training is False and self._use_auto_regressive:
@@ -311,6 +323,7 @@ class BERTEncoder(LegacyLayer):
             masked_lm_positions = inputs["masked_lm_positions"]
         else:
             masked_lm_positions = None
+
         # MaskedLM layer only project it and normalize (b x s x h)
         token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
         token_logits = tf.matmul(

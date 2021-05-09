@@ -106,5 +106,5 @@ class MaskedLM(tf.keras.layers.Layer):
         flat_sequence_tensor = tf.reshape(sequence_tensor, [batch_size * seq_length, width])
         output_tensor = tf.gather(flat_sequence_tensor, flat_positions)
         # Make it 3D (b x s x h)
-        output_tensor = tf.reshape(output_tensor, (batch_size, -1, width))
+        output_tensor = tf.reshape(output_tensor, (batch_size, -1, sequence_tensor.shape[2]))
         return output_tensor
