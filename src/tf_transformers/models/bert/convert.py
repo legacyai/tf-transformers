@@ -39,7 +39,7 @@ def assert_model_results(model):
     return assert_model
 
 
-def convert_bert_pt(model, config, version="4.3.3"):
+def convert_bert_pt(model, config):
     """PT converter
     Args:
         model_hf: HuggingFace Model (TF)
@@ -52,7 +52,6 @@ def convert_bert_pt(model, config, version="4.3.3"):
         import torch
         import transformers
 
-        assert transformers.__version__ == version
         # From vars (Transformer variables)
         from_model_vars = [
             "encoder.layer.{}.attention.self.query.weight",
@@ -260,7 +259,7 @@ def convert_bert_pt(model, config, version="4.3.3"):
     return convert
 
 
-def convert_bert_tf(model, config, version="4.3.3"):
+def convert_bert_tf(model, config):
     """TF converter
     Args:
         model_hf: HuggingFace Model (TF)
@@ -272,7 +271,6 @@ def convert_bert_tf(model, config, version="4.3.3"):
     def convert(model_name):
         import transformers
 
-        assert (transformers.__version__) == version
         transformers.logging.set_verbosity_error()
 
         hf_model_name = model_name.replace("_", "-")

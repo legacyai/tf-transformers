@@ -35,7 +35,7 @@ class ModelWrapper:
         if not cache_path.exists():  # If cache path not exists
             cache_path.mkdir()
 
-    def convert_hf_to_tf(self, model, convert_tf_fn, convert_pt_fn):
+    def convert_hf_to_tf(self, model, convert_tf_fn, convert_pt_fn, hf_version="4.3.3"):
         """Convert TTF from HF
 
         Args:
@@ -43,6 +43,14 @@ class ModelWrapper:
             convert_fn ([function]): [Function which converts HF to TTF]
         """
         # HF has '-' , instead of '_'
+        import transformers
+
+        if transformers.__version__ != hf_version:
+            raise ValueError(
+                "Expected `transformers` version `{}`, but found version `{}`.".format(
+                    hf_version, transformers.__version__
+                )
+            )
         hf_model_name = self.model_name
         convert_success = False
         if convert_tf_fn:
@@ -57,13 +65,17 @@ class ModelWrapper:
             try:
                 convert_pt_fn(hf_model_name)
                 logging.info("Successful: Converted model using PT HF")
+                convert_success = True
             except:
                 logging.info("Failed to convert model from huggingface")
                 pass
-        # TO DO
-        model.save_checkpoint(str(self.model_path), overwrite=True)
-        logging.info(
-            "Successful: Asserted and Converted `{}` from HF and saved it in cache folder {}".format(
-                hf_model_name, str(self.model_path)
+
+        if convert_success:
+            model.save_checkpoint(str(self.model_path), overwrite=True)
+            logging.info(
+                "Successful: Asserted and Converted `{}` from HF and saved it in cache folder {}".format(
+                    hf_model_name, str(self.model_path)
+                )
             )
-        )
+        model.save_checkpoint(str(self.model_path), overwrite=True)
+        logging.info("Saved model in cache folder with randomly initialized values  {}".format(str(self.model_path)))
