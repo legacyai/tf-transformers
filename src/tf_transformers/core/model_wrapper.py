@@ -77,5 +77,8 @@ class ModelWrapper:
                     hf_model_name, str(self.model_path)
                 )
             )
-        model.save_checkpoint(str(self.model_path), overwrite=True)
-        logging.info("Saved model in cache folder with randomly initialized values  {}".format(str(self.model_path)))
+        else:
+            model.save_checkpoint(str(self.model_path), overwrite=True)
+            logging.info(
+                "Saved model in cache folder with randomly initialized values  {}".format(str(self.model_path))
+            )
