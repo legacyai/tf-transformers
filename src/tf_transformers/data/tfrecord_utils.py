@@ -368,7 +368,7 @@ class TFReader(object):
         y_keys=None,
         shuffle=False,
         drop_remainder=False,
-        shuffle_buffer_size=10000,
+        shuffle_buffer_size=1000,
         prefetch_buffer_size=100,
     ):
         """Auto Batching
