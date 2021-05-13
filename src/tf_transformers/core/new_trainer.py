@@ -20,7 +20,7 @@ def save_model_checkpoints(overwrite_checkpoint_dir, model_checkpoint_dir, max_n
     return manager
 
 
-def get_train_loss_metric_dict(model, dataset, loss_fn, validation_dataset, validation_loss_fn):
+def get_loss_metric_dict(model, dataset, loss_fn, validation_dataset, validation_loss_fn):
     for (batch_inputs, batch_labels) in dataset.take(1):
         pass
     model_outputs = model(batch_inputs)
@@ -67,7 +67,7 @@ def trainer(
 ):
 
     if steps_per_epoch:
-        logging.info("Make sure `steps_per_epoc` should be less than or equal to number of batches in dataset.")
+        logging.info("Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.")
     checkpoint_manager = save_model_checkpoints(overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models)
 
     # Train Functions
