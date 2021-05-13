@@ -1,37 +1,13 @@
 import tensorflow as tf
 import time
+import tqdm
+from pprint import pformat
+from absl import logging
+
+logging.set_verbosity("INFO")
 
 
-def trainer(
-    model,
-    batch_size,
-    dataset,
-    total_examples,
-    loss_fn,
-    optimizer,
-    epochs,
-    validation_dataset,
-    validation_loss_fn,
-    model_checkpoint_dir,
-    steps_per_epoch=None,
-    model_save_interval_epochs=1,
-    max_number_of_models=10,
-    model_save_interval_steps=1,
-    overwrite_checkpoint_dir=False,
-    validation_interval_steps=None,
-    train_steps=None,
-    steps_per_call=100,
-    eval_callback=None,
-):
-
-    total_batches = total_examples // batch_size
-    if steps_per_epoch is None:
-        steps_per_epoch = total_examples
-        n_repeats = epochs
-    else:
-        if steps_per_epoch > total_batches:
-            n_repeats = steps_per_epoch // total_batches
-
+def save_model_checkpoints(overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models):
     # Model checkpoint
     if not overwrite_checkpoint_dir:
         import os
@@ -41,6 +17,58 @@ def trainer(
 
     checkpoint = tf.train.Checkpoint(model=model)
     manager = tf.train.CheckpointManager(checkpoint, directory=model_checkpoint_dir, max_to_keep=max_number_of_models)
+    return manager
+
+
+def get_train_loss_metric_dict(model, dataset, loss_fn, validation_dataset, validation_loss_fn):
+    for (batch_inputs, batch_labels) in dataset.take(1):
+        pass
+    model_outputs = model(batch_inputs)
+    train_loss_dict = loss_fn(batch_labels, model_outputs)
+    training_loss_dict_metric = {name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in train_loss_dict}
+
+    validation_loss_dict_metric = {}
+    if validation_dataset and validation_loss_fn:
+        for (batch_inputs, batch_labels) in dataset.take(1):
+            pass
+        model_outputs = model(batch_inputs)
+        valid_loss_dict = validation_loss_fn(batch_labels, model_outputs)
+        validation_loss_dict_metric = {name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in valid_loss_dict}
+
+    return training_loss_dict_metric, validation_loss_dict_metric
+
+
+def get_and_reset_metric_from_dict(metric_dict):
+    if not metric_dict:
+        return {}
+    metric_result = {name: metric.result() for name, metric in metric_dict.items()}
+    for name, metric in metric_result.items():
+        metric.reset_states()
+    return metric_result
+
+
+def trainer(
+    model,
+    dataset,
+    loss_fn,
+    optimizer,
+    epochs,
+    validation_dataset,
+    validation_loss_fn,
+    model_checkpoint_dir,
+    fp16=False,
+    steps_per_epoch=None,
+    max_number_of_models=10,
+    model_save_interval_steps=1000,
+    overwrite_checkpoint_dir=False,
+    validation_interval_steps=None,
+    steps_per_call=100,
+    eval_callbacks=None,
+):
+
+    if steps_per_epoch:
+        logging.info("Make sure `steps_per_epoc` should be less than or equal to number of batches in dataset.")
+    checkpoint_manager = save_model_checkpoints(overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models)
 
     # Train Functions
     @tf.function
@@ -69,9 +97,9 @@ def trainer(
 
     # Validate Functions
     @tf.function
-    def _validate(iterator):
+    def _validate(validation_dataset):
         """Validation step"""
-        for (batch_inputs, batch_labels) in iterator:
+        for (batch_inputs, batch_labels) in validation_dataset:
             model_outputs = model(batch_inputs)
             loss = validation_loss_fn(batch_labels, model_outputs)
             for name, loss_value in loss.items():
@@ -80,121 +108,84 @@ def trainer(
 
     # do validation
     def do_validation(validation_dataset):
-        validation_result = {}
         if validation_dataset and validation_loss_fn:
             _validate(validation_dataset)
-        loss = validation_loss.result()
-        validation_result = {name: metric.result() for name, metric in validation_loss_dict_metric.items()}
-        for name, metric in validation_loss_dict_metric.items():
-            metric.reset_states()
+        validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
         if eval_callback:
-            score = eval_callback(kwargs)
-            validation_result["val_score"] = score
+            for i, eval_callback in enumerate(eval_callbacks):
+                score = eval_callback(kwargs)
+                validation_result["callback_score_{}".format(i)] = score
         return validation_result
 
     # Metrics
     learning_rate_holder = tf.keras.metrics.Mean(
         "learning_rate_holder", dtype=tf.float32
     )  # We store learning rate here and reset after every global steps
-
-    # Sample Call
-    for (batch_inputs, batch_labels) in dataset.take(1):
-        pass
-    model_outputs = model(batch_inputs)
-    train_loss_dict = loss_fn(batch_labels, model_outputs)
-    training_loss_dict_metric = {name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in train_loss_dict}
-
-    if validation_dataset and validation_loss_fn:
-        for (batch_inputs, batch_labels) in dataset.take(1):
-            pass
-        model_outputs = model(batch_inputs)
-        valid_loss_dict = validation_loss_fn(batch_labels, model_outputs)
-        validation_loss_dict_metric = {name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in valid_loss_dict}
-
+    training_loss_dict_metric, validation_loss_dict_metric = get_loss_metric_dict(
+        model, dataset, loss_fn, validation_dataset, validation_loss_fn
+    )
     # dataset to iterator
-    dataset_iterator = iter(dataset.repeat(n_repeats + 1))
-    training_loss_holder = []
-    learning_rate_holder_history = []
-    validation_loss_holder = []
-    validation_score = []
-    validation_steps = []
-
-    # Do before model got trained
-    if validation_dataset:
+    dataset_iterator = iter(dataset.repeat(epochs + 1))
+    # Default ---> Do validation before model got trained
+    if validation_dataset and validation_loss_fn:
         val_result = do_validation(validation_dataset)
-        validation_loss_holder.append(val_result["val_loss"])
-        validation_score.append(val_result["val_score"])
-        validation_steps.append(0)
+        logging.info(pformat("Validation result before training {}".format(val_result)))
 
     # Main Loop
+    STEPS = steps_per_epoch // steps_per_call
     history = {}
-    for epoch in range(epochs):
-        epoch_loss = []
+    train_history = {}
+    validation_history = {}
+    global_step = 0
+    for epoch in range(1, epochs + 1):
         start_epoch_time = time.time()
-        for step in range(steps_per_epoch // steps_per_call):
+        epoch_loss = []
+        with tqdm.trange(STEPS, unit="batch") as tepoch:
+            for step in tepoch:
+                global_step += 1
+                steps_covered = (step + 1) * steps_per_call
+                tepoch.set_description(
+                    "Epoch {}/{} --- Step --- {} / {}".format(epoch, epochs, steps_covered, steps_per_epoch)
+                )
 
-            steps_covered = (step + 1) * steps_per_call
-            start_time = time.time()
-            train(dataset_iterator)
-            end_time = time.time()
+                # Call Train
+                train(dataset_iterator)
+                # Get Train metrics
+                training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
+                epoch_loss.append(training_result["loss"])  # To get average at the end of epoch
+                training_result["learning_rate"] = learning_rate_holder.result()
+                learning_rate_holder.reset_states()
+                tepoch.set_postfix(**training_result)
 
-            training_result = {name: metric.result() for name, metric in training_loss_dict_metric.items()}
-            training_print = ["{}: {}".format(k, v) for k, v in training_result.items()]
-            for name, metric in training_loss_dict_metric.items():
-                metric.reset_states()
-            epoch_loss.append(training_result["loss"])
-            learning_rate_holder_history.append(learning_rate_holder.result())
-            learning_rate_holder.reset_states()
-            print(
-                "Epoch {} --- Step {}/{} --- LR --- {} Loss {} --- Time {} seconds ".format(
-                    epoch + 1,
-                    steps_covered,
-                    steps_per_epoch,
-                    learning_rate_holder_history[-1],
-                    training_print,
-                    end_time - start_time,
-                ),
-                end="\r",
-            )
-            # Do after provided steps
-            if validation_interval_steps:
-                if steps_covered % validation_interval_steps == 0:
-                    start_time = time.time()
-                    val_result = do_validation(validation_dataset)
-                    end_time = time.time()
-                    validation_loss_holder.append(val_result["loss"])
-                    validation_score.append(val_result["val_score"])
-                    validation_steps.append(steps_covered)
-                    print(
-                        "Epoch {} --- validation Step {} --- Loss {} --- eval score {} Time {} seconds ".format(
-                            epoch,
-                            steps_covered,
-                            val_result,
-                            validation_score[-1],
-                            end_time - start_time,
-                        ),
-                        end="\r",
-                    )
-                    manager.save()
-            training_loss_holder.extend(epoch_loss)
-            end_epoch_time = time.time()
-            print(
-                "Epoch {}/{} --- Mean Loss {} in {} seconds".format(
+                train_history[global_step] = training_result
+
+                # Do after provided steps
+                if validation_interval_steps:
+                    if steps_covered % validation_interval_steps == 0:
+                        val_result = do_validation(validation_dataset)
+                        validation_history[global_step] = val_result
+                        logging.info(pformat("Validation result before training {}".format(val_result)))
+
+                # Save model
+                if model_save_interval_steps:
+                    if steps_covered % model_save_interval_steps == 0:
+                        checkpoint_manager.save()
+
+        # After an epoch
+        checkpoint_manager.save()
+        end_epoch_time = time.time()
+        val_result = do_validation(validation_dataset)
+        if val_result:
+            logging.info(pformat("Validation result before training {}".format(val_result)))
+        logging.info(
+            pformt(
+                "Epoch {}/{} --- Mean Loss {} --- Time {} seconds".format(
                     epoch + 1, epochs, tf.reduce_mean(epoch_loss), end_epoch_time - start_epoch_time
                 )
             )
-        # Do after every epoch
-        if validation_dataset:
-            val_result = do_validation(validation_dataset)
-            validation_loss_holder.append(val_result["val_loss"])
-            validation_score.append(val_result["val_score"])
-            validation_steps.append(steps_covered)
-        manager.save()
+        )
 
-    history["training_loss"] = training_loss_holder
-    history["val_loss"] = validation_loss_holder
-    history["val_score"] = validation_score
-    history["val_steps"] = validation_steps
-    history["learning_rate"] = learning_rate_holder_history
+    history["train_history"] = train_history
+    history["validation_history"] = validation_history
 
     return history
