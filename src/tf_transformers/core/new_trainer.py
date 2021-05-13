@@ -139,6 +139,7 @@ def trainer(
             end_time = time.time()
 
             training_result = {name: metric.result() for name, metric in training_loss_dict_metric.items()}
+            training_print = ["{}: {}".format(k, v) for k, v in training_result.items()]
             for name, metric in training_loss_dict_metric.items():
                 metric.reset_states()
             epoch_loss.append(training_result["loss"])
@@ -150,7 +151,7 @@ def trainer(
                     steps_covered,
                     steps_per_epoch,
                     learning_rate_holder_history[-1],
-                    training_result,
+                    training_print,
                     end_time - start_time,
                 ),
                 end="\r",
@@ -178,8 +179,8 @@ def trainer(
             training_loss_holder.extend(epoch_loss)
             end_epoch_time = time.time()
             print(
-                "Epoch {} --- mean Loss {} in {} seconds".format(
-                    epoch + 1, tf.reduce_mean(epoch_loss), end_epoch_time - start_epoch_time
+                "Epoch {}/{} --- Mean Loss {} in {} seconds".format(
+                    epoch + 1, epochs, tf.reduce_mean(epoch_loss), end_epoch_time - start_epoch_time
                 )
             )
         # Do after every epoch
