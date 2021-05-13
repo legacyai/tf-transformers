@@ -42,7 +42,7 @@ def get_and_reset_metric_from_dict(metric_dict):
     if not metric_dict:
         return {}
     metric_result = {name: metric.result().numpy()[0] for name, metric in metric_dict.items()}
-    for name, metric in metric_result.items():
+    for name, metric in metric_dict.items():
         metric.reset_states()
     return metric_result
 
