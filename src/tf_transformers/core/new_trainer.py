@@ -41,7 +41,7 @@ def get_loss_metric_dict(model, dataset, loss_fn, validation_dataset, validation
 def get_and_reset_metric_from_dict(metric_dict):
     if not metric_dict:
         return {}
-    metric_result = {name: metric.result() for name, metric in metric_dict.items()}
+    metric_result = {name: metric.result().numpy()[0] for name, metric in metric_dict.items()}
     for name, metric in metric_result.items():
         metric.reset_states()
     return metric_result
@@ -56,8 +56,8 @@ def trainer(
     validation_dataset,
     validation_loss_fn,
     model_checkpoint_dir,
-    fp16=False,
-    steps_per_epoch=None,
+    steps_per_epoch,
+    mixed_precision=False,
     max_number_of_models=10,
     model_save_interval_steps=1000,
     overwrite_checkpoint_dir=False,
@@ -70,6 +70,9 @@ def trainer(
         logging.info("Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.")
     checkpoint_manager = save_model_checkpoints(overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models)
 
+    if mixed_precision:
+        optimizer = tf.keras.mixed_precision.LossScaleOptimizer(optimizer)
+
     # Train Functions
     @tf.function
     def train(iterator):
@@ -81,7 +84,13 @@ def trainer(
                 model_outputs = model(batch_inputs)
                 loss = loss_fn(batch_labels, model_outputs)
 
-            grads = tape.gradient(loss["loss"], model.variables)
+                if mixed_precision:
+                    loss = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
+            if mixed_precision:
+                scaled_gradients = tape.gradient(loss["loss"], model.trainable_variables)
+                grads = optimizer.get_unscaled_gradients(scaled_gradients)
+            else:
+                grads = tape.gradient(loss["loss"], model.variables)
             optimizer.apply_gradients(zip(grads, model.variables))
             # training_loss.update_state(loss * strategy.num_replicas_in_sync)
 
@@ -140,12 +149,12 @@ def trainer(
     for epoch in range(1, epochs + 1):
         start_epoch_time = time.time()
         epoch_loss = []
-        with tqdm.trange(STEPS, unit="batch") as tepoch:
+        with tqdm.trange(STEPS, unit="batch ") as tepoch:
             for step in tepoch:
                 global_step += 1
                 steps_covered = (step + 1) * steps_per_call
                 tepoch.set_description(
-                    "Epoch {}/{} --- Step --- {} / {}".format(epoch, epochs, steps_covered, steps_per_epoch)
+                    "Epoch {}/{} --- Step {}/{} --- ".format(epoch, epochs, steps_covered, steps_per_epoch)
                 )
 
                 # Call Train
@@ -153,7 +162,7 @@ def trainer(
                 # Get Train metrics
                 training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
                 epoch_loss.append(training_result["loss"])  # To get average at the end of epoch
-                training_result["learning_rate"] = learning_rate_holder.result()
+                training_result["learning_rate"] = learning_rate_holder.result().numpy()[0]
                 learning_rate_holder.reset_states()
                 tepoch.set_postfix(**training_result)
 
