@@ -53,7 +53,7 @@ def trainer(
                 model_outputs = model(batch_inputs)
                 loss = loss_fn(batch_labels, model_outputs)
 
-            grads = tape.gradient(loss, model.variables)
+            grads = tape.gradient(loss["loss"], model.variables)
             optimizer.apply_gradients(zip(grads, model.variables))
             # training_loss.update_state(loss * strategy.num_replicas_in_sync)
 
@@ -141,7 +141,7 @@ def trainer(
             training_result = {name: metric.result() for name, metric in training_loss_dict_metric.items()}
             for name, metric in training_loss_dict_metric.items():
                 metric.reset_states()
-            epoch_loss.append(training_loss["loss"])
+            epoch_loss.append(training_result["loss"])
             learning_rate_holder_history.append(learning_rate_holder.result())
             learning_rate_holder.reset_states()
             print(
