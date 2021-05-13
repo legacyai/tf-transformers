@@ -13,7 +13,7 @@ def trainer(
     validation_dataset,
     validation_loss_fn,
     model_checkpoint_dir,
-    steps_per_epoch=100,
+    steps_per_epoch=None,
     model_save_interval_epochs=1,
     max_number_of_models=10,
     model_save_interval_steps=1,
@@ -31,6 +31,8 @@ def trainer(
     else:
         if steps_per_epoch > total_batches:
             n_repeats = steps_per_epoch // total_batches
+
+    # Model checkpoint
     if not overwrite_checkpoint_dir:
         import os
 
@@ -40,6 +42,7 @@ def trainer(
     checkpoint = tf.train.Checkpoint(model=model)
     manager = tf.train.CheckpointManager(checkpoint, directory=model_checkpoint_dir, max_to_keep=max_number_of_models)
 
+    # Train Functions
     @tf.function
     def train(iterator):
         """The step function for one training step"""
@@ -64,6 +67,7 @@ def trainer(
             batch_inputs, batch_labels = next(iterator)
             train_step(batch_inputs, batch_labels)
 
+    # Validate Functions
     @tf.function
     def _validate(iterator):
         """Validation step"""
@@ -120,6 +124,7 @@ def trainer(
         validation_score.append(val_result["val_score"])
         validation_steps.append(0)
 
+    # Main Loop
     history = {}
     for epoch in range(epochs):
         epoch_loss = []
