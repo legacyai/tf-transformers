@@ -98,13 +98,15 @@ def trainer(
     )  # We store learning rate here and reset after every global steps
 
     # Sample Call
-    batch_inputs, batch_labels = dataset.take(1)
+    for (batch_inputs, batch_labels) in dataset.take(1):
+        pass
     model_outputs = model(batch_inputs)
     train_loss_dict = loss_fn(batch_labels, model_outputs)
     training_loss_dict_metric = {name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in train_loss_dict}
 
     if validation_dataset and validation_loss_fn:
-        batch_inputs, batch_labels = validation_dataset.take(1)
+        for (batch_inputs, batch_labels) in dataset.take(1):
+            pass
         model_outputs = model(batch_inputs)
         valid_loss_dict = validation_loss_fn(batch_labels, model_outputs)
         validation_loss_dict_metric = {name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in valid_loss_dict}
