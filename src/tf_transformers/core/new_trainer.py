@@ -41,10 +41,24 @@ def get_loss_metric_dict(model, dataset, loss_fn, validation_dataset, validation
 def get_and_reset_metric_from_dict(metric_dict):
     if not metric_dict:
         return {}
-    metric_result = {name: metric.result().numpy()[0] for name, metric in metric_dict.items()}
+    metric_result = {name: metric.result().numpy() for name, metric in metric_dict.items()}
     for name, metric in metric_dict.items():
         metric.reset_states()
     return metric_result
+
+
+def get_tensorboard_writers(model_checkpoint_dir):
+    train_log_dir = model_checkpoint_dir + "/logs/train"
+    test_log_dir = model_checkpoint_dir + "/logs/dev"
+    train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+    test_summary_writer = tf.summary.create_file_writer(test_log_dir)
+    return train_summary_writer, test_summary_writer
+
+
+def write_metrics(metric_dict, writer, step):
+    with writer.as_default():
+        for name, result in metric_dict.items():
+            tf.summary.scalar(name, result, step=step)
 
 
 def trainer(
@@ -140,6 +154,9 @@ def trainer(
         val_result = do_validation(validation_dataset)
         logging.info(pformat("Validation result before training {}".format(val_result)))
 
+    # Get Tensorboard writers
+    train_summary_writer, val_summary_writer = get_tensorboard_writers()
+
     # Main Loop
     STEPS = steps_per_epoch // steps_per_call
     history = {}
@@ -151,8 +168,8 @@ def trainer(
         epoch_loss = []
         with tqdm.trange(STEPS, unit="batch ") as tepoch:
             for step in tepoch:
-                global_step += 1
                 steps_covered = (step + 1) * steps_per_call
+                global_step += steps_covered
                 tepoch.set_description(
                     "Epoch {}/{} --- Step {}/{} --- ".format(epoch, epochs, steps_covered, steps_per_epoch)
                 )
@@ -162,17 +179,20 @@ def trainer(
                 # Get Train metrics
                 training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
                 epoch_loss.append(training_result["loss"])  # To get average at the end of epoch
-                training_result["learning_rate"] = learning_rate_holder.result().numpy()[0]
+                training_result["learning_rate"] = learning_rate_holder.result().numpy()
                 learning_rate_holder.reset_states()
                 tepoch.set_postfix(**training_result)
 
                 train_history[global_step] = training_result
+                write_metrics(training_result, train_summary_writer, global_step)
 
                 # Do after provided steps
                 if validation_interval_steps:
                     if steps_covered % validation_interval_steps == 0:
                         val_result = do_validation(validation_dataset)
                         validation_history[global_step] = val_result
+                        write_metrics(val_result, val_summary_writer, global_step)
+                        print("-----------------------------------------------------------------------")
                         logging.info(pformat("Validation result before training {}".format(val_result)))
 
                 # Save model
@@ -185,7 +205,9 @@ def trainer(
         end_epoch_time = time.time()
         val_result = do_validation(validation_dataset)
         if val_result:
+            print("-----------------------------------------------------------------------")
             logging.info(pformat("Validation result before training {}".format(val_result)))
+        print("-----------------------------------------------------------------------")
         logging.info(
             pformt(
                 "Epoch {}/{} --- Mean Loss {} --- Time {} seconds".format(
