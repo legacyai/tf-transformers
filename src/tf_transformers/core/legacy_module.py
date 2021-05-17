@@ -1,10 +1,20 @@
-# from tensorflow.python.framework.ops import disable_eager_execution
-# disable_eager_execution()
 import tensorflow as tf
 
 
 class LegacyModuleCustom(tf.Module):
+    """LegacyModuleCustom : This will serialize by making use of
+    config dict from the models, so that we can infer inputs shapes
+    from serialized models.
+
+    """
+
     def __init__(self, model, name=None):
+
+        """
+        Args:
+            model (tf.keras.Model): Model
+            name (str), optional): Model name
+        """
         super(LegacyModuleCustom, self).__init__(name=name)
         self.model = model
         self.config = {}
@@ -36,6 +46,8 @@ class LegacyModuleCustom(tf.Module):
 
 
 class LegacyModule(tf.Module):
+    """LegacyModule : To make output names compatible we use this Module."""
+
     def __init__(self, model, name=None):
         super(LegacyModule, self).__init__(name=name)
         self.model = model
@@ -48,21 +60,3 @@ class LegacyModule(tf.Module):
         input_spec = {name: keras_input.type_spec for name, keras_input in self.model.input.items()}
         call_output = self.__call__.get_concrete_function(**input_spec)
         tf.saved_model.save(self, save_dir, signatures={signature_name: call_output})
-
-
-# Old Way
-# class LegacyModule(tf.Module):
-#     def __init__(self, model, name=None):
-#         super(LegacyModule, self).__init__(name=name)
-#         self.model = model
-
-#     @tf.function
-#     def __call__(self, **kwargs):
-#         return self.model(kwargs)
-
-# gpt2_module = LegacyModule(model_tf_transformers)
-# call_output = gpt2_module.__call__.get_concrete_function(**model_tf_transformers.input)
-# module_output_path = "model_pb"
-# tf.saved_model.save(
-#     gpt2_module, module_output_path, signatures={"serving_default": call_output}
-# )

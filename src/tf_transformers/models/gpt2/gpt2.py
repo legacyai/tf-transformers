@@ -5,21 +5,21 @@ from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer, LegacyModel
 from tf_transformers.layers import OnDeviceEmbedding, PositionEmbedding, MaskedLM, BiasLayer
 from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
-from tf_transformers.layers.transformer import TransformerBERT
+from tf_transformers.layers.transformer import TransformerGPT2
 from tf_transformers.utils import tf_utils
 
 logging.set_verbosity("INFO")
 
 
-class BERTEncoder(LegacyLayer):
-    """BERT based encoder / Decoder .
-    BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
-    Authors: Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova
+class GPT2Encoder(LegacyLayer):
+    """GPT2 based encoder / Decoder .
+    Language Models are Unsupervised Multitask Learners
+    Authors: Alec Radford , Jeffrey Wu , Rewon Child ,
+            David Luan , Dario Amodei ,Ilya Sutskever
 
-    Implementation of Bert in TF2.0
-
+    Implementation of GPT2 in TF2.0
     Paper: https://arxiv.org/abs/1810.04805
-    Official Code: https://github.com/google-research/bert
+    Official Code: https://github.com/openai/gpt-2
 
 
     """
@@ -27,15 +27,15 @@ class BERTEncoder(LegacyLayer):
     def __init__(
         self,
         config,
-        mask_mode="user_defined",
-        name="bert",
+        mask_mode="causal",
+        name="gpt2",
         use_dropout=False,
         is_training=False,
         use_auto_regressive=False,
         use_decoder=False,
         batch_size=None,
         sequence_length=None,
-        use_mlm_layer=True,
+        use_mlm_layer=False,
         use_masked_lm_positions=False,
         return_all_layer_outputs=False,
         **kwargs,
@@ -64,7 +64,7 @@ class BERTEncoder(LegacyLayer):
         self._return_all_layer_outputs = return_all_layer_outputs
 
         # self._self_setattr_tracking = False
-        super(BERTEncoder, self).__init__(
+        super(GPT2Encoder, self).__init__(
             is_training=self._is_training, use_dropout=self._use_dropout, name=self._model_name, **kwargs
         )
 

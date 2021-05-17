@@ -11,21 +11,38 @@ from tf_transformers.layers.attention import GPT2Attention
 
 
 class TransformerGPT2(LegacyLayer):
-    """Transformer
+    """Transformer GPT2 way
 
     This layer implements the Transformer from "Attention Is All You Need".
-    (https://arxiv.org/abs/1706.03762).
+    (https://arxiv.org/abs/1706.03762), with a customizable attention layer
+    option. Users can pass a class to `attention_cls` and associated config to
+    `attention_cfg`, in which case the scaffold will instantiate the class with
+    the config, or pass a class instance to `attention_cls`.
 
+    Arguments:
+      num_attention_heads: Number of attention heads.
+      intermediate_size: Size of the intermediate layer.
+      intermediate_activation: Activation for the intermediate layer.
+      attention_cls: A class to instantate, or a layer instance.
+      attention_cfg: The config with which to instantiate `attention_cls`. Ignored
+        if attention_cls is a layer instance.
+      dropout_rate: Dropout probability for the post-attention and output dropout.
+      attention_dropout_rate: Dropout probability for within the attention layer.
+      kernel_initializer: Initializer for dense layer kernels.
+      bias_initializer: Initializer for dense layer biases.
+      kernel_regularizer: Regularizer for dense layer kernels.
+      bias_regularizer: Regularizer for dense layer biases.
+      activity_regularizer: Regularizer for dense layer activity.
+      kernel_constraint: Constraint for dense layer kernels.
+      bias_constraint: Constraint for dense layer kernels.
     """
 
     def __init__(
         self,
-        hidden_size,
         num_attention_heads,
         intermediate_size,
         intermediate_activation,
-        use_auto_regressive,
-        attention_head_size=None,
+        attention_cfg=None,
         dropout_rate=0.0,
         attention_dropout_rate=0.0,
         kernel_initializer="glorot_uniform",
@@ -36,11 +53,10 @@ class TransformerGPT2(LegacyLayer):
         kernel_constraint=None,
         bias_constraint=None,
         use_bias=True,
-        use_decoder=False,
+        is_decoder=None,
         share_attention_layers=True,
         layer_norm_epsilon=None,
-        is_training=False,
-        use_dropout=False,
+        cross_attention_inside_encoder=False,
         name="transformer",
         **kwargs,
     ):
@@ -52,9 +68,9 @@ class TransformerGPT2(LegacyLayer):
             attention_cfg: The config with which to instantiate `attention_cls`. Ignored
             if attention_cls is a layer instance.
             dropout_rate: float (between 0 and 1), Dropout probability
-                            for the post-attention and output dropout.
+                                for the post-attention and output dropout.
             attention_dropout_rate: float (between 0 and 1), Dropout probability
-                            for within the attention layer.
+                                for within the attention layer.
             kernel_initializer: Initializer for dense layer kernels.
             bias_initializer: Initializer for dense layer biases.
             kernel_regularizer: Regularizer for dense layer kernels.
@@ -63,19 +79,16 @@ class TransformerGPT2(LegacyLayer):
             kernel_constraint: Constraint for dense layer kernels.
             bias_constraint: Constraint for dense layer kernels.
             share_attention_layers: To share same attention layers in decoder cross attentions
-            cross_attention_inside_encoder: Whether we want to use cross attention \
-                inside encoder.
             is_decoder: bool
         """
-        super(TransformerGPT2, self).__init__(name=name, is_training=is_training, use_dropout=use_dropout, **kwargs)
-        # mostly embedding_size is same as projecting after attention
-        self._hidden_size = hidden_size
+        kwargs["name"] = name
+        super(TransformerGPT2, self).__init__(**kwargs)
+        self._attention_cfg = attention_cfg
         self._num_heads = num_attention_heads
         self._intermediate_size = intermediate_size
         self._intermediate_activation = intermediate_activation
-        self._attention_head_size = attention_head_size
-        self._dropout_rate = dropout_rate
         self._attention_dropout_rate = attention_dropout_rate
+        self._dropout_rate = dropout_rate
         self._kernel_initializer = tf.keras.initializers.get(kernel_initializer)
         self._bias_initializer = tf.keras.initializers.get(bias_initializer)
         self._kernel_regularizer = tf.keras.regularizers.get(kernel_regularizer)
@@ -83,11 +96,10 @@ class TransformerGPT2(LegacyLayer):
         self._kernel_constraint = tf.keras.constraints.get(kernel_constraint)
         self._bias_constraint = tf.keras.constraints.get(bias_constraint)
         self._use_bias = use_bias
-        self._use_decoder = use_decoder
+        self._is_decoder = is_decoder
         self._layer_norm_epsilon = layer_norm_epsilon
-        self._is_training = is_training
-        self._use_dropout = use_dropout
-        self._use_auto_regressive = use_auto_regressive
+        self._share_attention_layers = share_attention_layers
+        self._cross_attention_inside_encoder = cross_attention_inside_encoder
 
     def build(self, input_shape):
         """

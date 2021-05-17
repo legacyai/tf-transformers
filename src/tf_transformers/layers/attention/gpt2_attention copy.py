@@ -46,8 +46,6 @@ class GPT2Attention(LegacyLayer):
         self,
         num_heads,
         head_size,
-        is_training,
-        use_auto_regressive,
         dropout_rate=0.0,
         kernel_initializer="glorot_uniform",
         bias_initializer="zeros",
@@ -63,8 +61,6 @@ class GPT2Attention(LegacyLayer):
         super(GPT2Attention, self).__init__(**kwargs)
         self._num_heads = num_heads
         self._head_size = head_size
-        self._is_training = is_training
-        self._use_auto_regressive = use_auto_regressive
         self._dropout_rate = dropout_rate
         self._kernel_initializer = tf.keras.initializers.get(kernel_initializer)
         self._bias_initializer = tf.keras.initializers.get(bias_initializer)
@@ -274,10 +270,9 @@ class GPT2Attention(LegacyLayer):
         return self.merge_attention_heads(context_layer), key_tensor_to, value_tensor_to
 
     def call(self, inputs, cache_key=None, cache_value=None):
-        # For decoder this function is used for training and inference
-        if (self._is_training is False and self._use_auto_regressive) or cache_key is not None:
-            attention_states, key_tensor, value_tensor = self.call_predict(inputs, cache_key, cache_value)
+        if self.is_training:
+            attention_states, key_tensor, value_tensor = self.call_training(inputs)
             return attention_states, key_tensor, value_tensor
         else:
-            attention_states, key_tensor, value_tensor = self.call_training(inputs)
+            attention_states, key_tensor, value_tensor = self.call_predict(inputs, cache_key, cache_value)
             return attention_states, key_tensor, value_tensor
