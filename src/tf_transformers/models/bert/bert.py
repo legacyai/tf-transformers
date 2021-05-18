@@ -677,14 +677,14 @@ class BERTEncoder(LegacyLayer):
                 # token logits per layer
                 layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
                 layer_token_logits = tf.matmul(
-                    token_embeddings_mlm,
+                    layer_token_embeddings_mlm,
                     tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
                     transpose_b=True,
                 )
                 layer_token_logits = self._masked_lm_bias(layer_token_logits)
                 all_token_logits.append(layer_token_logits)
 
-            result["all_layer_token_embeddings"] = encoder_outputs
+            result["all_layer_token_embeddings"] = decoder_outputs
             result["all_layer_cls_output"] = all_cls_output
             result["all_layer_token_logits"] = all_token_logits
 

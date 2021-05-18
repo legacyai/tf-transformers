@@ -275,7 +275,6 @@ def convert_bert_tf(model, config):
 
         transformers.logging.set_verbosity_error()
 
-        hf_model_name = model_name.replace("_", "-")
         # From vars (Transformer variables)
         from_model_vars = [
             "tf_bert_model/bert/encoder/layer_._{}/attention/self/query/kernel:0",

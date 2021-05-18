@@ -3,7 +3,7 @@ from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer, LegacyModel
-from tf_transformers.layers import OnDeviceEmbedding, PositionEmbedding, MaskedLM, BiasLayer
+from tf_transformers.layers import GPT2LayerNormalization, OnDeviceEmbedding, PositionEmbedding, MaskedLM, BiasLayer
 from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerGPT2
 from tf_transformers.utils import tf_utils
@@ -95,9 +95,9 @@ class GPT2Encoder(LegacyLayer):
         ) = self.get_embedding_layers(self._config_dict)
 
         # Embedding Norm
-        self._embedding_norm = tf.keras.layers.LayerNormalization(
-            name="embeddings/layer_norm", axis=-1, epsilon=config["layer_norm_epsilon"], dtype=tf.float32
-        )
+        # self._embedding_norm = GPT2LayerNormalization(
+        #     name="embeddings/layer_norm", axis=-1, epsilon=config["layer_norm_epsilon"], dtype=tf.float32
+        # )
 
         # Embedding dropout Layer
         self._embedding_dropout = tf.keras.layers.Dropout(rate=config["hidden_dropout_prob"])
@@ -105,7 +105,7 @@ class GPT2Encoder(LegacyLayer):
         # Transformer Layer
         self._transformer_layers = []
         for i in range(config["num_hidden_layers"]):
-            layer = TransformerBERT(
+            layer = TransformerGPT2(
                 hidden_size=config["embedding_size"],
                 num_attention_heads=config["num_attention_heads"],
                 intermediate_size=config["intermediate_size"],
@@ -122,24 +122,13 @@ class GPT2Encoder(LegacyLayer):
             )
             self._transformer_layers.append(layer)
 
-        # CLS layer
-        self._pooler_layer = tf.keras.layers.Dense(
-            units=config["embedding_size"],
-            activation="tanh",
-            kernel_initializer=self._initializer,
-            name="pooler_transform",
+        # Last Layer Normalization (only in GPT2)
+        self._last_layer_norm = GPT2LayerNormalization(
+            name="ln_f/layer_norm",
+            axis=-1,
+            epsilon=config["layer_norm_epsilon"],
+            dtype=tf.float32,
         )
-
-        # Default True for BERT and Albert
-        if self._use_mlm_layer:
-            self._masked_lm_layer = MaskedLM(
-                hidden_size=config["embedding_size"],
-                layer_norm_epsilon=config["layer_norm_epsilon"],
-                activation=config["hidden_act"],
-                name="mlm",
-            )
-            self._masked_lm_bias = BiasLayer(name="mlm/transform")
-
         self.call_fn = self.get_call_method(self._config_dict)
         # Initialize model
         self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
@@ -182,10 +171,6 @@ class GPT2Encoder(LegacyLayer):
         # If type mebddings required
         if self._type_embeddings_layer:
             inputs["input_type_ids"] = input_type_ids
-        # if masked_lm_positions
-        if self._use_masked_lm_positions:
-            inputs["masked_lm_positions"] = masked_lm_positions
-
         # Auto Regressive is activated only when is_training=False
         if self._is_training is False and self._use_auto_regressive:
             all_cache_key = tf.keras.layers.Input(
@@ -289,7 +274,7 @@ class GPT2Encoder(LegacyLayer):
             embeddings = embeddings + positional_embeddings
 
         # 2. Norm + dropout
-        embeddings = self._embedding_norm(embeddings)
+        # embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self._use_dropout)
 
         # 3. Attention  Mask
@@ -310,57 +295,33 @@ class GPT2Encoder(LegacyLayer):
             embeddings, _, _ = layer([embeddings, attention_mask])
             encoder_outputs.append(embeddings)
 
+        encoder_outputs[-1] = self._last_layer_norm(encoder_outputs[-1])
         # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(encoder_outputs[-1])
         # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
         # batch_size x sequence_length x embedding_size
         token_embeddings = encoder_outputs[-1]
-
-        # check for masked lm positions
-        # only for encoder forward pass. This is for MaskedLM training
-        if "masked_lm_positions" in inputs:
-            masked_lm_positions = inputs["masked_lm_positions"]
-        else:
-            masked_lm_positions = None
-
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
         token_logits = tf.matmul(
-            token_embeddings_mlm, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
+            token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
         )
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
-        token_logits = self._masked_lm_bias(token_logits)
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         result = {
-            "cls_output": cls_output,
             "token_embeddings": token_embeddings,
             "token_logits": token_logits,
             "last_token_logits": last_token_logits,
         }
 
         if self._return_all_layer_outputs:
-            all_cls_output = []
             all_token_logits = []
             for per_layer_token_embeddings in encoder_outputs:
-                per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
-                    per_layer_token_embeddings
-                )
-                all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
-
-                # token logits per layer
-                layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
                 layer_token_logits = tf.matmul(
-                    layer_token_embeddings_mlm,
+                    per_layer_token_embeddings,
                     tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
                     transpose_b=True,
                 )
-                layer_token_logits = self._masked_lm_bias(layer_token_logits)
                 all_token_logits.append(layer_token_logits)
 
             result["all_layer_token_embeddings"] = encoder_outputs
-            result["all_layer_cls_output"] = all_cls_output
             result["all_layer_token_logits"] = all_token_logits
 
         return result
@@ -480,7 +441,7 @@ class GPT2Encoder(LegacyLayer):
             embeddings = embeddings + positional_embeddings
 
         # 2. Norm + dropout
-        embeddings = self._embedding_norm(embeddings)
+        # embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
 
         # 3. Attention Mask
@@ -523,17 +484,10 @@ class GPT2Encoder(LegacyLayer):
             )
             encoder_outputs.append(embeddings)
 
-        # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(encoder_outputs[-1])
-        # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
+        encoder_outputs[-1] = self._last_layer_norm(encoder_outputs[-1])
         # batch_size x sequence_length x embedding_size
         token_embeddings = encoder_outputs[-1]
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings)
-        token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
-        token_logits = self._masked_lm_bias(token_logits)
+        token_logits = tf.matmul(token_embeddings, self.get_embedding_table(), transpose_b=True)
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         def step_0_gather(past_length, token_embeddings):
@@ -566,7 +520,6 @@ class GPT2Encoder(LegacyLayer):
         all_cache_value = tf.stack(all_cache_value, axis=0, name="all_cache_value")
 
         return {
-            "cls_output": cls_output,
             "token_embeddings": token_embeddings,
             "past_length": past_length,
             "all_cache_key": all_cache_key,
@@ -614,7 +567,7 @@ class GPT2Encoder(LegacyLayer):
             embeddings = embeddings + positional_embeddings
 
         # 2. Norm + dropout
-        embeddings = self._embedding_norm(embeddings)
+        # embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
         # Initialize `attention_mask` as empty list
         attention_mask = []
@@ -637,55 +590,32 @@ class GPT2Encoder(LegacyLayer):
             embeddings, _key, _value = layer([embeddings, attention_mask, encoder_output, decoder_encoder_mask])
             decoder_outputs.append(embeddings)
 
-        # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(decoder_outputs[-1])
-        # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
+        decoder_outputs[-1] = self._last_layer_norm(decoder_outputs[-1])
         # batch_size x sequence_length x embedding_size
         token_embeddings = decoder_outputs[-1]
 
-        # check for masked lm positions
-        # only for encoder forward pass. This is for MaskedLM training
-        if "masked_lm_positions" in inputs:
-            masked_lm_positions = inputs["masked_lm_positions"]
-        else:
-            masked_lm_positions = None
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
         token_logits = tf.matmul(
-            token_embeddings_mlm, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
+            token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
         )
-        token_logits = self._masked_lm_bias(token_logits)
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         result = {
-            "cls_output": cls_output,
             "token_embeddings": token_embeddings,
             "token_logits": token_logits,
             "last_token_logits": last_token_logits,
         }
 
         if self._return_all_layer_outputs:
-            all_cls_output = []
             all_token_logits = []
             for per_layer_token_embeddings in decoder_outputs:
-                per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
-                    per_layer_token_embeddings
-                )
-                all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
-
-                # token logits per layer
-                layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
                 layer_token_logits = tf.matmul(
-                    token_embeddings_mlm,
+                    per_layer_token_embeddings,
                     tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
                     transpose_b=True,
                 )
-                layer_token_logits = self._masked_lm_bias(layer_token_logits)
                 all_token_logits.append(layer_token_logits)
 
-            result["all_layer_token_embeddings"] = encoder_outputs
-            result["all_layer_cls_output"] = all_cls_output
+            result["all_layer_token_embeddings"] = decoder_outputs
             result["all_layer_token_logits"] = all_token_logits
 
         return result
@@ -779,7 +709,7 @@ class GPT2Encoder(LegacyLayer):
             embeddings = embeddings + positional_embeddings
 
         # Norm + dropout
-        embeddings = self._embedding_norm(embeddings)
+        # embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
         attention_mask = []
         if self._mask_mode == "causal":
@@ -816,26 +746,18 @@ class GPT2Encoder(LegacyLayer):
 
             decoder_outputs.append(embeddings)
 
+        decoder_outputs[-1] = self._last_layer_norm(decoder_outputs[-1])
         # Stack all layers key and value together
         # num_layers x batch_size x num_heads x sequence_length x (hidden_dimension/num_heads)
         all_cache_key = tf.stack(all_cache_key, axis=0, name="all_cache_key")
         all_cache_value = tf.stack(all_cache_value, axis=0, name="all_cache_value")
 
-        # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(decoder_outputs[-1])
-        # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
         # batch_size x sequence_length x embedding_size
         token_embeddings = decoder_outputs[-1]
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings)
-        token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
-        token_logits = self._masked_lm_bias(token_logits)
+        token_logits = tf.matmul(token_embeddings, self.get_embedding_table(), transpose_b=True)
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         return {
-            "cls_output": cls_output,
             "token_embeddings": token_embeddings,
             "all_cache_key": all_cache_key,
             "all_cache_value": all_cache_value,

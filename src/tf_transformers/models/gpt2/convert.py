@@ -55,65 +55,52 @@ def convert_bert_pt(model, config):
 
         # From vars (Transformer variables)
         from_model_vars = [
-            "encoder.layer.{}.attention.self.query.weight",
-            "encoder.layer.{}.attention.self.query.bias",
-            "encoder.layer.{}.attention.self.key.weight",
-            "encoder.layer.{}.attention.self.key.bias",
-            "encoder.layer.{}.attention.self.value.weight",
-            "encoder.layer.{}.attention.self.value.bias",
-            "encoder.layer.{}.attention.output.dense.weight",
-            "encoder.layer.{}.attention.output.dense.bias",
-            "encoder.layer.{}.attention.output.LayerNorm.weight",
-            "encoder.layer.{}.attention.output.LayerNorm.bias",
-            "encoder.layer.{}.intermediate.dense.weight",
-            "encoder.layer.{}.intermediate.dense.bias",
-            "encoder.layer.{}.output.dense.weight",
-            "encoder.layer.{}.output.dense.bias",
-            "encoder.layer.{}.output.LayerNorm.weight",
-            "encoder.layer.{}.output.LayerNorm.bias",
+            "tfgp_t2model/transformer/h_._{}/ln_1/gamma:0",
+            "tfgp_t2model/transformer/h_._{}/ln_1/beta:0",
+            "tfgp_t2model/transformer/h_._{}/attn/c_attn/weight:0",
+            "tfgp_t2model/transformer/h_._{}/attn/c_attn/bias:0",
+            "tfgp_t2model/transformer/h_._{}/attn/c_proj/weight:0",
+            "tfgp_t2model/transformer/h_._{}/attn/c_proj/bias:0",
+            "tfgp_t2model/transformer/h_._{}/ln_2/gamma:0",
+            "tfgp_t2model/transformer/h_._{}/ln_2/beta:0",
+            "tfgp_t2model/transformer/h_._{}/mlp/c_fc/weight:0",
+            "tfgp_t2model/transformer/h_._{}/mlp/c_fc/bias:0",
+            "tfgp_t2model/transformer/h_._{}/mlp/c_proj/weight:0",
+            "tfgp_t2model/transformer/h_._{}/mlp/c_proj/bias:0",
         ]
 
         # To vars (Transformer variables)
         to_model_vars = [
-            "tf_transformers/bert/transformer/layer_{}/self_attention/query/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention/query/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention/key/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention/key/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention/value/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention/value/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention_output/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention_output/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention_layer_norm/gamma:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention_layer_norm/beta:0",
-            "tf_transformers/bert/transformer/layer_{}/intermediate/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/intermediate/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/output/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/output/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/output_layer_norm/gamma:0",
-            "tf_transformers/bert/transformer/layer_{}/output_layer_norm/beta:0",
+            "tf_transformers/gpt2/transformer/layer_{}/ln_1/layer_norm/gamma:0",
+            "tf_transformers/gpt2/transformer/layer_{}/ln_1/layer_norm/beta:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention/qkv/kernel:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention/qkv/bias:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention_output/kernel:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention_output/bias:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention_layer_norm/gamma:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention_layer_norm/beta:0",
+            "tf_transformers/gpt2/transformer/layer_{}/intermediate/kernel:0",
+            "tf_transformers/gpt2/transformer/layer_{}/intermediate/bias:0",
+            "tf_transformers/gpt2/transformer/layer_{}/output/kernel:0",
+            "tf_transformers/gpt2/transformer/layer_{}/output/bias:0",
         ]
 
         # Simple Assertion
         assert len(from_model_vars) == len(to_model_vars)
-
-        # This dictionary maps from -> to dict names
         mapping_dict = {}
+
         for index in range(len(from_model_vars)):
             for i in range(config["num_hidden_layers"]):
                 mapping_dict[from_model_vars[index].format(i)] = to_model_vars[index].format(i)
 
         # Word Embeddings
-        mapping_dict["embeddings.word_embeddings.weight"] = "tf_transformers/bert/word_embeddings/embeddings:0"
+        mapping_dict["tfgp_t2model/transformer/wte/weight:0"] = "tf_transformers/gpt2/word_embeddings/embeddings:0"
         # Positional Embedding
         mapping_dict[
-            "embeddings.position_embeddings.weight"
-        ] = "tf_transformers/bert/positional_embeddings/embeddings:0"
-        # Type Embeddings
-        mapping_dict["embeddings.token_type_embeddings.weight"] = "tf_transformers/bert/type_embeddings/embeddings:0"
-        mapping_dict["embeddings.LayerNorm.weight"] = "tf_transformers/bert/embeddings/layer_norm/gamma:0"
-        mapping_dict["embeddings.LayerNorm.bias"] = "tf_transformers/bert/embeddings/layer_norm/beta:0"
-        mapping_dict["pooler.dense.weight"] = "tf_transformers/bert/pooler_transform/kernel:0"
-        mapping_dict["pooler.dense.bias"] = "tf_transformers/bert/pooler_transform/bias:0"
+            "tfgp_t2model/transformer/wpe/embeddings:0"
+        ] = "tf_transformers/gpt2/positional_embeddings/embeddings:0"
+        mapping_dict["tfgp_t2model/transformer/ln_f/gamma:0"] = "tf_transformers/gpt2/ln_f/layer_norm/gamma:0"
+        mapping_dict["tfgp_t2model/transformer/ln_f/beta:0"] = "tf_transformers/gpt2/ln_f/layer_norm/beta:0"
 
         from transformers import BertModel
 
@@ -275,82 +262,60 @@ def convert_bert_tf(model, config):
 
         transformers.logging.set_verbosity_error()
 
-        hf_model_name = model_name.replace("_", "-")
         # From vars (Transformer variables)
         from_model_vars = [
-            "tf_bert_model/bert/encoder/layer_._{}/attention/self/query/kernel:0",
-            "tf_bert_model/bert/encoder/layer_._{}/attention/self/query/bias:0",
-            "tf_bert_model/bert/encoder/layer_._{}/attention/self/key/kernel:0",
-            "tf_bert_model/bert/encoder/layer_._{}/attention/self/key/bias:0",
-            "tf_bert_model/bert/encoder/layer_._{}/attention/self/value/kernel:0",
-            "tf_bert_model/bert/encoder/layer_._{}/attention/self/value/bias:0",
-            "tf_bert_model/bert/encoder/layer_._{}/attention/output/dense/kernel:0",
-            "tf_bert_model/bert/encoder/layer_._{}/attention/output/dense/bias:0",
-            "tf_bert_model/bert/encoder/layer_._{}/attention/output/LayerNorm/gamma:0",
-            "tf_bert_model/bert/encoder/layer_._{}/attention/output/LayerNorm/beta:0",
-            "tf_bert_model/bert/encoder/layer_._{}/intermediate/dense/kernel:0",
-            "tf_bert_model/bert/encoder/layer_._{}/intermediate/dense/bias:0",
-            "tf_bert_model/bert/encoder/layer_._{}/output/dense/kernel:0",
-            "tf_bert_model/bert/encoder/layer_._{}/output/dense/bias:0",
-            "tf_bert_model/bert/encoder/layer_._{}/output/LayerNorm/gamma:0",
-            "tf_bert_model/bert/encoder/layer_._{}/output/LayerNorm/beta:0",
+            "tfgp_t2model/transformer/h_._{}/ln_1/gamma:0",
+            "tfgp_t2model/transformer/h_._{}/ln_1/beta:0",
+            "tfgp_t2model/transformer/h_._{}/attn/c_attn/weight:0",
+            "tfgp_t2model/transformer/h_._{}/attn/c_attn/bias:0",
+            "tfgp_t2model/transformer/h_._{}/attn/c_proj/weight:0",
+            "tfgp_t2model/transformer/h_._{}/attn/c_proj/bias:0",
+            "tfgp_t2model/transformer/h_._{}/ln_2/gamma:0",
+            "tfgp_t2model/transformer/h_._{}/ln_2/beta:0",
+            "tfgp_t2model/transformer/h_._{}/mlp/c_fc/weight:0",
+            "tfgp_t2model/transformer/h_._{}/mlp/c_fc/bias:0",
+            "tfgp_t2model/transformer/h_._{}/mlp/c_proj/weight:0",
+            "tfgp_t2model/transformer/h_._{}/mlp/c_proj/bias:0",
         ]
 
         # To vars (Transformer variables)
         to_model_vars = [
-            "tf_transformers/bert/transformer/layer_{}/self_attention/query/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention/query/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention/key/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention/key/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention/value/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention/value/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention_output/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention_output/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention_layer_norm/gamma:0",
-            "tf_transformers/bert/transformer/layer_{}/self_attention_layer_norm/beta:0",
-            "tf_transformers/bert/transformer/layer_{}/intermediate/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/intermediate/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/output/kernel:0",
-            "tf_transformers/bert/transformer/layer_{}/output/bias:0",
-            "tf_transformers/bert/transformer/layer_{}/output_layer_norm/gamma:0",
-            "tf_transformers/bert/transformer/layer_{}/output_layer_norm/beta:0",
+            "tf_transformers/gpt2/transformer/layer_{}/ln_1/layer_norm/gamma:0",
+            "tf_transformers/gpt2/transformer/layer_{}/ln_1/layer_norm/beta:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention/qkv/kernel:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention/qkv/bias:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention_output/kernel:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention_output/bias:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention_layer_norm/gamma:0",
+            "tf_transformers/gpt2/transformer/layer_{}/self_attention_layer_norm/beta:0",
+            "tf_transformers/gpt2/transformer/layer_{}/intermediate/kernel:0",
+            "tf_transformers/gpt2/transformer/layer_{}/intermediate/bias:0",
+            "tf_transformers/gpt2/transformer/layer_{}/output/kernel:0",
+            "tf_transformers/gpt2/transformer/layer_{}/output/bias:0",
         ]
 
         # Simple Assertion
         assert len(from_model_vars) == len(to_model_vars)
-
-        # This dictionary maps from -> to dict names
         mapping_dict = {}
+
         for index in range(len(from_model_vars)):
             for i in range(config["num_hidden_layers"]):
                 mapping_dict[from_model_vars[index].format(i)] = to_model_vars[index].format(i)
 
         # Word Embeddings
-        mapping_dict[
-            "tf_bert_model/bert/embeddings/word_embeddings/weight:0"
-        ] = "tf_transformers/bert/word_embeddings/embeddings:0"
+        mapping_dict["tfgp_t2model/transformer/wte/weight:0"] = "tf_transformers/gpt2/word_embeddings/embeddings:0"
         # Positional Embedding
         mapping_dict[
-            "tf_bert_model/bert/embeddings/position_embeddings/embeddings:0"
-        ] = "tf_transformers/bert/positional_embeddings/embeddings:0"
-        # Type Embeddings
-        mapping_dict[
-            "tf_bert_model/bert/embeddings/token_type_embeddings/embeddings:0"
-        ] = "tf_transformers/bert/type_embeddings/embeddings:0"
-        mapping_dict[
-            "tf_bert_model/bert/embeddings/LayerNorm/gamma:0"
-        ] = "tf_transformers/bert/embeddings/layer_norm/gamma:0"
-        mapping_dict[
-            "tf_bert_model/bert/embeddings/LayerNorm/beta:0"
-        ] = "tf_transformers/bert/embeddings/layer_norm/beta:0"
-        mapping_dict["tf_bert_model/bert/pooler/dense/kernel:0"] = "tf_transformers/bert/pooler_transform/kernel:0"
-        mapping_dict["tf_bert_model/bert/pooler/dense/bias:0"] = "tf_transformers/bert/pooler_transform/bias:0"
+            "tfgp_t2model/transformer/wpe/embeddings:0"
+        ] = "tf_transformers/gpt2/positional_embeddings/embeddings:0"
+        mapping_dict["tfgp_t2model/transformer/ln_f/gamma:0"] = "tf_transformers/gpt2/ln_f/layer_norm/gamma:0"
+        mapping_dict["tfgp_t2model/transformer/ln_f/beta:0"] = "tf_transformers/gpt2/ln_f/layer_norm/beta:0"
 
         # BertModel
-        from transformers import TFBertModel
+        from transformers import TFGPT2Model
 
         tf.keras.backend.clear_session()
-        model_hf = TFBertModel.from_pretrained(hf_model_name)
+        model_hf = TFGPT2Model.from_pretrained(hf_model_name)
 
         # HF model variable name to variable values, for fast retrieval
         from_to_variable_dict = {var.name: var for var in model_hf.variables}
@@ -362,69 +327,25 @@ def convert_bert_tf(model, config):
             # In auto_regressive mode, positional embeddings variable name has
             # cond extra name. So, in case someone converts in that mode,
             # replace above mapping here, only for positional embeddings
-            if var.name == "tf_transformers/bert/cond/positional_embeddings/embeddings:0":
+            if var.name == "tf_transformers/gpt2/cond/positional_embeddings/embeddings:0":
                 mapping_dict[
-                    "tf_bert_model/bert/embeddings/position_embeddings/embeddings:0"
-                ] = "tf_transformers/bert/cond/positional_embeddings/embeddings:0"
+                    "tfgp_t2model/transformer/wpe/embeddings:0"
+                ] = "tf_transformers/gpt2/cond/positional_embeddings/embeddings:0"
 
         # Start assigning HF values to tf_transformers
         # assigned_map and assigned_map_values are used for sanity check if needed
         assigned_map = []
-        assigned_map_values = []
+        # assigned_map_values = []
         for original_var, legacy_var in mapping_dict.items():
             index = tf_transformers_model_index_dict[legacy_var]
 
-            if "query/kernel:0" in legacy_var or "key/kernel:0" in legacy_var or "value/kernel:0" in legacy_var:
+            from_shape = from_to_variable_dict.get(original_var).shape
+            to_shape = model.variables[index].shape
 
-                # huggingface (2D) to tf_transformers (3D)
-                model.variables[index].assign(
-                    tf.reshape(
-                        from_to_variable_dict.get(original_var),
-                        (
-                            config["embedding_size"],
-                            config["num_attention_heads"],
-                            config["attention_head_size"],
-                        ),
-                    )
-                )
-                assigned_map.append((original_var, legacy_var))
-                continue
-            if "query/bias:0" in legacy_var or "key/bias:0" in legacy_var or "value/bias:0" in legacy_var:
-
-                # huggingface (2D) to tf_transformers (3D)
-                model.variables[index].assign(
-                    tf.reshape(
-                        from_to_variable_dict.get(original_var),
-                        (
-                            config["num_attention_heads"],
-                            config["attention_head_size"],
-                        ),
-                    )
-                )
-                assigned_map.append((original_var, legacy_var))
-                continue
-
-            if "self_attention_output/kernel:0" in legacy_var:
-                # huggingface (3D) to tf_transformers (2D)
-                model.variables[index].assign(
-                    tf.reshape(
-                        from_to_variable_dict.get(original_var),
-                        (config["embedding_size"], config["num_attention_heads"] * config["attention_head_size"]),
-                    )
-                )
-                assigned_map.append((original_var, legacy_var))
-                continue
-
-            if "self_attention_output/bias:0" in legacy_var:
-                # huggingface (3D) to tf_transformers (2D)
-                model.variables[index].assign(
-                    tf.reshape(
-                        from_to_variable_dict.get(original_var),
-                        (-1),
-                    )
-                )
-                assigned_map.append((original_var, legacy_var))
-                continue
+            if len(from_shape) == 2:
+                if len(to_shape) == 1:
+                    model.variables[index].assign(tf.squeeze(from_to_variable_dict.get(original_var)))
+                    continue
 
             model.variables[index].assign(from_to_variable_dict.get(original_var))
             assigned_map.append((original_var, legacy_var))

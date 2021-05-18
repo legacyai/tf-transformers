@@ -48,6 +48,7 @@ class GPT2Attention(LegacyLayer):
         head_size,
         is_training,
         use_auto_regressive,
+        use_decoder=False,
         dropout_rate=0.0,
         kernel_initializer="glorot_uniform",
         bias_initializer="zeros",
@@ -60,11 +61,12 @@ class GPT2Attention(LegacyLayer):
         **kwargs,
     ):
         kwargs["name"] = name
-        super(GPT2Attention, self).__init__(**kwargs)
+        super(GPT2Attention, self).__init__(is_training=is_training, **kwargs)
         self._num_heads = num_heads
         self._head_size = head_size
         self._is_training = is_training
         self._use_auto_regressive = use_auto_regressive
+        self._use_decoder = use_decoder
         self._dropout_rate = dropout_rate
         self._kernel_initializer = tf.keras.initializers.get(kernel_initializer)
         self._bias_initializer = tf.keras.initializers.get(bias_initializer)

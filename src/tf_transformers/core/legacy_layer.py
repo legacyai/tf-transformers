@@ -6,7 +6,7 @@ from tf_transformers.layers import OnDeviceEmbedding, PositionEmbedding
 from abc import ABC, abstractmethod
 
 
-class LegacyLayer(tf.keras.layers.Layer, ABC):
+class LegacyLayer(tf.keras.layers.Layer):
     """LegacyLayer extends from tf.keras.layers.Layer.
     Base for all the mdoel in tft
 
