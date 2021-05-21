@@ -1,5 +1,6 @@
 from tf_transformers.models.encoder_decoder import EncoderDecoder
 from tf_transformers.models.bert import BERTEncoder, BertModel
+from tf_transformers.models.gpt2 import GPT2Encoder, GPT2Model
 
 # from tf_transformers.models.albert import AlbertEncoder
 # from tf_transformers.models.encoder_decoder import EncoderDecoder

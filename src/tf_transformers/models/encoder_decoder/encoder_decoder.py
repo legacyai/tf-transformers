@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tf_transformers.core import LegacyLayer, LegacyModel
-from tf_transformers.layers.mask import CrossAttentionMask
+from tf_transformers.layers.mask import CrossAttentionMask, CausalMask
 
 
 def assert_shapes(encoder_embeddings, decoder_embeddings):
@@ -32,15 +32,21 @@ def share_embedding_layers(encoder_layer, decoder_layer):
     assert_shapes(encoder_layer._embedding_layer.embeddings, decoder_layer._embedding_layer.embeddings)
     decoder_layer._embedding_layer = encoder_layer._embedding_layer
 
-    if encoder_layer._type_embeddings_layer and decoder_layer._type_embeddings_layer:
-        assert_shapes(encoder_layer._type_embeddings_layer.embeddings, decoder_layer._type_embeddings_layer.embeddings)
-        decoder_layer._type_embeddings_layer = encoder_layer._type_embeddings_layer
+    try:
+        if encoder_layer._type_embeddings_layer and decoder_layer._type_embeddings_layer:
+            assert_shapes(encoder_layer._type_embeddings_layer.embeddings, decoder_layer._type_embeddings_layer.embeddings)
+            decoder_layer._type_embeddings_layer = encoder_layer._type_embeddings_layer
+    except:
+        pass
 
-    if encoder_layer._positional_embedding_layer and decoder_layer._positional_embedding_layer:
-        assert_shapes(
-            encoder_layer._positional_embedding_layer.embeddings, decoder_layer._positional_embedding_layer.embeddings
-        )
-        decoder_layer._positional_embedding_layer = encoder_layer._positional_embedding_layer
+    try:
+        if encoder_layer._positional_embedding_layer and decoder_layer._positional_embedding_layer:
+            assert_shapes(
+                encoder_layer._positional_embedding_layer.embeddings, decoder_layer._positional_embedding_layer.embeddings
+            )
+            decoder_layer._positional_embedding_layer = encoder_layer._positional_embedding_layer
+    except:
+        pass
 
 
 def share_encoder_layers(encoder_layer, decoder_layer):
@@ -74,15 +80,21 @@ def share_encoder_layers(encoder_layer, decoder_layer):
             dec_layer._output_layer_norm = enc_layer._output_layer_norm
         except:
             pass
+    
+    try:
+        if encoder_layer._pooler_layer and decoder_layer._pooler_layer:
+            decoder_layer._pooler_layer = encoder_layer._pooler_layer
+    except:
+        pass
 
-    if encoder_layer._pooler_layer and decoder_layer._pooler_layer:
-        decoder_layer._pooler_layer = encoder_layer._pooler_layer
-
-    if encoder_layer._use_mlm_layer and decoder_layer._use_mlm_layer:
-        if encoder_layer._masked_lm_layer and decoder_layer._masked_lm_layer:
-            decoder_layer._masked_lm_layer = encoder_layer._masked_lm_layer
-        if encoder_layer._masked_lm_bias and decoder_layer._masked_lm_bias:
-            decoder_layer._masked_lm_bias = encoder_layer._masked_lm_bias
+    try:
+        if encoder_layer._use_mlm_layer and decoder_layer._use_mlm_layer:
+            if encoder_layer._masked_lm_layer and decoder_layer._masked_lm_layer:
+                decoder_layer._masked_lm_layer = encoder_layer._masked_lm_layer
+            if encoder_layer._masked_lm_bias and decoder_layer._masked_lm_bias:
+                decoder_layer._masked_lm_bias = encoder_layer._masked_lm_bias
+    except:
+        pass
 
 
 class EncoderDecoder(LegacyLayer):
@@ -93,7 +105,7 @@ class EncoderDecoder(LegacyLayer):
         encoder,
         decoder,
         share_embeddings=False,
-        share_encoder=True,
+        share_encoder=False,
         is_training=False,
         use_dropout=False,
         encoder_sequence_length=None,
@@ -134,6 +146,8 @@ class EncoderDecoder(LegacyLayer):
             is_training=self._is_training, use_dropout=self._use_dropout, name=self._model_name, **kwargs
         )
 
+        if self._encoder._mask_mode != 'user_defined':
+            raise ValueError("mask_mode for encoder should be `user-defined`.")
         # Two different hidden dimension has to be changed
         if self._encoder_config_dict["embedding_size"] != self._decoder_config_dict["embedding_size"]:
             self._encoder_decoder_projection = tf.keras.layers.Dense(
@@ -230,14 +244,14 @@ class EncoderDecoder(LegacyLayer):
             if k.startswith("decoder_")
             if k not in ["decoder_encoder_mask"]
         }
-
-        # This is decoder_encoder_mask
-        decoder_encoder_mask = CrossAttentionMask()([decoder_inputs["input_ids"], encoder_inputs["input_mask"]])
-
+        
         # Call Encoder and take the last hidden states (B x S x E)
         encoder_outputs = self._encoder(encoder_inputs)
         encoder_hidden_states = encoder_outputs["token_embeddings"]
         encoder_hidden_states = self._encoder_decoder_projection(encoder_hidden_states)
+        
+        # This is decoder_encoder_mask
+        decoder_encoder_mask = CrossAttentionMask()([decoder_inputs["input_ids"], encoder_inputs["input_mask"]])
 
         # Add the inputs to decoder
         decoder_inputs["encoder_hidden_states"] = encoder_hidden_states
