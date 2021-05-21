@@ -10,7 +10,7 @@ config = {
     "num_attention_heads": 12,
     "attention_head_size": 64,
     "num_hidden_layers": 12,
-    "type_vocab_size": 2,
+    "type_vocab_size": -1,
     "vocab_size": 50257,
     "layer_norm_epsilon": 1e-05,
     "mask_mode": "causal",

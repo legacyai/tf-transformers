@@ -238,13 +238,14 @@ class TransformerGPT2(LegacyLayer):
         )
         attention_output = self._attention_output_dense(attention_output)
         attention_output = self._attention_dropout(attention_output, training=self._use_dropout)
+        attention_output_copy = tf.identity(attention_output)
         attention_output = self._attention_layer_norm(input_tensor + attention_output)
         # mixed precision stability requires Normalization to be in tf.ffloat32
         attention_output = tf.cast(attention_output, dtype=tf_utils.get_dtype())
         intermediate_output = self._intermediate_dense(attention_output)
         layer_output = self._output_dense(intermediate_output)
         layer_output = self._output_dropout(layer_output)
-        return layer_output + input_tensor + attention_output, key, value
+        return layer_output + input_tensor + attention_output_copy, key, value
 
     def call_decoder(self, inputs, cache_key=None, cache_value=None):
         """

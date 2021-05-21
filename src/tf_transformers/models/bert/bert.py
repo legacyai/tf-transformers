@@ -534,7 +534,6 @@ class BERTEncoder(LegacyLayer):
         token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
         # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
         token_logits = self._masked_lm_bias(token_logits)
-        last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         def step_0_gather(past_length, token_embeddings):
             cache_length = tf.reduce_sum(tf.cast(tf.not_equal(input_ids_mod, -1), tf.int32), axis=1) - 1
@@ -558,6 +557,13 @@ class BERTEncoder(LegacyLayer):
             lambda: step_other_gather(past_length, token_embeddings),
         )
 
+        # token --> vocab ( batch_size x sequence_length x vocab_size)
+        last_token_logits = tf.matmul(
+            last_token_tensor,
+            self.get_embedding_table(),
+            transpose_b=True,
+            name="token_logits",
+        )
         # Expand dims of past_length back to 2D
         past_length = tf.expand_dims(past_length, 0, name="past_length")
         # Stack all layers key and value together

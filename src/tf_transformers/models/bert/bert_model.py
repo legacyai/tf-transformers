@@ -70,6 +70,7 @@ class BertModel(ModelWrapper):
         model_checkpoint_dir=None,
         convert_from_hf=True,
         return_layer=False,
+        convert_fn_type='both',
         **kwargs,
     ):
         """Get Model will reurn a tf.keras.Model / LegacyModel .
@@ -82,6 +83,8 @@ class BertModel(ModelWrapper):
             model_checkpoint_dir ([type], optional): [description]. Defaults to None.
             convert_from_hf (bool, optional): [description]. Defaults to True.
             return_layer (bool, optional): [description]. Defaults to False.
+            convert_fn_type: ['both' , 'tf', 'pt'] . If both , we use both functions to fallback to another if
+                        one fails.
 
         Returns:
             [type]: [description]
@@ -140,9 +143,18 @@ class BertModel(ModelWrapper):
                 except:
                     pass
             if convert_from_hf and not load_succesfuly:
-                cls_ref.convert_hf_to_tf(
-                    model, convert_tf_fn=convert_bert_tf(model, config), convert_pt_fn=convert_bert_pt(model, config)
-                )
+                if convert_fn_type == 'both':
+                    cls_ref.convert_hf_to_tf(
+                        model, convert_tf_fn=convert_bert_tf(model, config), convert_pt_fn=convert_bert_pt(model, config)
+                    )
+                if convert_fn_type == 'tf':
+                    cls_ref.convert_hf_to_tf(
+                        model, convert_tf_fn=convert_bert_tf(model, config), convert_pt_fn=None
+                    )
+                if convert_fn_type == 'pt':
+                    cls_ref.convert_hf_to_tf(
+                        model, convert_tf_fn=None, convert_pt_fn=convert_bert_pt(model, config)
+                    )
         if return_layer:
             return model_layer, config
         return model, config

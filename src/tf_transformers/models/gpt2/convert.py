@@ -1,45 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-
-def assert_model_results(model):
-    def get_expected_text(model_name):
-        print("Model name", model_name)
-        if model_name == "bert_base_uncased":
-            expected_text = ". i want to buy the car because it is cheap.."
-        if model_name == "bert_base_cased" or model_name == "bert_large_cased":
-            expected_text = ".. want to buy the car because it is cheap.."
-        if model_name == "bert_large_cased":
-            expected_text = ".. want to buy the car because it is cheap.."
-        return expected_text
-
-    def assert_bert(model_name):
-        from transformers import BertTokenizer
-
-        model_name = model_name.replace("_", "-")
-        tokenizer = BertTokenizer.from_pretrained(model_name)
-        text = "[CLS] i want to [MASK] the car because it is cheap. [SEP]"
-        input_ids = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(text))
-
-        input_ids = tf.constant([input_ids])
-
-        inputs = {}
-        inputs["input_ids"] = input_ids
-        inputs["input_mask"] = tf.ones_like(input_ids)
-        inputs["input_type_ids"] = tf.zeros_like(input_ids)
-
-        results = model(inputs)
-        expected_text = get_expected_text(model_name)
-        decoded_text = tokenizer.decode(tf.argmax(results["token_logits"], axis=2)[0].numpy())
-        assert expected_text == decoded_text
-
-    def assert_model(model_name):
-        assert_bert(model_name)
-
-    return assert_model
-
-
-def convert_bert_pt(model, config):
+def convert_gpt2_pt(model, config):
     """PT converter
     Args:
         model_hf: HuggingFace Model (TF)
@@ -50,24 +12,24 @@ def convert_bert_pt(model, config):
     """
 
     def convert(model_name):
+
         import torch
         import transformers
+        transformers.logging.set_verbosity_error()
 
         # From vars (Transformer variables)
-        from_model_vars = [
-            "tfgp_t2model/transformer/h_._{}/ln_1/gamma:0",
-            "tfgp_t2model/transformer/h_._{}/ln_1/beta:0",
-            "tfgp_t2model/transformer/h_._{}/attn/c_attn/weight:0",
-            "tfgp_t2model/transformer/h_._{}/attn/c_attn/bias:0",
-            "tfgp_t2model/transformer/h_._{}/attn/c_proj/weight:0",
-            "tfgp_t2model/transformer/h_._{}/attn/c_proj/bias:0",
-            "tfgp_t2model/transformer/h_._{}/ln_2/gamma:0",
-            "tfgp_t2model/transformer/h_._{}/ln_2/beta:0",
-            "tfgp_t2model/transformer/h_._{}/mlp/c_fc/weight:0",
-            "tfgp_t2model/transformer/h_._{}/mlp/c_fc/bias:0",
-            "tfgp_t2model/transformer/h_._{}/mlp/c_proj/weight:0",
-            "tfgp_t2model/transformer/h_._{}/mlp/c_proj/bias:0",
-        ]
+        from_model_vars = ['h.{}.ln_1.weight',
+                        'h.{}.ln_1.bias',
+                        'h.{}.attn.c_attn.weight',
+                        'h.{}.attn.c_attn.bias',
+                        'h.{}.attn.c_proj.weight',
+                        'h.{}.attn.c_proj.bias',
+                        'h.{}.ln_2.weight',
+                        'h.{}.ln_2.bias',
+                        'h.{}.mlp.c_fc.weight',
+                        'h.{}.mlp.c_fc.bias',
+                        'h.{}.mlp.c_proj.weight',
+                        'h.{}.mlp.c_proj.bias']
 
         # To vars (Transformer variables)
         to_model_vars = [
@@ -94,17 +56,18 @@ def convert_bert_pt(model, config):
                 mapping_dict[from_model_vars[index].format(i)] = to_model_vars[index].format(i)
 
         # Word Embeddings
-        mapping_dict["tfgp_t2model/transformer/wte/weight:0"] = "tf_transformers/gpt2/word_embeddings/embeddings:0"
+        mapping_dict["wte.weight"] = "tf_transformers/gpt2/word_embeddings/embeddings:0"
         # Positional Embedding
         mapping_dict[
-            "tfgp_t2model/transformer/wpe/embeddings:0"
+            "wpe.weight"
         ] = "tf_transformers/gpt2/positional_embeddings/embeddings:0"
-        mapping_dict["tfgp_t2model/transformer/ln_f/gamma:0"] = "tf_transformers/gpt2/ln_f/layer_norm/gamma:0"
-        mapping_dict["tfgp_t2model/transformer/ln_f/beta:0"] = "tf_transformers/gpt2/ln_f/layer_norm/beta:0"
+        mapping_dict["ln_f.weight"] = "tf_transformers/gpt2/ln_f/layer_norm/gamma:0"
+        mapping_dict["ln_f.bias"] = "tf_transformers/gpt2/ln_f/layer_norm/beta:0"
 
-        from transformers import BertModel
+        # BertModel
+        from transformers import GPT2Model
+        model_hf = GPT2Model.from_pretrained(model_name)
 
-        model_hf = BertModel.from_pretrained(model_name)
         # HF model variable name to variable values, for fast retrieval
         from_to_variable_dict = {name: var.detach().numpy() for name, var in model_hf.named_parameters()}
 
@@ -112,142 +75,50 @@ def convert_bert_pt(model, config):
         tf_transformers_model_index_dict = {}
         for index, var in enumerate(model.variables):
             tf_transformers_model_index_dict[var.name] = index
-
             # In auto_regressive mode, positional embeddings variable name has
             # cond extra name. So, in case someone converts in that mode,
             # replace above mapping here, only for positional embeddings
-            if var.name == "tf_transformers/bert/cond/positional_embeddings/embeddings:0":
+            if var.name == "tf_transformers/gpt2/cond/positional_embeddings/embeddings:0":
                 mapping_dict[
-                    "tf_bert_model/bert/embeddings/position_embeddings/embeddings:0"
-                ] = "tf_transformers/bert/cond/positional_embeddings/embeddings:0"
+                    "wpe.weight"
+                ] = "tf_transformers/gpt2/cond/positional_embeddings/embeddings:0"
+
         # Start assigning HF values to tf_transformers
         # assigned_map and assigned_map_values are used for sanity check if needed
         assigned_map = []
-        assigned_map_values = []
+        # assigned_map_values = []
         for original_var, legacy_var in mapping_dict.items():
             index = tf_transformers_model_index_dict[legacy_var]
+            from_shape = from_to_variable_dict.get(original_var).shape
+            to_shape = model.variables[index].shape
 
-            if "query/kernel:0" in legacy_var or "key/kernel:0" in legacy_var or "value/kernel:0" in legacy_var:
-
-                # huggingface (2D) to tf_transformers (3D)
-                model.variables[index].assign(
-                    np.reshape(
-                        np.transpose(from_to_variable_dict.get(original_var)),
-                        (
-                            config["embedding_size"],
-                            config["num_attention_heads"],
-                            config["attention_head_size"],
-                        ),
-                    )
-                )
-                assigned_map.append((original_var, legacy_var))
-                continue
-            if "query/bias:0" in legacy_var or "key/bias:0" in legacy_var or "value/bias:0" in legacy_var:
-
-                # huggingface (2D) to tf_transformers (3D)
-                model.variables[index].assign(
-                    np.reshape(
-                        from_to_variable_dict.get(original_var),
-                        (
-                            config["num_attention_heads"],
-                            config["attention_head_size"],
-                        ),
-                    )
-                )
-                assigned_map.append((original_var, legacy_var))
-                continue
-
-            if "self_attention_output/kernel:0" in legacy_var:
-                # huggingface (3D) to tf_transformers (2D)
-                model.variables[index].assign(
-                    np.reshape(
-                        np.transpose(from_to_variable_dict.get(original_var)),
-                        (config["embedding_size"], config["num_attention_heads"] * config["attention_head_size"]),
-                    )
-                )
-                assigned_map.append((original_var, legacy_var))
-                continue
-
-            if "self_attention_output/bias:0" in legacy_var:
-                # huggingface (3D) to tf_transformers (2D)
-                model.variables[index].assign(
-                    np.reshape(
-                        from_to_variable_dict.get(original_var),
-                        (-1),
-                    )
-                )
-                assigned_map.append((original_var, legacy_var))
-                continue
-
-            if "intermediate/kernel:0" in legacy_var or "output/kernel:0" in legacy_var:
-                # huggingface (torch transpose
-                model.variables[index].assign(np.transpose(from_to_variable_dict.get(original_var)))
-
-                assigned_map.append((original_var, legacy_var))
-                continue
+            if len(from_shape) == 2:
+                if len(to_shape) == 1:
+                    model.variables[index].assign(np.squeeze(from_to_variable_dict.get(original_var)))
+                    continue
 
             model.variables[index].assign(from_to_variable_dict.get(original_var))
             assigned_map.append((original_var, legacy_var))
 
-        from transformers import BertTokenizer
-
-        tokenizer = BertTokenizer.from_pretrained(model_name)
-        text = "[CLS] i want to [MASK] the car because it is cheap. [SEP]"
+        from transformers import GPT2Tokenizer
+        tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+        text = "This is a long sentence to check how close models are."
         inputs = tokenizer(text, return_tensors="pt")
-        outputs_pt = model_hf(**inputs)
-        outputs_pt = torch.argmax(outputs_pt.last_hidden_state, dim=2)[0].numpy()
-
-        from transformers import BertForMaskedLM
-
-        model_hf = BertForMaskedLM.from_pretrained(model_name)
-        hf_vars = [
-            "cls.predictions.bias",
-            "cls.predictions.transform.dense.weight",
-            "cls.predictions.transform.dense.bias",
-            "cls.predictions.transform.LayerNorm.weight",
-            "cls.predictions.transform.LayerNorm.bias",
-        ]
-
-        tf_vars = [
-            "tf_transformers/bert/logits_bias/bias:0",
-            "tf_transformers/bert/mlm/transform/dense/kernel:0",
-            "tf_transformers/bert/mlm/transform/dense/bias:0",
-            "tf_transformers/bert/mlm/transform/LayerNorm/gamma:0",
-            "tf_transformers/bert/mlm/transform/LayerNorm/beta:0",
-        ]
-        mapping_dict = dict(zip(tf_vars, hf_vars))
-        # HF model variable name to variable values, for fast retrieval
-        hf_variable_dict = {name: var.detach().numpy() for name, var in model_hf.named_parameters() if name in hf_vars}
-        for var in model.variables:
-            if var.name in tf_vars:
-                hf_var_name = mapping_dict[var.name]
-
-                if "dense/kernel:0" in var.name:
-                    var.assign(np.transpose(hf_variable_dict[hf_var_name]))
-                    continue
-                var.assign(hf_variable_dict[hf_var_name])
-
-        inputs = tokenizer(text, return_tensors="pt")
-        outputs_pt_mlm = model_hf(**inputs)
-        text_pt = tokenizer.decode(torch.argmax(outputs_pt_mlm[0], dim=2)[0])
-        del model_hf
-
-        inputs = tokenizer(text, return_tensors="tf")
+        outputs_hf = model_hf(**inputs)
+        outputs_hf = torch.sum(outputs_hf['last_hidden_state'], dim=-1).detach().numpy()
         inputs_tf = {}
-        inputs_tf["input_ids"] = inputs["input_ids"]
-        inputs_tf["input_type_ids"] = inputs["token_type_ids"]
-        inputs_tf["input_mask"] = inputs["attention_mask"]
+        inputs_tf['input_ids'] = tf.cast(tf.constant(inputs['input_ids'].numpy()), tf.int32)
         outputs_tf = model(inputs_tf)
-        text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
-
-        assert text_pt == text_tf
-        outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
-        np.allclose(outputs_pt, outputs_tf)
-
+        outputs_tf = tf.reduce_sum(outputs_tf['token_embeddings'], axis=-1).numpy()
+        
+        np.allclose(outputs_hf, 
+                    outputs_tf, 
+                    rtol=1.0)
+        
     return convert
 
 
-def convert_bert_tf(model, config):
+def convert_gpt2_tf(model, config):
     """TF converter
     Args:
         model_hf: HuggingFace Model (TF)
@@ -259,7 +130,6 @@ def convert_bert_tf(model, config):
 
     def convert(model_name):
         import transformers
-
         transformers.logging.set_verbosity_error()
 
         # From vars (Transformer variables)
@@ -315,7 +185,7 @@ def convert_bert_tf(model, config):
         from transformers import TFGPT2Model
 
         tf.keras.backend.clear_session()
-        model_hf = TFGPT2Model.from_pretrained(hf_model_name)
+        model_hf = TFGPT2Model.from_pretrained(model_name)
 
         # HF model variable name to variable values, for fast retrieval
         from_to_variable_dict = {var.name: var for var in model_hf.variables}
@@ -338,7 +208,6 @@ def convert_bert_tf(model, config):
         # assigned_map_values = []
         for original_var, legacy_var in mapping_dict.items():
             index = tf_transformers_model_index_dict[legacy_var]
-
             from_shape = from_to_variable_dict.get(original_var).shape
             to_shape = model.variables[index].shape
 
@@ -350,56 +219,19 @@ def convert_bert_tf(model, config):
             model.variables[index].assign(from_to_variable_dict.get(original_var))
             assigned_map.append((original_var, legacy_var))
 
-        from transformers import BertTokenizer
-
-        tokenizer = BertTokenizer.from_pretrained(model_name)
-        text = "[CLS] i want to [MASK] the car because it is cheap. [SEP]"
+        from transformers import GPT2Tokenizer
+        tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+        text = "This is a long sentence to check how close models are."
         inputs = tokenizer(text, return_tensors="tf")
         outputs_hf = model_hf(**inputs)
-        outputs_hf = tf.argmax(outputs_hf.last_hidden_state, axis=2)[0].numpy()
-
-        # BertMLM
-        from transformers import TFBertForMaskedLM
-
-        tf.keras.backend.clear_session()
-        model_hf = TFBertForMaskedLM.from_pretrained(hf_model_name)
-        hf_vars = [
-            "tf_bert_for_masked_lm/mlm___cls/predictions/bias:0",
-            "tf_bert_for_masked_lm/mlm___cls/predictions/transform/dense/kernel:0",
-            "tf_bert_for_masked_lm/mlm___cls/predictions/transform/dense/bias:0",
-            "tf_bert_for_masked_lm/mlm___cls/predictions/transform/LayerNorm/gamma:0",
-            "tf_bert_for_masked_lm/mlm___cls/predictions/transform/LayerNorm/beta:0",
-        ]
-
-        tf_vars = [
-            "tf_transformers/bert/logits_bias/bias:0",
-            "tf_transformers/bert/mlm/transform/dense/kernel:0",
-            "tf_transformers/bert/mlm/transform/dense/bias:0",
-            "tf_transformers/bert/mlm/transform/LayerNorm/gamma:0",
-            "tf_transformers/bert/mlm/transform/LayerNorm/beta:0",
-        ]
-        mapping_dict = dict(zip(tf_vars, hf_vars))
-        # HF model variable name to variable values, for fast retrieval
-        hf_variable_dict = {var.name: var for var in model_hf.variables}
-        for var in model.variables:
-            if var.name in tf_vars:
-                hf_var_name = mapping_dict[var.name]
-                var.assign(hf_variable_dict[hf_var_name])
-
-        inputs = tokenizer(text, return_tensors="tf")
-        outputs_hf_mlm = model_hf(**inputs)
-        text_hf = tokenizer.decode(tf.argmax(outputs_hf_mlm[0], axis=2)[0])
+        outputs_hf = tf.reduce_sum(outputs_hf['last_hidden_state'], axis=-1).numpy()
         del model_hf
 
         inputs_tf = {}
         inputs_tf["input_ids"] = inputs["input_ids"]
-        inputs_tf["input_type_ids"] = inputs["token_type_ids"]
-        inputs_tf["input_mask"] = inputs["attention_mask"]
         outputs_tf = model(inputs_tf)
-        text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
+        outputs_tf = tf.reduce_sum(outputs_tf['token_embeddings'], axis=-1).numpy()
 
-        assert text_hf == text_tf
-        outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
-        np.allclose(outputs_hf, outputs_tf)
+        np.allclose(outputs_hf, outputs_tf, rtol=1.0)
 
     return convert

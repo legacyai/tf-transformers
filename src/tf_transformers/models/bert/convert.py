@@ -116,7 +116,6 @@ def convert_bert_pt(model, config):
         mapping_dict["pooler.dense.bias"] = "tf_transformers/bert/pooler_transform/bias:0"
 
         from transformers import BertModel
-
         model_hf = BertModel.from_pretrained(model_name)
         # HF model variable name to variable values, for fast retrieval
         from_to_variable_dict = {name: var.detach().numpy() for name, var in model_hf.named_parameters()}
@@ -131,7 +130,7 @@ def convert_bert_pt(model, config):
             # replace above mapping here, only for positional embeddings
             if var.name == "tf_transformers/bert/cond/positional_embeddings/embeddings:0":
                 mapping_dict[
-                    "tf_bert_model/bert/embeddings/position_embeddings/embeddings:0"
+                    "embeddings.position_embeddings.weight"
                 ] = "tf_transformers/bert/cond/positional_embeddings/embeddings:0"
         # Start assigning HF values to tf_transformers
         # assigned_map and assigned_map_values are used for sanity check if needed
@@ -349,7 +348,7 @@ def convert_bert_tf(model, config):
         from transformers import TFBertModel
 
         tf.keras.backend.clear_session()
-        model_hf = TFBertModel.from_pretrained(hf_model_name)
+        model_hf = TFBertModel.from_pretrained(model_name)
 
         # HF model variable name to variable values, for fast retrieval
         from_to_variable_dict = {var.name: var for var in model_hf.variables}
@@ -440,7 +439,7 @@ def convert_bert_tf(model, config):
         from transformers import TFBertForMaskedLM
 
         tf.keras.backend.clear_session()
-        model_hf = TFBertForMaskedLM.from_pretrained(hf_model_name)
+        model_hf = TFBertForMaskedLM.from_pretrained(model_name)
         hf_vars = [
             "tf_bert_for_masked_lm/mlm___cls/predictions/bias:0",
             "tf_bert_for_masked_lm/mlm___cls/predictions/transform/dense/kernel:0",

@@ -35,7 +35,7 @@ class ModelWrapper:
         if not cache_path.exists():  # If cache path not exists
             cache_path.mkdir()
 
-    def convert_hf_to_tf(self, model, convert_tf_fn, convert_pt_fn, hf_version="4.3.3"):
+    def convert_hf_to_tf(self, model, convert_tf_fn, convert_pt_fn, hf_version="4.6.0"):
         """Convert TTF from HF
 
         Args:
@@ -44,7 +44,6 @@ class ModelWrapper:
         """
         # HF has '-' , instead of '_'
         import transformers
-
         if transformers.__version__ != hf_version:
             raise ValueError(
                 "Expected `transformers` version `{}`, but found version `{}`.".format(

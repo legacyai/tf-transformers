@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from tf_transformers.text import _gather_beams, _log_prob_from_logits, assign_zeros_to_K_V, top_k_logits, top_p_logits
-
+from tf_transformers.core import LegacyModel
 tf.keras.backend.clear_session()
 
 
@@ -111,7 +111,7 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
     def get_model(self):
         # Call the model in init itself
         layer_outputs = self(self.model_inputs)
-        decoder_model = tf.keras.Model(inputs=self.model_inputs, outputs=layer_outputs, name="decoder_model")
+        decoder_model = LegacyModel(inputs=self.model_inputs, outputs=layer_outputs, name="decoder_model")
         return decoder_model
 
     def validate_decoder_type_ids(self, inputs):

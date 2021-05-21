@@ -2,7 +2,7 @@ import tensorflow as tf
 from absl import logging
 
 from tf_transformers.core.legacy_compile import LossesContainer, MetricsContainer
-from tf_transformers.core.legacy_module import LegacyModuleCustom
+from tf_transformers.core.legacy_module import LegacyModule, LegacyModuleCustom
 
 logging.set_verbosity("INFO")
 
@@ -176,4 +176,22 @@ class LegacyModel(tf.keras.Model):
                 raise FileExistsError()
 
         module = LegacyModuleCustom(self)
+        module.save(directory)
+        
+    def save_serialized(self, directory, overwrite=False):
+        """Save as tf.saved_model.save (.pb)
+
+        Args:
+            directory ([str]): [Location of the model]
+
+        Returns:
+            None
+        """
+        if not overwrite:
+            import os
+
+            if os.path.exists(directory):
+                raise FileExistsError()
+
+        module = LegacyModule(self)
         module.save(directory)

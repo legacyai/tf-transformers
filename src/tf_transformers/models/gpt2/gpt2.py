@@ -276,7 +276,6 @@ class GPT2Encoder(LegacyLayer):
         # 2. Norm + dropout
         # embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self._use_dropout)
-
         # 3. Attention  Mask
         attention_mask = []
         if self._mask_mode == "user_defined":
@@ -488,8 +487,7 @@ class GPT2Encoder(LegacyLayer):
         # batch_size x sequence_length x embedding_size
         token_embeddings = encoder_outputs[-1]
         token_logits = tf.matmul(token_embeddings, self.get_embedding_table(), transpose_b=True)
-        last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
-
+        
         def step_0_gather(past_length, token_embeddings):
             cache_length = tf.reduce_sum(tf.cast(tf.not_equal(input_ids_mod, -1), tf.int32), axis=1) - 1
             # Getting corresponding last token tensor and last token logits
@@ -511,7 +509,13 @@ class GPT2Encoder(LegacyLayer):
             lambda: step_0_gather(past_length, token_embeddings),
             lambda: step_other_gather(past_length, token_embeddings),
         )
-
+        # token --> vocab ( batch_size x sequence_length x vocab_size)
+        last_token_logits = tf.matmul(
+            last_token_tensor,
+            self.get_embedding_table(),
+            transpose_b=True,
+            name="token_logits",
+        )        
         # Expand dims of past_length back to 2D
         past_length = tf.expand_dims(past_length, 0, name="past_length")
         # Stack all layers key and value together

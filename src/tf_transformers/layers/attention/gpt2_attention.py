@@ -251,6 +251,9 @@ class GPT2Attention(LegacyLayer):
         # qkv from input (to_tensor)
         qkv_to = self._project_qkv(to_tensor)
         query_tensor_to, key_tensor_to, value_tensor_to = map(self.split_heads, tf.split(qkv_to, 3, axis=2))
+        #print("query", query_tensor.shape, tf.reduce_sum(query_tensor, axis=-1))
+        #rint("key", key_tensor_to.shape, tf.reduce_sum(key_tensor_to, axis=-1))
+        #print("value", value_tensor.shape, tf.reduce_sum(value_tensor, axis=-1))
         # Scalar dimensions referenced here:
         #   B = batch size (number of sequences)
         #   F = `from_tensor` sequence length
@@ -272,7 +275,10 @@ class GPT2Attention(LegacyLayer):
         # seem a bit unusual, but is taken from the original Transformer paper.
         attention_probs = self._dropout(attention_probs, training=self.use_dropout)
         # `context_layer` = [B, N, F, H]
+        #print("attention_scores", attention_scores.shape, tf.reduce_sum(attention_scores, axis=[2, 3]))
+        #print("attention_probs", attention_probs.shape, tf.reduce_sum(attention_probs, axis=[2, 3]))
         context_layer = tf.einsum("BNFT,BNTH->BNFH", attention_probs, value_tensor_to)
+        #print("context_layer", context_layer.shape, tf.reduce_sum(context_layer, axis=[2, 3]))
         return self.merge_attention_heads(context_layer), key_tensor_to, value_tensor_to
 
     def call(self, inputs, cache_key=None, cache_value=None):

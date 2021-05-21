@@ -1,11 +1,11 @@
 import tensorflow as tf
 from tf_transformers.utils import get_config
 from tf_transformers.core import ModelWrapper
-from tf_transformers.models.bert import BERTEncoder
-from tf_transformers.models.bert.convert import convert_bert_tf, convert_bert_pt
+from tf_transformers.models.gpt2 import GPT2Encoder
+from tf_transformers.models.gpt2.convert import convert_gpt2_tf, convert_gpt2_pt
 from absl import logging
 
-DEFAULT_CONFIG = {
+DEFAULT_CONFIG = config = {
     "attention_probs_dropout_prob": 0.1,
     "hidden_act": "gelu",
     "intermediate_act": "gelu",
@@ -13,16 +13,15 @@ DEFAULT_CONFIG = {
     "embedding_size": 768,
     "initializer_range": 0.02,
     "intermediate_size": 3072,
-    "max_position_embeddings": 512,
+    "max_position_embeddings": 1024,
     "num_attention_heads": 12,
     "attention_head_size": 64,
     "num_hidden_layers": 12,
-    "type_vocab_size": 2,
-    "vocab_size": 28996,
-    "layer_norm_epsilon": 1e-12,
-    "mask_mode": "user_defined",
+    "type_vocab_size": -1,
+    "vocab_size": 50257,
+    "layer_norm_epsilon": 1e-05,
+    "mask_mode": "causal"
 }
-
 
 def normalize_model_name(model_name):
     return model_name.lower().replace("-", "_").strip()
@@ -37,21 +36,21 @@ def update_config(tft_config, hf_config):
     """
 
     tft_config["vocab_size"] = hf_config["vocab_size"]
-    tft_config["embedding_size"] = hf_config["hidden_size"]
-    tft_config["intermediate_size"] = hf_config["intermediate_size"]
-    tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
-    tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]
+    tft_config["embedding_size"] = hf_config["n_embd"]
+    tft_config["intermediate_size"] = hf_config["n_ctx"]
+    # tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
+    # tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]
 
-    tft_config["num_attention_heads"] = hf_config["num_attention_heads"]
-    tft_config["num_hidden_layers"] = hf_config["num_hidden_layers"]
+    tft_config["num_attention_heads"] = hf_config["n_head"]
+    tft_config["num_hidden_layers"] = hf_config["n_layer"]
 
     if "attention_head_size" in tft_config:
         tft_config["attention_head_size"] = tft_config["embedding_size"] // tft_config["num_attention_heads"]
     return tft_config
 
 
-class BertModel(ModelWrapper):
-    """Bert Encoder Wrapper"""
+class GPT2Model(ModelWrapper):
+    """GPT2 Encoder Wrapper"""
 
     def __init__(self, model_name, cache_dir):
         """
@@ -59,7 +58,7 @@ class BertModel(ModelWrapper):
             model_name (str): Model name
             cache_dir (str): cache dir to save the mode checkpoints
         """
-        super(BertModel, self).__init__(cache_dir=cache_dir, model_name=model_name)
+        super(GPT2Model, self).__init__(cache_dir=cache_dir, model_name=model_name)
 
     @classmethod
     def get_model(
@@ -70,6 +69,7 @@ class BertModel(ModelWrapper):
         model_checkpoint_dir=None,
         convert_from_hf=True,
         return_layer=False,
+        convert_fn_type='both',
         **kwargs,
     ):
         """Get Model will reurn a tf.keras.Model / LegacyModel .
@@ -82,11 +82,13 @@ class BertModel(ModelWrapper):
             model_checkpoint_dir ([type], optional): [description]. Defaults to None.
             convert_from_hf (bool, optional): [description]. Defaults to True.
             return_layer (bool, optional): [description]. Defaults to False.
+            convert_fn_type: ['both' , 'tf', 'pt'] . If both , we use both functions to fallback to another if
+            one fails.
 
         Returns:
             [type]: [description]
         """
-        module_name = "tf_transformers.models.model_configs.bert"
+        module_name = "tf_transformers.models.model_configs.gpt2"
         tft_model_name = normalize_model_name(model_name)
 
         if not config:
@@ -94,7 +96,6 @@ class BertModel(ModelWrapper):
                 config = get_config(module_name, tft_model_name)
             except:
                 # Load a base config and then overwrite it
-                # config = get_config(module_name, "bert_base_uncased")
                 config = DEFAULT_CONFIG
                 from transformers import PretrainedConfig
 
@@ -110,7 +111,7 @@ class BertModel(ModelWrapper):
             # if a config is provided, we wont be doing any extra .
             # Just create a model and return it with random_weights
             tf.keras.backend.clear_session()
-            model_layer = BERTEncoder(config, **kwargs)
+            model_layer = GPT2Encoder(config, **kwargs)
             model = model_layer.get_model()
             logging.info("Create model from config")
             if return_layer:
@@ -125,7 +126,7 @@ class BertModel(ModelWrapper):
             del kwargs["name"]
 
         tf.keras.backend.clear_session()
-        model_layer = BERTEncoder(config, **kwargs)
+        model_layer = GPT2Encoder(config, **kwargs)
         model = model_layer.get_model()
 
         # Give preference to model_checkpoint_dir
@@ -140,9 +141,18 @@ class BertModel(ModelWrapper):
                 except:
                     pass
             if convert_from_hf and not load_succesfuly:
-                cls_ref.convert_hf_to_tf(
-                    model, convert_tf_fn=convert_bert_tf(model, config), convert_pt_fn=convert_bert_pt(model, config)
-                )
+                if convert_fn_type == 'both':
+                    cls_ref.convert_hf_to_tf(
+                        model, convert_tf_fn=convert_gpt2_tf(model, config), convert_pt_fn=convert_gpt2_pt(model, config)
+                    )
+                if convert_fn_type == 'tf':
+                    cls_ref.convert_hf_to_tf(
+                        model, convert_tf_fn=convert_gpt2_tf(model, config), convert_pt_fn=None
+                    )
+                if convert_fn_type == 'pt':
+                    cls_ref.convert_hf_to_tf(
+                        model, convert_tf_fn=None, convert_pt_fn=convert_gpt2_pt(model, config)
+                    )
         if return_layer:
             return model_layer, config
         return model, config
