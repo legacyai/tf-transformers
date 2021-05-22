@@ -116,6 +116,7 @@ def convert_bert_pt(model, config):
         mapping_dict["pooler.dense.bias"] = "tf_transformers/bert/pooler_transform/bias:0"
 
         from transformers import BertModel
+
         model_hf = BertModel.from_pretrained(model_name)
         # HF model variable name to variable values, for fast retrieval
         from_to_variable_dict = {name: var.detach().numpy() for name, var in model_hf.named_parameters()}

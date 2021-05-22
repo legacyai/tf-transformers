@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
+
 def convert_gpt2_pt(model, config):
     """PT converter
     Args:
@@ -15,21 +16,24 @@ def convert_gpt2_pt(model, config):
 
         import torch
         import transformers
+
         transformers.logging.set_verbosity_error()
 
         # From vars (Transformer variables)
-        from_model_vars = ['h.{}.ln_1.weight',
-                        'h.{}.ln_1.bias',
-                        'h.{}.attn.c_attn.weight',
-                        'h.{}.attn.c_attn.bias',
-                        'h.{}.attn.c_proj.weight',
-                        'h.{}.attn.c_proj.bias',
-                        'h.{}.ln_2.weight',
-                        'h.{}.ln_2.bias',
-                        'h.{}.mlp.c_fc.weight',
-                        'h.{}.mlp.c_fc.bias',
-                        'h.{}.mlp.c_proj.weight',
-                        'h.{}.mlp.c_proj.bias']
+        from_model_vars = [
+            "h.{}.ln_1.weight",
+            "h.{}.ln_1.bias",
+            "h.{}.attn.c_attn.weight",
+            "h.{}.attn.c_attn.bias",
+            "h.{}.attn.c_proj.weight",
+            "h.{}.attn.c_proj.bias",
+            "h.{}.ln_2.weight",
+            "h.{}.ln_2.bias",
+            "h.{}.mlp.c_fc.weight",
+            "h.{}.mlp.c_fc.bias",
+            "h.{}.mlp.c_proj.weight",
+            "h.{}.mlp.c_proj.bias",
+        ]
 
         # To vars (Transformer variables)
         to_model_vars = [
@@ -58,14 +62,13 @@ def convert_gpt2_pt(model, config):
         # Word Embeddings
         mapping_dict["wte.weight"] = "tf_transformers/gpt2/word_embeddings/embeddings:0"
         # Positional Embedding
-        mapping_dict[
-            "wpe.weight"
-        ] = "tf_transformers/gpt2/positional_embeddings/embeddings:0"
+        mapping_dict["wpe.weight"] = "tf_transformers/gpt2/positional_embeddings/embeddings:0"
         mapping_dict["ln_f.weight"] = "tf_transformers/gpt2/ln_f/layer_norm/gamma:0"
         mapping_dict["ln_f.bias"] = "tf_transformers/gpt2/ln_f/layer_norm/beta:0"
 
         # BertModel
         from transformers import GPT2Model
+
         model_hf = GPT2Model.from_pretrained(model_name)
 
         # HF model variable name to variable values, for fast retrieval
@@ -79,9 +82,7 @@ def convert_gpt2_pt(model, config):
             # cond extra name. So, in case someone converts in that mode,
             # replace above mapping here, only for positional embeddings
             if var.name == "tf_transformers/gpt2/cond/positional_embeddings/embeddings:0":
-                mapping_dict[
-                    "wpe.weight"
-                ] = "tf_transformers/gpt2/cond/positional_embeddings/embeddings:0"
+                mapping_dict["wpe.weight"] = "tf_transformers/gpt2/cond/positional_embeddings/embeddings:0"
 
         # Start assigning HF values to tf_transformers
         # assigned_map and assigned_map_values are used for sanity check if needed
@@ -101,20 +102,19 @@ def convert_gpt2_pt(model, config):
             assigned_map.append((original_var, legacy_var))
 
         from transformers import GPT2Tokenizer
+
         tokenizer = GPT2Tokenizer.from_pretrained(model_name)
         text = "This is a long sentence to check how close models are."
         inputs = tokenizer(text, return_tensors="pt")
         outputs_hf = model_hf(**inputs)
-        outputs_hf = torch.sum(outputs_hf['last_hidden_state'], dim=-1).detach().numpy()
+        outputs_hf = torch.sum(outputs_hf["last_hidden_state"], dim=-1).detach().numpy()
         inputs_tf = {}
-        inputs_tf['input_ids'] = tf.cast(tf.constant(inputs['input_ids'].numpy()), tf.int32)
+        inputs_tf["input_ids"] = tf.cast(tf.constant(inputs["input_ids"].numpy()), tf.int32)
         outputs_tf = model(inputs_tf)
-        outputs_tf = tf.reduce_sum(outputs_tf['token_embeddings'], axis=-1).numpy()
-        
-        np.allclose(outputs_hf, 
-                    outputs_tf, 
-                    rtol=1.0)
-        
+        outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
+
+        np.allclose(outputs_hf, outputs_tf, rtol=1.0)
+
     return convert
 
 
@@ -130,6 +130,7 @@ def convert_gpt2_tf(model, config):
 
     def convert(model_name):
         import transformers
+
         transformers.logging.set_verbosity_error()
 
         # From vars (Transformer variables)
@@ -220,17 +221,18 @@ def convert_gpt2_tf(model, config):
             assigned_map.append((original_var, legacy_var))
 
         from transformers import GPT2Tokenizer
+
         tokenizer = GPT2Tokenizer.from_pretrained(model_name)
         text = "This is a long sentence to check how close models are."
         inputs = tokenizer(text, return_tensors="tf")
         outputs_hf = model_hf(**inputs)
-        outputs_hf = tf.reduce_sum(outputs_hf['last_hidden_state'], axis=-1).numpy()
+        outputs_hf = tf.reduce_sum(outputs_hf["last_hidden_state"], axis=-1).numpy()
         del model_hf
 
         inputs_tf = {}
         inputs_tf["input_ids"] = inputs["input_ids"]
         outputs_tf = model(inputs_tf)
-        outputs_tf = tf.reduce_sum(outputs_tf['token_embeddings'], axis=-1).numpy()
+        outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
 
         np.allclose(outputs_hf, outputs_tf, rtol=1.0)
 

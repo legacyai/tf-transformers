@@ -44,6 +44,7 @@ class ModelWrapper:
         """
         # HF has '-' , instead of '_'
         import transformers
+
         if transformers.__version__ != hf_version:
             raise ValueError(
                 "Expected `transformers` version `{}`, but found version `{}`.".format(

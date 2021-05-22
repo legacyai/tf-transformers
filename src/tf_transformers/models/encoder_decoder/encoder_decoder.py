@@ -34,7 +34,9 @@ def share_embedding_layers(encoder_layer, decoder_layer):
 
     try:
         if encoder_layer._type_embeddings_layer and decoder_layer._type_embeddings_layer:
-            assert_shapes(encoder_layer._type_embeddings_layer.embeddings, decoder_layer._type_embeddings_layer.embeddings)
+            assert_shapes(
+                encoder_layer._type_embeddings_layer.embeddings, decoder_layer._type_embeddings_layer.embeddings
+            )
             decoder_layer._type_embeddings_layer = encoder_layer._type_embeddings_layer
     except:
         pass
@@ -42,7 +44,8 @@ def share_embedding_layers(encoder_layer, decoder_layer):
     try:
         if encoder_layer._positional_embedding_layer and decoder_layer._positional_embedding_layer:
             assert_shapes(
-                encoder_layer._positional_embedding_layer.embeddings, decoder_layer._positional_embedding_layer.embeddings
+                encoder_layer._positional_embedding_layer.embeddings,
+                decoder_layer._positional_embedding_layer.embeddings,
             )
             decoder_layer._positional_embedding_layer = encoder_layer._positional_embedding_layer
     except:
@@ -80,7 +83,7 @@ def share_encoder_layers(encoder_layer, decoder_layer):
             dec_layer._output_layer_norm = enc_layer._output_layer_norm
         except:
             pass
-    
+
     try:
         if encoder_layer._pooler_layer and decoder_layer._pooler_layer:
             decoder_layer._pooler_layer = encoder_layer._pooler_layer
@@ -146,7 +149,7 @@ class EncoderDecoder(LegacyLayer):
             is_training=self._is_training, use_dropout=self._use_dropout, name=self._model_name, **kwargs
         )
 
-        if self._encoder._mask_mode != 'user_defined':
+        if self._encoder._mask_mode != "user_defined":
             raise ValueError("mask_mode for encoder should be `user-defined`.")
         # Two different hidden dimension has to be changed
         if self._encoder_config_dict["embedding_size"] != self._decoder_config_dict["embedding_size"]:
@@ -244,12 +247,12 @@ class EncoderDecoder(LegacyLayer):
             if k.startswith("decoder_")
             if k not in ["decoder_encoder_mask"]
         }
-        
+
         # Call Encoder and take the last hidden states (B x S x E)
         encoder_outputs = self._encoder(encoder_inputs)
         encoder_hidden_states = encoder_outputs["token_embeddings"]
         encoder_hidden_states = self._encoder_decoder_projection(encoder_hidden_states)
-        
+
         # This is decoder_encoder_mask
         decoder_encoder_mask = CrossAttentionMask()([decoder_inputs["input_ids"], encoder_inputs["input_mask"]])
 

@@ -20,8 +20,9 @@ DEFAULT_CONFIG = config = {
     "type_vocab_size": -1,
     "vocab_size": 50257,
     "layer_norm_epsilon": 1e-05,
-    "mask_mode": "causal"
+    "mask_mode": "causal",
 }
+
 
 def normalize_model_name(model_name):
     return model_name.lower().replace("-", "_").strip()
@@ -69,7 +70,7 @@ class GPT2Model(ModelWrapper):
         model_checkpoint_dir=None,
         convert_from_hf=True,
         return_layer=False,
-        convert_fn_type='both',
+        convert_fn_type="both",
         **kwargs,
     ):
         """Get Model will reurn a tf.keras.Model / LegacyModel .
@@ -141,18 +142,16 @@ class GPT2Model(ModelWrapper):
                 except:
                     pass
             if convert_from_hf and not load_succesfuly:
-                if convert_fn_type == 'both':
+                if convert_fn_type == "both":
                     cls_ref.convert_hf_to_tf(
-                        model, convert_tf_fn=convert_gpt2_tf(model, config), convert_pt_fn=convert_gpt2_pt(model, config)
+                        model,
+                        convert_tf_fn=convert_gpt2_tf(model, config),
+                        convert_pt_fn=convert_gpt2_pt(model, config),
                     )
-                if convert_fn_type == 'tf':
-                    cls_ref.convert_hf_to_tf(
-                        model, convert_tf_fn=convert_gpt2_tf(model, config), convert_pt_fn=None
-                    )
-                if convert_fn_type == 'pt':
-                    cls_ref.convert_hf_to_tf(
-                        model, convert_tf_fn=None, convert_pt_fn=convert_gpt2_pt(model, config)
-                    )
+                if convert_fn_type == "tf":
+                    cls_ref.convert_hf_to_tf(model, convert_tf_fn=convert_gpt2_tf(model, config), convert_pt_fn=None)
+                if convert_fn_type == "pt":
+                    cls_ref.convert_hf_to_tf(model, convert_tf_fn=None, convert_pt_fn=convert_gpt2_pt(model, config))
         if return_layer:
             return model_layer, config
         return model, config

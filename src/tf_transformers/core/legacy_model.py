@@ -177,7 +177,7 @@ class LegacyModel(tf.keras.Model):
 
         module = LegacyModuleCustom(self)
         module.save(directory)
-        
+
     def save_serialized(self, directory, overwrite=False):
         """Save as tf.saved_model.save (.pb)
 
