@@ -113,7 +113,7 @@ def convert_gpt2_pt(model, config):
         outputs_tf = model(inputs_tf)
         outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
 
-        np.allclose(outputs_hf, outputs_tf, rtol=1.0)
+        assert np.allclose(outputs_hf, outputs_tf, rtol=1.0) == True
 
     return convert
 
@@ -182,7 +182,7 @@ def convert_gpt2_tf(model, config):
         mapping_dict["tfgp_t2model/transformer/ln_f/gamma:0"] = "tf_transformers/gpt2/ln_f/layer_norm/gamma:0"
         mapping_dict["tfgp_t2model/transformer/ln_f/beta:0"] = "tf_transformers/gpt2/ln_f/layer_norm/beta:0"
 
-        # BertModel
+        # GPT2Model
         from transformers import TFGPT2Model
 
         tf.keras.backend.clear_session()
@@ -234,6 +234,6 @@ def convert_gpt2_tf(model, config):
         outputs_tf = model(inputs_tf)
         outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
 
-        np.allclose(outputs_hf, outputs_tf, rtol=1.0)
+        assert np.allclose(outputs_hf, outputs_tf, rtol=1.0) == True
 
     return convert

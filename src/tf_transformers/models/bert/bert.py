@@ -746,22 +746,6 @@ class BERTEncoder(LegacyLayer):
         all_cache_key = inputs["all_cache_key"]
         all_cache_value = inputs["all_cache_value"]
 
-        def step_0_cache_length(_):
-            return tf.constant(0, dtype=tf.int32)
-
-        def step_other_cache_length(all_cache_key):
-            past_length = tf.shape(all_cache_key)[3]
-            # Why -1, because When iter 2 (our positional embedding should be 1 not 2 and so on)
-            sequence_length = tf.shape(input_ids)[1] + past_length - 1
-            return sequence_length
-
-        # Get sequence length
-        sequence_length = tf.cond(
-            tf.equal(tf.reduce_sum(all_cache_key), 0),
-            lambda: step_0_cache_length(all_cache_key),
-            lambda: step_other_cache_length(all_cache_key),
-        )
-
         all_cache_key = [
             tf.squeeze(item, axis=0)
             for item in tf.split(all_cache_key, num_or_size_splits=self._config_dict["num_hidden_layers"], axis=0)

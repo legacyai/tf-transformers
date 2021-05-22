@@ -39,7 +39,10 @@ class T5Attention(LegacyLayer):
         num_heads,
         head_size,
         bidirectional,
+        use_auto_regressive,
+        is_training,
         create_positonal_embedding=True,
+        use_decoder=False,
         positional_buckets=32,
         dropout_rate=0.0,
         kernel_initializer="glorot_uniform",
@@ -72,10 +75,13 @@ class T5Attention(LegacyLayer):
             bias_constraint: Constraint for dense layer kernels.
         """
         kwargs["name"] = name
-        super(T5Attention, self).__init__(**kwargs)
+        super(T5Attention, self).__init__(is_training=is_training, **kwargs)
         self._num_heads = num_heads
         self._head_size = head_size
+        self._is_training = is_training
         self._bidirectional = bidirectional
+        self._use_auto_regressive = use_auto_regressive
+        self._use_decoder = use_decoder
         self._create_positonal_embedding = create_positonal_embedding
         self._positional_buckets = positional_buckets
         self._dropout_rate = dropout_rate
@@ -483,13 +489,15 @@ class T5Attention(LegacyLayer):
         cache_value=None,
         cross_decoder_mode=False,
     ):
-        if self.is_training:
+        # For decoder this function is used for training and inference
+        if (self._is_training is False and self._use_auto_regressive) or cache_key is not None:
+
             (
                 attention_states,
                 position_bias,
                 key_tensor,
                 value_tensor,
-            ) = self.call_training(inputs, position_bias)
+            ) = self.call_predict(inputs, position_bias, cache_key, cache_value, cross_decoder_mode)
             return attention_states, position_bias, key_tensor, value_tensor
         else:
             (
@@ -497,5 +505,5 @@ class T5Attention(LegacyLayer):
                 position_bias,
                 key_tensor,
                 value_tensor,
-            ) = self.call_predict(inputs, position_bias, cache_key, cache_value, cross_decoder_mode)
+            ) = self.call_training(inputs, position_bias)
             return attention_states, position_bias, key_tensor, value_tensor

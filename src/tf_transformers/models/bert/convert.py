@@ -255,7 +255,7 @@ def convert_bert_pt(model, config):
 
         assert text_pt == text_tf
         outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
-        np.allclose(outputs_pt, outputs_tf)
+        assert np.allclose(outputs_pt, outputs_tf) == True
 
     return convert
 
@@ -478,6 +478,6 @@ def convert_bert_tf(model, config):
 
         assert text_hf == text_tf
         outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
-        np.allclose(outputs_hf, outputs_tf)
+        assert np.allclose(outputs_hf, outputs_tf) == True
 
     return convert

@@ -58,7 +58,8 @@ class ModelWrapper:
                 convert_tf_fn(hf_model_name)
                 convert_success = True
                 logging.info("Successful: Converted model using TF HF")
-            except:
+            except Exception as e:
+                logging.error(e)
                 logging.info("Failed: Converted model using TF HF")
                 pass
         if convert_success is False and convert_pt_fn:
@@ -66,7 +67,8 @@ class ModelWrapper:
                 convert_pt_fn(hf_model_name)
                 logging.info("Successful: Converted model using PT HF")
                 convert_success = True
-            except:
+            except Exception as e:
+                logging.error(e)
                 logging.info("Failed to convert model from huggingface")
                 pass
 
