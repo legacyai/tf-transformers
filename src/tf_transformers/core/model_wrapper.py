@@ -35,7 +35,7 @@ class ModelWrapper:
         if not cache_path.exists():  # If cache path not exists
             cache_path.mkdir()
 
-    def convert_hf_to_tf(self, model, convert_tf_fn, convert_pt_fn, hf_version="4.6.0"):
+    def convert_hf_to_tf(self, model, config, convert_tf_fn, convert_pt_fn, hf_version="4.6.0"):
         """Convert TTF from HF
 
         Args:
@@ -55,22 +55,21 @@ class ModelWrapper:
         convert_success = False
         if convert_tf_fn:
             try:
-                convert_tf_fn(hf_model_name)
+                convert_tf_fn(model, config, hf_model_name)
                 convert_success = True
                 logging.info("Successful: Converted model using TF HF")
             except Exception as e:
                 logging.error(e)
                 logging.info("Failed: Converted model using TF HF")
-                pass
+
         if convert_success is False and convert_pt_fn:
             try:
-                convert_pt_fn(hf_model_name)
+                convert_pt_fn(model, config, hf_model_name)
                 logging.info("Successful: Converted model using PT HF")
                 convert_success = True
             except Exception as e:
                 logging.error(e)
                 logging.info("Failed to convert model from huggingface")
-                pass
 
         if convert_success:
             model.save_checkpoint(str(self.model_path), overwrite=True)

@@ -140,6 +140,7 @@ class T5Model(ModelWrapper):
             del kwargs["name"]
 
         tf.keras.backend.clear_session()
+        config["bidirectional"] = True
         encoder_layer = T5Encoder(config=config, name="t5_encoder")
 
         config["bidirectional"] = False
@@ -168,13 +169,14 @@ class T5Model(ModelWrapper):
                 if convert_fn_type == "both":
                     cls_ref.convert_hf_to_tf(
                         model,
-                        convert_tf_fn=convert_t5_tf(model, config),
-                        convert_pt_fn=convert_t5_pt(model, config),
+                        config,
+                        convert_tf_fn=convert_t5_tf,
+                        convert_pt_fn=convert_t5_pt,
                     )
                 if convert_fn_type == "tf":
-                    cls_ref.convert_hf_to_tf(model, convert_tf_fn=convert_t5_tf(model, config), convert_pt_fn=None)
+                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=convert_t5_tf, convert_pt_fn=None)
                 if convert_fn_type == "pt":
-                    cls_ref.convert_hf_to_tf(model, convert_tf_fn=None, convert_pt_fn=convert_t5_pt(model, config))
+                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=None, convert_pt_fn=convert_t5_pt)
         if return_layer:
             return model_layer, config
         return model, config

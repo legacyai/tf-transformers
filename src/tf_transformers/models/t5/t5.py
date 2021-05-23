@@ -295,14 +295,11 @@ class T5Encoder(LegacyLayer):
         # 4. Transformer Outputs
         encoder_outputs = []
         position_bias = None
-        print("embeddings", embeddings.shape, tf.reduce_sum(embeddings))
         for i in range(self._config_dict["num_hidden_layers"]):
             layer = self._transformer_layers[i]
             embeddings, position_bias, k, v = layer([embeddings, attention_mask], position_bias=position_bias)
             encoder_outputs.append(embeddings)
-            print("embeddings", embeddings.shape, tf.reduce_sum(embeddings))
 
-        print("embeddings before norm", embeddings.shape, tf.reduce_sum(embeddings, axis=[0, 2]))
         encoder_outputs[-1] = self._last_layer_norm(encoder_outputs[-1])
         encoder_outputs[-1] = self._last_layer_dropout(encoder_outputs[-1])
         # First word of last layer outputs [CLS]
