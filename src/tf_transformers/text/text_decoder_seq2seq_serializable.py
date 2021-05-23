@@ -145,21 +145,21 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             batch_size=self.batch_size,
             ragged=False,
             dtype=tf.int32,
-            name="input_ids",
+            name="encoder_input_ids",
         )
         input_mask = tf.keras.layers.Input(
             shape=(self.sequence_length,),
             batch_size=self.batch_size,
             ragged=False,
             dtype=tf.int32,
-            name="input_mask",
+            name="encoder_input_mask",
         )
         input_type_ids = tf.keras.layers.Input(
             shape=(self.sequence_length,),
             batch_size=self.batch_size,
             ragged=False,
             dtype=tf.int32,
-            name="input_type_ids",
+            name="encoder_input_type_ids",
         )
         self.input_name_list = []
         if "encoder_input_ids" in self.model.input:
@@ -184,7 +184,7 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
 
         if self.max_iterations is None:
             inputs["iterations"] = tf.keras.layers.Input(
-                shape=(1,), batch_size=1, ragged=False, dtype=tf.int32, name="iterator"
+                shape=(1,), batch_size=1, ragged=False, dtype=tf.int32, name="iterations"
             )
 
         return self.decoder_input_name_list, self.input_name_list, inputs

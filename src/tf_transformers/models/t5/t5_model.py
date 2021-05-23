@@ -47,8 +47,7 @@ def update_config(tft_config, hf_config):
     tft_config["num_attention_heads"] = hf_config["num_heads"]
     tft_config["num_hidden_layers"] = hf_config["num_layers"]
     tft_config["positional_buckets"] = hf_config["relative_attention_num_buckets"]
-    if "attention_head_size" in tft_config:
-        tft_config["attention_head_size"] = tft_config["embedding_size"] // tft_config["num_attention_heads"]
+
     return tft_config
 
 

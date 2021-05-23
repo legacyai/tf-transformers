@@ -3,23 +3,23 @@ from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer, LegacyModel
-from tf_transformers.layers import OnDeviceEmbedding, PositionEmbedding, MaskedLM, BiasLayer
+from tf_transformers.layers import T5LayerNormalization, OnDeviceEmbedding, PositionEmbedding
 from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
-from tf_transformers.layers.transformer import TransformerBERT
+from tf_transformers.layers.transformer import TransformermT5
 from tf_transformers.utils import tf_utils
 
 logging.set_verbosity("INFO")
 
 
-class BERTEncoder(LegacyLayer):
-    """BERT based encoder / Decoder .
-    BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
-    Authors: Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova
+class MT5Encoder(LegacyLayer):
+    """MT5 based encoder / Decoder .
+    Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer
+    Authors: Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee,
+             Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, Peter J. Liu
+    Implementation of T5 in TF2.0
 
-    Implementation of Bert in TF2.0
-
-    Paper: https://arxiv.org/abs/1810.04805
-    Official Code: https://github.com/google-research/bert
+    Paper: https://arxiv.org/abs/1910.10683
+    Official Code: https://github.com/google-research/text-to-text-transfer-transformer
 
 
     """
@@ -28,14 +28,13 @@ class BERTEncoder(LegacyLayer):
         self,
         config,
         mask_mode="user_defined",
-        name="bert",
+        name="mt5",
         use_dropout=False,
         is_training=False,
         use_auto_regressive=False,
         use_decoder=False,
         batch_size=None,
         sequence_length=None,
-        use_mlm_layer=True,
         use_masked_lm_positions=False,
         return_all_layer_outputs=False,
         **kwargs,
@@ -60,11 +59,10 @@ class BERTEncoder(LegacyLayer):
         self._batch_size = batch_size
         self._sequence_length = sequence_length
         self._use_masked_lm_positions = use_masked_lm_positions
-        self._use_mlm_layer = use_mlm_layer
         self._return_all_layer_outputs = return_all_layer_outputs
 
         # self._self_setattr_tracking = False
-        super(BERTEncoder, self).__init__(
+        super(MT5Encoder, self).__init__(
             is_training=self._is_training, use_dropout=self._use_dropout, name=self._model_name, **kwargs
         )
 
@@ -80,7 +78,6 @@ class BERTEncoder(LegacyLayer):
             "use_dropout": self._use_dropout,
             "batch_size": self._batch_size,
             "sequence_length": self._sequence_length,
-            "use_mlm_layer": self._use_mlm_layer,
             "use_masked_lm_positions": self._use_masked_lm_positions,
             "return_all_layer_outputs": self._return_all_layer_outputs,
         }
@@ -95,22 +92,29 @@ class BERTEncoder(LegacyLayer):
         ) = self.get_embedding_layers(self._config_dict)
 
         # Embedding Norm
-        self._embedding_norm = tf.keras.layers.LayerNormalization(
-            name="embeddings/layer_norm", axis=-1, epsilon=config["layer_norm_epsilon"], dtype=tf.float32
-        )
+        # self._embedding_norm = GPT2LayerNormalization(
+        #     name="embeddings/layer_norm", axis=-1, epsilon=config["layer_norm_epsilon"], dtype=tf.float32
+        # )
 
         # Embedding dropout Layer
         self._embedding_dropout = tf.keras.layers.Dropout(rate=config["hidden_dropout_prob"])
-
         # Transformer Layer
         self._transformer_layers = []
         for i in range(config["num_hidden_layers"]):
-            layer = TransformerBERT(
+            #  Required only for first layer to create the positonal_embeddings
+            if i == 0:
+                create_positonal_embedding = True
+            else:
+                create_positonal_embedding = False
+            layer = TransformermT5(
                 hidden_size=config["embedding_size"],
                 num_attention_heads=config["num_attention_heads"],
                 attention_head_size=config["attention_head_size"],
                 intermediate_size=config["intermediate_size"],
                 intermediate_activation=self._intermediate_activation,
+                bidirectional=config["bidirectional"],
+                create_positonal_embedding=create_positonal_embedding,
+                positional_buckets=config["positional_buckets"],
                 dropout_rate=config["hidden_dropout_prob"],
                 attention_dropout_rate=config["attention_probs_dropout_prob"],
                 kernel_initializer=self._initializer,
@@ -123,24 +127,14 @@ class BERTEncoder(LegacyLayer):
             )
             self._transformer_layers.append(layer)
 
-        # CLS layer
-        self._pooler_layer = tf.keras.layers.Dense(
-            units=config["embedding_size"],
-            activation="tanh",
-            kernel_initializer=self._initializer,
-            name="pooler_transform",
+        # Last Layer Normalization (only in GPT2)
+        self._last_layer_norm = T5LayerNormalization(
+            name="last_layer_norm",
+            axis=-1,
+            epsilon=config["layer_norm_epsilon"],
+            dtype=tf.float32,
         )
-
-        # Default True for BERT and Albert
-        if self._use_mlm_layer:
-            self._masked_lm_layer = MaskedLM(
-                hidden_size=config["embedding_size"],
-                layer_norm_epsilon=config["layer_norm_epsilon"],
-                activation=config["hidden_act"],
-                name="mlm",
-            )
-            self._masked_lm_bias = BiasLayer(name="mlm/transform")
-
+        self._last_layer_dropout = tf.keras.layers.Dropout(rate=config["hidden_dropout_prob"])
         self.call_fn = self.get_call_method(self._config_dict)
         # Initialize model
         self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
@@ -183,10 +177,6 @@ class BERTEncoder(LegacyLayer):
         # If type mebddings required
         if self._type_embeddings_layer:
             inputs["input_type_ids"] = input_type_ids
-        # if masked_lm_positions
-        if self._use_masked_lm_positions:
-            inputs["masked_lm_positions"] = masked_lm_positions
-
         # Auto Regressive is activated only when is_training=False
         if self._is_training is False and self._use_auto_regressive:
             all_cache_key = tf.keras.layers.Input(
@@ -290,9 +280,8 @@ class BERTEncoder(LegacyLayer):
             embeddings = embeddings + positional_embeddings
 
         # 2. Norm + dropout
-        embeddings = self._embedding_norm(embeddings)
+        # embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self._use_dropout)
-
         # 3. Attention  Mask
         attention_mask = []
         if self._mask_mode == "user_defined":
@@ -306,62 +295,40 @@ class BERTEncoder(LegacyLayer):
 
         # 4. Transformer Outputs
         encoder_outputs = []
+        position_bias = None
         for i in range(self._config_dict["num_hidden_layers"]):
             layer = self._transformer_layers[i]
-            embeddings, _, _ = layer([embeddings, attention_mask])
+            embeddings, position_bias, k, v = layer([embeddings, attention_mask], position_bias=position_bias)
             encoder_outputs.append(embeddings)
 
+        encoder_outputs[-1] = self._last_layer_norm(encoder_outputs[-1])
+        encoder_outputs[-1] = self._last_layer_dropout(encoder_outputs[-1])
         # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(encoder_outputs[-1])
         # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
         # batch_size x sequence_length x embedding_size
         token_embeddings = encoder_outputs[-1]
-
-        # check for masked lm positions
-        # only for encoder forward pass. This is for MaskedLM training
-        if "masked_lm_positions" in inputs:
-            masked_lm_positions = inputs["masked_lm_positions"]
-        else:
-            masked_lm_positions = None
-
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
         token_logits = tf.matmul(
-            token_embeddings_mlm, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
+            token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
         )
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
-        token_logits = self._masked_lm_bias(token_logits)
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         result = {
-            "cls_output": cls_output,
             "token_embeddings": token_embeddings,
             "token_logits": token_logits,
             "last_token_logits": last_token_logits,
         }
 
         if self._return_all_layer_outputs:
-            all_cls_output = []
             all_token_logits = []
             for per_layer_token_embeddings in encoder_outputs:
-                per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
-                    per_layer_token_embeddings
-                )
-                all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
-
-                # token logits per layer
-                layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
                 layer_token_logits = tf.matmul(
-                    layer_token_embeddings_mlm,
+                    per_layer_token_embeddings,
                     tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
                     transpose_b=True,
                 )
-                layer_token_logits = self._masked_lm_bias(layer_token_logits)
                 all_token_logits.append(layer_token_logits)
 
             result["all_layer_token_embeddings"] = encoder_outputs
-            result["all_layer_cls_output"] = all_cls_output
             result["all_layer_token_logits"] = all_token_logits
 
         return result
@@ -410,176 +377,7 @@ class BERTEncoder(LegacyLayer):
             'past_length'       --> tf.int32 (1 x sequence_length)
 
         """
-
-        # 1. Gather necessary inputs
-        input_ids_mod = inputs["input_ids"]
-        all_cache_key = inputs["all_cache_key"]
-        all_cache_value = inputs["all_cache_value"]
-        past_length = inputs["past_length"]
-        # Convert past_length 2D to 1D
-        past_length = tf.squeeze(past_length, 0)
-
-        # IMPORTANT : Get input_ids by replacing -1 with 0
-        # Otherwise we get index error from word embeddings
-        # In case of variable batch decoding, we will pad the inputs with -1
-        # So, we will replace -1 with 0, because -1 is not a valid index in word embeddings
-        # >> input_ids_mod = [[ 1, 5, 7,  8,  10],
-        #                       2, 3, -1, -1, -1]]
-        #
-        # >> input_ids     = [[1, 5, 7, 8,10],
-        #                      2, 3, 0, 0, 0]]
-        input_ids = input_ids_mod * tf.cast(tf.not_equal(input_ids_mod, -1), tf.int32)
-        sequence_length = tf.shape(input_ids)[1]
-
-        # Asserting
-        tf.assert_equal(tf.shape(all_cache_value)[0], self._config_dict["num_hidden_layers"])
-
-        # Step 0 of inference. For step0, we do not have valid cache. We pass zero tensor
-        def step_0(input_ids):
-            sequence_length = tf.shape(input_ids)[1]
-            positional_embeddings = self._positional_embedding_layer(tf.range(sequence_length))
-            return sequence_length, positional_embeddings
-
-        # From step_1 (autoregressive mode starts) onwards, we need to account for
-        # `past_length` of previous words (inputs + generated) . Due to our logic,
-        # we need to take a transpose of `position_embeddings` in this specific setting
-        def step_other(input_ids):
-            sequence_length = tf.shape(input_ids)[1]
-            # Because past_length varies with batch
-            positional_embeddings = self._positional_embedding_layer(past_length + sequence_length)
-            positional_embeddings = tf.transpose(positional_embeddings, [1, 0, 2])
-            return sequence_length, positional_embeddings
-
-        # Split cache_key and cache_value into list (length = num_hudden_layers)
-        # So, that each layer consumes the corresponding cache
-        all_cache_key = [
-            tf.squeeze(item, axis=0)
-            for item in tf.split(all_cache_key, num_or_size_splits=self._config_dict["num_hidden_layers"], axis=0)
-        ]
-        all_cache_value = [
-            tf.squeeze(item, axis=0)
-            for item in tf.split(all_cache_value, num_or_size_splits=self._config_dict["num_hidden_layers"], axis=0)
-        ]
-
-        # Compuatation starts here
-        # 1. Collect Word Embeddings
-        embeddings = self._embedding_layer(input_ids)
-        # Add word_embeddings + position_embeddings + type_embeddings
-        if self._type_embeddings_layer:
-            input_type_ids = inputs["input_type_ids"]
-            type_embeddings = self._type_embeddings_layer(input_type_ids)
-            embeddings = embeddings + type_embeddings
-        if self._positional_embedding_layer:
-            # Condition to switch functions
-            # if `sum(past_length) = 0` , means no outputs has been generated. First step (step_0)
-            # the given inputs is the first input
-            sequence_length, positional_embeddings = tf.cond(
-                tf.equal(tf.reduce_sum(past_length), 0),
-                lambda: step_0(input_ids),
-                lambda: step_other(input_ids),
-            )
-            embeddings = embeddings + positional_embeddings
-
-        # 2. Norm + dropout
-        embeddings = self._embedding_norm(embeddings)
-        embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
-
-        # 3. Attention Mask
-        attention_mask = []
-        if self._mask_mode == "user_defined":
-            input_mask = inputs["input_mask"]
-            attention_mask = SelfAttentionMask()([embeddings, input_mask])
-        if self._mask_mode == "prefix":
-            input_mask = inputs["input_mask"]
-            attention_mask = tf.map_fn(prefix_mask, input_mask, fn_output_signature=tf.float32)
-        if self._mask_mode == "causal":
-            attention_mask = CausalMask()(embeddings)
-
-        # 4. Transformer Outputs
-        encoder_outputs = []
-        # Make all -1 positions to 0 (as -1 represents padding in the input)
-        mask_values = tf.cast(tf.not_equal(input_ids_mod, -1), tf.float32)
-        # We want zero values , where embeddings inputs where 0 (by replacing PAD -1)
-        # So we use the mask and multiply it with embeddings
-        embeddings = embeddings * tf.expand_dims(mask_values, -1)
-        for i in range(self._config_dict["num_hidden_layers"]):
-            layer = self._transformer_layers[i]
-            # Fetching
-            cache_value = all_cache_value[i]
-            cache_key = all_cache_key[i]
-
-            embeddings, cache_key, cache_value = layer(
-                [embeddings, attention_mask],
-                cache_key=cache_key,
-                cache_value=cache_value,
-            )
-            # Updating
-            all_cache_key[i] = cache_key
-            all_cache_value[i] = cache_value
-
-            # Mask next layer embedding (PAD positions to 0)
-            embeddings = tf.identity(
-                embeddings * tf.expand_dims(mask_values, -1),
-                name="encoder_outputs_{}".format(i),
-            )
-            encoder_outputs.append(embeddings)
-
-        # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(encoder_outputs[-1])
-        # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
-        # batch_size x sequence_length x embedding_size
-        token_embeddings = encoder_outputs[-1]
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings)
-        token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
-        token_logits = self._masked_lm_bias(token_logits)
-
-        def step_0_gather(past_length, token_embeddings):
-            cache_length = tf.reduce_sum(tf.cast(tf.not_equal(input_ids_mod, -1), tf.int32), axis=1) - 1
-            # Getting corresponding last token tensor and last token logits
-            last_token_tensor = tf.gather_nd(token_embeddings, tf.expand_dims(cache_length, axis=1), batch_dims=1)
-            past_length = past_length + cache_length
-            return past_length, last_token_tensor
-
-        def step_other_gather(past_length, token_embeddings):
-            past_length = past_length + sequence_length
-            last_token_tensor = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_embeddings)
-            return past_length, last_token_tensor
-
-        # Condition to switch functionsn (When batch_size > 1,
-        # past_length will be different for each entry)
-        # if `sum(past_length) = 0` , means no outputs has been generated.
-        # the given inputs is the first input
-        past_length, last_token_tensor = tf.cond(
-            tf.equal(tf.reduce_sum(past_length), 0),
-            lambda: step_0_gather(past_length, token_embeddings),
-            lambda: step_other_gather(past_length, token_embeddings),
-        )
-
-        # token --> vocab ( batch_size x sequence_length x vocab_size)
-        last_token_logits = tf.matmul(
-            last_token_tensor,
-            self.get_embedding_table(),
-            transpose_b=True,
-            name="token_logits",
-        )
-        # Expand dims of past_length back to 2D
-        past_length = tf.expand_dims(past_length, 0, name="past_length")
-        # Stack all layers key and value together
-        # num_layers x batch_size x num_heads x sequence_length x (hidden_dimension/num_heads)
-        all_cache_key = tf.stack(all_cache_key, axis=0, name="all_cache_key")
-        all_cache_value = tf.stack(all_cache_value, axis=0, name="all_cache_value")
-
-        return {
-            "cls_output": cls_output,
-            "token_embeddings": token_embeddings,
-            "past_length": past_length,
-            "all_cache_key": all_cache_key,
-            "all_cache_value": all_cache_value,
-            "last_token_logits": last_token_logits,
-        }
+        raise NotImplementedError(())
 
     def call_decoder(self, inputs):
         """Forward pass of an Decoder
@@ -621,7 +419,7 @@ class BERTEncoder(LegacyLayer):
             embeddings = embeddings + positional_embeddings
 
         # 2. Norm + dropout
-        embeddings = self._embedding_norm(embeddings)
+        # embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
         # Initialize `attention_mask` as empty list
         attention_mask = []
@@ -639,60 +437,43 @@ class BERTEncoder(LegacyLayer):
 
         # Trasformer Outputs
         decoder_outputs = []
+        position_bias = None
+        decoder_encoder_position_bias = None
         for i in range(self._config_dict["num_hidden_layers"]):
             layer = self._transformer_layers[i]
-            embeddings, _key, _value = layer([embeddings, attention_mask, encoder_output, decoder_encoder_mask])
+            embeddings, position_bias, decoder_encoder_position_bias, _, _ = layer(
+                [embeddings, attention_mask, encoder_output, decoder_encoder_mask],
+                position_bias=position_bias,
+                decoder_encoder_position_bias=decoder_encoder_position_bias,
+            )
             decoder_outputs.append(embeddings)
 
-        # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(decoder_outputs[-1])
-        # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
+        decoder_outputs[-1] = self._last_layer_norm(decoder_outputs[-1])
         # batch_size x sequence_length x embedding_size
-        token_embeddings = decoder_outputs[-1]
+        token_embeddings = self._last_layer_dropout(decoder_outputs[-1])
 
-        # check for masked lm positions
-        # only for encoder forward pass. This is for MaskedLM training
-        if "masked_lm_positions" in inputs:
-            masked_lm_positions = inputs["masked_lm_positions"]
-        else:
-            masked_lm_positions = None
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
         token_logits = tf.matmul(
-            token_embeddings_mlm, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
+            token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
         )
-        token_logits = self._masked_lm_bias(token_logits)
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         result = {
-            "cls_output": cls_output,
             "token_embeddings": token_embeddings,
             "token_logits": token_logits,
             "last_token_logits": last_token_logits,
         }
 
         if self._return_all_layer_outputs:
-            all_cls_output = []
             all_token_logits = []
             for per_layer_token_embeddings in decoder_outputs:
-                per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
-                    per_layer_token_embeddings
-                )
-                all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
-
-                # token logits per layer
-                layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
                 layer_token_logits = tf.matmul(
-                    layer_token_embeddings_mlm,
+                    per_layer_token_embeddings,
                     tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
                     transpose_b=True,
                 )
-                layer_token_logits = self._masked_lm_bias(layer_token_logits)
                 all_token_logits.append(layer_token_logits)
 
             result["all_layer_token_embeddings"] = decoder_outputs
-            result["all_layer_cls_output"] = all_cls_output
             result["all_layer_token_logits"] = all_token_logits
 
         return result
@@ -706,14 +487,14 @@ class BERTEncoder(LegacyLayer):
             'input_ids'         --> tf.int32 (b x s)
             'input_mask'        --> tf.int32 (b x s) # optional
             'input_type_ids'    --> tf.int32 (b x s) # optional
-
-            'all_cache_key'     --> tf.float32 (num_hidden_layers ,
+            'encoder_hidden_states' ---> tf.float32 (b x s x h) # Output of Encoder
+            'decoder_all_cache_key'     --> tf.float32 (num_hidden_layers ,
                                      batch_size ,
                                      num_attention_heads ,
                                      sequence_length,
                                      attention_head_size)
 
-            'all_cache_value'    --> tf.float32 (num_hidden_layers ,
+            'decoder_all_cache_value'    --> tf.float32 (num_hidden_layers ,
                                      batch_size ,
                                      num_attention_heads ,
                                      sequence_length,
@@ -738,7 +519,6 @@ class BERTEncoder(LegacyLayer):
                                      sequence_length,
                                      attention_head_size)
 
-            'past_length'       --> tf.int32 (1 x sequence_length)
 
         """
         input_ids = inputs["input_ids"]
@@ -770,7 +550,7 @@ class BERTEncoder(LegacyLayer):
             embeddings = embeddings + positional_embeddings
 
         # Norm + dropout
-        embeddings = self._embedding_norm(embeddings)
+        # embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
         attention_mask = []
         if self._mask_mode == "causal":
@@ -784,19 +564,23 @@ class BERTEncoder(LegacyLayer):
             )
 
         decoder_outputs = []
+        position_bias = None
+        decoder_encoder_position_bias = None
         for i in range(self._config_dict["num_hidden_layers"]):
             layer = self._transformer_layers[i]
             # Fetching
             cache_value = all_cache_value[i]
             cache_key = all_cache_key[i]
 
-            embeddings, cache_key, cache_value = layer(
+            (embeddings, position_bias, decoder_encoder_position_bias, cache_key, cache_value,) = layer(
                 [
                     embeddings,
                     attention_mask,
                     encoder_hidden_state,
                     decoder_encoder_mask,
                 ],
+                position_bias=position_bias,
+                decoder_encoder_position_bias=decoder_encoder_position_bias,
                 cache_key=cache_key,
                 cache_value=cache_value,
             )
@@ -807,26 +591,18 @@ class BERTEncoder(LegacyLayer):
 
             decoder_outputs.append(embeddings)
 
+        decoder_outputs[-1] = self._last_layer_norm(decoder_outputs[-1])
         # Stack all layers key and value together
         # num_layers x batch_size x num_heads x sequence_length x (hidden_dimension/num_heads)
         all_cache_key = tf.stack(all_cache_key, axis=0, name="all_cache_key")
         all_cache_value = tf.stack(all_cache_value, axis=0, name="all_cache_value")
 
-        # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(decoder_outputs[-1])
-        # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
         # batch_size x sequence_length x embedding_size
-        token_embeddings = decoder_outputs[-1]
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings)
-        token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
-        token_logits = self._masked_lm_bias(token_logits)
+        token_embeddings = self._last_layer_dropout(decoder_outputs[-1])
+        token_logits = tf.matmul(token_embeddings, self.get_embedding_table(), transpose_b=True)
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         return {
-            "cls_output": cls_output,
             "token_embeddings": token_embeddings,
             "all_cache_key": all_cache_key,
             "all_cache_value": all_cache_value,

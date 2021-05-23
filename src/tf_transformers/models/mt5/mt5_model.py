@@ -1,26 +1,28 @@
 import tensorflow as tf
 from tf_transformers.utils import get_config
 from tf_transformers.core import ModelWrapper
-from tf_transformers.models.bert import BERTEncoder
-from tf_transformers.models.bert.convert import convert_bert_tf, convert_bert_pt
+from tf_transformers.models.encoder_decoder import EncoderDecoder
+from tf_transformers.models.mt5 import MT5Encoder
+from tf_transformers.models.mt5.convert import convert_mt5_tf, convert_mt5_pt
 from absl import logging
 
-DEFAULT_CONFIG = {
+DEFAULT_CONFIG = config = {
     "attention_probs_dropout_prob": 0.1,
     "hidden_act": "gelu",
     "intermediate_act": "gelu",
     "hidden_dropout_prob": 0.1,
-    "embedding_size": 768,
+    "embedding_size": 512,
     "initializer_range": 0.02,
-    "intermediate_size": 3072,
-    "max_position_embeddings": 512,
-    "num_attention_heads": 12,
+    "intermediate_size": 1024,
+    "max_position_embeddings": -1,
+    "num_attention_heads": 6,
     "attention_head_size": 64,
-    "num_hidden_layers": 12,
-    "type_vocab_size": 2,
-    "vocab_size": 28996,
-    "layer_norm_epsilon": 1e-12,
-    "mask_mode": "user_defined",
+    "num_hidden_layers": 8,
+    "vocab_size": 250112,
+    "type_vocab_size": -1,
+    "layer_norm_epsilon": 1e-06,
+    "bidirectional": True,
+    "positional_buckets": 32,
 }
 
 
@@ -37,19 +39,20 @@ def update_config(tft_config, hf_config):
     """
 
     tft_config["vocab_size"] = hf_config["vocab_size"]
-    tft_config["embedding_size"] = hf_config["hidden_size"]
-    tft_config["intermediate_size"] = hf_config["intermediate_size"]
-    tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
-    tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]
+    tft_config["embedding_size"] = hf_config["d_model"]
+    tft_config["intermediate_size"] = hf_config["d_ff"]
+    # tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
+    # tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]
 
-    tft_config["num_attention_heads"] = hf_config["num_attention_heads"]
-    tft_config["num_hidden_layers"] = hf_config["num_hidden_layers"]
+    tft_config["num_attention_heads"] = hf_config["num_heads"]
+    tft_config["num_hidden_layers"] = hf_config["num_layers"]
+    tft_config["positional_buckets"] = hf_config["relative_attention_num_buckets"]
 
     return tft_config
 
 
-class BertModel(ModelWrapper):
-    """Bert Encoder Wrapper"""
+class MT5Model(ModelWrapper):
+    """MT5 Encoder Wrapper"""
 
     def __init__(self, model_name, cache_dir):
         """
@@ -57,13 +60,14 @@ class BertModel(ModelWrapper):
             model_name (str): Model name
             cache_dir (str): cache dir to save the mode checkpoints
         """
-        super(BertModel, self).__init__(cache_dir=cache_dir, model_name=model_name)
+        super(MT5Model, self).__init__(cache_dir=cache_dir, model_name=model_name)
 
     @classmethod
     def get_model(
         cls,
         model_name,
         config=None,
+        use_auto_regressive=False,
         cache_dir=None,
         model_checkpoint_dir=None,
         convert_from_hf=True,
@@ -82,12 +86,12 @@ class BertModel(ModelWrapper):
             convert_from_hf (bool, optional): [description]. Defaults to True.
             return_layer (bool, optional): [description]. Defaults to False.
             convert_fn_type: ['both' , 'tf', 'pt'] . If both , we use both functions to fallback to another if
-                        one fails.
+            one fails.
 
         Returns:
             [type]: [description]
         """
-        module_name = "tf_transformers.models.model_configs.bert"
+        module_name = "tf_transformers.models.model_configs.mt5"
         tft_model_name = normalize_model_name(model_name)
 
         if not config:
@@ -95,7 +99,6 @@ class BertModel(ModelWrapper):
                 config = get_config(module_name, tft_model_name)
             except:
                 # Load a base config and then overwrite it
-                # config = get_config(module_name, "bert_base_uncased")
                 config = DEFAULT_CONFIG
                 from transformers import PretrainedConfig
 
@@ -111,7 +114,17 @@ class BertModel(ModelWrapper):
             # if a config is provided, we wont be doing any extra .
             # Just create a model and return it with random_weights
             tf.keras.backend.clear_session()
-            model_layer = BERTEncoder(config, **kwargs)
+            encoder_layer = MT5Encoder(config=config, name="mt5_encoder")
+
+            config["bidirectional"] = False
+            decoder_layer = MT5Encoder(
+                config=config,
+                name="mt5_decoder",
+                use_decoder=True,
+                mask_mode="causal",
+                use_auto_regressive=use_auto_regressive,
+            )
+            model_layer = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True)
             model = model_layer.get_model()
             logging.info("Create model from config")
             if return_layer:
@@ -126,7 +139,18 @@ class BertModel(ModelWrapper):
             del kwargs["name"]
 
         tf.keras.backend.clear_session()
-        model_layer = BERTEncoder(config, **kwargs)
+        config["bidirectional"] = True
+        encoder_layer = MT5Encoder(config=config, name="mt5_encoder")
+
+        config["bidirectional"] = False
+        decoder_layer = MT5Encoder(
+            config=config,
+            name="mt5_decoder",
+            use_decoder=True,
+            mask_mode="causal",
+            use_auto_regressive=use_auto_regressive,
+        )
+        model_layer = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True)
         model = model_layer.get_model()
 
         # Give preference to model_checkpoint_dir
@@ -145,13 +169,13 @@ class BertModel(ModelWrapper):
                     cls_ref.convert_hf_to_tf(
                         model,
                         config,
-                        convert_tf_fn=convert_bert_tf,
-                        convert_pt_fn=convert_bert_pt,
+                        convert_tf_fn=convert_mt5_tf,
+                        convert_pt_fn=convert_mt5_pt,
                     )
                 if convert_fn_type == "tf":
-                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=convert_bert_tf, convert_pt_fn=None)
+                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=convert_mt5_tf, convert_pt_fn=None)
                 if convert_fn_type == "pt":
-                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=None, convert_pt_fn=convert_bert_pt)
+                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=None, convert_pt_fn=convert_mt5_pt)
         if return_layer:
             return model_layer, config
         return model, config

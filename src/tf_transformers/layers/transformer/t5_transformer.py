@@ -196,13 +196,6 @@ class TransformerT5(LegacyLayer):
             self._cross_attention_output_dense = dense_einsum.DenseEinsum(
                 output_shape=self._hidden_size, name="cross_attention_output", **common_kwargs
             )
-            # Norm
-            self._cross_attention_layer_norm = tf.keras.layers.LayerNormalization(
-                name="cross_attention_layer_norm",
-                axis=-1,
-                epsilon=self._layer_norm_epsilon,
-                dtype=tf.float32,
-            )
 
         # Main Dense Layer after Attention
         self._intermediate_dense = dense_einsum.DenseEinsum(

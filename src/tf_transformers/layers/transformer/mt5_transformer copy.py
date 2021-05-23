@@ -10,7 +10,7 @@ from tf_transformers.layers.attention import T5Attention
 from tf_transformers.utils import tf_utils
 
 
-class TransformermT5(LegacyLayer):
+class TransformerT5(LegacyLayer):
     """Transformer
 
     This layer implements the Transformer from "Attention Is All You Need".
@@ -240,54 +240,68 @@ class TransformermT5(LegacyLayer):
         base_config = super(TransformermT5, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
-    def call_encoder(self, inputs, position_bias=None, cache_key=None, cache_value=None):
+    def call_training(self, inputs, position_bias=None, cache_key=None, cache_value=None):
         """
-        Encoder pipeline
+        Training pipeline
         """
-
-        # b x s x h   # b x s x s
         input_tensor, attention_mask = inputs
-        # GPT2 Pre Attention Norm
         input_tensor_norm = self._pre_attention_norm(input_tensor)
-        # [from_tensor, to_tensor]
         attention_inputs = [input_tensor_norm, input_tensor_norm]
+
         if attention_mask is not None:
             attention_inputs.append(attention_mask)
 
-        # attention_inputs = [from_tensor, to_tensor, attention_mask]
         attention_output, position_bias, key, value = self._attention_layer(
             attention_inputs,
             position_bias=position_bias,
             cache_key=cache_key,
             cache_value=cache_value,
         )
-        attention_output = self._attention_output_dense(attention_output)
-        attention_output = self._attention_dropout(attention_output, training=self._use_dropout)
 
-        attention_output_copy = tf.identity(attention_output)
-        attention_output = self._attention_layer_norm(input_tensor + attention_output)
-        # mixed precision stability requires Normalization to be in tf.ffloat32
-        attention_output = tf.cast(attention_output, dtype=tf_utils.get_dtype())
-        intermediate_output = self._intermediate_dense(attention_output)
-        intermediate_output2 = self._intermediate_dense2(attention_output)
-        intermediate_output = intermediate_output * intermediate_output2
+        attention_output = self._attention_output_dense(attention_output)
+        attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
+        # Use float32 in keras layer norm and the gelu activation in the
+        # intermediate dense layer for numeric stability
+        if self.dtype == tf.float16:
+            input_tensor = tf.cast(input_tensor, tf.float32)
+            attention_output = tf.cast(attention_output, tf.float32)
+
+        attention_output = input_tensor + attention_output
+        attention_output_normed = self._attention_layer_norm(attention_output)
+        intermediate_output1 = self._intermediate_dense(attention_output_normed)
+        intermediate_output2 = self._intermediate_dense2(attention_output_normed)
+        intermediate_output = intermediate_output1 * intermediate_output2
+
         layer_output = self._output_dense(intermediate_output)
         layer_output = self._output_dropout(layer_output)
-        return layer_output + input_tensor + attention_output_copy, position_bias, key, value
+        # During mixed precision training, attention_output is from layer norm and
+        # is always fp32 for now. Cast layer_output to fp32 for the subsequent
+        # add.
+        # Use float32 in keras layer norm for numeric stability
+        if self.dtype == tf.float16:
+            layer_output = tf.cast(layer_output, tf.float32)
+        # layer_output = self._output_layer_norm(layer_output + attention_output)
+        return layer_output + attention_output, position_bias, key, value
 
     def call_decoder(
-        self, inputs, position_bias=None, decoder_encoder_position_bias=None, cache_key=None, cache_value=None
+        self,
+        inputs,
+        position_bias=None,
+        decoder_encoder_position_bias=None,
+        cache_key=None,
+        cache_value=None,
     ):
         """
-        Decoder pipeline
+        Training pipeline
         """
         input_tensor, attention_mask, encoder_output, decoder_encoder_mask = inputs
 
-        # Decoder Self Attention
         input_tensor_norm = self._pre_attention_norm(input_tensor)
         attention_inputs = [input_tensor_norm, input_tensor_norm]
+
         if attention_mask is not None:
             attention_inputs.append(attention_mask)
+
         attention_output, position_bias, key, value = self._attention_layer(
             attention_inputs,
             position_bias=position_bias,
@@ -295,40 +309,53 @@ class TransformermT5(LegacyLayer):
             cache_value=cache_value,
             cross_decoder_mode=False,
         )
-        # Self Attention Dense + Norm
         attention_output = self._attention_output_dense(attention_output)
         attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
+        # Use float32 in keras layer norm and the gelu activation in the
+        # intermediate dense layer for numeric stability
+        if self.dtype == tf.float16:
+            input_tensor = tf.cast(input_tensor, tf.float32)
+            attention_output = tf.cast(attention_output, tf.float32)
+
         attention_output = input_tensor + attention_output
-        attention_output = tf.cast(attention_output, dtype=tf_utils.get_dtype())
-        attention_output_copy = tf.identity(attention_output)
+        if self._is_decoder:
+            attention_output_copy = tf.identity(attention_output, name="attention_output_copy")
+            attention_output_norm = self._pre_cross_attention_norm(attention_output_copy)
+            attention_inputs_for_decoder = [
+                attention_output_norm,
+                encoder_output,
+                decoder_encoder_mask,
+            ]
+            (attention_output, decoder_encoder_position_bias, _, _,) = self._cross_attention_layer(
+                attention_inputs_for_decoder,
+                position_bias=decoder_encoder_position_bias,
+                cache_key=cache_key,
+                cache_value=cache_value,
+                cross_decoder_mode=True,
+            )
+            attention_output = self._cross_attention_output_dense(attention_output)
+            attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
+            # Use float32 in keras layer norm and the gelu activation in the
+            # intermediate dense layer for numeric stability
+            if self.dtype == tf.float16:
+                attention_output_copy = tf.cast(attention_output_copy, tf.float32)
+                attention_output = tf.cast(attention_output, tf.float32)
 
-        attention_output_norm = self._pre_cross_attention_norm(attention_output)
-        attention_inputs_for_decoder = [
-            attention_output_norm,
-            encoder_output,
-            decoder_encoder_mask,
-        ]
-        (attention_output, decoder_encoder_position_bias, _, _,) = self._cross_attention_layer(
-            attention_inputs_for_decoder,
-            position_bias=decoder_encoder_position_bias,
-            cache_key=cache_key,
-            cache_value=cache_value,
-            cross_decoder_mode=True,
-        )
-
-        attention_output = self._cross_attention_output_dense(attention_output)
-        attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
-        attention_output = tf.cast(attention_output, dtype=tf_utils.get_dtype())
-        attention_output = attention_output + attention_output_copy
+            attention_output = attention_output + attention_output_copy
 
         attention_output_normed = self._attention_layer_norm(attention_output)
-        intermediate_output = self._intermediate_dense(attention_output_normed)
+        intermediate_output1 = self._intermediate_dense(attention_output_normed)
         intermediate_output2 = self._intermediate_dense2(attention_output_normed)
-        intermediate_output = intermediate_output * intermediate_output2
+        intermediate_output = intermediate_output1 * intermediate_output2
         layer_output = self._output_dense(intermediate_output)
         layer_output = self._output_dropout(layer_output)
-        layer_output = tf.cast(layer_output, dtype=tf_utils.get_dtype())
-
+        # During mixed precision training, attention_output is from layer norm and
+        # is always fp32 for now. Cast layer_output to fp32 for the subsequent
+        # add.
+        # Use float32 in keras layer norm for numeric stability
+        if self.dtype == tf.float16:
+            layer_output = tf.cast(layer_output, tf.float32)
+        # layer_output = self._output_layer_norm(layer_output + attention_output)
         return (
             layer_output + attention_output,
             position_bias,
@@ -347,20 +374,29 @@ class TransformermT5(LegacyLayer):
         cache_key=None,
         cache_value=None,
     ):
-
-        """Call
-
+        """
         Args:
-            inputs ([embeddings 3D, attention_mask 3D]): List of [embeddings,
-                                                                attention_mask]
-            mode (str, optional): [description]. Defaults to "encoder".
-            cache_key ([type], optional): [description]. Defaults to None.
-            cache_value ([type], optional): [description]. Defaults to None.
+            # Scalar dimensions referenced here:
+            #   B = batch size (number of sequences)
+            #   F = `from_tensor` sequence length
+            #   T = `to_tensor` sequence length
+            #   N = `num_attention_heads`
+            #   H = `size_per_head`
+            #   E = N * H
+            # `query_tensor` = [B, F, N ,H]
+            inputs: list, [input_embeddings, attention_mask]
+                          [B x F x E, B x F x F]
 
         Returns:
-            [type]: [description]
+            list: [layer_output, key, value]
+                  if cache = None:
+                    [B x E,      B x N x F x H , B x N x F x H]
+                  else:
+                    [B x E,      B x N x (F+T) x H , B x N x (F+T) x H]
+                    (F+T) means , we will add the current (F) to cached key and value of length (T)
+
         """
-        if self._use_decoder:
+        if self._is_decoder:
             outputs = self.call_decoder(
                 inputs,
                 position_bias=position_bias,
@@ -368,8 +404,17 @@ class TransformermT5(LegacyLayer):
                 cache_key=cache_key,
                 cache_value=cache_value,
             )
+
         else:
-            outputs = self.call_encoder(
-                inputs, position_bias=position_bias, cache_key=cache_key, cache_value=cache_value
+            # outputs = self.call_training(inputs,
+            #                             position_bias=position_bias,
+            #                             decoder_encoder_position_bias=decoder_encoder_position_bias,
+            #                             cache_key=cache_key,
+            #                             cache_value=cache_value)
+            outputs = self.call_training(
+                inputs,
+                position_bias=position_bias,
+                cache_key=cache_key,
+                cache_value=cache_value,
             )
         return outputs

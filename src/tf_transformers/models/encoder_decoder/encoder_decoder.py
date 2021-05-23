@@ -179,6 +179,12 @@ class EncoderDecoder(LegacyLayer):
         # Convert 'input_ids' --> 'encoder_input_ids'
         # Add 'encoder' prefix
         for k, v in encoder_inputs.items():
+            if k in ["input_ids", "input_mask", "input_type_ids"]:
+                shape = encoder_inputs[k].shape
+                inputs["encoder_" + k] = tf.keras.layers.Input(
+                    shape[1:], batch_size=encoder_inputs[k].shape[0], name="encoder_" + k, dtype=encoder_inputs[k].dtype
+                )
+                continue
             inputs["encoder_" + k] = v
 
         # Convert 'input_ids' --> 'decoder_input_ids'
@@ -187,6 +193,15 @@ class EncoderDecoder(LegacyLayer):
             # Do not add prefix if 'decoder' or 'encoder' is present
             if k.startswith("decoder") or k.startswith("encoder"):
                 inputs[k] = v
+                continue
+            # We don't want to change name of all_cache_key to decoder_all_cache_key
+            # and similarily for all_cache_value . As it will raise issues
+            # while serializing
+            if k in ["all_cache_key", "all_cache_value"]:
+                shape = decoder_inputs[k].shape
+                inputs["decoder_" + k] = tf.keras.layers.Input(
+                    shape[1:], batch_size=decoder_inputs[k].shape[0], name="decoder_" + k, dtype=decoder_inputs[k].dtype
+                )
                 continue
             inputs["decoder_" + k] = v
 

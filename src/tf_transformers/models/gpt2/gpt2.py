@@ -108,6 +108,7 @@ class GPT2Encoder(LegacyLayer):
             layer = TransformerGPT2(
                 hidden_size=config["embedding_size"],
                 num_attention_heads=config["num_attention_heads"],
+                attention_head_size=config["attention_head_size"],
                 intermediate_size=config["intermediate_size"],
                 intermediate_activation=self._intermediate_activation,
                 dropout_rate=config["hidden_dropout_prob"],
