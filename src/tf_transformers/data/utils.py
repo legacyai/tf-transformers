@@ -1,5 +1,4 @@
 from functools import wraps
-
 import tensorflow as tf
 
 
@@ -31,16 +30,29 @@ def auto_batch(
     _padded_values = {}
     if not padded_values:
         padded_values = {}
+    if not padded_shapes:
+        padded_shapes = {}
     # sometimes we might have to have sme custom values other than 0
     for k, v in element_spec.items():
         if k in padded_values:
             value = padded_values[k]
             _padded_values[k] = tf.constant(value, dtype=value.dtype)
         else:
+            if v.dtype == tf.string:
+                _padded_values[k] = tf.constant("0", dtype=v.dtype)
+                continue
+
             _padded_values[k] = tf.constant(0, dtype=v.dtype)
+
+    _padded_shapes = {}
+    for k, v in element_spec.items():
+        if k in padded_shapes:
+            _padded_shapes[k] = padded_shapes[k]
+        else:
+            _padded_shapes[k] = [None]
     dataset = tf_dataset.padded_batch(
         padding_values=_padded_values,
-        padded_shapes=padded_shapes,
+        padded_shapes=_padded_shapes,
         batch_size=batch_size,
         drop_remainder=drop_remainder,
     )

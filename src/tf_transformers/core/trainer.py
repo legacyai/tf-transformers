@@ -7,7 +7,7 @@ from absl import logging
 logging.set_verbosity("INFO")
 
 
-def save_model_checkpoints(overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models):
+def save_model_checkpoints(model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models):
     # Model checkpoint
     if not overwrite_checkpoint_dir:
         import os
@@ -108,7 +108,9 @@ def SingleDeviceTrainer(
 
     if steps_per_epoch:
         logging.info("Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.")
-    checkpoint_manager = save_model_checkpoints(overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models)
+    checkpoint_manager = save_model_checkpoints(
+        model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models
+    )
 
     if mixed_precision:
         optimizer = tf.keras.mixed_precision.LossScaleOptimizer(optimizer)
@@ -156,14 +158,16 @@ def SingleDeviceTrainer(
                 validation_loss.update_state(loss_value)
 
     # do validation
-    def do_validation(validation_dataset):
+    def do_validation(validation_dataset, trainer_kwargs):
         if validation_dataset and validation_loss_fn:
             _validate(validation_dataset)
         validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
-        if eval_callback:
+        callback_scores = []
+        if eval_callbacks:
             for i, eval_callback in enumerate(eval_callbacks):
-                score = eval_callback(kwargs)
-                validation_result["callback_score_{}".format(i)] = score
+                score = eval_callback(trainer_kwargs)
+                callback_scores.append(score)
+            validation_result["callback_score"] = callback_scores
         return validation_result
 
     # Metrics
@@ -177,11 +181,12 @@ def SingleDeviceTrainer(
     dataset_iterator = iter(dataset.repeat(epochs + 1))
     # Default ---> Do validation before model got trained
     if validation_dataset and validation_loss_fn:
-        val_result = do_validation(validation_dataset)
+        val_result = do_validation(validation_dataset, locals())
+        print(pformat("Validation result before training {}".format(val_result)))
         logging.info(pformat("Validation result before training {}".format(val_result)))
 
     # Get Tensorboard writers
-    train_summary_writer, val_summary_writer = get_tensorboard_writers()
+    train_summary_writer, val_summary_writer = get_tensorboard_writers(model_checkpoint_dir)
 
     # Main Loop
     STEPS = steps_per_epoch // steps_per_call
@@ -195,7 +200,7 @@ def SingleDeviceTrainer(
         with tqdm.trange(STEPS, unit="batch ") as tepoch:
             for step in tepoch:
                 steps_covered = (step + 1) * steps_per_call
-                global_step += steps_covered
+                global_step += steps_per_call
                 tepoch.set_description(
                     "Epoch {}/{} --- Step {}/{} --- ".format(epoch, epochs, steps_covered, steps_per_epoch)
                 )
@@ -215,11 +220,15 @@ def SingleDeviceTrainer(
                 # Do after provided steps
                 if validation_interval_steps:
                     if steps_covered % validation_interval_steps == 0:
-                        val_result = do_validation(validation_dataset)
+                        val_result = do_validation(validation_dataset, locals())
                         validation_history[global_step] = val_result
                         write_metrics(val_result, val_summary_writer, global_step)
                         print("-----------------------------------------------------------------------")
-                        logging.info(pformat("Validation result before training {}".format(val_result)))
+                        logging.info(
+                            pformat(
+                                ("Epoch {} , Step {} , validation result {}".format(epoch, steps_covered, val_result))
+                            )
+                        )
 
                 # Save model
                 if model_save_interval_steps:
@@ -229,15 +238,25 @@ def SingleDeviceTrainer(
         # After an epoch
         checkpoint_manager.save()
         end_epoch_time = time.time()
-        val_result = do_validation(validation_dataset)
+        val_result = do_validation(validation_dataset, locals())
+        print("validation result", val_result)
         if val_result:
             print("-----------------------------------------------------------------------")
-            logging.info(pformat("Validation result before training {}".format(val_result)))
+            logging.info(pformat(("Epoch {} , validation result {}".format(epoch, val_result))))
+            validation_history[global_step] = val_result
+            print(pformat(("Epoch {} , validation result {}".format(epoch, val_result))))
         print("-----------------------------------------------------------------------")
         logging.info(
-            pformt(
+            pformat(
                 "Epoch {}/{} --- Mean Loss {} --- Time {} seconds".format(
                     epoch + 1, epochs, tf.reduce_mean(epoch_loss), end_epoch_time - start_epoch_time
+                )
+            )
+        )
+        print(
+            pformat(
+                "Epoch {}/{} --- Mean Loss {} --- Time {} seconds".format(
+                    epoch, epochs, tf.reduce_mean(epoch_loss), end_epoch_time - start_epoch_time
                 )
             )
         )

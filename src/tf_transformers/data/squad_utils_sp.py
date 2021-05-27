@@ -337,7 +337,6 @@ def _convert_single_example_to_feature_fast_sp_train(
 
     # Fast Alignment for subwords
 
-    # subwords = tokenizer.tokenize(example["paragraph_text"])
     orig_to_new_index, aligned_words, sub_words_mapped = fast_sp_alignment(
         example["paragraph_text"], tokenizer, SPECIAL_PIECE
     )

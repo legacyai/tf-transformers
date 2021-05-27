@@ -3,7 +3,7 @@ config = {
     "hidden_act": "gelu",
     "intermediate_act": "gelu",
     "hidden_dropout_prob": 0.1,
-    "embedding_size": 1024,
+    "embedding_size": 128,
     "initializer_range": 0.02,
     "intermediate_size": 3072,
     "max_position_embeddings": 512,
@@ -14,5 +14,5 @@ config = {
     "vocab_size": 30000,
     "layer_norm_epsilon": 1e-12,
     "mask_mode": "user_defined",
-    "embedding_projection_size": 128,
+    "embedding_projection_size": 1024,
 }

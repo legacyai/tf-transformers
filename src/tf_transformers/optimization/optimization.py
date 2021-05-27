@@ -5,7 +5,7 @@ from tf_transformers.optimization.adam_weighted import AdamWeightDecay
 from tf_transformers.optimization.learning_rate_utils import WarmUp, WarmUp_Linear
 
 
-def get_learning_rate_fn(learning_rate_type, num_train_steps, num_warmup_steps):
+def get_learning_rate_fn(init_lr, learning_rate_type, num_train_steps, num_warmup_steps):
     """Get learning rate function
 
     Args:
@@ -69,7 +69,7 @@ def create_optimizer(
         logging.info("Using AdaFactor optimizer")
         return AdafactorOptimizer(learning_rate=init_lr)
 
-    learning_rate_fn = get_learning_rate_fn(learning_rate_type, num_train_steps, num_warmup_steps)
+    learning_rate_fn = get_learning_rate_fn(init_lr, learning_rate_type, num_train_steps, num_warmup_steps)
     if not learning_rate_fn:
         learning_rate_fn = init_lr
     if optimizer_type == "adamw":

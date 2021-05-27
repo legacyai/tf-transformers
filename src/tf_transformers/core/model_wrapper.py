@@ -5,6 +5,7 @@ from absl import logging
 logging.set_verbosity("INFO")
 
 _PREFIX_DIR = "tf_transformers_cache"
+HF_VERSION = "4.6.0"
 
 
 class ModelWrapper:
@@ -25,6 +26,7 @@ class ModelWrapper:
         self.cache_dir = Path(self.cache_dir, _PREFIX_DIR)
         self.create_cache_dir(self.cache_dir)
         self.model_path = Path(self.cache_dir, self.model_name)
+        self.hf_version = HF_VERSION
 
     def create_cache_dir(self, cache_path):
         """Create Cache Directory
@@ -35,7 +37,7 @@ class ModelWrapper:
         if not cache_path.exists():  # If cache path not exists
             cache_path.mkdir()
 
-    def convert_hf_to_tf(self, model, config, convert_tf_fn, convert_pt_fn, hf_version="4.6.0"):
+    def convert_hf_to_tf(self, model, config, convert_tf_fn, convert_pt_fn):
         """Convert TTF from HF
 
         Args:
@@ -45,12 +47,14 @@ class ModelWrapper:
         # HF has '-' , instead of '_'
         import transformers
 
-        if transformers.__version__ != hf_version:
-            raise ValueError(
-                "Expected `transformers` version `{}`, but found version `{}`.".format(
-                    hf_version, transformers.__version__
+        if self.hf_version:
+            if transformers.__version__ != self.hf_version:
+                logging.warning(
+                    "Expected `transformers` version `{}`, but found version `{}`.\
+                        The conversion might or might not work.".format(
+                        hf_version, transformers.__version__
+                    )
                 )
-            )
         hf_model_name = self.model_name
         convert_success = False
         if convert_tf_fn:
