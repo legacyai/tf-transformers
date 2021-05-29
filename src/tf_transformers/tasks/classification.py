@@ -3,8 +3,13 @@ from tf_transformers.core import LegacyModel, LegacyLayer
 
 
 class Classification_Model(LegacyLayer):
-    def __init__(self, model, num_classes, use_all_layers=False, activation=None, **kwargs):
-        super(Classification_Model, self).__init__(**kwargs)
+    def __init__(
+        self, model, num_classes, use_all_layers=False, activation=None, is_training=False, use_dropout=False, **kwargs
+    ):
+        super(Classification_Model, self).__init__(
+            is_training=is_training, use_dropout=use_dropout, name=self.model.name, **kwargs
+        )
+
         self.model = model
         if isinstance(model, LegacyModel):
             self.model_config = model.model_config

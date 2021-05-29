@@ -52,7 +52,7 @@ class ModelWrapper:
                 logging.warning(
                     "Expected `transformers` version `{}`, but found version `{}`.\
                         The conversion might or might not work.".format(
-                        hf_version, transformers.__version__
+                        self.hf_version, transformers.__version__
                     )
                 )
         hf_model_name = self.model_name
