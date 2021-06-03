@@ -5,7 +5,7 @@ from tf_transformers.optimization.adam_weighted import AdamWeightDecay
 from tf_transformers.optimization.learning_rate_utils import WarmUp, WarmUp_Linear
 
 
-def get_learning_rate_fn(init_lr, learning_rate_type, num_train_steps, num_warmup_steps):
+def get_learning_rate_fn(init_lr, num_train_steps, num_warmup_steps, learning_rate_type):
     """Get learning rate function
 
     Args:
@@ -17,23 +17,22 @@ def get_learning_rate_fn(init_lr, learning_rate_type, num_train_steps, num_warmu
         [type]: [description]
     """
     if learning_rate_type == "linear":
-        if num_warmup_steps:
-            learning_rate_fn = WarmUp_Linear(
-                initial_learning_rate=init_lr, num_training_steps=num_train_steps, warmup_steps=num_warmup_steps
-            )
-            return learning_rate_fn
+        learning_rate_fn = WarmUp_Linear(
+            initial_learning_rate=init_lr, num_training_steps=num_train_steps, warmup_steps=num_warmup_steps
+        )
+        return learning_rate_fn
 
     if learning_rate_type == "polynomial":
         learning_rate_fn = tf.keras.optimizers.schedules.PolynomialDecay(
             initial_learning_rate=init_lr, decay_steps=num_train_steps, end_learning_rate=0.0
         )
-        if num_warmup_steps:
+        if num_warmup_steps > 0.0:
             learning_rate_fn = WarmUp(
                 initial_learning_rate=init_lr, decay_schedule_fn=learning_rate_fn, warmup_steps=num_warmup_steps
             )
         return learning_rate_fn
-
-    return None
+    logging.info("Using initial learning rate {}".format(init_lr))
+    return init_lr
 
 
 def create_optimizer(
@@ -69,9 +68,8 @@ def create_optimizer(
         logging.info("Using AdaFactor optimizer")
         return AdafactorOptimizer(learning_rate=init_lr)
 
-    learning_rate_fn = get_learning_rate_fn(init_lr, learning_rate_type, num_train_steps, num_warmup_steps)
-    if not learning_rate_fn:
-        learning_rate_fn = init_lr
+    learning_rate_fn = get_learning_rate_fn(init_lr, num_train_steps, num_warmup_steps, learning_rate_type)
+
     if optimizer_type == "adamw":
         logging.info("Using Adamw optimizer")
         optimizer = AdamWeightDecay(

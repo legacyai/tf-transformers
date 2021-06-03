@@ -78,6 +78,7 @@ def SingleDeviceTrainer(
     validation_interval_steps=None,
     steps_per_call=100,
     eval_callbacks=None,
+    skip_pre_train_validation=True,
 ):
     """SingleDevice Trainer
 
@@ -180,7 +181,7 @@ def SingleDeviceTrainer(
     # dataset to iterator
     dataset_iterator = iter(dataset.repeat(epochs + 1))
     # Default ---> Do validation before model got trained
-    if validation_dataset and validation_loss_fn:
+    if not skip_pre_train_validation:
         val_result = do_validation(validation_dataset, locals())
         print(pformat("Validation result before training {}".format(val_result)))
         logging.info(pformat("Validation result before training {}".format(val_result)))
