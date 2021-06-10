@@ -35,6 +35,8 @@ def update_config(tft_config, hf_config):
         tft_config ([type]): [description]
         hf_config ([type]): [description]
     """
+    print("Updating config ............")
+    print("Hf config", hf_config)
 
     tft_config["vocab_size"] = hf_config["vocab_size"]
     tft_config["embedding_size"] = hf_config["n_embd"]

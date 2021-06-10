@@ -31,7 +31,7 @@ def get_learning_rate_fn(init_lr, num_train_steps, num_warmup_steps, learning_ra
                 initial_learning_rate=init_lr, decay_schedule_fn=learning_rate_fn, warmup_steps=num_warmup_steps
             )
         return learning_rate_fn
-    logging.info("Using initial learning rate {}".format(init_lr))
+    logging.info("Not using learning rate fn : Using initial learning rate {}".format(init_lr))
     return init_lr
 
 
