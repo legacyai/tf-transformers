@@ -239,7 +239,7 @@ class AlbertEncoder(LegacyLayer):
                         name="decoder_{}".format(input_name),
                     )
             encoder_hidden_states = tf.keras.layers.Input(
-                shape=(self._sequence_length, self._config_dict["embedding_size"]),
+                shape=(self._sequence_length, self._config_dict["embedding_projection_size"]),
                 batch_size=self._batch_size,
                 dtype=tf.float32,
                 name="encoder_hidden_states",

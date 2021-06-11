@@ -5,7 +5,7 @@ config = {
     "hidden_dropout_prob": 0.1,
     "embedding_size": 1024,
     "initializer_range": 0.02,
-    "intermediate_size": 3072,
+    "intermediate_size": 4096,
     "max_position_embeddings": 1024,
     "num_attention_heads": 16,
     "attention_head_size": 64,
