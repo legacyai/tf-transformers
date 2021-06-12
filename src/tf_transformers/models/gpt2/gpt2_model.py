@@ -35,14 +35,12 @@ def update_config(tft_config, hf_config):
         tft_config ([type]): [description]
         hf_config ([type]): [description]
     """
-    print("Updating config ............")
-    print("Hf config", hf_config)
 
     tft_config["vocab_size"] = hf_config["vocab_size"]
     tft_config["embedding_size"] = hf_config["n_embd"]
-    tft_config["intermediate_size"] = hf_config["n_ctx"]
+    tft_config["intermediate_size"] = hf_config["n_embed"] * 4
     # tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
-    # tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]
+    tft_config["max_position_embeddings"] = hf_config["n_ctx"]
 
     tft_config["num_attention_heads"] = hf_config["n_head"]
     tft_config["num_hidden_layers"] = hf_config["n_layer"]
