@@ -13,13 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Keras-based GPT2 Layer Normalization layer."""
-# from __future__ import google_type_annotations
-# pylint: disable=g-classes-have-attributes
-from __future__ import absolute_import, division, print_function
-
 import tensorflow as tf
-
-from tf_transformers.utils import tf_utils
 
 
 @tf.keras.utils.register_keras_serializable(package="Text")

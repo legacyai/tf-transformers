@@ -1,4 +1,5 @@
 import tensorflow as tf
+
 from tf_transformers.activations import get_activation
 
 

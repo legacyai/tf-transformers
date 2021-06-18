@@ -1,4 +1,6 @@
-# Copyright 2021 The TensorFlow and tf-transformers Authors. All Rights Reserved.
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.
+# All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-# ==============================================================================
 
 """Keras-based one-hot embedding layer."""
 
 import tensorflow as tf
+
 from tf_transformers.utils import tf_utils
 
 

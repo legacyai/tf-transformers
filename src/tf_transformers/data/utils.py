@@ -1,4 +1,21 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 from functools import wraps
+
 import tensorflow as tf
 
 
@@ -17,14 +34,18 @@ def auto_batch(
     """Auto Batching
 
     Args:
-        tf_dataset : TF dataset
-        x_keys (optional): List of key names. We will filter based on this.
-        y_keys (optional): List of key names.
-        shuffle (bool, optional): [description]. Defaults to False.
-        shuffle_buffer_size (int, optional): [description]. Defaults to 10000.
+        tf_dataset (tf.data.Dataset): TF dataset
+        batch_size (int): Batch Size
+        padded_values (dict): dict of key to padded values eg: {'key': tf.constant(0)}
+        padded_shapes (dict): dict of key to padded shapes eg: 'key': (None,)}
+        x_keys (list): List of key names. We will filter based on this.
+        y_keys (list): List of key names.
+        shuffle (bool):  Defaults to False.
+        shuffle_buffer_size (int):  Defaults to 100.
+        prefetch_buffer_size (int): Defaults to 100.
 
     Returns:
-        batched tf dataset
+        tf.data.Dataset: Batched
     """
     element_spec = tf_dataset.element_spec
     _padded_values = {}

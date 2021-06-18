@@ -1,7 +1,8 @@
-import tensorflow as tf
 import time
-import tqdm
 from pprint import pformat
+
+import tensorflow as tf
+import tqdm
 from absl import logging
 
 logging.set_verbosity("INFO")

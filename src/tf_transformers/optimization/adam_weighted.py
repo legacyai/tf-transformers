@@ -1,5 +1,6 @@
-import tensorflow as tf
 import re
+
+import tensorflow as tf
 
 
 class AdamWeightDecay(tf.keras.optimizers.Adam):
@@ -35,7 +36,8 @@ class AdamWeightDecay(tf.keras.optimizers.Adam):
     @classmethod
     def from_config(cls, config):
         """Creates an optimizer from its config with WarmUp custom object."""
-        custom_objects = {"WarmUp": WarmUp}
+        # custom_objects = {"WarmUp": WarmUp}
+        custom_objects = {}
         return super(AdamWeightDecay, cls).from_config(config, custom_objects=custom_objects)
 
     def _prepare_local(self, var_device, var_dtype, apply_state):
@@ -95,11 +97,7 @@ class AdamWeightDecay(tf.keras.optimizers.Adam):
 
     def get_config(self):
         config = super(AdamWeightDecay, self).get_config()
-        config.update(
-            {
-                "weight_decay_rate": self.weight_decay_rate,
-            }
-        )
+        config.update({"weight_decay_rate": self.weight_decay_rate})
         return config
 
     def _do_use_weight_decay(self, param_name):

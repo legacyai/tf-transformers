@@ -1,10 +1,26 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 import tensorflow as tf
 from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer, LegacyModel
-from tf_transformers.layers import GPT2LayerNormalization, OnDeviceEmbedding, PositionEmbedding, MaskedLM, BiasLayer
-from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
+from tf_transformers.layers import GPT2LayerNormalization
+from tf_transformers.layers.mask import CausalMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerGPT2
 from tf_transformers.utils import tf_utils
 
@@ -158,12 +174,9 @@ class GPT2Encoder(LegacyLayer):
             dtype=tf.int32,
             name="input_type_ids",
         )
-        masked_lm_positions = tf.keras.layers.Input(
-            shape=(None,),
-            batch_size=self._batch_size,
-            dtype=tf.int32,
-            name="masked_lm_positions",
-        )
+        # masked_lm_positions = tf.keras.layers.Input(
+        #     shape=(None,), batch_size=self._batch_size, dtype=tf.int32, name="masked_lm_positions",
+        # )
         inputs = {}
         inputs["input_ids"] = input_ids  # Default
         # if mask_mode != 'causal', user has to provde mask
@@ -487,7 +500,7 @@ class GPT2Encoder(LegacyLayer):
         encoder_outputs[-1] = self._last_layer_norm(encoder_outputs[-1])
         # batch_size x sequence_length x embedding_size
         token_embeddings = encoder_outputs[-1]
-        token_logits = tf.matmul(token_embeddings, self.get_embedding_table(), transpose_b=True)
+        # token_logits = tf.matmul(token_embeddings, self.get_embedding_table(), transpose_b=True)
 
         def step_0_gather(past_length, token_embeddings):
             cache_length = tf.reduce_sum(tf.cast(tf.not_equal(input_ids_mod, -1), tf.int32), axis=1) - 1
@@ -685,6 +698,7 @@ class GPT2Encoder(LegacyLayer):
         ]
 
         # 1. Collect Word Embeddings
+        sequence_length = tf.shape(input_ids)[1]
         embeddings = self._embedding_layer(input_ids)
         # Add word_embeddings + position_embeddings + type_embeddings
         if self._type_embeddings_layer:
@@ -719,12 +733,7 @@ class GPT2Encoder(LegacyLayer):
             cache_key = all_cache_key[i]
 
             embeddings, cache_key, cache_value = layer(
-                [
-                    embeddings,
-                    attention_mask,
-                    encoder_hidden_state,
-                    decoder_encoder_mask,
-                ],
+                [embeddings, attention_mask, encoder_hidden_state, decoder_encoder_mask],
                 cache_key=cache_key,
                 cache_value=cache_value,
             )

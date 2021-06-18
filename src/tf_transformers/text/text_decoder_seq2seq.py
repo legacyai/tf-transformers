@@ -1,8 +1,12 @@
 import numpy as np
 import tensorflow as tf
-import tensorflow_hub as hub
 
-from tf_transformers.text import _gather_beams, _log_prob_from_logits, assign_zeros_to_K_V, top_k_logits, top_p_logits
+from tf_transformers.text import (
+    _gather_beams,
+    _log_prob_from_logits,
+    top_k_logits,
+    top_p_logits,
+)
 
 
 class TextDecoderSeq2Seq(object):
@@ -87,6 +91,14 @@ class TextDecoderSeq2Seq(object):
         self.reserved_input_keys = ["input_ids", "input_mask", "input_type_ids"]
 
     def validate_decoder_type_ids(self, inputs):
+        """Validate all extra IDS for models.
+
+        Args:
+            inputs (dict): Dict of Keras Inputs
+        Raises:
+            ValueError: If present and not provided
+            ValueError: If present and not provided
+        """
         if "decoder_input_type_ids" in inputs:
             if self.decoder_input_type_ids < 0:
                 raise ValueError(
@@ -95,13 +107,13 @@ class TextDecoderSeq2Seq(object):
                 )
 
     def auto_infer_config(self, config, saved_model=False):
-        """[summary]
+        """Automatically Infer size and shape from config
 
         Args:
-            config ([type]): [description]
+            config (dict): Necessary Model config
 
         Returns:
-            [type]: [description]
+            [embedding_size, num_attention_heads, num_hidden_layers, attention_head_size]: Numbers
         """
         if saved_model:
             embedding_size = config["embedding_size"].numpy()
@@ -117,8 +129,8 @@ class TextDecoderSeq2Seq(object):
             return (embedding_size, decoder_num_attention_heads, decoder_num_hidden_layers, attention_head_size)
 
     def reorder_past_batches(self, all_cache_key, all_cache_value, coordinates, beam_size):
-        """[Reorder the input batch based on beam predictions
-        Future beams changes the best path order]
+        """Reorder the input batch based on beam predictions
+        Future beams changes the best path order
 
         Args:
             all_cache_key ([tf.tensor]): [K from Transformers]
@@ -127,7 +139,7 @@ class TextDecoderSeq2Seq(object):
             beam_size ([int/tf.tensor]): [Number of beams]
 
         Returns:
-            [type]: [description]
+            all_cache_key and all_cache_value (Updated)
 
         """
         coordinates_reshaped = coordinates[:, :beam_size, -1] + tf.expand_dims(
@@ -209,9 +221,11 @@ class TextDecoderSeq2Seq(object):
             encoder_hidden_states = result["encoder_hidden_states"]
             if do_sample:
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
+                prediction_probs = tf_utils.gather_values_from_2d_tensor(model_logits, prediction_ids)
                 input_ids = tf.cast(prediction_ids, tf.int32)
             else:
                 prediction_ids = tf.argmax(model_logits, axis=1)
+                prediction_probs = tf.reduce_max(model_logits, axis=1)
                 input_ids = tf.expand_dims(prediction_ids, axis=1)
 
             all_predictions.append(input_ids)

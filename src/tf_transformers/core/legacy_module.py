@@ -1,3 +1,21 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Extending  tf.Module to LegacyModule for serialization"""
+
 import tensorflow as tf
 
 
@@ -40,6 +58,12 @@ class LegacyModuleCustom(tf.Module):
         return self.model(kwargs)
 
     def save(self, save_dir, signature_name="serving_default"):
+        """Make models compatible for `tf.saved_model` format
+
+        Args:
+            save_dir (str): Model directory
+            signature_name (str, optional): Defaults to "serving_default".
+        """
         input_spec = {name: keras_input.type_spec for name, keras_input in self.model.input.items()}
         call_output = self.__call__.get_concrete_function(**input_spec)
         tf.saved_model.save(self, save_dir, signatures={signature_name: call_output})
@@ -49,6 +73,12 @@ class LegacyModule(tf.Module):
     """LegacyModule : To make output names compatible we use this Module."""
 
     def __init__(self, model, name=None):
+        """LegacyModule.
+
+        Args:
+            model tf.keras.Model): Model
+            name (str), optional): Model name
+        """
         super(LegacyModule, self).__init__(name=name)
         self.model = model
 
@@ -57,6 +87,12 @@ class LegacyModule(tf.Module):
         return self.model(kwargs)
 
     def save(self, save_dir, signature_name="serving_default"):
+        """Make models compatible for `tf.saved_model` format
+
+        Args:
+            save_dir (str): Model directory
+            signature_name (str, optional): Defaults to "serving_default".
+        """
         input_spec = {name: keras_input.type_spec for name, keras_input in self.model.input.items()}
         call_output = self.__call__.get_concrete_function(**input_spec)
         tf.saved_model.save(self, save_dir, signatures={signature_name: call_output})

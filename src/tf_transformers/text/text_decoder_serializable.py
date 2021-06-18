@@ -1,10 +1,31 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Text Auto Regressive Decoder for Tensorflow Model and saved_model. This is Serializable as saved_model"""
 import numpy as np
 import tensorflow as tf
 
-from tf_transformers.text import _gather_beams, _log_prob_from_logits, assign_zeros_to_K_V, top_k_logits, top_p_logits
 from tf_transformers.core import LegacyModel
-
-tf.keras.backend.clear_session()
+from tf_transformers.text import (
+    _gather_beams,
+    _log_prob_from_logits,
+    top_k_logits,
+    top_p_logits,
+)
+from tf_transformers.utils import tf_utils
 
 
 class TextDecoderSerializable(tf.keras.layers.Layer):
@@ -21,9 +42,9 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
         batch_size=None,
         sequence_length=None,
         max_sequence_length=None,
-        sampling_temperature=1.0,
+        temperature=1.0,
         alpha=0.0,
-        beam_size=1,
+        num_beams=1,
         eos_id=-100,
         do_sample=False,
         top_k=0,
@@ -32,7 +53,7 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
         input_type_ids=-1,
         input_mask_ids=1,
     ):
-        """[Init]
+        """
 
         Args:
             model ([tf.keras.Model / tf.keras.Layer]): [The model with which decoding
@@ -89,13 +110,13 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
         self.eos_id = eos_id
         self.mode = mode
 
-        self.beam_size = beam_size
+        self.beam_size = num_beams
         self.top_k = top_k
         self.top_p = top_p
         self.do_sample = do_sample
         self.num_return_sequences = num_return_sequences
 
-        self.temperature = sampling_temperature
+        self.temperature = temperature
         self.alpha = alpha
 
         if self.mode == "greedy":
@@ -106,6 +127,14 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
             self.decoder_fn = self.top_k_top()
 
     def validate_decoder_type_ids(self, inputs):
+        """Validate all extra IDS for models.
+
+        Args:
+            inputs (dict): Dict of Keras Inputs
+        Raises:
+            ValueError: If present and not provided
+            ValueError: If present and not provided
+        """
         if "input_type_ids" in inputs:
             if self.input_type_ids < 0:
                 raise ValueError(
@@ -114,13 +143,13 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
                 )
 
     def auto_infer_config(self, config, saved_model=False):
-        """[summary]
+        """Automatically Infer size and shape from config
 
         Args:
-            config ([type]): [description]
+            config (dict): Necessary Model config
 
         Returns:
-            [type]: [description]
+            [embedding_size, num_attention_heads, num_hidden_layers, attention_head_size]: Numbers
         """
         if saved_model:
             embedding_size = config["embedding_size"].numpy()
@@ -136,13 +165,22 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
             return (embedding_size, num_attention_heads, num_hidden_layers, attention_head_size)
 
     def get_model(self):
+        """Convert LegacyLayer to Keras/LegacyModel
+
+        Returns:
+            tf.keras.Model/LegacyModel
+        """
         # Call the model in init itself
         layer_outputs = self(self.model_inputs)
         decoder_model = LegacyModel(inputs=self.model_inputs, outputs=layer_outputs, name="decoder_model")
         return decoder_model
 
     def get_inputs(self):
+        """Get inputs for the model
 
+        Returns:
+            dict: model inputs (KerasTensor)
+        """
         input_ids = tf.keras.layers.Input(
             shape=(self.sequence_length,),
             batch_size=self.batch_size,
@@ -164,6 +202,7 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
             dtype=tf.int32,
             name="input_type_ids",
         )
+        # List of input names
         self.input_name_list = []
         if "input_ids" in self.model.input:
             self.input_name_list.append("input_ids")
@@ -172,6 +211,7 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
         if "input_type_ids" in self.model.input:
             self.input_name_list.append("input_type_ids")
 
+        # Based on names, we make a dict of input Tensor
         inputs = {}
         for name in self.input_name_list:
             if name == "input_ids":
@@ -182,9 +222,10 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
             if name == "input_type_ids":
                 inputs["input_type_ids"] = input_type_ids
 
+        # If iterations has to be passed as input
         if self.max_iterations is None:
             inputs["iterations"] = tf.keras.layers.Input(
-                shape=(1,), batch_size=1, ragged=False, dtype=tf.int32, name="iterator"
+                shape=(1,), batch_size=1, ragged=False, dtype=tf.int32, name="iterations"
             )
 
         return self.input_name_list, inputs
@@ -222,14 +263,14 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
         """
 
         # EOS check function
-        def cond(i, input_ids, all_cache_key, all_cache_value, past_length, initial_id):
+        def cond(i, input_ids, all_cache_key, all_cache_value, past_length, initial_id, prediction_probs):
             eos_check = tf.greater(
                 tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(initial_id, self.eos_id), tf.int32), axis=[1])),
                 0,
             )
             return tf.not_equal(eos_check, True)
 
-        def body(i, inputs_tuple, all_cache_key, all_cache_value, past_length, initial_id):
+        def body(i, inputs_tuple, all_cache_key, all_cache_value, past_length, initial_id, prediction_probs):
 
             """[This is the body of the beam decoder]
 
@@ -263,9 +304,13 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
 
             if self.do_sample:
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
+                p_probs = tf_utils.gather_values_from_2d_tensor(model_logits, prediction_ids)
+                p_probs = tf.expand_dims(p_probs, 1)  # 2D
                 input_ids = tf.cast(prediction_ids, tf.int32)
             else:
                 prediction_ids = tf.argmax(model_logits, axis=1)
+                p_probs = tf.reduce_max(model_logits, axis=1)
+                p_probs = tf.expand_dims(p_probs, 1)  # 2D
                 input_ids = tf.cast(tf.expand_dims(prediction_ids, axis=1), tf.int32)
 
             inputs_tuple = [None] * len(self.input_name_list)
@@ -293,6 +338,7 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
                 model_outputs["all_cache_value"],
                 model_outputs["past_length"],
                 tf.concat([initial_id, input_ids], axis=1),
+                tf.concat([prediction_probs, p_probs], axis=1),
             ]
 
         # @tf.function(experimental_relax_shapes=True)
@@ -347,9 +393,13 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
             model_logits = model_outputs["last_token_logits"] / self.temperature
             if self.do_sample:
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
+                prediction_probs = tf_utils.gather_values_from_2d_tensor(model_logits, prediction_ids)
+                prediction_probs = tf.expand_dims(prediction_probs, 1)  # 2D
                 input_ids = tf.cast(prediction_ids, tf.int32)
             else:
                 prediction_ids = tf.argmax(model_logits, axis=1)
+                prediction_probs = tf.reduce_max(model_logits, axis=1)
+                prediction_probs = tf.expand_dims(prediction_probs, 1)  # 2D
                 input_ids = tf.cast(tf.expand_dims(prediction_ids, axis=1), tf.int32)
 
             # Update iter
@@ -396,28 +446,18 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
                     all_cache_value,
                     model_outputs["past_length"],
                     initial_id,
+                    prediction_probs,
                 ],
                 shape_invariants=[
                     i.get_shape(),
                     input_shapes_tuple,
                     tf.TensorShape(
-                        [
-                            self.num_hidden_layers,
-                            None,
-                            self.num_attention_heads,
-                            None,
-                            self.attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
                     tf.TensorShape(
-                        [
-                            self.num_hidden_layers,
-                            None,
-                            self.num_attention_heads,
-                            None,
-                            self.attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
+                    tf.TensorShape([None, None]),
                     tf.TensorShape([None, None]),
                     tf.TensorShape([None, None]),
                 ],
@@ -427,7 +467,8 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
             results_dict["iterations"] = results[0]
             results_dict["input_ids"] = input_ids_orig
             # Skip -1 initial ids
-            results_dict["predicted_ids"] = results[-1][:, 1:]
+            results_dict["predicted_ids"] = results[-2][:, 1:]  # -2 second last entry
+            results_dict["prediction_probs"] = results[-1]  # -1 last entry
             # Add matched positions here
             matched_positions = tf.argmax(
                 tf.cast(tf.equal(self.eos_id, results_dict["predicted_ids"]), tf.int64),
@@ -437,7 +478,7 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
             eos_pos_mask = tf.cast(tf.equal(matched_positions, 0), tf.int64) * -1
             matched_positions = tf.cast(matched_positions, tf.int64) + eos_pos_mask
             results_dict["matched_eos_pos"] = matched_positions
-            results_dict["predicted_ids"] = tf.expand_dims(results[-1][:, 1:], 1)
+            results_dict["predicted_ids"] = tf.expand_dims(results_dict["predicted_ids"], 1)
 
             return results_dict
 
@@ -762,35 +803,15 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
                 cond,
                 body,
                 maximum_iterations=iterations - 1,
-                loop_vars=[
-                    i,
-                    inputs_tuple,
-                    all_cache_key,
-                    all_cache_value,
-                    past_length,
-                    alive_log_probs,
-                    alive_seq,
-                ],
+                loop_vars=[i, inputs_tuple, all_cache_key, all_cache_value, past_length, alive_log_probs, alive_seq],
                 shape_invariants=[
                     i.get_shape(),
                     input_shapes_tuple,
                     tf.TensorShape(
-                        [
-                            self.num_hidden_layers,
-                            None,
-                            self.num_attention_heads,
-                            None,
-                            self.attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
                     tf.TensorShape(
-                        [
-                            self.num_hidden_layers,
-                            None,
-                            self.num_attention_heads,
-                            None,
-                            self.attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
                     tf.TensorShape([None, None]),
                     tf.TensorShape([None, None]),
@@ -832,14 +853,14 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
     def top_k_top(self):
 
         # EOS check function
-        def cond(i, input_ids, all_cache_key, all_cache_value, past_length, initial_id):
+        def cond(i, input_ids, all_cache_key, all_cache_value, past_length, initial_id, prediction_probs):
             eos_check = tf.greater(
                 tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(initial_id, self.eos_id), tf.int32), axis=[1])),
                 0,
             )
             return tf.not_equal(eos_check, True)
 
-        def body(i, inputs_tuple, all_cache_key, all_cache_value, past_length, initial_id):
+        def body(i, inputs_tuple, all_cache_key, all_cache_value, past_length, initial_id, prediction_probs):
             """[This is the body of the top k top p decoder]
 
             Args:
@@ -851,6 +872,7 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
                 This is our main output or decoded ids]
                 initial_id ([tf.tensor]): [To keep track of concatanted ids generated
                 in each iteration]
+                prediction_probs (tf.tensor): Prediction probs 2D
 
             Returns:
                 [List of tensors]: [Outputs]
@@ -872,9 +894,13 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
 
             if self.do_sample:
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
+                p_probs = tf_utils.gather_values_from_2d_tensor(model_logits, prediction_ids)
+                p_probs = tf.expand_dims(p_probs, 1)  # 2D
                 input_ids = tf.cast(prediction_ids, tf.int32)
             else:
                 prediction_ids = tf.argmax(model_logits, axis=1)
+                p_probs = tf.reduce_max(model_logits, axis=1)
+                p_probs = tf.expand_dims(p_probs, 1)  # 2D
                 input_ids = tf.cast(tf.expand_dims(prediction_ids, axis=1), tf.int32)
 
             inputs_tuple = [None] * len(self.input_name_list)
@@ -901,6 +927,7 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
                 model_outputs["all_cache_value"],
                 model_outputs["past_length"],
                 tf.concat([initial_id, input_ids], axis=1),
+                tf.concat([prediction_probs, p_probs], axis=1),
             ]
 
         def call_top_k_top_p(inputs):
@@ -965,10 +992,15 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
 
             if self.do_sample:
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
+                prediction_probs = tf_utils.gather_values_from_2d_tensor(model_logits, prediction_ids)
+                prediction_probs = tf.expand_dims(prediction_probs, 1)  # 2D
                 input_ids = tf.cast(prediction_ids, tf.int32)
             else:
                 prediction_ids = tf.argmax(model_logits, axis=1)
+                prediction_probs = tf.reduce_max(model_logits, axis=1)
+                prediction_probs = tf.expand_dims(prediction_probs, 1)  # 2D
                 input_ids = tf.cast(tf.expand_dims(prediction_ids, axis=1), tf.int32)
+
             inputs_tuple = [None] * len(self.input_name_list)
             input_shapes_tuple = [tf.TensorShape([None, None])] * len(self.input_name_list)
             for index, name in self.input_name_map.items():
@@ -1016,28 +1048,18 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
                     all_cache_value,
                     model_outputs["past_length"],
                     initial_id,
+                    prediction_probs,
                 ],
                 shape_invariants=[
                     i.get_shape(),
                     input_shapes_tuple,
                     tf.TensorShape(
-                        [
-                            self.num_hidden_layers,
-                            None,
-                            self.num_attention_heads,
-                            None,
-                            self.attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
                     tf.TensorShape(
-                        [
-                            self.num_hidden_layers,
-                            None,
-                            self.num_attention_heads,
-                            None,
-                            self.attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
+                    tf.TensorShape([None, None]),
                     tf.TensorShape([None, None]),
                     tf.TensorShape([None, None]),
                 ],
@@ -1047,12 +1069,12 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
             results_dict["iterations"] = results[0]
             results_dict["input_ids"] = input_ids_orig
             # Skip -1 initial ids
-            results_dict["predicted_ids"] = results[-1][:, 1:]
+            results_dict["predicted_ids"] = results[-2][:, 1:]  # -2 second last entry
             results_dict["predicted_ids"] = tf.reshape(
                 results_dict["predicted_ids"],
                 (batch_size, self.num_return_sequences, -1),
             )
-
+            results_dict['prediction_probs'] = results[-1]  # -1 last entry
             matched_positions = (
                 tf.squeeze(
                     tf.reshape(

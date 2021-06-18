@@ -1,9 +1,24 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""LegacyLayer Setup"""
+
 import tensorflow as tf
 
-from absl import logging
-from tf_transformers.core.legacy_model import LegacyModel
 from tf_transformers.layers import OnDeviceEmbedding, PositionEmbedding
-from abc import ABC, abstractmethod
 
 
 class LegacyLayer(tf.keras.layers.Layer):
@@ -18,7 +33,7 @@ class LegacyLayer(tf.keras.layers.Layer):
         Args:
             name (str): Name of the layer
             is_training (bool): True/False
-            use_dropout (bool]): This will help us to disable dropout even in training
+            use_dropout (bool): This will help us to disable dropout even in training
         """
         self.is_training = is_training
         self.use_dropout = use_dropout
@@ -64,29 +79,46 @@ class LegacyLayer(tf.keras.layers.Layer):
             )
         return embedding_layer, type_embedding_layer, positional_embedding_layer
 
-    @abstractmethod
     def call_encoder(self):
-        return
+        """Forward Pass of Encoders (GPT2, BERT and Encoder for T5, BART etc)
 
-    @abstractmethod
+        Raises:
+            NotImplementedError: Must implement in corresponding models.
+        """
+        raise NotImplementedError('Must be implemented in subclasses.')
+
     def call_decoder(self):
-        return
+        """Forward Pass of Decoders (Decoder for T5, BART etc)
 
-    @abstractmethod
+        Raises:
+            NotImplementedError: Must implement in corresponding models.
+        """
+        raise NotImplementedError('Must be implemented in subclasses.')
+
     def call_encoder_auto_regressive(self):
-        return
+        """Forward Pass of Encoders in Auto Regressive mode:
+        (GPT2, BERT etc)
 
-    @abstractmethod
+        Raises:
+            NotImplementedError: Must implement in corresponding models.
+        """
+        raise NotImplementedError('Must be implemented in subclasses.')
+
     def call_decoder_auto_regressive(self):
-        return
+        """Forward Pass of Decoders in Auto Regressive mode:
+        (T5, BART etc)
 
-    @abstractmethod
+        Raises:
+            NotImplementedError: Must implement in corresponding models.
+        """
+        raise NotImplementedError('Must be implemented in subclasses.')
+
     def get_model(self, initialize_only=False):
         """Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
         Args:
             initialize_only [bool]: If True, just initialize the model, but wont return model object.
         """
-        return
+        raise NotImplementedError('Must be implemented in subclasses.')
 
     def get_call_method(self, config):
         """This method helps us to choose the call method.

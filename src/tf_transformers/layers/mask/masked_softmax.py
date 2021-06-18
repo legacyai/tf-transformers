@@ -1,4 +1,6 @@
-# Copyright 2019 The TensorFlow Authors. All Rights Reserved.
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.
+# All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +15,6 @@
 # limitations under the License.
 # ==============================================================================
 """Keras-based softmax layer with optional masking."""
-# from __future__ import google_type_annotations
-# pylint: disable=g-classes-have-attributes
 from __future__ import absolute_import, division, print_function
 
 import tensorflow as tf

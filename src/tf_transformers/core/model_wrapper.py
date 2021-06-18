@@ -1,5 +1,24 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""ModelWrapper setup"""
 import tempfile
+from abc import ABC, abstractmethod
 from pathlib import Path
+
 from absl import logging
 
 logging.set_verbosity("INFO")
@@ -8,18 +27,18 @@ _PREFIX_DIR = "tf_transformers_cache"
 HF_VERSION = "4.6.0"
 
 
-class ModelWrapper:
+class ModelWrapper(ABC):
     """Model Wrapper for all models"""
 
-    def __init__(self, cache_dir, model_name):
+    def __init__(self, model_name, cache_dir):
         """
 
         Args:
             cache_dir ([str]): [None/ cache_dir string]
             model_name ([str]): [name of the model]
         """
-        self.cache_dir = cache_dir
         self.model_name = model_name
+        self.cache_dir = cache_dir
         if cache_dir is None:
             self.cache_dir = tempfile.gettempdir()
 
@@ -27,6 +46,29 @@ class ModelWrapper:
         self.create_cache_dir(self.cache_dir)
         self.model_path = Path(self.cache_dir, self.model_name)
         self.hf_version = HF_VERSION
+
+    @abstractmethod
+    def update_config(self):
+        pass
+
+    def _update_kwargs_and_config(self, kwargs, config):
+        """keywords in kwargs has to be updated oi  config
+        Otherwise it wont be recongnized by the Model
+
+        Args:
+            kwargs (dict): Keyword arguments for the model
+            config (dict): Model config
+
+        Returns:
+            [dict]: Updated kwargs
+        """
+        kwargs_copy = kwargs.copy()
+
+        for key, value in kwargs.items():
+            if key in config:
+                config[key] = value
+                del kwargs_copy[key]
+        return kwargs_copy
 
     def create_cache_dir(self, cache_path):
         """Create Cache Directory
@@ -51,7 +93,7 @@ class ModelWrapper:
             if transformers.__version__ != self.hf_version:
                 logging.warning(
                     "Expected `transformers` version `{}`, but found version `{}`.\
-                        The conversion might or might not work.".format(
+        The conversion might or might not work.".format(
                         self.hf_version, transformers.__version__
                     )
                 )

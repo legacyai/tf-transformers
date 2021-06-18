@@ -1,4 +1,6 @@
-# Copyright 2020 The BigBird Authors.
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.
+# All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# ==============================================================================
 
 """BigBird Attention Layers."""
 
@@ -19,11 +22,9 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 import tensorflow as tf
-from absl import logging
 
 from tf_transformers.core import LegacyLayer
 from tf_transformers.layers import dense_einsum
-from tf_transformers.layers.mask import masked_softmax
 from tf_transformers.utils import tf_utils
 
 MAX_SEQ_LEN = 4096
@@ -466,7 +467,7 @@ def original_full_attention(
 
     # This is actually dropping out entire tokens to attend to, which might
     # seem a bit unusual, but is taken from the original Transformer paper.
-    attention_probs = utils.dropout(attention_probs, attention_probs_dropout_prob)
+    attention_probs = tf.keras.layers.Dropout(attention_probs, attention_probs_dropout_prob)
 
     # `context_layer` = [B, F, N, H]
     context_layer = tf.einsum("BNFT,BNTH->BFNH", attention_probs, value_layer)
@@ -1035,7 +1036,6 @@ class BigBirdAttention(LegacyLayer):
         value_tensor = self._value_dense(to_tensor)
 
         # Transpose to [B, N, T, H]
-        c = tf.transpose(query_tensor, [0, 2, 1, 3])
         key_tensor = tf.transpose(key_tensor, [0, 2, 1, 3])
         value_tensor = tf.transpose(value_tensor, [0, 2, 1, 3])
 

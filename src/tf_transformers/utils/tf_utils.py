@@ -179,3 +179,36 @@ def get_dtype():
     if policy.name == "mixed_float16":
         dtype = tf.float16
     return dtype
+
+
+def gather_values_from_2d_tensor(value_tensor, index_tensor):
+    """Get values from 2D tensor using 2D index
+
+    value_tensor:
+        tf.Tensor: shape=(2, 10), dtype=float32, numpy=
+        array([[0.41716623, 0.16220212, 0.57236147, 0.85827255, 0.07229817,
+                0.7548058 , 0.34538198, 0.50186884, 0.17406607, 0.6326196 ],
+                [0.50965476, 0.7139858 , 0.66155374, 0.77050793, 0.56380427,
+                0.80631006, 0.81072354, 0.17372155, 0.742455  , 0.46470654]],
+        dtype=float32)>
+    index_tensor:
+        <tf.Tensor: shape=(2, 1), dtype=int64, numpy=
+        array([[1],
+             [5]])>
+
+    Values based on index in each row has to be returned.
+    Returns (value_tensor[0][1], value_tensor[1][5])
+
+    Args:
+        value_tensor (tf.Tensor): 2D Tensor of (Matrxi) values
+        index_tensor (tf.Tensor): 2D tensor of indexes ( batch_size x 1)
+
+    Returns:
+        tf.Tensor: 1D (batch_size,)
+    """
+    batch_size = tf.shape(index_tensor)[0]  # scalar
+    batch_range = tf.expand_dims(tf.range(batch_size), 1)  # 2d (batch_size, 1)
+    index_tensor_2d = tf.concat(
+        [batch_range, tf.cast(index_tensor, dtype=batch_range.dtype)], axis=1
+    )  # 2D (batch_size, 2)
+    return tf.gather_nd(value_tensor, index_tensor_2d)  # (batch_size, )

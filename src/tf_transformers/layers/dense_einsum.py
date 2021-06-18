@@ -13,10 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 """Keras-based einsum layer."""
-# from __future__ import google_type_annotations
-# pylint: disable=g-classes-have-attributes
-from __future__ import absolute_import, division, print_function
-
 import tensorflow as tf
 
 _CHR_IDX = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m"]

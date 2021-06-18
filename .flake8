@@ -1,6 +1,10 @@
 [flake8]
-select = B,B9,C,E,F,I,W
+select = B,C,E,F,P,T4,W,B9
 # F401 - imported but unused
-ignore = E203,W503,F401,C901,E722,F821,F841,F403,F405,E712
+# C901 - complexity
+# E722 do not use bare 'except'
+ignore = E203, E266, E501, W503, C901, E722
 max-complexity = 10
 max-line-length = 120
+# to avoid import unused in __init__.py
+per-file-ignores = __init__.py:F401
