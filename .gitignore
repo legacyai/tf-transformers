@@ -15,6 +15,9 @@ logs/
 lightning_logs/
 lang_code_data/
 
+#hydra outputs
+benchmarks/*/outputs
+
 # Distribution / packaging
 .Python
 build/

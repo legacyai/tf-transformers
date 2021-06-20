@@ -1,0 +1,3 @@
+data:
+  name: cnn_dailymail_hfpt
+  take_sample: false
