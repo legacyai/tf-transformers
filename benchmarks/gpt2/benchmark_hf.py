@@ -100,6 +100,39 @@ class HFBenchmark:
         ]
         return batched_datasets
 
+    def _load_dataset_jax(self):
+        """Load TF dataset"""
+        import jax.numpy as jnp
+        import torch
+
+        cfg = self.cfg
+        tokenizer = self.tokenizer
+        # Load from hydra config
+        dataset_name = cfg.benchmark.data.name
+        take_sample = cfg.benchmark.data.take_sample
+        batch_size = cfg.benchmark.data.batch_size
+        max_length = cfg.benchmark.data.max_length
+        device = cfg.benchmark.task.device
+
+        dataset = load_dataset(dataset_name, "3.0.0", split="test")
+        if take_sample:
+            dataset = dataset.select(range(50))
+
+        dataset = dataset.map(
+            lambda e: tokenizer(e["article"], truncation=True, padding=True, max_length=max_length),
+            batched=True,
+        )
+        dataset.set_format(type='torch', columns=['input_ids'], device=device)
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
+        # Convert alldataset to a list for not including that latency while measuring model
+        # performance
+        # (batch_dataset, batch_size, seq_length)
+        batched_datasets = [
+            (jnp.array(batch_dataset), batch_dataset['input_ids'].shape[0], batch_dataset['input_ids'].shape[1])
+            for batch_dataset in dataloader
+        ]
+        return batched_datasets
+
     def load_and_batch_dataset(self):
         """Load Dataset based on model type"""
         if self.model_type == "tf":
@@ -107,6 +140,9 @@ class HFBenchmark:
 
         if self.model_type == 'pt':
             dataset = self._load_dataset_pt()
+
+        if self.model_type == 'jax':
+            dataset = self._load_dataset_jax()
 
         return dataset
 
@@ -167,6 +203,31 @@ class HFBenchmark:
         text_generation_kwargs = self.cfg.benchmark.text_generation
         return decoder_fn(model, text_generation_kwargs)
 
+    def _load_jax(self):
+        """Load using KerasModel"""
+
+        def decoder_fn(model, text_generation_kwargs):
+            text_generation_kwargs = dict(text_generation_kwargs)
+            del text_generation_kwargs['max_length']  # we will pass it from inputs
+
+            def _decoder_fn(inputs, max_length):
+                return model.generate(**inputs, max_length=max_length, **text_generation_kwargs)
+
+            return _decoder_fn
+
+        from transformers import FlaxGPT2LMHeadModel as Model
+
+        model_name = self.cfg.benchmark.model.name
+        # model = Model.from_pretrained(model_name=model_name) # somehow link is broken
+
+        model = Model.from_pretrained(
+            model_name=model_name,
+            pad_token_id=50256,
+        )  # somehow link is broken
+
+        text_generation_kwargs = self.cfg.benchmark.text_generation
+        return decoder_fn(model, text_generation_kwargs)
+
     def load_model_decoder_fn(self):
         """Load Model"""
 
@@ -175,6 +236,9 @@ class HFBenchmark:
 
         if self.model_type == 'pt':
             decoder_fn = self._load_pt()
+
+        if self.model_type == 'jax':
+            decoder_fn = self._load_jax()
 
         return decoder_fn
 
