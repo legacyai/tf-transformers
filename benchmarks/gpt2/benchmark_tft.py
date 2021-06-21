@@ -1,4 +1,5 @@
 """TFTBechmark scripts"""
+import contextlib
 import shutil
 import tempfile
 import time
@@ -150,6 +151,62 @@ class TftBenchmark:
 
         return decoder_fn()
 
+    def _load_textdecoder_serializable_grappler(self):
+        """Load using TextDecoder Serializable tf.while_loop"""
+
+        @contextlib.contextmanager
+        def options(options):
+            old_opts = tf.config.optimizer.get_experimental_options()
+            tf.config.optimizer.set_experimental_options(options)
+            try:
+                yield
+            finally:
+                tf.config.optimizer.set_experimental_options(old_opts)
+
+        with options(
+            {
+                "constant_folding": True,
+                "shape_optimization": True,
+                "disable_model_pruning": False,
+                "arithmetic_optimization": True,
+                "function_optimization": True,
+                "remapping": True,
+                "dependency_optimization": True,
+                "loop_optimization": True,
+                "scoped_allocator_optimization": True,
+            }
+        ):
+
+            def decoder_fn():
+                model = self.loaded.signatures['serving_default']
+
+                def _decoder_fn(inputs):
+                    return model(**inputs)
+
+                return _decoder_fn
+
+            model_name = self.cfg.benchmark.model.name
+            model, model_config = Model.from_pretrained(model_name=model_name)
+            # Load Auto Regressive Version
+            model, model_config = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
+            # Make decoder model
+            from tf_transformers.text import TextDecoderSerializable
+
+            text_generation_kwargs = self.cfg.benchmark.text_generation
+            decoder = TextDecoderSerializable(model=model, **text_generation_kwargs)
+            decoder = decoder.get_model()
+
+            # Save as saved_model
+            decoder.save_serialized(self.temp_dir, overwrite=True)
+
+            # Load as saved_model
+            del model
+            del decoder
+            # It should be a part of the class (self.loaded)
+            self.loaded = tf.saved_model.load(self.temp_dir)
+
+        return decoder_fn()
+
     def _load_textdecoder_model_serializable(self):
         """Load using TextDecoder Serializable while loop"""
 
@@ -227,6 +284,9 @@ class TftBenchmark:
         if self.model_type == "textdecoder_model_serializable":
             decoder_fn = self._load_textdecoder_model_serializable()
 
+        if self.model_type == 'grappler':
+            decoder_fn = self._load_textdecoder_serializable_grappler()
+
         return decoder_fn
 
     def run(self):
@@ -260,4 +320,4 @@ class TftBenchmark:
         time_taken = end_time - start_time
         samples_per_second = slines / time_taken
 
-        return {"model_type": self.model_type, "time_taken": time_taken, "samples_per_second": samples_per_second}
+        return {"time_taken": time_taken, "samples_per_second": samples_per_second}
