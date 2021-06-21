@@ -1,5 +1,6 @@
 task:
   name: hf
+  device: cuda
 
 data:
   name: cnn_dailymail

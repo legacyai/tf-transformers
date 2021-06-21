@@ -74,12 +74,12 @@ class HFBenchmark:
 
         cfg = self.cfg
         tokenizer = self.tokenizer
-
         # Load from hydra config
         dataset_name = cfg.benchmark.data.name
         take_sample = cfg.benchmark.data.take_sample
         batch_size = cfg.benchmark.data.batch_size
         max_length = cfg.benchmark.data.max_length
+        device = cfg.benchmark.task.device
 
         dataset = load_dataset(dataset_name, "3.0.0", split="test")
         if take_sample:
@@ -89,7 +89,7 @@ class HFBenchmark:
             lambda e: tokenizer(e["article"], truncation=True, padding=True, max_length=max_length),
             batched=True,
         )
-        dataset.set_format(type='torch', columns=['input_ids'])
+        dataset.set_format(type='torch', columns=['input_ids'], device=device)
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
         # Convert alldataset to a list for not including that latency while measuring model
         # performance
@@ -149,14 +149,20 @@ class HFBenchmark:
 
             return _decoder_fn
 
+        import torch
         from transformers import GPT2Config as Config
         from transformers import GPT2LMHeadModel as Model
+
+        device = self.cfg.benchmark.task.device
+        device = torch.device(device)
 
         # model_name = self.cfg.benchmark.model.name
         # model = Model.from_pretrained(model_name=model_name) # somehow link is broken
 
         configuration = Config()
         model = Model(configuration)
+        model.to(device)
+        model.eval()
 
         text_generation_kwargs = self.cfg.benchmark.text_generation
         return decoder_fn(model, text_generation_kwargs)
