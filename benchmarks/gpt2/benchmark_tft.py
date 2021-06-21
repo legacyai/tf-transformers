@@ -16,8 +16,9 @@ _ALLOWED_DECODER_TYPES = [
     "textdecoder_saved_model",
     "textdecoder_serializable",  # This uses tf.while_loop
     "textdecoder_model",  # This uses while loop (tf.keras.Model)
-    "textdecoder_model_serializable",
-]  # This uses while loop
+    "textdecoder_model_serializable",  # This uses while loop
+    "grappler",  # Graph optimizations
+]
 
 
 class TftBenchmark:

@@ -1,0 +1,16 @@
+task:
+  name: hf
+
+data:
+  name: cnn_dailymail
+  take_sample: false
+  batch_size: 32
+  max_length: 512
+
+model:
+  name: gpt2
+  type: tf
+
+text_generation:
+  max_iterations: 64
+  mode: greedy
