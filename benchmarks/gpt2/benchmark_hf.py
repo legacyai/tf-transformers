@@ -3,7 +3,6 @@ import shutil
 import tempfile
 import time
 
-import tensorflow as tf
 import tqdm
 from datasets import load_dataset
 from transformers import GPT2TokenizerFast
@@ -33,8 +32,10 @@ class HFBenchmark:
 
         self.temp_dir = tempfile.mkdtemp()
 
-    def load_and_batch_dataset(self):
+    def _load_dataset_tf(self):
         """Load TF dataset"""
+        import tensorflow as tf
+
         cfg = self.cfg
         tokenizer = self.tokenizer
 
@@ -67,8 +68,51 @@ class HFBenchmark:
         ]
         return batched_datasets
 
+    def _load_dataset_pt(self):
+        """Load TF dataset"""
+        import torch
+
+        cfg = self.cfg
+        tokenizer = self.tokenizer
+
+        # Load from hydra config
+        dataset_name = cfg.benchmark.data.name
+        take_sample = cfg.benchmark.data.take_sample
+        batch_size = cfg.benchmark.data.batch_size
+        max_length = cfg.benchmark.data.max_length
+
+        dataset = load_dataset(dataset_name, "3.0.0", split="test")
+        if take_sample:
+            dataset = dataset.select(range(50))
+
+        dataset = dataset.map(
+            lambda e: tokenizer(e["article"], truncation=True, padding=True, max_length=max_length),
+            batched=True,
+        )
+        dataset.set_format(type='torch', columns=['input_ids'])
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
+        # Convert alldataset to a list for not including that latency while measuring model
+        # performance
+        # (batch_dataset, batch_size, seq_length)
+        batched_datasets = [
+            (batch_dataset, batch_dataset['input_ids'].shape[0], batch_dataset['input_ids'].shape[1])
+            for batch_dataset in dataloader
+        ]
+        return batched_datasets
+
+    def load_and_batch_dataset(self):
+        """Load Dataset based on model type"""
+        if self.model_type == "tf":
+            dataset = self._load_dataset_tf()
+
+        if self.model_type == 'pt':
+            dataset = self._load_dataset_pt()
+
+        return dataset
+
     def _load_tf(self):
-        """Load using TextDecoder KerasModel"""
+        """Load using KerasModel"""
+        import tensorflow as tf
 
         def decoder_fn(model, text_generation_kwargs):
             text_generation_kwargs = dict(text_generation_kwargs)
@@ -93,11 +137,38 @@ class HFBenchmark:
         text_generation_kwargs = self.cfg.benchmark.text_generation
         return decoder_fn(model, text_generation_kwargs)
 
+    def _load_pt(self):
+        """Load using KerasModel"""
+
+        def decoder_fn(model, text_generation_kwargs):
+            text_generation_kwargs = dict(text_generation_kwargs)
+            del text_generation_kwargs['max_length']  # we will pass it from inputs
+
+            def _decoder_fn(inputs, max_length):
+                return model.generate(**inputs, max_length=max_length, **text_generation_kwargs)
+
+            return _decoder_fn
+
+        from transformers import GPT2Config as Config
+        from transformers import GPT2LMHeadModel as Model
+
+        # model_name = self.cfg.benchmark.model.name
+        # model = Model.from_pretrained(model_name=model_name) # somehow link is broken
+
+        configuration = Config()
+        model = Model(configuration)
+
+        text_generation_kwargs = self.cfg.benchmark.text_generation
+        return decoder_fn(model, text_generation_kwargs)
+
     def load_model_decoder_fn(self):
         """Load Model"""
 
         if self.model_type == "tf":
             decoder_fn = self._load_tf()
+
+        if self.model_type == 'pt':
+            decoder_fn = self._load_pt()
 
         return decoder_fn
 
@@ -119,7 +190,7 @@ class HFBenchmark:
         max_length = self.cfg.benchmark.text_generation.max_length
         # Sample batch (to avoid first time compilation time)
         sample_batch_inputs, _, seq_length = batched_datasets[0]
-        outputs = decoder_fn(sample_batch_inputs, seq_length + max_length)  # noqa
+        outputs = decoder_fn(sample_batch_inputs, seq_length + max_length)
 
         slines = 0
         start_time = time.time()

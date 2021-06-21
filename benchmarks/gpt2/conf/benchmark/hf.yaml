@@ -12,5 +12,4 @@ model:
   type: tf
 
 text_generation:
-  max_iterations: 64
-  mode: greedy
+  max_length: 64
