@@ -212,11 +212,14 @@ class HFBenchmark:
         import jax.numpy as jnp
         import numpy as np
         from flax.jax_utils import replicate
-        from flax.training.common_utils import shard
+        # from flax.training.common_utils import shard
+        
+        def my_shard(xs, device_count=1):
+            return jax.tree_map(lambda x: x.reshape((device_count,-1) + x.shape[1:]), xs)
 
         # Wrap generate inside a normal function
         # We will compile it using pmap
-        MAX_LENGTH = self.cfg.benchmark.text_generation
+        MAX_LENGTH = self.cfg.benchmark.text_generation.max_length
         text_generation_kwargs = self.cfg.benchmark.text_generation
         text_generation_kwargs = dict(text_generation_kwargs)
         del text_generation_kwargs['max_length']
@@ -225,16 +228,16 @@ class HFBenchmark:
             seq_length = batch['input_ids'].shape[1]
             max_length = seq_length + MAX_LENGTH
             output_ids = model.generate(
-                batch["input_ids"], prng_key=rng, params=params, max_length=max_length, **text_generation_kwargs
+                batch["input_ids"], prng_key=rng, params=params, max_length=max_length,**text_generation_kwargs
             ).sequences
             return output_ids
 
         def decoder_fn(p_params, dummy_inputs, rngs):
             p_generate = jax.pmap(generate)
-            dummy_outputs = p_generate(p_params, shard(dummy_inputs), rngs)  # noqa
+            dummy_outputs = p_generate(p_params, my_shard(dummy_inputs), rngs)  # noqa
 
             def _decoder_fn(inputs, max_length):
-                output_ids = p_generate(p_params, shard(inputs), rngs)
+                output_ids = p_generate(p_params, my_shard(inputs), rngs)
                 return output_ids
 
             return _decoder_fn
@@ -242,10 +245,8 @@ class HFBenchmark:
         from transformers import FlaxGPT2LMHeadModel as Model
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)  # somehow link is broken
-
         model = Model.from_pretrained(
-            model_name=model_name,
+            model_name,
             pad_token_id=50256,
         )  # somehow link is broken
 
@@ -254,8 +255,8 @@ class HFBenchmark:
         rngs = jax.random.split(rng, num_devices)
         batch_size = self.cfg.benchmark.data.batch_size
         max_length = self.cfg.benchmark.data.max_length
-        p_params = replicate(model.params)
-        dummy_inputs = jnp.array(np.random.randint(0, 100, size=(batch_size, max_length)), dtype=jnp.int32)
+        p_params = replicate(model.params, devices=[jax.local_devices()[0]])
+        dummy_inputs = {"input_ids":jnp.array(np.random.randint(0, 100, size=(batch_size, max_length)), dtype=jnp.int32)}
         return decoder_fn(p_params, dummy_inputs, rngs)
 
     def load_model_decoder_fn(self):
