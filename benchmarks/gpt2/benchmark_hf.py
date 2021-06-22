@@ -258,7 +258,7 @@ class HFBenchmark:
         p_params = replicate(model.params, devices=[jax.local_devices()[0]])
         dummy_inputs = {"input_ids":jnp.array(np.random.randint(0, 100, size=(batch_size, max_length)), dtype=jnp.int32)}
         return decoder_fn(p_params, dummy_inputs, rngs)
-
+    
     def load_model_decoder_fn(self):
         """Load Model"""
 
