@@ -112,7 +112,6 @@ class HFBenchmark:
         take_sample = cfg.benchmark.data.take_sample
         batch_size = cfg.benchmark.data.batch_size
         max_length = cfg.benchmark.data.max_length
-        device = cfg.benchmark.task.device
 
         dataset = load_dataset(dataset_name, "3.0.0", split="test")
         if take_sample:
@@ -122,13 +121,17 @@ class HFBenchmark:
             lambda e: tokenizer(e["article"], truncation=True, padding=True, max_length=max_length),
             batched=True,
         )
-        dataset.set_format(type='torch', columns=['input_ids'], device=device)
+        dataset.set_format(type='torch', columns=['input_ids'])
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
         # Convert alldataset to a list for not including that latency while measuring model
         # performance
         # (batch_dataset, batch_size, seq_length)
         batched_datasets = [
-            (jnp.array(batch_dataset), batch_dataset['input_ids'].shape[0], batch_dataset['input_ids'].shape[1])
+            (
+                {"input_ids": jnp.array(batch_dataset["input_ids"].numpy())},
+                batch_dataset['input_ids'].shape[0],
+                batch_dataset['input_ids'].shape[1],
+            )
             for batch_dataset in dataloader
         ]
         return batched_datasets
@@ -205,28 +208,55 @@ class HFBenchmark:
 
     def _load_jax(self):
         """Load using KerasModel"""
+        import jax
+        import jax.numpy as jnp
+        import numpy as np
+        from flax.jax_utils import replicate
+        from flax.training.common_utils import shard
 
-        def decoder_fn(model, text_generation_kwargs):
-            text_generation_kwargs = dict(text_generation_kwargs)
-            del text_generation_kwargs['max_length']  # we will pass it from inputs
+        # Wrap generate inside a normal function
+        # We will compile it using pmap
+        MAX_LENGTH = self.cfg.benchmark.text_generation
+        text_generation_kwargs = self.cfg.benchmark.text_generation
+        text_generation_kwargs = dict(text_generation_kwargs)
+        del text_generation_kwargs['max_length']
+
+        def generate(params, batch, rng):
+            seq_length = batch['input_ids'].shape[1]
+            max_length = seq_length + MAX_LENGTH
+            output_ids = model.generate(
+                batch["input_ids"], prng_key=rng, params=params, max_length=max_length, **text_generation_kwargs
+            ).sequences
+            return output_ids
+
+        def decoder_fn(p_params, dummy_inputs, rngs):
+            p_generate = jax.pmap(generate)
+            dummy_outputs = p_generate(p_params, shard(dummy_inputs), rngs)  # noqa
 
             def _decoder_fn(inputs, max_length):
-                return model.generate(**inputs, max_length=max_length, **text_generation_kwargs)
+                output_ids = p_generate(p_params, shard(inputs), rngs)
+                return output_ids
 
             return _decoder_fn
 
         from transformers import FlaxGPT2LMHeadModel as Model
 
         model_name = self.cfg.benchmark.model.name
-        # model = Model.from_pretrained(model_name=model_name) # somehow link is broken
+        model = Model.from_pretrained(model_name=model_name)  # somehow link is broken
 
         model = Model.from_pretrained(
             model_name=model_name,
             pad_token_id=50256,
         )  # somehow link is broken
 
-        text_generation_kwargs = self.cfg.benchmark.text_generation
-        return decoder_fn(model, text_generation_kwargs)
+        num_devices = 1
+        rng = jax.random.PRNGKey(0)
+        rngs = jax.random.split(rng, num_devices)
+        batch_size = self.cfg.benchmark.data.batch_size
+        max_length = self.cfg.benchmark.data.max_length
+        p_params = replicate(model.params)
+        dummy_inputs = jnp.array(np.random.randint(0, 100, size=(batch_size, max_length)), dtype=jnp.int32)
+        return decoder_fn(p_params, dummy_inputs, rngs)
 
     def load_model_decoder_fn(self):
         """Load Model"""
@@ -274,4 +304,4 @@ class HFBenchmark:
         time_taken = end_time - start_time
         samples_per_second = slines / time_taken
 
-        return {"time_taken": time_taken, "samples_per_second": samples_per_second}
+        return {"model_type": self.model_type, "time_taken": time_taken, "samples_per_second": samples_per_second}
