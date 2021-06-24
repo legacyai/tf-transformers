@@ -242,10 +242,8 @@ class HFBenchmark:
         from transformers import FlaxGPT2LMHeadModel as Model
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)  # somehow link is broken
-
         model = Model.from_pretrained(
-            model_name=model_name,
+            model_name,
             pad_token_id=50256,
         )  # somehow link is broken
 
@@ -256,7 +254,7 @@ class HFBenchmark:
         max_length = self.cfg.benchmark.data.max_length
         p_params = replicate(model.params)
         dummy_inputs = jnp.array(np.random.randint(0, 100, size=(batch_size, max_length)), dtype=jnp.int32)
-        return decoder_fn(p_params, dummy_inputs, rngs)
+        return decoder_fn(p_params, {"input_ids": dummy_inputs}, rngs)
 
     def load_model_decoder_fn(self):
         """Load Model"""
