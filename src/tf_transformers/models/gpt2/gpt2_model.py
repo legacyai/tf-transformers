@@ -88,7 +88,7 @@ class GPT2Model(ModelWrapper):
 
         # if a config is provided, we wont be doing any extra .
         # Just create a model and return it with random_weights
-        tf.keras.backend.clear_session()
+        # tf.keras.backend.clear_session() (Distribute strategy fails)
         model_layer = GPT2Encoder(config, **kwargs_copy)
         model = model_layer.get_model()
         logging.info("Create model from config")
@@ -151,8 +151,6 @@ class GPT2Model(ModelWrapper):
             del kwargs["name"]
 
         kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config)
-
-        tf.keras.backend.clear_session()
         model_layer = GPT2Encoder(config, **kwargs_copy)
         model = model_layer.get_model()
 

@@ -24,7 +24,7 @@ import six
 import tensorflow as tf
 from absl import logging
 
-from tf_transformers.data import separate_x_y
+from tf_transformers.data.utils import separate_x_y
 
 logging.set_verbosity("INFO")
 
@@ -412,7 +412,13 @@ class TFReader(object):
             if k in padded_shapes:
                 _padded_shapes[k] = padded_shapes[k]
             else:
-                _padded_shapes[k] = [None]
+                if len(v.shape.dims) == 1:
+                    _padded_shapes[k] = [None]
+                if len(v.shape.dims) == 0:
+                     _padded_shapes[k] = []
+                if len(v.shape.dims) > 1:
+                    raise ValueError("Seems like `{}` has 2 dimensional or more".format(v))
+
         dataset = tf_dataset.padded_batch(
             padding_values=_padded_values,
             padded_shapes=_padded_shapes,
