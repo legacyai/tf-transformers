@@ -88,6 +88,7 @@ def train_and_eval(
     validation_interval_steps,
     mixed_precision,
     callbacks,
+    callbacks_interval_steps,
     trainer_kwargs,
 ):
 
@@ -132,7 +133,7 @@ def train_and_eval(
 
     # do validation
     @tf.function()
-    def do_validation(validation_dataset_distributed):
+    def do_validation(validation_dataset_distributed, epoch_end=False):
         """Validation step"""
 
         def _validate_step(dist_inputs):
@@ -145,25 +146,50 @@ def train_and_eval(
                 validation_loss = validation_loss_dict_metric[name]
                 validation_loss.update_state(loss_value)
 
-        if validation_dataset_distributed and (global_step + 1 % validation_interval_steps == 0):
-            logging.info("Validation in progress at step {} . . . .".format(global_step + 1))
-            for dist_inputs in tqdm.tqdm(validation_dataset_distributed):
-                strategy.run(_validate_step, args=(dist_inputs,))
+        if not epoch_end:
+            if validation_dataset_distributed and (global_step % validation_interval_steps == 0):
+                logging.info("Validation in progress at step {} . . . .".format(global_step))
+                for dist_inputs in tqdm.tqdm(validation_dataset_distributed):
+                    strategy.run(_validate_step, args=(dist_inputs,))
 
-            validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
-            validation_history[global_step] = validation_result
-            logging.info("Validation result at step {}".format(validation_result))
-            print("\n")
+                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
+                validation_history[global_step] = validation_result
+                logging.info("Validation result at step {}".format(validation_result))
+                print("\n")
+        else:
+            if validation_dataset_distributed:
+                logging.info("Validation in progress at epoch end {} . . . .".format(epoch))
+                for dist_inputs in tqdm.tqdm(validation_dataset_distributed):
+                    strategy.run(_validate_step, args=(dist_inputs,))
 
-    def do_callbacks(callbacks):
+                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
+                # validation_history[global_step] = validation_result
+                logging.info("Validation result at epoch {} is {}".format(epoch, validation_result))
+                print("\n")
+
+    def do_callbacks(callbacks, epoch_end=False):
         """Call callbacks"""
-        callback_scores = None
-        if callbacks and (global_step + 1 % validation_interval_steps == 0):
-            callback_scores = []
-            for callback in callbacks:
-                score = callback(trainer_kwargs)
-                callback_scores.append(score)
-        return callback_scores
+        if not epoch_end:
+            callback_scores = None
+            if callbacks:
+                logging.info("Callbacks in progress at step {} . . . .".format(global_step))
+                callback_scores = []
+                for callback, callback_steps in zip(callbacks, callbacks_interval_steps):
+                    if callback_steps and (global_step % callback_steps == 0):
+                        score = callback(trainer_kwargs)
+                        callback_scores.append(score)
+                    else:
+                        callback_scores.append(None)
+            return callback_scores
+        else:
+            callback_scores = None
+            if callbacks:
+                logging.info("Callbacks in progress at epoch end {} . . . .".format(epoch))
+                callback_scores = []
+                for callback in callbacks:
+                    score = callback(trainer_kwargs)
+                    callback_scores.append(score)
+            return callback_scores
 
     # Loop starts here
     validation_history = {}
@@ -186,7 +212,7 @@ def train_and_eval(
                 do_validation(validation_dataset_distributed)
 
                 # Call Callbacks
-                do_callbacks(callbacks)
+                callback_scores = do_callbacks(callbacks)
 
                 # Train Metrics
                 training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
@@ -196,9 +222,9 @@ def train_and_eval(
 
         # Do after every epoch
         do_validation(validation_dataset_distributed)
-        do_callbacks(callbacks)
+        callback_scores = do_callbacks(callbacks)
 
-    return training_history, validation_history
+    return training_history, validation_history, callback_scores
 
 
 class TrainerNew:
@@ -257,6 +283,7 @@ class TrainerNew:
         steps_per_call=100,
         enable_xla=True,
         callbacks=None,
+        callbacks_interval_steps=None,
     ):
 
         logging.info("Run")
@@ -290,7 +317,7 @@ class TrainerNew:
         train_dataset_distributed = iter(train_dataset_distributed)
 
         history = {}
-        training_history, validation_history = train_and_eval(
+        training_history, validation_history, callback_scores = train_and_eval(
             model,
             optimizer,
             self.distribution_strategy,
@@ -306,7 +333,8 @@ class TrainerNew:
             validation_interval_steps,
             self.use_float16,
             callbacks,
+            callbacks_interval_steps,
             locals(),
         )
 
-        return training_history, validation_history
+        return training_history, validation_history, callback_scores
