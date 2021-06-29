@@ -130,27 +130,29 @@ def train_and_eval(
             # Get current learning rate
             current_lr = optimizer._decayed_lr(tf.float32)
             training_loss_dict_metric["learning_rate"].update_state(current_lr)
+            #training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
+            
 
     # do validation
-    @tf.function()
-    def do_validation(validation_dataset_distributed, epoch_end=False):
+    def do_validation(validation_dataset_distributed):
         """Validation step"""
-
+        @tf.function
         def _validate_step(dist_inputs):
 
             batch_inputs, batch_labels = dist_inputs
             model_outputs = model(batch_inputs)
             loss = validation_loss_fn(batch_labels, model_outputs)
-            for name, loss_value in loss.items():
-                loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
-                validation_loss = validation_loss_dict_metric[name]
-                validation_loss.update_state(loss_value)
+            return loss
 
         if not epoch_end:
             if validation_dataset_distributed and (global_step % validation_interval_steps == 0):
                 logging.info("Validation in progress at step {} . . . .".format(global_step))
                 for dist_inputs in tqdm.tqdm(validation_dataset_distributed):
-                    strategy.run(_validate_step, args=(dist_inputs,))
+                    loss = strategy.run(_validate_step, args=(dist_inputs,))
+                    for name, loss_value in loss.items():
+                        loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
+                        validation_loss = validation_loss_dict_metric[name]
+                        validation_loss.update_state(loss_value)
 
                 validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
                 validation_history[global_step] = validation_result
@@ -160,14 +162,18 @@ def train_and_eval(
             if validation_dataset_distributed:
                 logging.info("Validation in progress at epoch end {} . . . .".format(epoch))
                 for dist_inputs in tqdm.tqdm(validation_dataset_distributed):
-                    strategy.run(_validate_step, args=(dist_inputs,))
+                    loss = strategy.run(_validate_step, args=(dist_inputs,))
+                    for name, loss_value in loss.items():
+                        loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
+                        validation_loss = validation_loss_dict_metric[name]
+                        validation_loss.update_state(loss_value)
 
-                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
+                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)                
                 # validation_history[global_step] = validation_result
                 logging.info("Validation result at epoch {} is {}".format(epoch, validation_result))
                 print("\n")
 
-    def do_callbacks(callbacks, epoch_end=False):
+    def do_callbacks(callbacks):
         """Call callbacks"""
         if not epoch_end:
             callback_scores = None
@@ -195,6 +201,7 @@ def train_and_eval(
     validation_history = {}
     training_history = {}
     global_step = 0
+    epoch_end = False
     STEPS = steps_per_epoch // steps_per_call
     for epoch in range(1, epochs + 1):
         # start_epoch_time = time.time()
@@ -207,22 +214,28 @@ def train_and_eval(
                 )
                 # Call Train
                 do_train(train_dataset_iter)
+                print(global_step, steps_per_call, STEPS)
 
                 # Call Validation
+                print("Do valid")
                 do_validation(validation_dataset_distributed)
 
                 # Call Callbacks
+                print("Do call back")
                 callback_scores = do_callbacks(callbacks)
 
                 # Train Metrics
                 training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
+                training_history[global_step] = training_result
                 # training_result["learning_rate"] = learning_rate_holder.result().numpy()
                 # learning_rate_holder.reset_states()
                 tepoch.set_postfix(**training_result)
 
         # Do after every epoch
+        epoch_end = True
         do_validation(validation_dataset_distributed)
         callback_scores = do_callbacks(callbacks)
+        epoch_end = False
 
     return training_history, validation_history, callback_scores
 
