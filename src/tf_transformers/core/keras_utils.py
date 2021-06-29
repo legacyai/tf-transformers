@@ -32,6 +32,11 @@ first_batch_start_time = first_batch_time_gauge.get_cell('start')
 first_batch_end_time = first_batch_time_gauge.get_cell('end')
 
 
+def get_policy_name():
+    policy = tf.keras.mixed_precision.experimental.global_policy()
+    return policy.name
+
+
 class BatchTimestamp(object):
     """A structure to store batch time stamp."""
 
