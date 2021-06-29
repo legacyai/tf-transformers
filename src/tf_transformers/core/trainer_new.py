@@ -283,7 +283,7 @@ class TrainerNew:
     def __init__(
         self,
         distribution_strategy,
-        num_gpus,
+        num_gpus=0,
         all_reduce_alg=None,
         num_packs=1,
         tpu_address=None,
@@ -349,7 +349,7 @@ class TrainerNew:
 
         # Enable XLA
         keras_utils.set_session_config(enable_xla=enable_xla)
-
+        logging.info("Policy: ----> {}".format(keras_utils.get_policy_name()))
         logging.info("Strategy: ---> {}".format(self.distribution_strategy))
         if self.use_tpu:
             logging.info("Num TPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
