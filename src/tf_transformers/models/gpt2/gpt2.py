@@ -312,7 +312,7 @@ class GPT2Encoder(LegacyLayer):
         # First word of last layer outputs [CLS]
         # batch_size x embedding_size
         # batch_size x sequence_length x embedding_size
-        token_embeddings = encoder_outputs[-1]
+        token_embeddings = tf.cast(encoder_outputs[-1],  dtype=tf_utils.get_dtype())
         token_logits = tf.matmul(
             token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
         )
