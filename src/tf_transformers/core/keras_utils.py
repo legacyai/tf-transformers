@@ -177,6 +177,7 @@ def set_session_config(enable_xla=False):
     """Sets the session config."""
     if enable_xla:
         tf.config.optimizer.set_jit(True)
+        logging.info("XLA enabled")
 
 
 # TODO(hongkuny): remove set_config_v2 globally.

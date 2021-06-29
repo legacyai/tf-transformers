@@ -90,7 +90,19 @@ def train_and_eval(
     callbacks,
     callbacks_interval_steps,
     trainer_kwargs,
+    checkpoint_manager,
+    model_checkpoint_dir,
+    model_save_interval_steps,
 ):
+    def save_model(epoch_end=False):
+        if not epoch_end:
+            if model_save_interval_steps:
+                if global_step % model_save_interval_steps == 0:
+                    checkpoint_manager.save()
+                    logging.info("Model saved at step {}".format(global_step))
+        else:
+            checkpoint_manager.save()
+            logging.info("Model saved at epoch {}".format(epoch))
 
     # Train Functions
     @tf.function
@@ -130,12 +142,12 @@ def train_and_eval(
             # Get current learning rate
             current_lr = optimizer._decayed_lr(tf.float32)
             training_loss_dict_metric["learning_rate"].update_state(current_lr)
-            #training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
-            
+            # training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
 
     # do validation
     def do_validation(validation_dataset_distributed):
         """Validation step"""
+
         @tf.function
         def _validate_step(dist_inputs):
 
@@ -156,6 +168,7 @@ def train_and_eval(
 
                 validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
                 validation_history[global_step] = validation_result
+                write_metrics(validation_result, val_summary_writer, global_step)
                 logging.info("Validation result at step {}".format(validation_result))
                 print("\n")
         else:
@@ -168,7 +181,8 @@ def train_and_eval(
                         validation_loss = validation_loss_dict_metric[name]
                         validation_loss.update_state(loss_value)
 
-                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)                
+                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
+                write_metrics(validation_result, val_summary_writer, global_step)
                 # validation_history[global_step] = validation_result
                 logging.info("Validation result at epoch {} is {}".format(epoch, validation_result))
                 print("\n")
@@ -198,6 +212,8 @@ def train_and_eval(
             return callback_scores
 
     # Loop starts here
+    # Get Tensorboard writers
+    train_summary_writer, val_summary_writer = get_tensorboard_writers(model_checkpoint_dir)
     validation_history = {}
     training_history = {}
     global_step = 0
@@ -214,25 +230,27 @@ def train_and_eval(
                 )
                 # Call Train
                 do_train(train_dataset_iter)
-                print(global_step, steps_per_call, STEPS)
 
                 # Call Validation
-                print("Do valid")
                 do_validation(validation_dataset_distributed)
 
                 # Call Callbacks
-                print("Do call back")
                 callback_scores = do_callbacks(callbacks)
 
                 # Train Metrics
                 training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
                 training_history[global_step] = training_result
+                write_metrics(training_result, train_summary_writer, global_step)
                 # training_result["learning_rate"] = learning_rate_holder.result().numpy()
                 # learning_rate_holder.reset_states()
                 tepoch.set_postfix(**training_result)
 
+                # Save model
+                save_model()
+
         # Do after every epoch
         epoch_end = True
+        save_model()
         do_validation(validation_dataset_distributed)
         callback_scores = do_callbacks(callbacks)
         epoch_end = False
@@ -290,6 +308,7 @@ class TrainerNew:
         train_loss_fn,
         epochs,
         steps_per_epoch,
+        model_checkpoint_dir,
         validation_dataset=None,
         validation_loss_fn=None,
         validation_interval_steps=None,
@@ -297,9 +316,15 @@ class TrainerNew:
         enable_xla=True,
         callbacks=None,
         callbacks_interval_steps=None,
+        overwrite_checkpoint_dir=False,
+        max_number_of_models=10,
+        model_save_interval_steps=None,
     ):
 
-        logging.info("Run")
+        if steps_per_epoch:
+            logging.info("Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.")
+        assert len(callbacks) == len(callbacks_interval_steps)
+
         # Enable XLA
         keras_utils.set_session_config(enable_xla=enable_xla)
 
@@ -311,6 +336,11 @@ class TrainerNew:
             # Optimizer
             optimizer = optimizer_fn()
             optimizer = configure_optimizer(optimizer, use_float16=self.use_float16, loss_scale=self.loss_scale)
+
+        # Checkpoint manager
+        checkpoint_manager = save_model_checkpoints(
+            model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models
+        )
 
         # Get metric dicts before distributing the dataset
         # ddistributed datasets has no attribute .take
@@ -348,6 +378,9 @@ class TrainerNew:
             callbacks,
             callbacks_interval_steps,
             locals(),
+            checkpoint_manager,
+            model_checkpoint_dir,
+            model_save_interval_steps,
         )
 
         return training_history, validation_history, callback_scores
