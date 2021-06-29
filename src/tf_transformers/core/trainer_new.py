@@ -128,16 +128,17 @@ def train_and_eval(
             with tf.GradientTape() as tape:
                 model_outputs = model(batch_inputs)
                 loss = train_loss_fn(batch_labels, model_outputs)
+                if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+                    loss_scaled = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
                 # TODO
                 # Scales down the loss for gradients to be invariant from replicas.
                 # loss = loss / strategy.num_replicas_in_sync
             if mixed_precision:
-                loss = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
-                scaled_gradients = tape.gradient(loss["loss"], model.trainable_variables)
+                scaled_gradients = tape.gradient(loss_scaled["loss"], model.trainable_variables)
                 grads = optimizer.get_unscaled_gradients(scaled_gradients)
             else:
-                grads = tape.gradient(loss["loss"], model.variables)
-            optimizer.apply_gradients(zip(grads, model.variables))
+                grads = tape.gradient(loss["loss"], model.trainable_variables)
+            optimizer.apply_gradients(zip(grads, model.trainable_variables))
             # training_loss.update_state(loss * strategy.num_replicas_in_sync)
             return loss
 
