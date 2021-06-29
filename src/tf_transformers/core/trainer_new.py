@@ -170,9 +170,14 @@ def train_and_eval(
             return loss
 
         if not epoch_end:
-            if validation_dataset_distributed and (global_step % validation_interval_steps == 0):
+            if (
+                validation_dataset_distributed
+                and validation_loss_fn
+                and validation_interval_steps
+                and (global_step % validation_interval_steps == 0)
+            ):
                 logging.info("Validation in progress at step {} . . . .".format(global_step))
-                for dist_inputs in tqdm.tqdm(validation_dataset_distributed):
+                for dist_inputs in tqdm.tqdm(validation_dataset_distributed, position=0, unit=" Val batch "):
                     loss = strategy.run(_validate_step, args=(dist_inputs,))
                     for name, loss_value in loss.items():
                         loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
@@ -185,9 +190,9 @@ def train_and_eval(
                 logging.info("Validation result at step {}".format(validation_result))
                 print("\n")
         else:
-            if validation_dataset_distributed:
+            if validation_dataset_distributed and validation_loss_fn:
                 logging.info("Validation in progress at epoch end {} . . . .".format(epoch))
-                for dist_inputs in tqdm.tqdm(validation_dataset_distributed, position=0, leave=True):
+                for dist_inputs in tqdm.tqdm(validation_dataset_distributed, position=0, unit=" Val batch "):
                     loss = strategy.run(_validate_step, args=(dist_inputs,))
                     for name, loss_value in loss.items():
                         loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
@@ -204,7 +209,7 @@ def train_and_eval(
         """Call callbacks"""
         if not epoch_end:
             callback_scores = None
-            if callbacks:
+            if callbacks and callbacks_interval_steps:
                 logging.info("Callbacks in progress at step {} . . . .".format(global_step))
                 callback_scores = []
                 for callback, callback_steps in zip(callbacks, callbacks_interval_steps):
@@ -367,6 +372,7 @@ class TrainerNew:
 
         # Get metric dicts before distributing the dataset
         # ddistributed datasets has no attribute .take
+        logging.info("Inferring metric shapes . . . . .")
         training_loss_dict_metric, validation_loss_dict_metric = get_loss_metric_dict(
             model, train_dataset, train_loss_fn, validation_dataset, validation_loss_fn
         )
@@ -374,6 +380,7 @@ class TrainerNew:
         train_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
             train_dataset.repeat(epochs + 1)
         )
+        validation_dataset_distributed = None
         if validation_dataset:
             validation_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
                 validation_dataset
