@@ -100,8 +100,13 @@ def train_and_eval(
             with tf.GradientTape() as tape:
                 model_outputs = model(batch_inputs)
                 loss = train_loss_fn(batch_labels, model_outputs)
+                # TODO
+                # Scales down the loss for gradients to be invariant from replicas.
+                # loss = loss / strategy.num_replicas_in_sync
                 if mixed_precision:
                     loss = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
+
+                # strategy reduce
                 loss = {
                     name: strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
                     for name, loss_value in loss.items()
@@ -213,8 +218,8 @@ class TrainerNew:
         self._dtype = get_tf_dtype(dtype)
 
         # Setting dtype policy
-        set_mixed_precision_policy(dtype)
-        self.use_float16 = is_float16(dtype)
+        set_mixed_precision_policy(self._dtype)
+        self.use_float16 = is_float16(self._dtype)
         self.loss_scale = loss_scale
 
         # # TODO
@@ -269,10 +274,6 @@ class TrainerNew:
                 validation_dataset
             )
 
-        # Metrics
-        learning_rate_holder = tf.keras.metrics.Mean(
-            "learning_rate", dtype=tf.float32
-        )  # We store learning rate here and reset after every global steps
         training_loss_dict_metric, validation_loss_dict_metric = get_loss_metric_dict(
             model, train_dataset_distributed, train_loss_fn, validation_dataset_distributed, validation_loss_fn
         )
