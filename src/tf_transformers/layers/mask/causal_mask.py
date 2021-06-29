@@ -59,6 +59,6 @@ class CausalMask(tf.keras.layers.Layer):
         from_mask = attention_mask_square(from_seq_length)
 
         # Replicate 2D `N` times
-        mask = tf.ones([batch_size, 1, 1]) * from_mask
+        mask = tf.cast(tf.ones([batch_size, 1, 1]), from_mask.dtype) * from_mask
 
         return mask
