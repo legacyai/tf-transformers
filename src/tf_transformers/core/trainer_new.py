@@ -265,6 +265,11 @@ class TrainerNew:
             optimizer = optimizer_fn()
             optimizer = configure_optimizer(optimizer, use_float16=self.use_float16, loss_scale=self.loss_scale)
 
+        # Get metric dicts before distributing the dataset
+        # ddistributed datasets has no attribute .take
+        training_loss_dict_metric, validation_loss_dict_metric = get_loss_metric_dict(
+            model, train_dataset, train_loss_fn, validation_dataset, validation_loss_fn
+        )
         # Distribute dataset
         train_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
             train_dataset.repeat(epochs + 1)
@@ -273,10 +278,6 @@ class TrainerNew:
             validation_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
                 validation_dataset
             )
-
-        training_loss_dict_metric, validation_loss_dict_metric = get_loss_metric_dict(
-            model, train_dataset_distributed, train_loss_fn, validation_dataset_distributed, validation_loss_fn
-        )
 
         # Make train dataset iterator
         train_dataset_distributed = iter(train_dataset_distributed)
