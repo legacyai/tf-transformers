@@ -11,6 +11,8 @@ from tf_transformers.core.performance_utils import (
     set_mixed_precision_policy,
 )
 
+logging.get_absl_logger().name = "trainer"
+
 
 def save_model_checkpoints(model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models):
     # Model checkpoint
@@ -111,6 +113,7 @@ def train_and_eval(
                 grads = tape.gradient(loss["loss"], model.variables)
             optimizer.apply_gradients(zip(grads, model.variables))
             # training_loss.update_state(loss * strategy.num_replicas_in_sync)
+            return loss
 
         for _ in tf.range(tf.convert_to_tensor(steps_per_call)):
             dist_inputs = next(iterator)
@@ -143,11 +146,14 @@ def train_and_eval(
                 validation_loss.update_state(loss_value)
 
         if validation_dataset_distributed and (global_step + 1 % validation_interval_steps == 0):
-            for dist_inputs in validation_dataset_distributed:
+            logging.info("Validation in progress at step {} . . . .".format(global_step + 1))
+            for dist_inputs in tqdm.tqdm(validation_dataset_distributed):
                 strategy.run(_validate_step, args=(dist_inputs,))
 
             validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
             validation_history[global_step] = validation_result
+            logging.info("Validation result at step {}".format(validation_result))
+            print("\n")
 
     def do_callbacks(callbacks):
         """Call callbacks"""
@@ -187,6 +193,10 @@ def train_and_eval(
                 # training_result["learning_rate"] = learning_rate_holder.result().numpy()
                 # learning_rate_holder.reset_states()
                 tepoch.set_postfix(**training_result)
+
+        # Do after every epoch
+        do_validation(validation_dataset_distributed)
+        do_callbacks(callbacks)
 
     return training_history, validation_history
 
