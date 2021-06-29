@@ -14,6 +14,19 @@ from tf_transformers.core.performance_utils import (
 logging.get_absl_logger().name = "trainer"
 
 
+def flat_metric_dict(metric_dict):
+    """Flatten the dict"""
+    dict_flatten = {}
+    dict_flatten['steps'] = list(metric_dict.keys())
+    for _key, value in metric_dict.items():
+        for sub_key, sub_value in value.items():
+            if sub_key not in dict_flatten:
+                dict_flatten[sub_key] = [sub_value]
+            else:
+                dict_flatten[sub_key].append(sub_value)
+    return dict_flatten
+
+
 def save_model_checkpoints(model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models):
     # Model checkpoint
     if not overwrite_checkpoint_dir:
@@ -174,7 +187,7 @@ def train_and_eval(
         else:
             if validation_dataset_distributed:
                 logging.info("Validation in progress at epoch end {} . . . .".format(epoch))
-                for dist_inputs in tqdm.tqdm(validation_dataset_distributed):
+                for dist_inputs in tqdm.tqdm(validation_dataset_distributed, position=0, leave=True):
                     loss = strategy.run(_validate_step, args=(dist_inputs,))
                     for name, loss_value in loss.items():
                         loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
@@ -255,6 +268,9 @@ def train_and_eval(
         callback_scores = do_callbacks(callbacks)
         epoch_end = False
 
+    # Flatten the results
+    training_history = flat_metric_dict(training_history)
+    validation_history = flat_metric_dict(validation_history)
     return training_history, validation_history, callback_scores
 
 
@@ -323,10 +339,17 @@ class TrainerNew:
 
         if steps_per_epoch:
             logging.info("Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.")
-        assert len(callbacks) == len(callbacks_interval_steps)
+        if callbacks:
+            assert len(callbacks) == len(callbacks_interval_steps)
 
         # Enable XLA
         keras_utils.set_session_config(enable_xla=enable_xla)
+
+        logging.info("Strategy: ---> {}".format(self.distribution_strategy))
+        if self.use_tpu:
+            logging.info("Num TPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
+        else:
+            logging.info("Num GPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
 
         # Under Strategy Scope
         with self.distribution_strategy.scope():
@@ -382,5 +405,7 @@ class TrainerNew:
             model_checkpoint_dir,
             model_save_interval_steps,
         )
-
-        return training_history, validation_history, callback_scores
+        history['training_history'] = training_history
+        history['validation_hsitory'] = validation_history
+        history['callbacks'] = callback_scores
+        return history
