@@ -103,15 +103,8 @@ def train_and_eval(
                 # TODO
                 # Scales down the loss for gradients to be invariant from replicas.
                 # loss = loss / strategy.num_replicas_in_sync
-                if mixed_precision:
-                    loss = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
-
-                # strategy reduce
-                loss = {
-                    name: strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
-                    for name, loss_value in loss.items()
-                }
             if mixed_precision:
+                loss = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
                 scaled_gradients = tape.gradient(loss["loss"], model.trainable_variables)
                 grads = optimizer.get_unscaled_gradients(scaled_gradients)
             else:
@@ -119,16 +112,20 @@ def train_and_eval(
             optimizer.apply_gradients(zip(grads, model.variables))
             # training_loss.update_state(loss * strategy.num_replicas_in_sync)
 
+        for _ in tf.range(tf.convert_to_tensor(steps_per_call)):
+            dist_inputs = next(iterator)
+            loss = strategy.run(train_step, args=(dist_inputs,))
+            # strategy reduce
+            loss = {
+                name: strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
+                for name, loss_value in loss.items()
+            }
             for name, loss_value in loss.items():
                 training_loss = training_loss_dict_metric[name]
                 training_loss.update_state(loss_value)
             # Get current learning rate
             current_lr = optimizer._decayed_lr(tf.float32)
             training_loss_dict_metric["learning_rate"].update_state(current_lr)
-
-        for _ in tf.range(tf.convert_to_tensor(steps_per_call)):
-            dist_inputs = next(iterator)
-            strategy.run(train_step, args=(dist_inputs,))
 
     # do validation
     @tf.function()
