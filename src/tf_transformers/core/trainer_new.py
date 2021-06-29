@@ -154,7 +154,10 @@ def train_and_eval(
                 training_loss = training_loss_dict_metric[name]
                 training_loss.update_state(loss_value)
             # Get current learning rate
-            current_lr = optimizer._decayed_lr(tf.float32)
+            if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+                current_lr = optimizer._optimizer._decayed_lr(tf.float32)
+            else:
+                current_lr = optimizer._decayed_lr(tf.float32)
             training_loss_dict_metric["learning_rate"].update_state(current_lr)
             # training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
 
