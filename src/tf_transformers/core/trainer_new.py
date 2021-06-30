@@ -181,12 +181,13 @@ def train_and_eval(
                 and (global_step % validation_interval_steps == 0)
             ):
                 logging.info("Validation in progress at step {} . . . .".format(global_step))
-                for dist_inputs in tqdm.tqdm(validation_dataset_distributed, leave=True, unit=" Val batch "):
-                    loss = strategy.run(_validate_step, args=(dist_inputs,))
-                    for name, loss_value in loss.items():
-                        loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
-                        validation_loss = validation_loss_dict_metric[name]
-                        validation_loss.update_state(loss_value)
+                with tqdm.tqdm(validation_dataset_distributed, unit=" Val batch ") as val_batches:
+                    for dist_inputs in val_batches:
+                        loss = strategy.run(_validate_step, args=(dist_inputs,))
+                        for name, loss_value in loss.items():
+                            loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
+                            validation_loss = validation_loss_dict_metric[name]
+                            validation_loss.update_state(loss_value)
 
                 validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
                 validation_history[global_step] = validation_result
@@ -196,12 +197,13 @@ def train_and_eval(
         else:
             if validation_dataset_distributed and validation_loss_fn:
                 logging.info("Validation in progress at epoch end {} . . . .".format(epoch))
-                for dist_inputs in tqdm.tqdm(validation_dataset_distributed, leave=True, unit=" Val batch "):
-                    loss = strategy.run(_validate_step, args=(dist_inputs,))
-                    for name, loss_value in loss.items():
-                        loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
-                        validation_loss = validation_loss_dict_metric[name]
-                        validation_loss.update_state(loss_value)
+                with tqdm.tqdm(validation_dataset_distributed, unit=" Val batch ") as val_batches:
+                    for dist_inputs in val_batches:
+                        loss = strategy.run(_validate_step, args=(dist_inputs,))
+                        for name, loss_value in loss.items():
+                            loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
+                            validation_loss = validation_loss_dict_metric[name]
+                            validation_loss.update_state(loss_value)
 
                 validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
                 write_metrics(validation_result, val_summary_writer, global_step)
