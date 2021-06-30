@@ -181,7 +181,7 @@ def train_and_eval(
                 and (global_step % validation_interval_steps == 0)
             ):
                 logging.info("Validation in progress at step {} . . . .".format(global_step))
-                for dist_inputs in tqdm.tqdm(validation_dataset_distributed, position=0, unit=" Val batch "):
+                for dist_inputs in tqdm.tqdm(validation_dataset_distributed, leave=True, unit=" Val batch "):
                     loss = strategy.run(_validate_step, args=(dist_inputs,))
                     for name, loss_value in loss.items():
                         loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
@@ -196,7 +196,7 @@ def train_and_eval(
         else:
             if validation_dataset_distributed and validation_loss_fn:
                 logging.info("Validation in progress at epoch end {} . . . .".format(epoch))
-                for dist_inputs in tqdm.tqdm(validation_dataset_distributed, position=0, unit=" Val batch "):
+                for dist_inputs in tqdm.tqdm(validation_dataset_distributed, leave=True, unit=" Val batch "):
                     loss = strategy.run(_validate_step, args=(dist_inputs,))
                     for name, loss_value in loss.items():
                         loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
@@ -272,7 +272,7 @@ def train_and_eval(
 
         # Do after every epoch
         epoch_end = True
-        save_model()
+        save_model(epoch_end)
         do_validation(validation_dataset_distributed)
         callback_scores = do_callbacks(callbacks)
         epoch_end = False

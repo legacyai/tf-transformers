@@ -12,13 +12,14 @@ def cross_entropy_loss(labels, logits, label_weights=None):
 
     per_example_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels)
     if label_weights is None:
-        label_weights = tf.ones_like(labels)
-    per_example_loss = per_example_loss * tf.cast(label_weights, per_example_loss.dtype)
+        label_weights = tf.cast(tf.ones_like(labels), tf.float32)
+    per_example_loss = tf.cast(tf.float32)
+    per_example_loss = per_example_loss * label_weights
     # Take mean along axis=1 and then divide that first
     # Otherwise float16 will overflow
     numerator = tf.reduce_sum(per_example_loss, axis=1)
-    denominator = tf.cast(tf.reduce_sum(label_weights, axis=1), numerator.dtype)    
-    loss = tf.math.divide_no_nan(numerator, tf.cast(denominator, numerator.dtype))
+    denominator = tf.reduce_sum(label_weights, axis=1)
+    loss = tf.math.divide_no_nan(numerator, denominator)
     return tf.reduce_mean(loss)
 
 
@@ -42,10 +43,12 @@ def cross_entropy_loss_label_smoothing(labels, logits, smoothing=0.1, label_weig
         confidence * tf.math.log(confidence) + vocab_float * low_confidence * tf.math.log(low_confidence + 1e-20)
     )
     xentropy -= normalizing_constant
+    xentropy = tf.cast(xentropy, tf.float32)
     if label_weights is None:
         label_weights = tf.ones_like(labels)
-    per_example_loss = xentropy * tf.cast(label_weights, xentropy.dtype)
+    label_weights = tf.cast(label_weights, tf.float32)
+    per_example_loss = xentropy * label_weights
     numerator = tf.reduce_sum(per_example_loss, axis=1)
-    denominator = tf.cast(tf.reduce_sum(label_weights, axis=1), numerator.dtype)    
-    loss = tf.math.divide_no_nan(numerator, tf.cast(denominator, numerator.dtype))
+    denominator = tf.reduce_sum(label_weights, axis=1)
+    loss = tf.math.divide_no_nan(numerator, denominator)
     return loss
