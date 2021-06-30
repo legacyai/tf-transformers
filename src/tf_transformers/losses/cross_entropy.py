@@ -12,8 +12,9 @@ def cross_entropy_loss(labels, logits, label_weights=None):
 
     per_example_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels)
     if label_weights is None:
-        label_weights = tf.cast(tf.ones_like(labels), tf.float32)
-    per_example_loss = tf.cast(tf.float32)
+        label_weights = tf.ones_like(labels)
+    label_weights = tf.cast(label_weights, tf.float32)
+    per_example_loss = tf.cast(per_example_loss,tf.float32)
     per_example_loss = per_example_loss * label_weights
     # Take mean along axis=1 and then divide that first
     # Otherwise float16 will overflow
