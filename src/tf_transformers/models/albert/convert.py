@@ -1,5 +1,5 @@
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 
 def assert_model_results(model):
@@ -132,7 +132,7 @@ def convert_albert_pt(model, config, model_name):
 
     # legacy_ai <-- HuggingFace
     assigned_map = []
-    assigned_map_values = []
+    # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
 
         index = tf_transformers_model_index_dict[legacy_var]
@@ -264,7 +264,7 @@ def convert_albert_pt(model, config, model_name):
 
     assert text_pt == text_tf
     outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
-    assert np.allclose(outputs_pt, outputs_tf, rtol=1.0) == True
+    tf.debugging.assert_equal(outputs_pt, outputs_tf)
 
 
 def convert_albert_tf(model, config, model_name):
@@ -361,7 +361,7 @@ def convert_albert_tf(model, config, model_name):
 
     # legacy_ai <-- HuggingFace
     assigned_map = []
-    assigned_map_values = []
+    # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
 
         index = tf_transformers_model_index_dict[legacy_var]
@@ -453,4 +453,4 @@ def convert_albert_tf(model, config, model_name):
 
     assert text_hf == text_tf
     outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
-    assert np.allclose(outputs_hf, outputs_tf, rtol=1.0) == True
+    tf.debugging.assert_equal(outputs_hf, outputs_tf)

@@ -94,7 +94,7 @@ class BertModel(ModelWrapper):
         model = model_layer.get_model()
         logging.info("Create model from config")
         if return_layer:
-            return model_layer, config
+            return model_layer
         return model
 
     @classmethod

@@ -1,5 +1,5 @@
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
 
 def convert_mt5_pt(model, config, model_name):
@@ -71,7 +71,7 @@ def convert_mt5_pt(model, config, model_name):
 
     # legacy_ai <-- hub
     assigned_map = []
-    assigned_map_values = []
+    # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
         index = tf_transformers_model_index_dict[legacy_var]
         # If not in mapping_dict, then mostly it is from attention layer
@@ -168,7 +168,7 @@ def convert_mt5_pt(model, config, model_name):
 
     # legacy_ai <-- hub
     assigned_map = []
-    assigned_map_values = []
+    # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
         index = tf_transformers_model_index_dict[legacy_var]
         # If not in mapping_dict, then mostly it is from attention layer
@@ -214,7 +214,7 @@ def convert_mt5_pt(model, config, model_name):
     inputs_tf["decoder_input_ids"] = inputs["input_ids"]
     outputs_tf = model(inputs_tf)
     outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
-    assert np.allclose(outputs_hf, outputs_tf, rtol=1.0) == True
+    tf.debugging.assert_equal(outputs_hf, outputs_tf)
 
 
 def convert_mt5_tf(model, config, model_name):
@@ -288,7 +288,7 @@ def convert_mt5_tf(model, config, model_name):
 
     # legacy_ai <-- hub
     assigned_map = []
-    assigned_map_values = []
+    # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
         index = tf_transformers_model_index_dict[legacy_var]
         # If not in mapping_dict, then mostly it is from attention layer
@@ -374,7 +374,7 @@ def convert_mt5_tf(model, config, model_name):
 
     # legacy_ai <-- hub
     assigned_map = []
-    assigned_map_values = []
+    # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
         index = tf_transformers_model_index_dict[legacy_var]
         # If not in mapping_dict, then mostly it is from attention layer
@@ -418,4 +418,4 @@ def convert_mt5_tf(model, config, model_name):
     inputs_tf["decoder_input_ids"] = inputs["input_ids"]
     outputs_tf = model(inputs_tf)
     outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
-    assert np.allclose(outputs_hf, outputs_tf, rtol=1.0) == True
+    tf.debugging.assert_equal(outputs_hf, outputs_tf)

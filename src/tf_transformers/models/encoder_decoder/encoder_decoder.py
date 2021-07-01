@@ -1,6 +1,8 @@
 import tensorflow as tf
+from absl import logging
+
 from tf_transformers.core import LegacyLayer, LegacyModel
-from tf_transformers.layers.mask import CrossAttentionMask, CausalMask
+from tf_transformers.layers.mask import CrossAttentionMask
 
 
 def assert_shapes(encoder_embeddings, decoder_embeddings):
@@ -38,7 +40,8 @@ def share_embedding_layers(encoder_layer, decoder_layer):
                 encoder_layer._type_embeddings_layer.embeddings, decoder_layer._type_embeddings_layer.embeddings
             )
             decoder_layer._type_embeddings_layer = encoder_layer._type_embeddings_layer
-    except:
+    except Exception as e:
+        logging.info(e)
         pass
 
     try:
@@ -48,7 +51,8 @@ def share_embedding_layers(encoder_layer, decoder_layer):
                 decoder_layer._positional_embedding_layer.embeddings,
             )
             decoder_layer._positional_embedding_layer = encoder_layer._positional_embedding_layer
-    except:
+    except Exception as e:
+        logging.info(e)
         pass
 
 
@@ -69,25 +73,30 @@ def share_encoder_layers(encoder_layer, decoder_layer):
 
         try:
             dec_layer._attention_layer_norm = enc_layer._attention_layer_norm
-        except:
+        except Exception as e:
+            logging.warn(e)
             pass
         try:
             dec_layer._intermediate_dense = enc_layer._intermediate_dense
-        except:
+        except Exception as e:
+            logging.warn(e)
             pass
         try:
             dec_layer._output_dense = enc_layer._output_dense
-        except:
+        except Exception as e:
+            logging.warn(e)
             pass
         try:
             dec_layer._output_layer_norm = enc_layer._output_layer_norm
-        except:
+        except Exception as e:
+            logging.warn(e)
             pass
 
     try:
         if encoder_layer._pooler_layer and decoder_layer._pooler_layer:
             decoder_layer._pooler_layer = encoder_layer._pooler_layer
-    except:
+    except Exception as e:
+        logging.warn(e)
         pass
 
     try:
@@ -96,7 +105,8 @@ def share_encoder_layers(encoder_layer, decoder_layer):
                 decoder_layer._masked_lm_layer = encoder_layer._masked_lm_layer
             if encoder_layer._masked_lm_bias and decoder_layer._masked_lm_bias:
                 decoder_layer._masked_lm_bias = encoder_layer._masked_lm_bias
-    except:
+    except Exception as e:
+        logging.warn(e)
         pass
 
 
@@ -168,8 +178,8 @@ class EncoderDecoder(LegacyLayer):
             self: model (tf.keras.Layer) instance
             initialize_only: bool
         """
-        encoder_sequence_length = self._encoder._sequence_length
-        decoder_sequence_length = self._decoder._sequence_length
+        # encoder_sequence_length = self._encoder._sequence_length
+        # decoder_sequence_length = self._decoder._sequence_length
 
         encoder_inputs = self._encoder.model_inputs
         decoder_inputs = self._decoder.model_inputs
