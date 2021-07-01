@@ -17,29 +17,27 @@
 from absl import logging
 
 from tf_transformers.core import ModelWrapper
-from tf_transformers.models.encoder_decoder import EncoderDecoder
-from tf_transformers.models.t5 import T5Encoder as Encoder
-from tf_transformers.models.t5.convert import convert_t5_pt as convert_pt
-from tf_transformers.models.t5.convert import convert_t5_tf as convert_tf
+from tf_transformers.models.roberta import RobertaEncoder as Encoder
+from tf_transformers.models.roberta.convert import convert_roberta_pt as convert_pt
+from tf_transformers.models.roberta.convert import convert_roberta_tf as convert_tf
 from tf_transformers.utils import get_config
 
 DEFAULT_CONFIG = {
     "attention_probs_dropout_prob": 0.1,
     "hidden_act": "gelu",
-    "intermediate_act": "relu",
+    "intermediate_act": "gelu",
     "hidden_dropout_prob": 0.1,
-    "embedding_size": 512,
+    "embedding_size": 768,
     "initializer_range": 0.02,
-    "intermediate_size": 2048,
-    "max_position_embeddings": -1,
-    "num_attention_heads": 8,
+    "intermediate_size": 3072,
+    "max_position_embeddings": 512,
+    "num_attention_heads": 12,
     "attention_head_size": 64,
-    "num_hidden_layers": 6,
-    "vocab_size": 32128,
-    "type_vocab_size": -1,
-    "layer_norm_epsilon": 1e-06,
-    "bidirectional": True,
-    "positional_buckets": 32,
+    "num_hidden_layers": 12,
+    "type_vocab_size": 1,
+    "vocab_size": 50265,
+    "layer_norm_epsilon": 1e-05,
+    "mask_mode": "user_defined",
 }
 
 
@@ -47,16 +45,16 @@ def normalize_model_name(model_name):
     return model_name.lower().replace("-", "_").strip()
 
 
-class t5Model(ModelWrapper):
-    """t5 Encoder Wrapper"""
+class RobertaModel(ModelWrapper):
+    """Roberta Encoder Wrapper"""
 
-    def __init__(self, model_name='alt5', cache_dir=None):
+    def __init__(self, model_name='roberta', cache_dir=None):
         """
         Args:
             model_name (str): Model name
             cache_dir (str): cache dir to save the mode checkpoints
         """
-        super(t5Model, self).__init__(model_name=model_name, cache_dir=cache_dir)
+        super(RobertaModel, self).__init__(model_name=model_name, cache_dir=cache_dir)
 
     def update_config(self, tft_config, hf_config):
         """Update tft config with hf config.
@@ -66,19 +64,18 @@ class t5Model(ModelWrapper):
             hf_config ([type]): [description]
         """
         tft_config["vocab_size"] = hf_config["vocab_size"]
-        tft_config["embedding_size"] = hf_config["d_model"]
-        tft_config["intermediate_size"] = hf_config["d_ff"]
-        # tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
-        # tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]
+        tft_config["embedding_size"] = hf_config["hidden_size"]
+        tft_config["intermediate_size"] = hf_config["intermediate_size"]
+        tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
+        tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"] - 2  # 514-2
 
-        tft_config["num_attention_heads"] = hf_config["num_heads"]
-        tft_config["num_hidden_layers"] = hf_config["num_layers"]
-        tft_config["positional_buckets"] = hf_config["relative_attention_num_buckets"]
+        tft_config["num_attention_heads"] = hf_config["num_attention_heads"]
+        tft_config["num_hidden_layers"] = hf_config["num_hidden_layers"]
 
         return tft_config
 
     @classmethod
-    def from_config(cls, config, return_layer=False, encoder_kwargs=None, decoder_kwargs=None, **kwargs):
+    def from_config(cls, config, return_layer=False, **kwargs):
 
         config = config.copy()
         cls_ref = cls()
@@ -88,29 +85,12 @@ class t5Model(ModelWrapper):
         if "name" in kwargs:
             del kwargs["name"]
 
-        encoder_kwargs_copy = {}
-        if encoder_kwargs:
-            if not isinstance(encoder_kwargs, dict):
-                raise ValueError("encoder kwargs should be dict")
-            encoder_kwargs_copy = cls_ref._update_kwargs_and_config(encoder_kwargs, config)
+        kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config)
 
         # if a config is provided, we wont be doing any extra .
         # Just create a model and return it with random_weights
         # tf.keras.backend.clear_session() (Distribute strategy fails)
-        config["bidirectional"] = True
-        encoder_layer = Encoder(config=config, name="t5_encoder", **encoder_kwargs_copy)
-
-        decoder_kwargs_copy = {}
-        if decoder_kwargs:
-            if not isinstance(decoder_kwargs, dict):
-                raise ValueError("decoder kwargs should be dict")
-            decoder_kwargs_copy = cls_ref._update_kwargs_and_config(decoder_kwargs, config)
-
-        config["bidirectional"] = False
-        decoder_layer = Encoder(
-            config=config, name="t5_decoder", use_decoder=True, mask_mode="causal", **decoder_kwargs_copy
-        )
-        model_layer = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True)
+        model_layer = Encoder(config, **kwargs_copy)
         model = model_layer.get_model()
         logging.info("Create model from config")
         if return_layer:
@@ -127,8 +107,6 @@ class t5Model(ModelWrapper):
         return_layer=False,
         return_config=False,
         convert_fn_type="both",
-        encoder_kwargs=None,
-        decoder_kwargs=None,
         **kwargs,
     ):
         """Return tf.keras.Model / LegacyModel .
@@ -146,7 +124,7 @@ class t5Model(ModelWrapper):
         Returns:
             [type]: [description]
         """
-        module_name = "tf_transformers.models.model_configs.t5"
+        module_name = "tf_transformers.models.model_configs.roberta"
         tft_model_name = normalize_model_name(model_name)
 
         # Load a base config and then overwrite it
@@ -174,30 +152,10 @@ class t5Model(ModelWrapper):
         if "name" in kwargs:
             del kwargs["name"]
 
-        encoder_kwargs_copy = {}
-        if encoder_kwargs:
-            if not isinstance(encoder_kwargs, dict):
-                raise ValueError("encoder kwargs should be dict")
-            encoder_kwargs_copy = cls_ref._update_kwargs_and_config(encoder_kwargs, config)
-
-        # if a config is provided, we wont be doing any extra .
-        # Just create a model and return it with random_weights
-        # tf.keras.backend.clear_session() (Distribute strategy fails)
-        config["bidirectional"] = True
-        encoder_layer = Encoder(config=config, name="t5_encoder", **encoder_kwargs_copy)
-
-        decoder_kwargs_copy = {}
-        if decoder_kwargs:
-            if not isinstance(decoder_kwargs, dict):
-                raise ValueError("decoder kwargs should be dict")
-            decoder_kwargs_copy = cls_ref._update_kwargs_and_config(decoder_kwargs, config)
-
-        config["bidirectional"] = False
-        decoder_layer = Encoder(
-            config=config, name="t5_decoder", use_decoder=True, mask_mode="causal", **decoder_kwargs_copy
-        )
-        model_layer = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True)
+        kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config)
+        model_layer = Encoder(config, **kwargs_copy)
         model = model_layer.get_model()
+
         # Give preference to model_checkpoint_dir
         if model_checkpoint_dir:
             model.load_checkpoint(model_checkpoint_dir)

@@ -14,19 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Test t5 Models"""
+"""Test ROBERTA Models"""
 
 import unittest
 
 import tensorflow as tf
 from absl import logging
-from transformers import T5Tokenizer as Tokenizer
+from transformers import RobertaTokenizer as Tokenizer
 
-from tf_transformers.models import t5Model as Model
+from tf_transformers.models import RobertaModel as Model
 
-logging.get_absl_logger().name = "t5_testing"
+logging.get_absl_logger().name = "roberta_testing"
 
-MODEL_NAME = 't5-small'
+MODEL_NAME = 'roberta-base'
 
 
 class ModelTest(unittest.TestCase):
@@ -37,7 +37,7 @@ class ModelTest(unittest.TestCase):
         # self.model_ar  = Model.from_pretrained(MODEL_NAME, use_auto_regressive=True)
         self.tokenizer = Tokenizer.from_pretrained(MODEL_NAME)
 
-    #@unittest.skip
+    # @unittest.skip
     def test_tf_conversion(self):
         import shutil
 
@@ -48,7 +48,7 @@ class ModelTest(unittest.TestCase):
         model = Model.from_pretrained(MODEL_NAME, convert_fn_type='tf')
         logging.info("Test: TF Conversion. ✅")
 
-    # @unittest.skip
+    #@unittest.skip
     def test_pt_conversion(self):
         import shutil
 
@@ -59,7 +59,7 @@ class ModelTest(unittest.TestCase):
         model = Model.from_pretrained(MODEL_NAME, convert_fn_type='pt')
         logging.info("Test: PT Conversion. ✅")
 
-    @unittest.skip("mt5 has to be fine tuned for this")
+    @unittest.skip("Bert has to be fine tuned for this")
     def test_auto_regressive(self):
         """Test Text Generation using Non Cache and Cached"""
 
@@ -117,7 +117,7 @@ class ModelTest(unittest.TestCase):
         tf.debugging.assert_equal(predictions_auto_regressive, predictions_non_auto_regressive)
         logging.info("Test: Successful Auto Regressive Encoder. ✅")
 
-    @unittest.skip("mt5 has to be fine tuned for this")
+    @unittest.skip("Bert has to be fine tuned for this")
     def test_auto_regressive_batch(self):
         """Test Batch Text Generation Auto Regressive"""
         text = ['Sachin Tendulkar is one of the finest', 'I love stars because']
@@ -195,7 +195,7 @@ class ModelTest(unittest.TestCase):
         tf.debugging.assert_near(predictions_prob_auto_regressive.numpy().tolist(), expected_probs)
         logging.info("Test: Successful Batch Auto Regressive Encoder. ✅")
 
-    @unittest.skip("mt5 has to be fine tuned for this")
+    @unittest.skip("Bert has to be fine tuned for this")
     def test_auto_regressive_saved_model(self):
         """Test Auto Regressive using Decoder Saved Model"""
         import shutil
@@ -227,7 +227,7 @@ class ModelTest(unittest.TestCase):
         shutil.rmtree(dirpath)
         logging.info("Test: Successful Batch Auto Regressive Encoder Saved Model. ✅")
 
-    @unittest.skip("mt5 has to be fine tuned for this")
+    @unittest.skip("Bert has to be fine tuned for this")
     def test_auto_regressive_keras_model(self):
         """Test Auto Regressive using Decoder Keras Model"""
         from tf_transformers.text import TextDecoder
