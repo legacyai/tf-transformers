@@ -14,12 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-import tensorflow as tf
 from absl import logging
 
 from tf_transformers.core import ModelWrapper
-from tf_transformers.models.gpt2 import GPT2Encoder
-from tf_transformers.models.gpt2.convert import convert_gpt2_pt, convert_gpt2_tf
+from tf_transformers.models.gpt2 import GPT2Encoder as Encoder
+from tf_transformers.models.gpt2.convert import convert_gpt2_pt as convert_pt
+from tf_transformers.models.gpt2.convert import convert_gpt2_tf as convert_tf
 from tf_transformers.utils import get_config
 
 DEFAULT_CONFIG = {
@@ -77,6 +77,7 @@ class GPT2Model(ModelWrapper):
     @classmethod
     def from_config(cls, config, return_layer=False, **kwargs):
 
+        config = config.copy()
         cls_ref = cls()
         # if we allow names other than
         # whats in the class, we might not be able
@@ -89,12 +90,12 @@ class GPT2Model(ModelWrapper):
         # if a config is provided, we wont be doing any extra .
         # Just create a model and return it with random_weights
         # tf.keras.backend.clear_session() (Distribute strategy fails)
-        model_layer = GPT2Encoder(config, **kwargs_copy)
+        model_layer = Encoder(config, **kwargs_copy)
         model = model_layer.get_model()
         logging.info("Create model from config")
         if return_layer:
             return model_layer, config
-        return model, config
+        return model
 
     @classmethod
     def from_pretrained(
@@ -104,6 +105,7 @@ class GPT2Model(ModelWrapper):
         model_checkpoint_dir=None,
         convert_from_hf=True,
         return_layer=False,
+        return_config=False,
         convert_fn_type="both",
         **kwargs,
     ):
@@ -131,8 +133,8 @@ class GPT2Model(ModelWrapper):
         try:
             # If a config present as a part of tft load it
             config = get_config(module_name, tft_model_name)
-        except:
-            pass
+        except Exception as e:
+            logging.warn(e)
 
         try:
             from transformers import PretrainedConfig
@@ -151,7 +153,7 @@ class GPT2Model(ModelWrapper):
             del kwargs["name"]
 
         kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config)
-        model_layer = GPT2Encoder(config, **kwargs_copy)
+        model_layer = Encoder(config, **kwargs_copy)
         model = model_layer.get_model()
 
         # Give preference to model_checkpoint_dir
@@ -163,20 +165,25 @@ class GPT2Model(ModelWrapper):
                 try:
                     model.load_checkpoint(str(cls_ref.model_path))
                     load_succesfuly = True
-                except:
-                    pass
+                except Exception as e:
+                    logging.warn(e)
             if convert_from_hf and not load_succesfuly:
                 if convert_fn_type == "both":
                     cls_ref.convert_hf_to_tf(
                         model,
                         config,
-                        convert_tf_fn=convert_gpt2_tf,
-                        convert_pt_fn=convert_gpt2_pt,
+                        convert_tf_fn=convert_tf,
+                        convert_pt_fn=convert_pt,
                     )
                 if convert_fn_type == "tf":
-                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=convert_gpt2_tf, convert_pt_fn=None)
+                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=convert_tf, convert_pt_fn=None)
                 if convert_fn_type == "pt":
-                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=None, convert_pt_fn=convert_gpt2_pt)
+                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=None, convert_pt_fn=convert_pt)
+
         if return_layer:
-            return model_layer, config
-        return model, config
+            if return_config:
+                return model_layer, config
+            return model_layer
+        if return_config:
+            return model, config
+        return model

@@ -1,9 +1,9 @@
-from tf_transformers.models.encoder_decoder import EncoderDecoder
-from tf_transformers.models.bert import BERTEncoder, BertModel
 from tf_transformers.models.albert import AlbertEncoder, AlbertModel
+from tf_transformers.models.bert import BertEncoder, BertModel
+from tf_transformers.models.encoder_decoder import EncoderDecoder
 from tf_transformers.models.gpt2 import GPT2Encoder, GPT2Model
-from tf_transformers.models.t5 import T5Encoder, T5Model
 from tf_transformers.models.mt5 import MT5Encoder, MT5Model
+from tf_transformers.models.t5 import T5Encoder, T5Model
 
 # from tf_transformers.models.albert import AlbertEncoder
 # from tf_transformers.models.encoder_decoder import EncoderDecoder

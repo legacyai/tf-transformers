@@ -103,29 +103,29 @@ class ModelWrapper(ABC):
             try:
                 convert_tf_fn(model, config, hf_model_name)
                 convert_success = True
-                logging.info("Successful: Converted model using TF HF")
+                logging.info("Successful ✅: Converted model using TF HF")
             except Exception as e:
                 logging.error(e)
-                logging.info("Failed: Converted model using TF HF")
+                logging.info("Failed ❌: Converted model using TF HF")
 
         if convert_success is False and convert_pt_fn:
             try:
                 convert_pt_fn(model, config, hf_model_name)
-                logging.info("Successful: Converted model using PT HF")
+                logging.info("Successful ✅: Converted model using PT HF")
                 convert_success = True
             except Exception as e:
                 logging.error(e)
-                logging.info("Failed to convert model from huggingface")
+                logging.info("Failed ❌: Converted model using PT HF")
 
         if convert_success:
             model.save_checkpoint(str(self.model_path), overwrite=True)
             logging.info(
-                "Successful: Asserted and Converted `{}` from HF and saved it in cache folder {}".format(
+                "Successful ✅: Asserted and Converted `{}` from HF and saved it in cache folder {}".format(
                     hf_model_name, str(self.model_path)
                 )
             )
         else:
             model.save_checkpoint(str(self.model_path), overwrite=True)
             logging.info(
-                "Saved model in cache folder with randomly initialized values  {}".format(str(self.model_path))
+                "Saved model in cache folder with randomly ❌ initialized values  {}".format(str(self.model_path))
             )

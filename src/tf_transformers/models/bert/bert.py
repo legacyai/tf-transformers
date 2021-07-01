@@ -1,17 +1,33 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 import tensorflow as tf
 from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer, LegacyModel
-from tf_transformers.layers import OnDeviceEmbedding, PositionEmbedding, MaskedLM, BiasLayer
-from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
+from tf_transformers.layers import BiasLayer, MaskedLM
+from tf_transformers.layers.mask import CausalMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerBERT
 from tf_transformers.utils import tf_utils
 
 logging.set_verbosity("INFO")
 
 
-class BERTEncoder(LegacyLayer):
+class BertEncoder(LegacyLayer):
     """BERT based encoder / Decoder .
     BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding
     Authors: Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova
@@ -64,7 +80,7 @@ class BERTEncoder(LegacyLayer):
         self._return_all_layer_outputs = return_all_layer_outputs
 
         # self._self_setattr_tracking = False
-        super(BERTEncoder, self).__init__(
+        super(BertEncoder, self).__init__(
             is_training=self._is_training, use_dropout=self._use_dropout, name=self._model_name, **kwargs
         )
 
@@ -757,6 +773,7 @@ class BERTEncoder(LegacyLayer):
         ]
 
         # 1. Collect Word Embeddings
+        sequence_length = tf.shape(input_ids)[1]
         embeddings = self._embedding_layer(input_ids)
         # Add word_embeddings + position_embeddings + type_embeddings
         if self._type_embeddings_layer:
