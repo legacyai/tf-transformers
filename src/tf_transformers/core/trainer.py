@@ -99,6 +99,7 @@ def write_metrics(metric_dict, writer, step):
     with writer.as_default():
         for name, result in metric_dict.items():
             tf.summary.scalar(name, result, step=step)
+        writer.flush()
 
 
 def train_and_eval(

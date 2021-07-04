@@ -20,7 +20,7 @@
 import tensorflow as tf
 
 
-@tf.keras.utils.register_keras_serializable(package="legacyai.text")
+@tf.keras.utils.register_keras_serializable(package="Text")
 class PositionEmbedding(tf.keras.layers.Layer):
     """Creates a positional embedding.
 

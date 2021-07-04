@@ -3,6 +3,10 @@
 # from tf_transformers.layers.attention import GPT2Attention
 # from tf_transformers.layers.multihead_attention  import MultiHeadAttention
 from tf_transformers.layers.bias_layer import BiasLayer
+from tf_transformers.layers.image_embeddings import (
+    PatchEmbeddings,
+    PositionEmbeddingImage,
+)
 from tf_transformers.layers.layer_normalization import (
     GPT2LayerNormalization,
     T5LayerNormalization,
