@@ -10,28 +10,27 @@ def convert_vit_pt(model, config, model_name):
     Returns:
         a function
     """
-
     import numpy as np
     import torch
 
     # From vars (Transformer variables)
     from_model_vars = [
-        "encoder.layer.{}.attention.attention.query.weight",
-        "encoder.layer.{}.attention.attention.query.bias",
-        "encoder.layer.{}.attention.attention.key.weight",
-        "encoder.layer.{}.attention.attention.key.bias",
-        "encoder.layer.{}.attention.attention.value.weight",
-        "encoder.layer.{}.attention.attention.value.bias",
-        "encoder.layer.{}.attention.output.dense.weight",
-        "encoder.layer.{}.attention.output.dense.bias",
-        "encoder.layer.{}.layernorm_before.weight",
-        "encoder.layer.{}.layernorm_before.bias",
-        "encoder.layer.{}.intermediate.dense.weight",
-        "encoder.layer.{}.intermediate.dense.bias",
-        "encoder.layer.{}.output.dense.weight",
-        "encoder.layer.{}.output.dense.bias",
-        "encoder.layer.{}.layernorm_after.weight",
-        "encoder.layer.{}.layernorm_after.bias",
+        "vit.encoder.layer.{}.attention.attention.query.weight",
+        "vit.encoder.layer.{}.attention.attention.query.bias",
+        "vit.encoder.layer.{}.attention.attention.key.weight",
+        "vit.encoder.layer.{}.attention.attention.key.bias",
+        "vit.encoder.layer.{}.attention.attention.value.weight",
+        "vit.encoder.layer.{}.attention.attention.value.bias",
+        "vit.encoder.layer.{}.attention.output.dense.weight",
+        "vit.encoder.layer.{}.attention.output.dense.bias",
+        "vit.encoder.layer.{}.layernorm_before.weight",
+        "vit.encoder.layer.{}.layernorm_before.bias",
+        "vit.encoder.layer.{}.intermediate.dense.weight",
+        "vit.encoder.layer.{}.intermediate.dense.bias",
+        "vit.encoder.layer.{}.output.dense.weight",
+        "vit.encoder.layer.{}.output.dense.bias",
+        "vit.encoder.layer.{}.layernorm_after.weight",
+        "vit.encoder.layer.{}.layernorm_after.bias",
     ]
 
     # To vars (Transformer variables)
@@ -64,23 +63,28 @@ def convert_vit_pt(model, config, model_name):
             mapping_dict[from_model_vars[index].format(i)] = to_model_vars[index].format(i)
 
     # CLS Token
-    mapping_dict["embeddings.cls_token"] = "tf_transformers/vit/cls_token:0"
+    mapping_dict["vit.embeddings.cls_token"] = "tf_transformers/vit/cls_token:0"
     # Positional Embedding
-    mapping_dict["embeddings.position_embeddings"] = "tf_transformers/vit/positional_embeddings/embeddings:0"
+    mapping_dict["vit.embeddings.position_embeddings"] = "tf_transformers/vit/positional_embeddings/embeddings:0"
     # Patch Embeddings
     mapping_dict[
-        "embeddings.patch_embeddings.projection.weight"
+        "vit.embeddings.patch_embeddings.projection.weight"
     ] = "tf_transformers/vit/patch_embeddings/conv2d/kernel:0"
-    mapping_dict["embeddings.patch_embeddings.projection.bias"] = "tf_transformers/vit/patch_embeddings/conv2d/bias:0"
+    mapping_dict[
+        "vit.embeddings.patch_embeddings.projection.bias"
+    ] = "tf_transformers/vit/patch_embeddings/conv2d/bias:0"
 
-    mapping_dict["layernorm.weight"] = "tf_transformers/vit/last_layer_norm/gamma:0"
-    mapping_dict["layernorm.bias"] = "tf_transformers/vit/last_layer_norm/beta:0"
-    mapping_dict["pooler.dense.weight"] = "tf_transformers/vit/pooler_transform/kernel:0"
-    mapping_dict["pooler.dense.bias"] = "tf_transformers/vit/pooler_transform/bias:0"
+    mapping_dict["vit.layernorm.weight"] = "tf_transformers/vit/last_layer_norm/gamma:0"
+    mapping_dict["vit.layernorm.bias"] = "tf_transformers/vit/last_layer_norm/beta:0"
+    mapping_dict["classifier.weight"] = "tf_transformers/vit/classifier_layer/kernel:0"
+    mapping_dict["classifier.bias"] = "tf_transformers/vit/classifier_layer/bias:0"
 
-    from transformers import ViTModel
+    # Randomly initialize by HF
+    # mapping_dict["pooler.dense.weight"] = "tf_transformers/vit/pooler_transform/kernel:0"
+    # mapping_dict["pooler.dense.bias"] = "tf_transformers/vit/pooler_transform/bias:0"
+    from transformers import ViTForImageClassification
 
-    model_hf = ViTModel.from_pretrained(model_name)
+    model_hf = ViTForImageClassification.from_pretrained(model_name)
     # HF model variable name to variable values, for fast retrieval
     from_to_variable_dict = {name: var.detach().numpy() for name, var in model_hf.named_parameters()}
     # We need variable name to the index where it is stored inside tf_transformers model
@@ -167,12 +171,20 @@ def convert_vit_pt(model, config, model_name):
             assigned_map.append((original_var, legacy_var))
             continue
 
+        if "classifier_layer/kernel:0" in legacy_var:
+            model.variables[index].assign(np.transpose(from_to_variable_dict.get(original_var)))
+            continue
+
         model.variables[index].assign(from_to_variable_dict.get(original_var))
         assigned_map.append((original_var, legacy_var))
 
+    from transformers import ViTModel
+
+    model_hf = ViTModel.from_pretrained(model_name)
+
     batch_size = 2
-    num_channels = 3
-    image_size = 224
+    num_channels = config["num_channels"]
+    image_size = config["image_size"]
     pixel_values = torch.rand(([batch_size, num_channels, image_size, image_size]))
     inputs_tf = tf.convert_to_tensor(pixel_values.numpy())
     # Reshape (b x channels x h x w)

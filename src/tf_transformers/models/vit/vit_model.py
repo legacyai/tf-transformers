@@ -21,7 +21,8 @@ from tf_transformers.models.vit import ViTEncoder as Encoder
 from tf_transformers.models.vit.convert import convert_vit_pt as convert_pt
 
 # from tf_transformers.models.vit.convert import convert_vit_tf as convert_tf
-from tf_transformers.utils import get_config
+
+logging.get_absl_logger().name = "vit_model"
 
 DEFAULT_CONFIG = {
     "attention_probs_dropout_prob": 0.1,
@@ -42,6 +43,7 @@ DEFAULT_CONFIG = {
     "image_size": 224,
     "patch_size": 16,
     "num_channels": 3,
+    "num_labels": 1000,
 }
 
 
@@ -49,7 +51,7 @@ def normalize_model_name(model_name):
     return model_name.lower().replace("-", "_").strip()
 
 
-class VitModel(ModelWrapper):
+class ViTModel(ModelWrapper):
     """vit Encoder Wrapper"""
 
     def __init__(self, model_name='vit', cache_dir=None):
@@ -58,7 +60,7 @@ class VitModel(ModelWrapper):
             model_name (str): Model name
             cache_dir (str): cache dir to save the mode checkpoints
         """
-        super(VitModel, self).__init__(model_name=model_name, cache_dir=cache_dir)
+        super(ViTModel, self).__init__(model_name=model_name, cache_dir=cache_dir)
 
     def update_config(self, tft_config, hf_config):
         """Update tft config with hf config.
@@ -67,17 +69,18 @@ class VitModel(ModelWrapper):
             tft_config ([type]): [description]
             hf_config ([type]): [description]
         """
-        return tft_config
-        # tft_config["vocab_size"] = hf_config["vocab_size"]
-        # tft_config["embedding_size"] = hf_config["n_embd"]
-        # tft_config["intermediate_size"] = hf_config["n_embd"] * 4
-        # # tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
+        tft_config["image_size"] = hf_config["image_size"]
+        tft_config["patch_size"] = hf_config["patch_size"]
+        tft_config["num_channels"] = hf_config["num_channels"]
+        tft_config["embedding_size"] = hf_config["hidden_size"]
+        tft_config["intermediate_size"] = hf_config["intermediate_size"]
+        # tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
         # tft_config["max_position_embeddings"] = hf_config["n_ctx"]
 
-        # tft_config["num_attention_heads"] = hf_config["n_head"]
-        # tft_config["num_hidden_layers"] = hf_config["n_layer"]
+        tft_config["num_attention_heads"] = hf_config["num_attention_heads"]
+        tft_config["num_hidden_layers"] = hf_config["num_hidden_layers"]
 
-        # return tft_config
+        return tft_config
 
     @classmethod
     def from_config(cls, config, return_layer=False, **kwargs):
@@ -129,17 +132,17 @@ class VitModel(ModelWrapper):
         Returns:
             [type]: [description]
         """
-        module_name = "tf_transformers.models.model_configs.vit"
-        tft_model_name = normalize_model_name(model_name)
+        # module_name = "tf_transformers.models.model_configs.vit"
+        # tft_model_name = normalize_model_name(model_name)
 
         # Load a base config and then overwrite it
         config = DEFAULT_CONFIG.copy()
         cls_ref = cls(model_name, cache_dir)
-        try:
-            # If a config present as a part of tft load it
-            config = get_config(module_name, tft_model_name)
-        except Exception as e:
-            logging.warn(e)
+        # try:
+        #     # If a config present as a part of tft load it
+        #     config = get_config(module_name, tft_model_name)
+        # except Exception as e:
+        #     logging.warn(e)
 
         try:
             from transformers import PretrainedConfig

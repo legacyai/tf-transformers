@@ -363,6 +363,7 @@ class Trainer:
         overwrite_checkpoint_dir=False,
         max_number_of_models=10,
         model_save_interval_steps=None,
+        repeat_dataset=False,
     ):
 
         if steps_per_epoch:
@@ -400,9 +401,14 @@ class Trainer:
             model, train_dataset, train_loss_fn, validation_dataset, validation_loss_fn
         )
         # Distribute dataset
-        train_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
-            train_dataset.repeat(epochs + 1)
-        )
+        if not repeat_dataset:
+            train_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
+                train_dataset.repeat(epochs + 1)
+            )
+        else:
+            train_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
+                train_dataset.repeat()
+            )
         validation_dataset_distributed = None
         if validation_dataset:
             validation_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(

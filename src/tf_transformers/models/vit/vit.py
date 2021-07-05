@@ -71,6 +71,8 @@ class ViTEncoder(LegacyLayer):
         self._use_mlm_layer = use_mlm_layer
         self._return_all_layer_outputs = return_all_layer_outputs
 
+        if "num_labels" not in config:
+            config["num_labels"] = None
         one_side_patch = config['image_size'] // config['patch_size']
         self._num_patches = (one_side_patch * one_side_patch) + 1  # 1 for CLS token
 
@@ -135,6 +137,16 @@ class ViTEncoder(LegacyLayer):
                 name="transformer/layer_%d" % i,
             )
             self._transformer_layers.append(layer)
+
+        # Add Classifier layer (by default VIT traines on 1000 labels)
+        if config['num_labels']:
+
+            self._classifier_layer = tf.keras.layers.Dense(
+                units=config["num_labels"],
+                activation=None,
+                kernel_initializer=self._initializer,
+                name="classifier_layer",
+            )
 
         # CLS layer
         self._pooler_layer = tf.keras.layers.Dense(
@@ -328,10 +340,32 @@ class ViTEncoder(LegacyLayer):
         # batch_size x sequence_length x embedding_size
         token_embeddings = encoder_outputs[-1]
 
-        result = {"token_embeddings": token_embeddings, "cls_output": cls_output}
+        result = {"token_embeddings": token_embeddings, "cls_output": cls_output, "cls_token_tensor": cls_token_tensor}
+
+        if self._config_dict['num_labels']:
+            classifier_predictions = self._classifier_layer(cls_token_tensor)
+            result['classifier_predictions'] = classifier_predictions
 
         if self._return_all_layer_outputs:
+            all_cls_token_tensors = []
+            all_cls_output = []
+            all_layer_classifier_predictions = []
+            for per_layer_token_embeddings in encoder_outputs:
+                per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
+                    per_layer_token_embeddings
+                )
+                all_cls_token_tensors.append(per_cls_token_tensor)
+                all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
+
+                if self._config_dict['num_labels']:
+                    classifier_predictions = self._classifier_layer(cls_token_tensor)
+                    all_layer_classifier_predictions.append(classifier_predictions)
+
             result["all_layer_token_embeddings"] = encoder_outputs
+            result["all_layer_cls_output"] = all_cls_output
+            result["all_layer_cls_token_tensor"] = all_cls_token_tensors
+            if self._config_dict['num_labels']:
+                result["all_layer_classifier_predictions"] = all_layer_classifier_predictions
 
         return result
 
