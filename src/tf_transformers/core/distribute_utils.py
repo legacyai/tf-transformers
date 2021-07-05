@@ -90,6 +90,22 @@ def tpu_initialize(tpu_address):
     return cluster_resolver
 
 
+def tpu_initialize_colab():
+    """Initializes TPU for TF 2.x training.
+
+    Args:
+      tpu_address: string, bns address of master TPU worker.
+
+    Returns:
+      A TPUClusterResolver.
+    """
+    resolver = tf.distribute.cluster_resolver.TPUClusterResolver(tpu='')
+    tf.config.experimental_connect_to_cluster(resolver)
+    # This is the TPU initialization code that has to be at the beginning.
+    tf.tpu.experimental.initialize_tpu_system(resolver)
+    return resolver
+
+
 def get_distribution_strategy(
     distribution_strategy="mirrored", num_gpus=0, all_reduce_alg=None, num_packs=1, tpu_address=None, **kwargs
 ):
@@ -146,6 +162,11 @@ def get_distribution_strategy(
         return tf.distribute.get_strategy()
 
     if distribution_strategy == "tpu":
+
+        if tpu_address == 'colab':
+            cluster_resolver = tpu_initialize_colab()
+            return tf.distribute.TPUStrategy(cluster_resolver)
+
         # When tpu_address is an empty string, we communicate with local TPUs.
         cluster_resolver = tpu_initialize(tpu_address)
         return tf.distribute.TPUStrategy(cluster_resolver)

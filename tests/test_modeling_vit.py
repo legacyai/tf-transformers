@@ -48,7 +48,7 @@ class ModelTest(unittest.TestCase):
         # model = Model.from_pretrained(MODEL_NAME, convert_fn_type='tf')
         # logging.info("Test: TF Conversion. ✅")
 
-    @unittest.skip
+    #@unittest.skip
     def test_pt_conversion(self):
         
         import shutil
