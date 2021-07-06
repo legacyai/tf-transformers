@@ -171,7 +171,7 @@ class TFWriter(object):
         """
         simple schema validation check
         """
-        for k, v in schema.items():
+        for _k, v in schema.items():
             if v[0] == "var_len":
                 assert len(v) == 2
                 assert v[1] in TF_VALUE
@@ -293,7 +293,7 @@ class TFReader(object):
 
     """
 
-    def __init__(self, schema, tfrecord_files, shuffle_files=False, keys=[]):
+    def __init__(self, schema, tfrecord_files, shuffle_files=False, keys=None):
 
         if not isinstance(tfrecord_files, (list, tuple)):
             raise Exception("input must be a list or tuple of files")
@@ -346,7 +346,7 @@ class TFReader(object):
             schema_writer_dict[key] = TF_FUNC[value[1]]  # _bytes_feature
         return schema_reader_dict, schema_writer_dict
 
-    def decode_record_var(self, record, keys=[]):
+    def decode_record_var(self, record, keys=None):
         """Decodes a record to a TensorFlow example."""
         feature_dict = tf.io.parse_single_example(record, self.schema_reader_fn)
 
@@ -415,7 +415,7 @@ class TFReader(object):
                 if len(v.shape.dims) == 1:
                     _padded_shapes[k] = [None]
                 if len(v.shape.dims) == 0:
-                     _padded_shapes[k] = []
+                    _padded_shapes[k] = []
                 if len(v.shape.dims) > 1:
                     raise ValueError("Seems like `{}` has 2 dimensional or more".format(v))
 
@@ -434,7 +434,7 @@ class TFReader(object):
         dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
         return dataset
 
-    def read_record(self, keys=[], auto_batch=False, **kwargs):
+    def read_record(self, keys=None, auto_batch=False, **kwargs):
         """Read TF records
 
         Args:
@@ -450,6 +450,11 @@ class TFReader(object):
             cycle_length=8,
             num_parallel_calls=tf.data.experimental.AUTOTUNE,
         )
+
+        # TODO Make it optional
+        options = tf.data.Options()
+        options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.DATA
+        dataset = dataset.with_options(options)
 
         def decode_fn(record):
             return self.decode_record_var(record, keys)
@@ -492,7 +497,7 @@ if __name__ == "__main__":
 
     tf_writer = TFWriter(tf_dummy_schema, "test.tfrecord", tag="train", overwrite=True)
 
-    for i in range(10000):
+    for _i in range(10000):
         tf_writer.write_record(data_1)
 
     import glob
@@ -541,7 +546,7 @@ if __name__ == "__main__":
     }
 
     tf_writer = TFWriter(tf_dummy_schema, "test2.tfrecord", tag="train", overwrite=True)
-    for i in range(1000):
+    for _i in range(1000):
         tf_writer.write_record(data_1)
         tf_writer.write_record(data_2)
 
