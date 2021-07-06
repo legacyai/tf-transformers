@@ -30,7 +30,7 @@ HF_VERSION = "4.6.0"
 class ModelWrapper(ABC):
     """Model Wrapper for all models"""
 
-    def __init__(self, model_name, cache_dir):
+    def __init__(self, model_name, cache_dir, save_checkpoint_cache):
         """
 
         Args:
@@ -39,6 +39,7 @@ class ModelWrapper(ABC):
         """
         self.model_name = model_name
         self.cache_dir = cache_dir
+        self.save_checkpoint_cache = save_checkpoint_cache
         if cache_dir is None:
             self.cache_dir = tempfile.gettempdir()
 
@@ -79,7 +80,7 @@ class ModelWrapper(ABC):
         if not cache_path.exists():  # If cache path not exists
             cache_path.mkdir()
 
-    def convert_hf_to_tf(self, model, config, convert_tf_fn, convert_pt_fn, save_checkpoint_cache=True):
+    def convert_hf_to_tf(self, model, config, convert_tf_fn, convert_pt_fn):
         """Convert TTF from HF
 
         Args:
@@ -117,7 +118,7 @@ class ModelWrapper(ABC):
                 logging.error(e)
                 logging.info("Failed ❌: Converted model using PT HF")
 
-        if save_checkpoint_cache:
+        if self.save_checkpoint_cache:
             if convert_success:
                 model.save_checkpoint(str(self.model_path), overwrite=True)
                 logging.info(
