@@ -451,17 +451,16 @@ class TFReader(object):
             num_parallel_calls=tf.data.experimental.AUTOTUNE,
         )
 
-        # TODO Make it optional
-        options = tf.data.Options()
-        options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.DATA
-        dataset = dataset.with_options(options)
-
         def decode_fn(record):
             return self.decode_record_var(record, keys)
 
         dataset = dataset.map(decode_fn)
         # Using `ignore_errors()` will drop the element that causes an error.
         dataset = dataset.apply(tf.data.experimental.ignore_errors())  # ==> {1., 0.5, 0.2}
+        # TODO Make it optional
+        options = tf.data.Options()
+        options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.DATA
+        dataset = dataset.with_options(options)
         if auto_batch:
             dataset = self.auto_batch(dataset, **kwargs)
         return dataset
