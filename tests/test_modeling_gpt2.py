@@ -37,7 +37,7 @@ class ModelTest(unittest.TestCase):
         self.model_ar = Model.from_pretrained(MODEL_NAME, use_auto_regressive=True)
         self.tokenizer = Tokenizer.from_pretrained(MODEL_NAME)
 
-    @unittest.skip
+    #@unittest.skip
     def test_tf_conversion(self):
         import shutil
 
@@ -48,7 +48,7 @@ class ModelTest(unittest.TestCase):
         model = Model.from_pretrained(MODEL_NAME, convert_fn_type='tf')
         logging.info("Test: TF Conversion. ✅")
 
-    @unittest.skip
+    #@unittest.skip
     def test_pt_conversion(self):
         import shutil
 
@@ -58,7 +58,8 @@ class ModelTest(unittest.TestCase):
             pass
         model = Model.from_pretrained(MODEL_NAME, convert_fn_type='pt')
         logging.info("Test: PT Conversion. ✅")
-
+        
+    @unittest.skip
     def test_auto_regressive(self):
         """Test Text Generation using Non Cache and Cached"""
 
@@ -115,7 +116,8 @@ class ModelTest(unittest.TestCase):
         tf.debugging.assert_near(predictions_prob_auto_regressive, predictions_prob_non_auto_regressive, rtol=1.0)
         tf.debugging.assert_equal(predictions_auto_regressive, predictions_non_auto_regressive)
         logging.info("Test: Successful Auto Regressive Encoder. ✅")
-
+        
+    @unittest.skip
     def test_auto_regressive_batch(self):
         """Test Batch Text Generation Auto Regressive"""
         text = ['Sachin Tendulkar is one of the finest', 'I love stars because']
@@ -192,7 +194,8 @@ class ModelTest(unittest.TestCase):
         tf.debugging.assert_equal(predictions_auto_regressive.numpy().tolist(), expected_prediction)
         tf.debugging.assert_near(predictions_prob_auto_regressive.numpy().tolist(), expected_probs)
         logging.info("Test: Successful Batch Auto Regressive Encoder. ✅")
-
+        
+    @unittest.skip
     def test_auto_regressive_saved_model(self):
         """Test Auto Regressive using Decoder Saved Model"""
         import shutil
@@ -223,7 +226,8 @@ class ModelTest(unittest.TestCase):
         tf.debugging.assert_equal(predicted_ids, expected_ids)
         shutil.rmtree(dirpath)
         logging.info("Test: Successful Batch Auto Regressive Encoder Saved Model. ✅")
-
+        
+    @unittest.skip
     def test_auto_regressive_keras_model(self):
         """Test Auto Regressive using Decoder Keras Model"""
         from tf_transformers.text import TextDecoder

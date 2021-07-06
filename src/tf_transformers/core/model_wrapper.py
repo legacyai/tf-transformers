@@ -79,7 +79,7 @@ class ModelWrapper(ABC):
         if not cache_path.exists():  # If cache path not exists
             cache_path.mkdir()
 
-    def convert_hf_to_tf(self, model, config, convert_tf_fn, convert_pt_fn):
+    def convert_hf_to_tf(self, model, config, convert_tf_fn, convert_pt_fn, save_checkpoint_cache=True):
         """Convert TTF from HF
 
         Args:
@@ -117,15 +117,16 @@ class ModelWrapper(ABC):
                 logging.error(e)
                 logging.info("Failed ❌: Converted model using PT HF")
 
-        if convert_success:
-            model.save_checkpoint(str(self.model_path), overwrite=True)
-            logging.info(
-                "Successful ✅: Asserted and Converted `{}` from HF and saved it in cache folder {}".format(
-                    hf_model_name, str(self.model_path)
+        if save_checkpoint_cache:
+            if convert_success:
+                model.save_checkpoint(str(self.model_path), overwrite=True)
+                logging.info(
+                    "Successful ✅: Asserted and Converted `{}` from HF and saved it in cache folder {}".format(
+                        hf_model_name, str(self.model_path)
+                    )
                 )
-            )
-        else:
-            model.save_checkpoint(str(self.model_path), overwrite=True)
-            logging.info(
-                "Saved model in cache folder with randomly ❌ initialized values  {}".format(str(self.model_path))
-            )
+            else:
+                model.save_checkpoint(str(self.model_path), overwrite=True)
+                logging.info(
+                    "Saved model in cache folder with randomly ❌ initialized values  {}".format(str(self.model_path))
+                )

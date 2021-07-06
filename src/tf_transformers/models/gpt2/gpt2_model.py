@@ -54,7 +54,7 @@ class GPT2Model(ModelWrapper):
             model_name (str): Model name
             cache_dir (str): cache dir to save the mode checkpoints
         """
-        super(GPT2Model, self).__init__(model_name=model_name, cache_dir=cache_dir)
+        super(GPT2Model, self).__init__(model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=True)
 
     def update_config(self, tft_config, hf_config):
         """Update tft config with hf config.
@@ -107,6 +107,7 @@ class GPT2Model(ModelWrapper):
         return_layer=False,
         return_config=False,
         convert_fn_type="both",
+        save_checkpoint_cache=True,
         **kwargs,
     ):
         """Return tf.keras.Model / LegacyModel .
@@ -129,7 +130,7 @@ class GPT2Model(ModelWrapper):
 
         # Load a base config and then overwrite it
         config = DEFAULT_CONFIG.copy()
-        cls_ref = cls(model_name, cache_dir)
+        cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
         try:
             # If a config present as a part of tft load it
             config = get_config(module_name, tft_model_name)
@@ -169,12 +170,7 @@ class GPT2Model(ModelWrapper):
                     logging.warn(e)
             if convert_from_hf and not load_succesfuly:
                 if convert_fn_type == "both":
-                    cls_ref.convert_hf_to_tf(
-                        model,
-                        config,
-                        convert_tf_fn=convert_tf,
-                        convert_pt_fn=convert_pt,
-                    )
+                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=convert_tf, convert_pt_fn=convert_pt)
                 if convert_fn_type == "tf":
                     cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=convert_tf, convert_pt_fn=None)
                 if convert_fn_type == "pt":
