@@ -9,8 +9,6 @@ from tf_transformers.text import (
     top_p_logits,
 )
 
-tf.keras.backend.clear_session()
-
 
 class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
     """TextDecoderSerializable - This class is responsible for saving

@@ -89,7 +89,7 @@ class BertModel(ModelWrapper):
 
         # if a config is provided, we wont be doing any extra .
         # Just create a model and return it with random_weights
-        # tf.keras.backend.clear_session() (Distribute strategy fails)
+        #  (Distribute strategy fails)
         model_layer = Encoder(config, **kwargs_copy)
         model = model_layer.get_model()
         logging.info("Create model from config")

@@ -339,7 +339,6 @@ def convert_bert_tf(model, config, model_name):
     # BertModel
     from transformers import TFBertModel
 
-    tf.keras.backend.clear_session()
     model_hf = TFBertModel.from_pretrained(model_name)
 
     # HF model variable name to variable values, for fast retrieval
@@ -430,7 +429,6 @@ def convert_bert_tf(model, config, model_name):
     # BertMLM
     from transformers import TFBertForMaskedLM
 
-    tf.keras.backend.clear_session()
     model_hf = TFBertForMaskedLM.from_pretrained(model_name)
     hf_vars = [
         "tf_bert_for_masked_lm/mlm___cls/predictions/bias:0",

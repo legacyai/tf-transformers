@@ -68,4 +68,4 @@ python3 /usr/share/models/official/nlp/bert/run_classifier.py \
 
 
 
- gcloud compute ssh bert-tutorial --zone=europe-west4
+ gcloud compute ssh bert-tutorial --zone=us-central1-f

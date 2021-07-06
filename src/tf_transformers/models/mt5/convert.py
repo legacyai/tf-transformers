@@ -278,7 +278,6 @@ def convert_mt5_tf(model, config, model_name):
     # MT5Model
     from transformers import TFMT5Model
 
-    tf.keras.backend.clear_session()
     model_hf = TFMT5Model.from_pretrained(model_name)
     from_to_variable_dict = {var.name: var for var in model_hf.variables}
 

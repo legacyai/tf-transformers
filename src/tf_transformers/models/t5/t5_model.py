@@ -96,7 +96,7 @@ class t5Model(ModelWrapper):
 
         # if a config is provided, we wont be doing any extra .
         # Just create a model and return it with random_weights
-        # tf.keras.backend.clear_session() (Distribute strategy fails)
+        #  (Distribute strategy fails)
         config["bidirectional"] = True
         encoder_layer = Encoder(config=config, name="t5_encoder", **encoder_kwargs_copy)
 
@@ -182,7 +182,7 @@ class t5Model(ModelWrapper):
 
         # if a config is provided, we wont be doing any extra .
         # Just create a model and return it with random_weights
-        # tf.keras.backend.clear_session() (Distribute strategy fails)
+        #  (Distribute strategy fails)
         config["bidirectional"] = True
         encoder_layer = Encoder(config=config, name="t5_encoder", **encoder_kwargs_copy)
 

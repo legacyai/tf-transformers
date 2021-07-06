@@ -179,7 +179,6 @@ def convert_gpt2_tf(model, config, model_name):
     # GPT2Model
     from transformers import TFGPT2Model
 
-    tf.keras.backend.clear_session()
     model_hf = TFGPT2Model.from_pretrained(model_name)
 
     # HF model variable name to variable values, for fast retrieval

@@ -346,7 +346,6 @@ def convert_roberta_tf(model, config, model_name):
     # BertModel
     from transformers import TFRobertaModel
 
-    tf.keras.backend.clear_session()
     model_hf = TFRobertaModel.from_pretrained(model_name)
 
     # HF model variable name to variable values, for fast retrieval

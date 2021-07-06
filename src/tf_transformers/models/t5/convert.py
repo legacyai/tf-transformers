@@ -269,7 +269,6 @@ def convert_t5_tf(model, config, model_name):
     # T5Model
     from transformers import TFT5Model
 
-    tf.keras.backend.clear_session()
     model_hf = TFT5Model.from_pretrained(model_name)
 
     from_to_variable_dict = {var.name: var for var in model_hf.variables}

@@ -350,7 +350,6 @@ def convert_albert_tf(model, config, model_name):
     # BertModel
     from transformers import TFAlbertModel
 
-    tf.keras.backend.clear_session()
     model_hf = TFAlbertModel.from_pretrained(model_name)
 
     from_to_variable_dict = {var.name: var for var in model_hf.variables}
@@ -414,7 +413,6 @@ def convert_albert_tf(model, config, model_name):
     # BertMLM
     from transformers import TFAlbertForMaskedLM
 
-    tf.keras.backend.clear_session()
     model_hf = TFAlbertForMaskedLM.from_pretrained(model_name)
     hf_vars = [
         "tf_albert_for_masked_lm/predictions/bias:0",
