@@ -22,6 +22,8 @@ from tf_transformers.models.gpt2.convert import convert_gpt2_pt as convert_pt
 from tf_transformers.models.gpt2.convert import convert_gpt2_tf as convert_tf
 from tf_transformers.utils import get_config
 
+logging.get_absl_logger().name = "gpt2_model"
+
 DEFAULT_CONFIG = {
     "attention_probs_dropout_prob": 0.1,
     "hidden_act": "gelu",
@@ -48,13 +50,15 @@ def normalize_model_name(model_name):
 class GPT2Model(ModelWrapper):
     """GPT2 Encoder Wrapper"""
 
-    def __init__(self, model_name='gpt2', cache_dir=None):
+    def __init__(self, model_name='gpt2', cache_dir=None, save_checkpoint_cache=True):
         """
         Args:
             model_name (str): Model name
             cache_dir (str): cache dir to save the mode checkpoints
         """
-        super(GPT2Model, self).__init__(model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=True)
+        super(GPT2Model, self).__init__(
+            model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=save_checkpoint_cache
+        )
 
     def update_config(self, tft_config, hf_config):
         """Update tft config with hf config.
