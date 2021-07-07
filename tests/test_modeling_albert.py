@@ -24,7 +24,7 @@ from transformers import AlbertTokenizerFast as Tokenizer
 
 from tf_transformers.models import AlbertModel as Model
 
-logging.get_absl_logger().name = "bert_testing"
+logging.get_absl_logger().name = "albert_testing"
 
 MODEL_NAME = 'albert-base-v2'
 

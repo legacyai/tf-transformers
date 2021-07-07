@@ -37,3 +37,11 @@ f . gcloud alpha compute tpus tpu-vm ssh tft-free-tpu --zone europe-west4-a --pr
 # Check status
 
 gcloud compute tpus list --zone=europe-west4-a
+
+g. gcloud alpha compute tpus tpu-vm delete tft-free-tpu \
+  --zone=europe-west4-a
+
+
+sudo python3 -m pip3 install google-cloud-storage
+
+!gsutil -m cp -r logs/ gs://tft_free/logs_new

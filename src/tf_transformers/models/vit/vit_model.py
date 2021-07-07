@@ -22,8 +22,6 @@ from tf_transformers.models.vit.convert import convert_vit_pt as convert_pt
 
 # from tf_transformers.models.vit.convert import convert_vit_tf as convert_tf
 
-logging.get_absl_logger().name = "vit_model"
-
 DEFAULT_CONFIG = {
     "attention_probs_dropout_prob": 0.1,
     "hidden_act": "gelu",

@@ -4,3 +4,4 @@ from tf_transformers.core.legacy_module import LegacyModule, LegacyModuleCustom
 from tf_transformers.core.model_wrapper import ModelWrapper
 from tf_transformers.core.trainer import Trainer
 from tf_transformers.core.trainer_single_device import SingleDeviceTrainer
+from tf_transformers.core.trainer_tpu import TPUTrainer
