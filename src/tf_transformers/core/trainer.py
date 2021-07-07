@@ -387,7 +387,9 @@ class Trainer:
 
             # Optimizer
             optimizer = optimizer_fn()
-            optimizer = configure_optimizer(optimizer, use_float16=self.use_float16, loss_scale=self.loss_scale)
+            # TPU do not need this
+            if not self.use_tpu:
+                optimizer = configure_optimizer(optimizer, use_float16=self.use_float16, loss_scale=self.loss_scale)
 
         # Checkpoint manager
         checkpoint_manager = save_model_checkpoints(

@@ -13,7 +13,7 @@ def get_tf_dtype(dtype):
 
 
 def is_float16(dtype):
-    if dtype in [tf.float16, tf.bfloat16]:
+    if dtype in [tf.float16]:
         return True
     return False
 
