@@ -293,7 +293,7 @@ class TFReader(object):
 
     """
 
-    def __init__(self, schema, tfrecord_files, shuffle_files=False, keys=None):
+    def __init__(self, schema, tfrecord_files, shuffle_files=False, keys=[]):  # noqa
 
         if not isinstance(tfrecord_files, (list, tuple)):
             raise Exception("input must be a list or tuple of files")
@@ -346,7 +346,7 @@ class TFReader(object):
             schema_writer_dict[key] = TF_FUNC[value[1]]  # _bytes_feature
         return schema_reader_dict, schema_writer_dict
 
-    def decode_record_var(self, record, keys=None):
+    def decode_record_var(self, record, keys=[]):  # noqa
         """Decodes a record to a TensorFlow example."""
         feature_dict = tf.io.parse_single_example(record, self.schema_reader_fn)
 
@@ -434,7 +434,7 @@ class TFReader(object):
         dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
         return dataset
 
-    def read_record(self, keys=None, auto_batch=False, **kwargs):
+    def read_record(self, keys=[], auto_batch=False, **kwargs):  # noqa
         """Read TF records
 
         Args:
