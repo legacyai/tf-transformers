@@ -81,10 +81,10 @@ def get_and_reset_metric_from_dict(metric_dict):
     return metric_result
 
 
-def get_tensorboard_writers():
-    current_directory = os.getcwd()
-    train_log_dir = os.path.join(current_directory, "logs/train")
-    test_log_dir = os.path.join(current_directory, "logs/dev")
+def get_tensorboard_writers(model_checkpoint_dir):
+    # current_directory = os.getcwd()
+    train_log_dir = os.path.join(model_checkpoint_dir, "logs/train")
+    test_log_dir = os.path.join(model_checkpoint_dir, "logs/dev")
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
     test_summary_writer = tf.summary.create_file_writer(test_log_dir)
     return train_summary_writer, test_summary_writer
@@ -178,7 +178,7 @@ def train_and_eval(
             training_loss_dict_metric["learning_rate"].update_state(current_lr)
             # training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
 
-    @tf.function
+    @tf.function(experimental_relax_shapes=True)
     def write_metrics(metric_dict, writer, step):
         @tf.function
         def _write(step):
@@ -266,7 +266,7 @@ def train_and_eval(
 
     # Loop starts here
     # Get Tensorboard writers
-    train_summary_writer, val_summary_writer = get_tensorboard_writers()
+    train_summary_writer, val_summary_writer = get_tensorboard_writers(model_checkpoint_dir)
     validation_history = {}
     training_history = {}
     global_step = 0
