@@ -178,6 +178,7 @@ def train_and_eval(
             training_loss_dict_metric["learning_rate"].update_state(current_lr)
             # training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
 
+    @tf.function
     def write_metrics(metric_dict, writer, step):
         @tf.function
         def _write(step):
@@ -213,7 +214,7 @@ def train_and_eval(
                     for dist_inputs in val_batches:
                         loss = strategy.run(_validate_step, args=(dist_inputs,))
                         for name, loss_value in loss.items():
-                            loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
+                            loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
                             validation_loss = validation_loss_dict_metric[name]
                             validation_loss.update_state(loss_value)
 
@@ -229,7 +230,7 @@ def train_and_eval(
                     for dist_inputs in val_batches:
                         loss = strategy.run(_validate_step, args=(dist_inputs,))
                         for name, loss_value in loss.items():
-                            loss_value = strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
+                            loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
                             validation_loss = validation_loss_dict_metric[name]
                             validation_loss.update_state(loss_value)
 
