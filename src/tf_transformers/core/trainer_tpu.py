@@ -132,6 +132,16 @@ def train_and_eval(
             per_example_loss_averaged[name] = tf.nn.compute_average_loss(loss, global_batch_size=GLOBAL_BATCH_SIZE)
         return per_example_loss_averaged
 
+    def compute_loss_valid(batch_labels, model_outputs):
+        """Validation Loss computation which takes care of loss reduction based on GLOBAL_BATCH_SIZE"""
+        per_example_loss = validation_loss_fn(batch_labels, model_outputs)
+        per_example_loss_averaged = {}
+        # Inplace update
+        # Avergae loss per global batch size , recommended
+        for name, loss in per_example_loss.items():
+            per_example_loss_averaged[name] = tf.nn.compute_average_loss(loss, global_batch_size=GLOBAL_BATCH_SIZE)
+        return per_example_loss_averaged
+
     # Train Functions
     @tf.function
     def do_train(iterator):
@@ -188,7 +198,7 @@ def train_and_eval(
 
             batch_inputs, batch_labels = dist_inputs
             model_outputs = model(batch_inputs)
-            loss = validation_loss_fn(batch_labels, model_outputs)
+            loss = compute_loss_valid(batch_labels, model_outputs)
             return loss
 
         if not epoch_end:

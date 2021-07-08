@@ -45,3 +45,12 @@ g. gcloud alpha compute tpus tpu-vm delete tft-free-tpu \
 sudo python3 -m pip3 install google-cloud-storage
 
 !gsutil -m cp -r logs/ gs://tft_free/logs_new
+
+
+# Learning rate
+
+https://aws.amazon.com/blogs/machine-learning/the-importance-of-hyperparameter-tuning-for-scaling-deep-learning-training-to-multiple-gpus/#:~:text=The%20importance%20of%20hyperparameter%20tuning%20for%20scaling%20deep%20learning%20training%20to%20multiple%20GPUs,-by%20Sina%20Afrooze&text=Parallel%20processing%20with%20multiple%20GPUs,scaling%20training%20of%20deep%20models.&text=To%20ensure%20that%20you%20fully,linearly%20with%20each%20additional%20GPU.
+
+https://www.wwt.com/api/attachments/5eac259f31d66a008d00abe5/file
+
+https://databricks.com/blog/2019/08/15/how-not-to-scale-deep-learning-in-6-easy-steps.html

@@ -1,5 +1,23 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 import numpy as np
 import tensorflow as tf
+
+from tf_transformers.core import keras_utils
 
 
 def assert_model_results(model):
@@ -451,4 +469,5 @@ def convert_albert_tf(model, config, model_name):
 
     assert text_hf == text_tf
     outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
-    tf.debugging.assert_equal(outputs_hf, outputs_tf)
+    if keras_utils.get_policy_name() == 'float32':
+        tf.debugging.assert_equal(outputs_hf, outputs_tf)

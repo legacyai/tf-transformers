@@ -48,13 +48,15 @@ def normalize_model_name(model_name):
 class RobertaModel(ModelWrapper):
     """Roberta Encoder Wrapper"""
 
-    def __init__(self, model_name='roberta', cache_dir=None):
+    def __init__(self, model_name='roberta', cache_dir=None, save_checkpoint_cache=True):
         """
         Args:
             model_name (str): Model name
             cache_dir (str): cache dir to save the mode checkpoints
         """
-        super(RobertaModel, self).__init__(model_name=model_name, cache_dir=cache_dir)
+        super(RobertaModel, self).__init__(
+            model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=save_checkpoint_cache
+        )
 
     def update_config(self, tft_config, hf_config):
         """Update tft config with hf config.
@@ -107,6 +109,8 @@ class RobertaModel(ModelWrapper):
         return_layer=False,
         return_config=False,
         convert_fn_type="both",
+        save_checkpoint_cache=True,
+        load_from_cache=True,
         **kwargs,
     ):
         """Return tf.keras.Model / LegacyModel .
@@ -129,7 +133,7 @@ class RobertaModel(ModelWrapper):
 
         # Load a base config and then overwrite it
         config = DEFAULT_CONFIG.copy()
-        cls_ref = cls(model_name, cache_dir)
+        cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
         try:
             # If a config present as a part of tft load it
             config = get_config(module_name, tft_model_name)
@@ -163,8 +167,9 @@ class RobertaModel(ModelWrapper):
             load_succesfuly = False
             if cls_ref.model_path.exists():
                 try:
-                    model.load_checkpoint(str(cls_ref.model_path))
-                    load_succesfuly = True
+                    if load_from_cache:
+                        model.load_checkpoint(str(cls_ref.model_path))
+                        load_succesfuly = True
                 except Exception as e:
                     logging.warn(e)
             if convert_from_hf and not load_succesfuly:

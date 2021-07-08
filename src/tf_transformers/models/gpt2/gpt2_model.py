@@ -22,7 +22,7 @@ from tf_transformers.models.gpt2.convert import convert_gpt2_pt as convert_pt
 from tf_transformers.models.gpt2.convert import convert_gpt2_tf as convert_tf
 from tf_transformers.utils import get_config
 
-logging.get_absl_logger().name = "gpt2_model"
+# logging.get_absl_logger().name = "gpt2_model"
 
 DEFAULT_CONFIG = {
     "attention_probs_dropout_prob": 0.1,
@@ -112,6 +112,7 @@ class GPT2Model(ModelWrapper):
         return_config=False,
         convert_fn_type="both",
         save_checkpoint_cache=True,
+        load_from_cache=True,
         **kwargs,
     ):
         """Return tf.keras.Model / LegacyModel .
@@ -168,8 +169,9 @@ class GPT2Model(ModelWrapper):
             load_succesfuly = False
             if cls_ref.model_path.exists():
                 try:
-                    model.load_checkpoint(str(cls_ref.model_path))
-                    load_succesfuly = True
+                    if load_from_cache:
+                        model.load_checkpoint(str(cls_ref.model_path))
+                        load_succesfuly = True
                 except Exception as e:
                     logging.warn(e)
             if convert_from_hf and not load_succesfuly:

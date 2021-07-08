@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
+from tf_transformers.core import keras_utils
+
 
 def convert_mt5_pt(model, config, model_name):
     """PT converter
@@ -417,4 +419,5 @@ def convert_mt5_tf(model, config, model_name):
     inputs_tf["decoder_input_ids"] = inputs["input_ids"]
     outputs_tf = model(inputs_tf)
     outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
-    tf.debugging.assert_near(outputs_hf, outputs_tf, rtol=1.0)
+    if keras_utils.get_policy_name() == 'float32':
+        tf.debugging.assert_near(outputs_hf, outputs_tf, rtol=1.0)

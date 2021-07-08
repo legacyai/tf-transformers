@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow as tf
 
+from tf_transformers.core import keras_utils
+
 
 def assert_model_results(model):
     def get_expected_text(model_name):
@@ -467,4 +469,5 @@ def convert_bert_tf(model, config, model_name):
 
     assert text_hf == text_tf
     outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
-    tf.debugging.assert_equal(outputs_hf, outputs_tf)
+    if keras_utils.get_policy_name() == 'float32':
+        tf.debugging.assert_equal(outputs_hf, outputs_tf)

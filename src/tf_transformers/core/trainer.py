@@ -93,13 +93,6 @@ def get_tensorboard_writers(model_checkpoint_dir):
     return train_summary_writer, test_summary_writer
 
 
-def write_metrics(metric_dict, writer, step):
-    with writer.as_default():
-        for name, result in metric_dict.items():
-            tf.summary.scalar(name, result, step=step)
-        writer.flush()
-
-
 def train_and_eval(
     model,
     optimizer,
@@ -109,6 +102,7 @@ def train_and_eval(
     steps_per_call,
     train_dataset_iter,
     train_loss_fn,
+    GLOBAL_BATCH_SIZE,
     training_loss_dict_metric,
     validation_dataset_distributed,
     validation_loss_fn,
@@ -132,6 +126,37 @@ def train_and_eval(
             checkpoint_manager.save()
             logging.info("Model saved at epoch {}".format(epoch))
 
+    def write_metrics(metric_dict, writer, step):
+        @tf.function
+        def _write(step):
+            # other model code would go here
+            with writer.as_default():
+                for name, result in metric_dict.items():
+                    tf.summary.scalar(name, result, step=step)
+
+        _write(step)
+        writer.flush()
+
+    def compute_loss(batch_labels, model_outputs):
+        """Loss computation which takes care of loss reduction based on GLOBAL_BATCH_SIZE"""
+        per_example_loss = train_loss_fn(batch_labels, model_outputs)
+        per_example_loss_averaged = {}
+        # Inplace update
+        # Avergae loss per global batch size , recommended
+        for name, loss in per_example_loss.items():
+            per_example_loss_averaged[name] = tf.nn.compute_average_loss(loss, global_batch_size=GLOBAL_BATCH_SIZE)
+        return per_example_loss_averaged
+
+    def compute_loss_valid(batch_labels, model_outputs):
+        """Validation Loss computation which takes care of loss reduction based on GLOBAL_BATCH_SIZE"""
+        per_example_loss = validation_loss_fn(batch_labels, model_outputs)
+        per_example_loss_averaged = {}
+        # Inplace update
+        # Avergae loss per global batch size , recommended
+        for name, loss in per_example_loss.items():
+            per_example_loss_averaged[name] = tf.nn.compute_average_loss(loss, global_batch_size=GLOBAL_BATCH_SIZE)
+        return per_example_loss_averaged
+
     # Train Functions
     @tf.function
     def do_train(iterator):
@@ -142,7 +167,7 @@ def train_and_eval(
             batch_inputs, batch_labels = dist_inputs
             with tf.GradientTape() as tape:
                 model_outputs = model(batch_inputs)
-                loss = train_loss_fn(batch_labels, model_outputs)
+                loss = compute_loss(batch_labels, model_outputs)
                 if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
                     loss_scaled = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
                 # TODO
@@ -185,7 +210,7 @@ def train_and_eval(
 
             batch_inputs, batch_labels = dist_inputs
             model_outputs = model(batch_inputs)
-            loss = validation_loss_fn(batch_labels, model_outputs)
+            loss = compute_loss_valid(batch_labels, model_outputs)
             return loss
 
         if not epoch_end:
@@ -351,6 +376,7 @@ class Trainer:
         epochs,
         steps_per_epoch,
         model_checkpoint_dir,
+        batch_size,
         validation_dataset=None,
         validation_loss_fn=None,
         validation_interval_steps=None,
@@ -428,6 +454,7 @@ class Trainer:
             steps_per_call,
             train_dataset_distributed,
             train_loss_fn,
+            batch_size,
             training_loss_dict_metric,
             validation_dataset_distributed,
             validation_loss_fn,
