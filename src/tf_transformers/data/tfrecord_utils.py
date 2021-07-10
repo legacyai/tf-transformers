@@ -81,7 +81,7 @@ class TFWriter(object):
         shuffle=True,
         max_files_per_record=10000,
         overwrite=False,
-        verbose_counter=1000,
+        verbose_counter=None,
     ):
         """
         Args:
@@ -274,16 +274,16 @@ class TFWriter(object):
                 the_writer.write(example_proto.SerializeToString())
                 self.examples_per_record[self.current_file_name] += 1
                 self.global_counter += 1
-
-            if self.global_counter % self.verbose_counter == 0:
-                logging.info("Wrote {} tfrecods".format(self.global_counter))
+            if self.verbose_counter:
+                if self.global_counter % self.verbose_counter == 0:
+                    logging.info("Wrote {} tfrecods".format(self.global_counter))
         else:
             the_writer = self.all_writer[0]
             the_writer.write(example_proto.SerializeToString())
             self.global_counter += 1
-
-            if self.global_counter % self.verbose_counter == 0:
-                logging.info("Wrote {} tfrecods".format(self.global_counter))
+            if self.verbose_counter:
+                if self.global_counter % self.verbose_counter == 0:
+                    logging.info("Wrote {} tfrecods".format(self.global_counter))
 
 
 class TFReader(object):

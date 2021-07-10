@@ -54,3 +54,14 @@ https://aws.amazon.com/blogs/machine-learning/the-importance-of-hyperparameter-t
 https://www.wwt.com/api/attachments/5eac259f31d66a008d00abe5/file
 
 https://databricks.com/blog/2019/08/15/how-not-to-scale-deep-learning-in-6-easy-steps.html
+
+
+alias python=python3
+alias pip=pip3
+
+
+/home/sidhu/text/bazel-bin
+
+
+"@local_config_tf//:libtensorflow_framework" -> "@org_tensorflow//tensorflow/core:framework"
+"@local_config_tf//:tf_header_lib" -> "@org_tensorflow//tensorflow/core:lib"
