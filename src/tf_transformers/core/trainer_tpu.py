@@ -178,9 +178,9 @@ def train_and_eval(
             training_loss_dict_metric["learning_rate"].update_state(current_lr)
             # training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
 
-    @tf.function(experimental_relax_shapes=True)
+    # @tf.function(experimental_relax_shapes=True)
     def write_metrics(metric_dict, writer, step):
-        @tf.function
+        # @tf.function
         def _write(step):
             # other model code would go here
             with writer.as_default():
@@ -445,6 +445,6 @@ class TPUTrainer:
             model_save_interval_steps,
         )
         history['training_history'] = training_history
-        history['validation_hsitory'] = validation_history
+        history['validation_history'] = validation_history
         history['callbacks'] = callback_scores
         return history

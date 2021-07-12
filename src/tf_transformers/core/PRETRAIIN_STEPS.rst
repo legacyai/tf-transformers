@@ -41,6 +41,4 @@ export PYTHONPATH=$PYTHONPATH:/home/sidhu/Libraries/tf-transformers/src/
 
 ##### Download TFRecord and vocab from gsbucket
 cd Datasets
-gsutil -m cp -r \
-  "gs://tft_free/PRETRAIN_DATA/" \
-  .
+gsutil -m cp -r "gs://tft_free/PRETRAIN_DATA/" .

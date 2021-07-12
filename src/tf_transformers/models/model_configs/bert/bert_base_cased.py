@@ -13,5 +13,4 @@ config = {
     "type_vocab_size": 2,
     "vocab_size": 28996,
     "layer_norm_epsilon": 1e-12,
-    "mask_mode": "user_defined",
 }
