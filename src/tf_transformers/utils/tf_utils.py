@@ -178,6 +178,8 @@ def get_dtype():
     policy = tf.keras.mixed_precision.experimental.global_policy()
     if policy.name == "mixed_float16":
         dtype = tf.float16
+    if policy.name == "mixed_bfloat16":
+        dtype = tf.bfloat16
     return dtype
 
 

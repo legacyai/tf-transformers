@@ -59,9 +59,16 @@ https://databricks.com/blog/2019/08/15/how-not-to-scale-deep-learning-in-6-easy-
 alias python=python3
 alias pip=pip3
 
+------------------------------------------------------------------------------------
+ TF Text on TPU
+
+ "@local_config_tf//:libtensorflow_framework" -> "@org_tensorflow//tensorflow/core:framework"
+"@local_config_tf//:tf_header_lib" -> "@org_tensorflow//tensorflow/core:lib"
+
+git clone https://github.com/s4sarath/text.git
 
 /home/sidhu/text/bazel-bin
 
 
-"@local_config_tf//:libtensorflow_framework" -> "@org_tensorflow//tensorflow/core:framework"
-"@local_config_tf//:tf_header_lib" -> "@org_tensorflow//tensorflow/core:lib"
+
+gsutil -m cp -R "Your local directory" gs://Your bucket name
