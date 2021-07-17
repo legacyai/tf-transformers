@@ -1,4 +1,6 @@
 
+1. Run benchmark_run.py
+
 ## GPT2 Benchmark
 
 

@@ -125,6 +125,7 @@ class TFWriter(object):
 
         # we need this file to write the schema to the model_dir
         schema_file_name = "schema.json"
+        self.stats_file_name = "stats.json"
         if model_dir:
             if overwrite is False:
                 if os.path.exists(model_dir):
@@ -133,6 +134,7 @@ class TFWriter(object):
             os.makedirs(model_dir, exist_ok=True)
             self.file_name = file_name = os.path.join(model_dir, file_name.replace(".tfrecord", ""))
             schema_file_name = os.path.join(model_dir, schema_file_name)
+            self.stats_file_name = os.path.join(model_dir, self.stats_file_name)
 
         if tag == "train":
             if self.shuffle:
@@ -221,10 +223,22 @@ class TFWriter(object):
         """
         parse_fn: function which should be an iterator or generator
         """
+        import time
+
         if hasattr(parse_fn, "__iter__") and not hasattr(parse_fn, "__len__"):
+            start_time = time.time()
             for entry in parse_fn:
                 self.write_record(entry)
-            logging.info("Total individual observations/examples written is {}".format(self.global_counter))
+            end_time = time.time()
+            stats = {'time_taken': "{} seconds".format(end_time - start_time), "total_records": self.global_counter}
+            # Save stats time and record
+            with open(self.stats_file_name, "w") as f:
+                json.dump(stats, f, indent=2)
+            logging.info(
+                "Total individual observations/examples written is {} in {} seconds".format(
+                    self.global_counter, end_time - start_time
+                )
+            )
             self.close_sess()
         else:
             raise ValueError("Expected `parse_fn` to be a generator/iterator ")

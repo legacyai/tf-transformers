@@ -22,7 +22,8 @@ alias ipython=~/.local/bin/ipython
 cd Libraries
 
 git clone https://github.com/s4sarath/text.git
-
+cd text
+./oss_scripts/run_build.sh
 cd text/tensorflow_text/python/ops
 cp ~/Libraries/text/bazel-bin/tensorflow_text/python/ops/*.so .
 
@@ -42,3 +43,6 @@ export PYTHONPATH=$PYTHONPATH:/home/sidhu/Libraries/tf-transformers/src/
 ##### Download TFRecord and vocab from gsbucket
 cd Datasets
 gsutil -m cp -r "gs://tft_free/PRETRAIN_DATA/" .
+
+
+nohup python3 /path/to/test.py > output.log &

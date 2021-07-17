@@ -271,6 +271,7 @@ def train_and_eval(
     training_history = {}
     global_step = 0
     epoch_end = False
+    total_examples_processed = 0
     STEPS = steps_per_epoch // steps_per_call
     for epoch in range(1, epochs + 1):
         # start_epoch_time = time.time()
@@ -278,8 +279,11 @@ def train_and_eval(
             for step in tepoch:
                 steps_covered = (step + 1) * steps_per_call
                 global_step += steps_per_call
+                total_examples_processed += steps_per_call * GLOBAL_BATCH_SIZE
                 tepoch.set_description(
-                    "Epoch {}/{} --- Step {}/{} --- ".format(epoch, epochs, steps_covered, steps_per_epoch)
+                    "Epoch {}/{} --- Step {}/{} --- total examples {}".format(
+                        epoch, epochs, steps_covered, steps_per_epoch, total_examples_processed
+                    )
                 )
                 # Call Train
                 do_train(train_dataset_iter)

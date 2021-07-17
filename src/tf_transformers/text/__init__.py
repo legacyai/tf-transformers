@@ -5,6 +5,7 @@ from tf_transformers.text.decoder_utils import (
     top_k_logits,
     top_p_logits,
 )
+from tf_transformers.text.sentencepiece_layer import SentencepieceTokenizer
 from tf_transformers.text.text_decoder import TextDecoder
 from tf_transformers.text.text_decoder_model import TextDecoderModel
 from tf_transformers.text.text_decoder_seq2seq import TextDecoderSeq2Seq

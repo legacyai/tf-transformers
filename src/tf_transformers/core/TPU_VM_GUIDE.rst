@@ -72,3 +72,23 @@ git clone https://github.com/s4sarath/text.git
 
 
 gsutil -m cp -R "Your local directory" gs://Your bucket name
+
+
+gsutil -u tft-tpu -m cp 'gs://allennlp-tensorflow-datasets/c4/en/3.0.1/*' local_datasets_dir/c4/en/3.0.1/
+
+
+
+
+
+
+gcloud alpha compute tpus tpu-vm create tft-free-tpu-malayalam \
+  --zone=europe-west4-a \
+  --accelerator-type=v3-8 \
+  --version=v2-alpha
+
+  gcloud alpha compute tpus tpu-vm create tft-free-tpu-malayalam \
+  --zone=us-central1-f  \
+  --accelerator-type=v2-8 \
+  --version=v2-alpha
+
+  gcloud alpha compute tpus tpu-vm ssh tft-free-tpu-malayalam --zone us-central1-f --project tft-tpu

@@ -1,0 +1,7 @@
+
+data:
+  name: mc4
+  version: en
+  split: train
+  output_text_file: 'output.txt'
+  keys: text

@@ -54,24 +54,18 @@ def save_model_checkpoints(model, overwrite_checkpoint_dir, model_checkpoint_dir
     return manager
 
 
-def get_loss_metric_dict(model, dataset, loss_fn, validation_dataset, validation_loss_fn):
-    for (batch_inputs, batch_labels) in dataset.take(1):
-        model_outputs = model(batch_inputs)
-        train_loss_dict = loss_fn(batch_labels, model_outputs)
-        training_loss_dict_metric = {name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in train_loss_dict}
+def get_loss_metric_dict(training_loss_names, validation_loss_names):
 
+    training_loss_dict_metric = {name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in training_loss_names}
     training_loss_dict_metric["learning_rate"] = tf.keras.metrics.Mean(
         "learning_rate", dtype=tf.float32
     )  # We store learning rate here and reset after every global steps
 
     validation_loss_dict_metric = {}
-    if validation_dataset and validation_loss_fn:
-        for (batch_inputs, batch_labels) in dataset.take(1):
-            model_outputs = model(batch_inputs)
-            valid_loss_dict = validation_loss_fn(batch_labels, model_outputs)
-            validation_loss_dict_metric = {
-                name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in valid_loss_dict
-            }
+    if validation_loss_names:
+        validation_loss_dict_metric = {
+            name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in validation_loss_names
+        }
 
     return training_loss_dict_metric, validation_loss_dict_metric
 
@@ -126,9 +120,9 @@ def train_and_eval(
             checkpoint_manager.save()
             logging.info("Model saved at epoch {}".format(epoch))
 
-    @tf.function(experimental_relax_shapes=True)
+    # @tf.function(experimental_relax_shapes=True)
     def write_metrics(metric_dict, writer, step):
-        @tf.function
+        # @tf.function
         def _write(step):
             # other model code would go here
             with writer.as_default():
@@ -362,12 +356,6 @@ class Trainer:
 
         # Add keras utils threads
 
-    @property
-    def use_tpu(self):
-        if self.distribution_strategy:
-            return isinstance(self.distribution_strategy, tf.distribute.TPUStrategy)
-        return False
-
     def run(
         self,
         model_fn,
@@ -378,6 +366,8 @@ class Trainer:
         steps_per_epoch,
         model_checkpoint_dir,
         batch_size,
+        training_loss_names=None,
+        validation_loss_names=None,
         validation_dataset=None,
         validation_loss_fn=None,
         validation_interval_steps=None,
@@ -400,10 +390,7 @@ class Trainer:
         keras_utils.set_session_config(enable_xla=enable_xla)
         logging.info("Policy: ----> {}".format(keras_utils.get_policy_name()))
         logging.info("Strategy: ---> {}".format(self.distribution_strategy))
-        if self.use_tpu:
-            logging.info("Num TPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
-        else:
-            logging.info("Num GPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
+        logging.info("Num GPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
 
         # Under Strategy Scope
         with self.distribution_strategy.scope():
@@ -416,6 +403,16 @@ class Trainer:
             if not self.use_tpu:
                 optimizer = configure_optimizer(optimizer, use_float16=self.use_float16, loss_scale=self.loss_scale)
 
+        # We use this to avoid inferring names from loss functions
+        _training_loss_names = ['loss']
+        _validation_loss_names = ['loss']
+        if training_loss_names:
+            _training_loss_names += training_loss_names
+        if validation_loss_names:
+            _validation_loss_names += validation_loss_names
+        # Make unique names
+        training_loss_names = list(set(_training_loss_names))
+        validation_loss_names = list(set(_validation_loss_names))
         # Checkpoint manager
         checkpoint_manager = save_model_checkpoints(
             model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models
@@ -423,9 +420,8 @@ class Trainer:
 
         # Get metric dicts before distributing the dataset
         # ddistributed datasets has no attribute .take
-        logging.info("Inferring metric shapes . . . . .")
         training_loss_dict_metric, validation_loss_dict_metric = get_loss_metric_dict(
-            model, train_dataset, train_loss_fn, validation_dataset, validation_loss_fn
+            training_loss_names, validation_loss_names
         )
         # Distribute dataset
         if not repeat_dataset:

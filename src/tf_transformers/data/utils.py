@@ -73,7 +73,7 @@ def auto_batch(
             if len(v.shape.dims) == 1:
                 _padded_shapes[k] = [None]
             if len(v.shape.dims) == 0:
-                 _padded_shapes[k] = []
+                _padded_shapes[k] = []
             if len(v.shape.dims) > 1:
                 raise ValueError("Seems like `{}` has 2 dimensional or more".format(v))
 
@@ -195,3 +195,30 @@ def pad_ragged(dataset):
         else:
             dataset_padded[item] = tensor
     return dataset_padded
+
+
+def hf_dump_chars_to_textfile(file, dataset, data_keys, max_char=-1):
+    """Write part of a TFDS sentence dataset to lines in a text file.
+
+    Args:
+        dataset: tf.dataset containing string-data.
+        data_keys: what keys in dataset to dump from.
+        max_char: max character to dump to text file.
+
+    Returns:
+        name of temp file with dataset bytes, exact number of characters dumped.
+    """
+    import tqdm
+
+    line_count = 0
+    with open(file, "a+") as outfp:
+        char_count = 0
+        for example in tqdm.tqdm(dataset):
+            for k in data_keys:
+                line = example[k]
+                line = line + "\n"
+                char_count += len(line)
+                line_count += 1
+                outfp.write(line)
+
+    print("Total lines {}, chars {}".format(line_count, char_count))
