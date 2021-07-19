@@ -8,7 +8,7 @@ from transformers import T5Tokenizer
 
 from tf_transformers.core import TPUTrainer
 from tf_transformers.data import TFReader
-from tf_transformers.data.callbacks import MLMCallback
+from tf_transformers.data.callbacks.mlm_callback import MLMCallback
 from tf_transformers.data.processors.mlm import dynamic_masking_from_features
 from tf_transformers.losses import cross_entropy_loss
 from tf_transformers.optimization import create_optimizer
@@ -83,8 +83,10 @@ def get_dataset(
     train_dataset = train_dataset.shuffle(100)
     train_dataset = train_dataset.prefetch(100)
 
+    return train_dataset
 
-def get_model(vocab_size, model_kwargs):
+
+def get_model(vocab_size):
     """Model"""
 
     def model_fn():
@@ -196,7 +198,9 @@ def train(cfg):
     min_sen_len = cfg.data.min_sen_len
 
     # Train Dataset
+    tfrecord_path_list = cfg.data.tfrecord_path_list
     train_dataset = get_dataset(
+        tfrecord_path_list,
         max_seq_len,
         max_predictions_per_batch,
         vocab_size,
@@ -210,8 +214,7 @@ def train(cfg):
     )
 
     # Get Model
-    model_kwargs = cfg.model.model_kwargs
-    model_fn = get_model(vocab_size, model_kwargs)
+    model_fn = get_model(vocab_size)
 
     # Get Optimizer
     optimizer_fn = get_optimizer(
@@ -223,9 +226,9 @@ def train(cfg):
 
     # Get loss
     loss_fn = get_loss(cfg.model.loss.loss_type)
-    training_loss_names = cfg.model.loss.training_loss_names
-    # Get trainer
-    trainer = get_trainer(cfg.trainer.device_type, cfg.trainer.device_address, cfg.trainer.dtype)
+    training_loss_names = None
+    if cfg.model.loss.loss_type == 'joint':
+        training_loss_names = ['loss_{}'.format(i + 1) for i in range(12)]  # 12 num of hidden layers
 
     # Model params
     epochs = cfg.model.epochs
@@ -246,6 +249,9 @@ def train(cfg):
     tokenizer_hf = T5Tokenizer(**t5_kwargs)
     tokenizer_hf.unique_no_split_tokens = tokenizer_hf.all_special_tokens
     mlm_callback = MLMCallback(tokenizer_hf)
+
+    # Get trainer
+    trainer = get_trainer(cfg.trainer.device_type, cfg.trainer.device_address, cfg.trainer.dtype)
 
     trainer.run(
         model_fn=model_fn,

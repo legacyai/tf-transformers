@@ -2,7 +2,7 @@
 tokenizer:
   vocab_size: 32002
   cls_token: '[CLS]'
-  mask_token: '[MASK'
+  mask_token: '[MASK]'
   pad_token: '<pad>'
   sep_token: '</s>'
   unk_token: '<unk>'
@@ -14,7 +14,7 @@ data:
   max_predictions_per_batch: 20
   batch_size: 512
   min_sen_len:
-  tfrecord_path_list:
+  tfrecord_path_list: ['path1, path2']
 model:
   optimizer:
     learning_rate: 5e-5
@@ -26,8 +26,8 @@ model:
   epochs: 2
   steps_per_epoch: 200
   callback_steps: [100]
-
+  model_save_dir:
 trainer:
   device_type: tpu
-  address: local
+  device_address: local
   dtype: bf16

@@ -29,8 +29,8 @@ class MLMCallback:
         inputs = self.tokenizer(self.validation_sentences, padding=True, return_tensors="tf")
         inputs_tf = {}
         inputs_tf["input_ids"] = inputs["input_ids"]
-        inputs_tf["input_type_ids"] = inputs["token_type_ids"]
         inputs_tf["input_mask"] = inputs["attention_mask"]
+        inputs_tf["input_type_ids"] = tf.zeros_like(inputs_tf["input_ids"])
         if _use_masked_lm_positions:
             seq_length = tf.shape(inputs_tf['input_ids'])[1]
             inputs_tf['masked_lm_positions'] = tf.zeros_like(inputs_tf["input_ids"]) + tf.range(seq_length)
