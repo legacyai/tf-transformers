@@ -40,7 +40,7 @@ class MLMCallback:
     def __call__(self, trainer_params):
         """Main Call"""
         model = trainer_params['model']
-        if "use_masked_lm_positions" in model.input:
+        if "masked_lm_positions" in model.input:
             _use_masked_lm_positions = True
         else:
             _use_masked_lm_positions = False
