@@ -245,10 +245,11 @@ def train_and_eval(
         if not epoch_end:
             callback_scores = None
             if callbacks and callbacks_interval_steps:
-                logging.info("Callbacks in progress at step {} . . . .".format(global_step))
+                # each callback can have separate interval steps
                 callback_scores = []
                 for callback, callback_steps in zip(callbacks, callbacks_interval_steps):
                     if callback_steps and (global_step % callback_steps == 0):
+                        logging.info("Callbacks in progress at step {} . . . .".format(global_step))
                         score = callback(trainer_kwargs)
                         callback_scores.append(score)
                     else:

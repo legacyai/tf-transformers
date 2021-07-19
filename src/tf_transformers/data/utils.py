@@ -71,7 +71,7 @@ def auto_batch(
             _padded_shapes[k] = padded_shapes[k]
         else:
             if len(v.shape.dims) == 0:
-                _padded_shapes[k] = []
+                _padded_shapes[k] = [None]
             else:
                 _padded_shapes[k] = [None] * len(v.shape.dims)
 

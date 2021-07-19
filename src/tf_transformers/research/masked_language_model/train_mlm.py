@@ -76,7 +76,7 @@ def get_dataset(
 
     train_dataset = get_tfdataset_from_tfrecords(tfrecord_path_list)
     if min_sen_len and min_sen_len > 0:
-        train_dataset = train_dataset.filter(lambda x: filter_by_batch(x, min_sen_len))
+        train_dataset = train_dataset.filter(lambda x: filter_by_length(x, min_sen_len))
     train_dataset = train_dataset.apply(tf.data.experimental.dense_to_ragged_batch(batch_size=batch_size))
     train_dataset = train_dataset.map(dynamic_mlm_fn, num_parallel_calls=tf.data.AUTOTUNE)
     train_dataset = train_dataset.filter(lambda x, y: filter_by_batch(x, y, batch_size))

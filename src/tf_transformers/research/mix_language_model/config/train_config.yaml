@@ -1,0 +1,33 @@
+
+tokenizer:
+  vocab_size: 32002
+  cls_token: '[CLS]'
+  mask_token: '[MASK]'
+  pad_token: '<pad>'
+  sep_token: '</s>'
+  unk_token: '<unk>'
+  model_file_path: 'new_spiece.model'
+  do_lower_case: false
+  special_tokens: ['[CLS]', '[MASK]', '</s>', '<unk>', '<pad>']
+data:
+  max_seq_len: 128
+  max_predictions_per_batch: 20
+  batch_size: 512
+  min_sen_len:
+  tfrecord_path_list: ['path1, path2']
+model:
+  optimizer:
+    learning_rate: 5e-5
+    train_steps: 2000000
+    warmup_steps: 60000
+    optimizer_type: adamw
+  loss:
+    loss_type: joint
+  epochs: 2
+  steps_per_epoch: 200
+  callback_steps: [100]
+  model_save_dir:
+trainer:
+  device_type: tpu
+  device_address: local
+  dtype: bf16

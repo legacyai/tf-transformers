@@ -47,7 +47,7 @@ class MLMCallback:
         inputs_tf = self.get_inputs(_use_masked_lm_positions)
         outputs_tf = model(inputs_tf)
 
-        if "all_layer_token_logits" in model.input:
+        if "all_layer_token_logits" in model.output:
             # Get masked positions from each sentence
             masked_positions = tf.argmax(tf.equal(inputs_tf["input_ids"], self.tokenizer.mask_token_id), axis=1)
             for layer_count, layer_logits in enumerate(outputs_tf['all_layer_token_logits']):
