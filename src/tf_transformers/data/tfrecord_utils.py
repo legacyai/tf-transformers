@@ -426,12 +426,10 @@ class TFReader(object):
             if k in padded_shapes:
                 _padded_shapes[k] = padded_shapes[k]
             else:
-                if len(v.shape.dims) == 1:
-                    _padded_shapes[k] = [None]
                 if len(v.shape.dims) == 0:
                     _padded_shapes[k] = []
-                if len(v.shape.dims) > 1:
-                    raise ValueError("Seems like `{}` has 2 dimensional or more".format(v))
+                else:
+                    _padded_shapes[k] = [None] * len(v.shape.dims)
 
         dataset = tf_dataset.padded_batch(
             padding_values=_padded_values,

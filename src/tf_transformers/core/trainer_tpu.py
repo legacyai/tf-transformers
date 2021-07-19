@@ -365,7 +365,7 @@ class TPUTrainer:
         overwrite_checkpoint_dir=False,
         max_number_of_models=10,
         model_save_interval_steps=None,
-        repeat_dataset=False,
+        repeat_dataset=True,
     ):
 
         if steps_per_epoch:

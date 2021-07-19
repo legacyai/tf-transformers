@@ -92,3 +92,15 @@ gcloud alpha compute tpus tpu-vm create tft-free-tpu-malayalam \
   --version=v2-alpha
 
   gcloud alpha compute tpus tpu-vm ssh tft-free-tpu-malayalam --zone us-central1-f --project tft-tpu
+
+
+  gcloud alpha compute tpus tpu-vm create tft-free-tpu2 \
+  --zone=europe-west4-a \
+  --accelerator-type=v3-8 \
+  --version=v2-alpha
+
+
+
+  gcloud alpha compute tpus tpu-vm ssh tft-free-tpu-2 --zone europe-west4-a --project tft-tpu
+
+  python3 1_data_to_text.py data.name=bookcorpus data.version= data.output_text_file=/home/Sidhu/datasets/bookcorpus.txt

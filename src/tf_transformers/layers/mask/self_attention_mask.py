@@ -37,6 +37,15 @@ class SelfAttentionMask(tf.keras.layers.Layer):
     """
 
     def call(self, inputs):
+        """
+
+        Args:
+            inputs : List of ([embeddings, input_mask])
+              embeddings: 3D (b x s x h)
+              input_mask: 2D (b x s)
+        Returns:
+            Tensor: (b x from_seq_length x to_seq_length)
+        """
         from_tensor = inputs[0]
         to_mask = inputs[1]
         from_shape = tf_utils.get_shape_list(from_tensor, expected_rank=[2, 3])
