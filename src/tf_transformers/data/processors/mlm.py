@@ -1,9 +1,6 @@
 import tensorflow as tf
 import tensorflow_text as tf_text
 
-from tf_transformers.layers.mask import prefix_mask
-from tf_transformers.utils import tf_utils
-
 
 def dynamic_masking_from_features(
     max_seq_len, max_predictions_per_batch, vocab_size, cls_id, sep_id, unk_id, pad_id, mask_id
@@ -97,11 +94,10 @@ def dynamic_prefix_lm_from_features(max_seq_len, cls_id, sep_id):
 
         # input type ids
         input_type_ids = tf.zeros_like(input_ids)
-        mask = prefix_mask(input_mask)
+
         inputs = {
             'input_ids': input_ids,
             'input_type_ids': input_type_ids,
-            '3d_mask': mask,
             'input_mask': input_mask,
             'masked_lm_positions': tf.range(tf.shape(input_ids)[0]),
         }
@@ -115,32 +111,6 @@ def dynamic_prefix_lm_from_features(max_seq_len, cls_id, sep_id):
 def dynamic_causal_lm_from_features(max_seq_len, cls_id, sep_id):
     """Causal LM"""
 
-    def attention_mask_square(nd):
-        """1's in the lower triangle, counting from the lower right corner.
-
-        Same as tf.matrix_band_part(tf.ones([nd, ns]), -1, ns-nd), but doesn't produce garbage on TPUs.
-        """
-        dtype = tf_utils.get_dtype()
-        ns = nd
-        i = tf.range(nd)[:, None]
-        j = tf.range(ns)
-        m = i >= j - ns + nd
-        return tf.cast(m, dtype)
-
-    def mask_causal_mask(input_ids):
-        input_ids = tf.expand_dims(input_ids, 0)
-        from_shape = tf_utils.get_shape_list(input_ids, expected_rank=[2, 3])
-        batch_size = from_shape[0]
-        from_seq_length = from_shape[1]
-
-        # 2D Lower Triangular Mask
-        from_mask = attention_mask_square(from_seq_length)
-
-        # Replicate 2D `N` times
-        mask = tf.cast(tf.ones([batch_size, 1, 1]), from_mask.dtype) * from_mask
-
-        return tf.cast(tf.squeeze(mask, axis=0), tf.float32)
-
     def dynamic_map_causal(item):
         input_ids = item['input_ids']
         input_ids = input_ids[: max_seq_len - 1]  # we need -2 for cls and sep, but in causal LM we shift one pos
@@ -153,12 +123,10 @@ def dynamic_causal_lm_from_features(max_seq_len, cls_id, sep_id):
         input_mask = labels_mask
         # input type ids
         input_type_ids = tf.zeros_like(input_ids)
-        mask = mask_causal_mask(input_ids)
 
         inputs = {
             'input_ids': input_ids,
             'input_type_ids': input_type_ids,
-            '3d_mask': mask,
             'input_mask': input_mask,
             'masked_lm_positions': tf.range(tf.shape(input_ids)[0]),
         }

@@ -283,7 +283,6 @@ def train_and_eval(
             for step in tepoch:
                 steps_covered = (step + 1) * steps_per_call
                 global_step += steps_per_call
-                total_examples_processed += steps_per_call * GLOBAL_BATCH_SIZE
                 tepoch.set_description(
                     "Epoch {}/{} --- Step {}/{} --- total examples {}".format(
                         epoch, epochs, steps_covered, steps_per_epoch, total_examples_processed
@@ -291,6 +290,7 @@ def train_and_eval(
                 )
                 # Call Train
                 do_train(train_dataset_iter)
+                total_examples_processed += steps_per_call * GLOBAL_BATCH_SIZE
 
                 # Call Validation
                 do_validation(validation_dataset_distributed)

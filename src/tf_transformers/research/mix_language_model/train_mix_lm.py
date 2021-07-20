@@ -15,6 +15,7 @@ from tf_transformers.data.processors.mlm import (
     dynamic_prefix_lm_from_features,
 )
 from tf_transformers.data.utils import auto_batch
+from tf_transformers.layers.mask import prefix_mask
 from tf_transformers.losses import cross_entropy_loss
 from tf_transformers.optimization import create_optimizer
 from tf_transformers.text import SentencepieceTokenizer
@@ -62,11 +63,11 @@ def get_dataset(
 
     def filter_by_length(x, min_sen_len):
         """Filter by minimum sentence length (subwords)"""
-        return tf.squeeze(tf.greater_equal(tf.shape(x['input_ids']), tf.constant(min_sen_len)), axis=0)
+        return tf.squeeze(tf.greater_equal(tf.shape(x["input_ids"]), tf.constant(min_sen_len)), axis=0)
 
     def filter_by_batch(x, y, batch_size):
         """Filter by batch size"""
-        x_batch = tf.shape(x['input_ids'])[0]
+        x_batch = tf.shape(x["input_ids"])[0]
         return tf.equal(x_batch, tf.constant(batch_size))
 
     def prepare_3d_input_mask_mlm(input_mask):
@@ -80,6 +81,32 @@ def get_dataset(
         mask = broadcast_ones * to_mask
 
         return tf.cast(mask, tf.float32)
+
+    def attention_mask_square(nd):
+        """1's in the lower triangle, counting from the lower right corner.
+
+        Same as tf.matrix_band_part(tf.ones([nd, ns]), -1, ns-nd), but doesn't produce garbage on TPUs.
+        """
+        dtype = tf_utils.get_dtype()
+        ns = nd
+        i = tf.range(nd)[:, None]
+        j = tf.range(ns)
+        m = i >= j - ns + nd
+        return tf.cast(m, dtype)
+
+    def mask_causal_mask(input_ids):
+        input_ids = tf.expand_dims(input_ids, 0)
+        from_shape = tf_utils.get_shape_list(input_ids, expected_rank=[2, 3])
+        batch_size = from_shape[0]
+        from_seq_length = from_shape[1]
+
+        # 2D Lower Triangular Mask
+        from_mask = attention_mask_square(from_seq_length)
+
+        # Replicate 2D `N` times
+        mask = tf.cast(tf.ones([batch_size, 1, 1]), from_mask.dtype) * from_mask
+
+        return tf.cast(tf.squeeze(mask, axis=0), tf.float32)
 
     # Dynamic MLM
     dynamic_mlm_fn = dynamic_masking_from_features(
@@ -111,28 +138,95 @@ def get_dataset(
 
         def add_mark(x, mode, prob):
             """Check are we getting all if conditions with equal probability"""
-            x['mode'] = [mode]
-            x['prob'] = [prob]
+            x["mode"] = [mode]
+            x["prob"] = [prob]
             return x
 
         def map_mlm(x):
             """MLM"""
-            x['input_ids'] = tf.RaggedTensor.from_tensor(tf.expand_dims(x['input_ids'], axis=0))
+            x["input_ids"] = tf.RaggedTensor.from_tensor(tf.expand_dims(x["input_ids"], axis=0))
             x_copy, y_copy = dynamic_mlm_fn(x)
+
+            # Pad to max length
+            # Only masked lm positions needs to padded
+            length_to_fill = max_seq_len - max_predictions_per_batch
+
+            x_copy["masked_lm_positions"] = tf.concat(
+                [
+                    x_copy["masked_lm_positions"],
+                    tf.zeros(
+                        shape=(1, length_to_fill),
+                        dtype=x_copy["masked_lm_positions"].dtype,
+                    ),
+                ],
+                axis=1,
+            )
+            y_copy["masked_lm_labels"] = tf.concat(
+                [
+                    y_copy["masked_lm_labels"],
+                    tf.zeros(
+                        shape=(1, length_to_fill),
+                        dtype=y_copy["masked_lm_labels"].dtype,
+                    ),
+                ],
+                axis=1,
+            )
+            y_copy["masked_lm_weights"] = tf.concat(
+                [
+                    y_copy["masked_lm_weights"],
+                    tf.zeros(
+                        shape=(1, length_to_fill),
+                        dtype=y_copy["masked_lm_weights"].dtype,
+                    ),
+                ],
+                axis=1,
+            )
+
+            # Squeeze
             x = {}
             for name, v_tensor in x_copy.items():
                 x[name] = tf.squeeze(v_tensor, axis=0)
-            y = {}
             for name, v_tensor in y_copy.items():
-                y[name] = tf.squeeze(v_tensor, axis=0)
-            x['3d_mask'] = tf.squeeze(prepare_3d_input_mask_mlm(x_copy['input_mask']), axis=0)
-            for name, v_tensor in y.items():
-                x[name] = v_tensor
+                x[name] = tf.squeeze(v_tensor, axis=0)
+            x["3d_mask"] = tf.squeeze(prepare_3d_input_mask_mlm(x_copy["input_mask"]), axis=0)
+
             return x
 
         def map_pcmlm(x):
             """Prefix Causal LM"""
             x, y = dynamic_prefix_lm(x)
+
+            # pad
+            length_to_fill = max_seq_len - tf.shape(x["input_ids"])[0]
+            for name in [
+                "input_ids",
+                "input_type_ids",
+                "input_mask",
+                "masked_lm_positions",
+                "masked_lm_labels",
+                "masked_lm_weights",
+            ]:
+                if name in x:
+                    x[name] = tf.concat(
+                        [
+                            x[name],
+                            tf.zeros(shape=(length_to_fill,), dtype=x[name].dtype),
+                        ],
+                        axis=0,
+                    )
+                    continue
+                if name in y:
+                    y[name] = tf.concat(
+                        [
+                            y[name],
+                            tf.zeros(shape=(length_to_fill,), dtype=y[name].dtype),
+                        ],
+                        axis=0,
+                    )
+                    continue
+
+            # Add mask
+            x["3d_mask"] = prefix_mask(x["input_mask"])
             for name, v_tensor in y.items():
                 x[name] = v_tensor
             return x
@@ -140,6 +234,37 @@ def get_dataset(
         def map_cmlm(x):
             """Causal LM"""
             x, y = dynamic_causal_lm(x)
+
+            # pad
+            length_to_fill = max_seq_len - tf.shape(x["input_ids"])[0]
+            for name in [
+                "input_ids",
+                "input_type_ids",
+                "input_mask",
+                "masked_lm_positions",
+                "masked_lm_labels",
+                "masked_lm_weights",
+            ]:
+                if name in x:
+                    x[name] = tf.concat(
+                        [
+                            x[name],
+                            tf.zeros(shape=(length_to_fill,), dtype=x[name].dtype),
+                        ],
+                        axis=0,
+                    )
+                    continue
+                if name in y:
+                    y[name] = tf.concat(
+                        [
+                            y[name],
+                            tf.zeros(shape=(length_to_fill,), dtype=y[name].dtype),
+                        ],
+                        axis=0,
+                    )
+                    continue
+
+            x["3d_mask"] = mask_causal_mask(x["input_ids"])
             for name, v_tensor in y.items():
                 x[name] = v_tensor
             return x
@@ -147,30 +272,28 @@ def get_dataset(
         prob = tf.random.uniform(shape=())
         # Keep a copy like this importatnt
         # otherwise transformation in first if cond might affect other
-        input_ids = item['input_ids']
+        input_ids = item["input_ids"]
 
         # Do MLM
         if prob <= 0.33:
             x = map_mlm(item)
-            x['masked_lm_positions'] = tf.cast(x['masked_lm_positions'], dtype=tf.int32)
-            x['masked_lm_weights'] = tf.cast(x['masked_lm_weights'], dtype=tf.int32)
-            x['input_mask'] = x['3d_mask']
-            del x['3d_mask']
+            x["masked_lm_positions"] = tf.cast(x["masked_lm_positions"], dtype=tf.int32)
+            x["masked_lm_weights"] = tf.cast(x["masked_lm_weights"], dtype=tf.int32)
+            x["input_mask"] = x["3d_mask"]
+            del x["3d_mask"]
             # x = add_mark(x, "mlm", prob)
 
         # Prefix CLM
         elif prob < 0.66:
             x = map_pcmlm({"input_ids": input_ids})
-            del x['input_mask']
-            x['input_mask'] = x['3d_mask']
-            del x['3d_mask']
+            x["input_mask"] = x["3d_mask"]
+            del x["3d_mask"]
             # x = add_mark(x, "prefix", prob)
-        # Causal LM
+
         else:
             x = map_cmlm({"input_ids": input_ids})
-            del x['input_mask']
-            x['input_mask'] = x['3d_mask']
-            del x['3d_mask']
+            x["input_mask"] = x["3d_mask"]
+            del x["3d_mask"]
             # x = add_mark(x, "causal", prob)
         return x
 
@@ -178,18 +301,16 @@ def get_dataset(
     train_dataset = auto_batch(
         train_dataset,
         batch_size,
-        x_keys=['input_ids', 'input_type_ids', 'input_mask', 'masked_lm_positions'],
-        y_keys=['masked_lm_labels', 'masked_lm_weights'],
+        x_keys=["input_ids", "input_type_ids", "input_mask", "masked_lm_positions"],
+        y_keys=["masked_lm_labels", "masked_lm_weights"],
         shuffle=True,
     )
     train_dataset = train_dataset.filter(lambda x, y: filter_by_batch(x, y, batch_size))
-    train_dataset = train_dataset.shuffle(100)
-    train_dataset = train_dataset.prefetch(100)
 
     return train_dataset
 
 
-def get_model(vocab_size):
+def get_model(vocab_size, batch_size):
     """Model"""
 
     def model_fn():
@@ -379,7 +500,12 @@ def get_model(vocab_size):
                 return result
 
         model = MixEncoder(
-            config, is_training=True, use_dropout=True, use_masked_lm_positions=True, return_all_layer_outputs=False
+            config,
+            batch_size=batch_size,
+            is_training=True,
+            use_dropout=True,
+            use_masked_lm_positions=True,
+            return_all_layer_outputs=False,
         )
         model = model.get_model()
 
@@ -486,7 +612,7 @@ def train(cfg):
     )
 
     # Get Model
-    model_fn = get_model(vocab_size)
+    model_fn = get_model(vocab_size, batch_size)
 
     # Get Optimizer
     optimizer_fn = get_optimizer(
