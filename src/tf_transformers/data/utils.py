@@ -159,7 +159,7 @@ def pad_dataset_normal(tokenizer_fn):
     return pad_fn
 
 
-def separate_x_y(dict, x_keys, y_keys):
+def separate_x_y(item, x_keys, y_keys):
     """Separate dataset into a tuple (X, Y)
 
     Args:
@@ -172,7 +172,7 @@ def separate_x_y(dict, x_keys, y_keys):
     """
     X = {}
     Y = {}
-    for k, v in dict.items():
+    for k, v in item.items():
         if k in x_keys:
             X[k] = v
             continue

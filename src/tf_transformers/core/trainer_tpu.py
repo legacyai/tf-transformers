@@ -153,6 +153,9 @@ def train_and_eval(
             with tf.GradientTape() as tape:
                 model_outputs = model(batch_inputs)
                 loss = compute_loss(batch_labels, model_outputs)
+
+                tf.debugging.check_numerics(loss['loss'], message='Loss value is either NaN or inf')
+
                 # TODO
                 # Scales down the loss for gradients to be invariant from replicas.
                 # loss = loss / strategy.num_replicas_in_sync

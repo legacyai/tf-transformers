@@ -111,8 +111,8 @@ def get_dataset(
 
         def add_mark(x, mode, prob):
             """Check are we getting all if conditions with equal probability"""
-            x['mode'] = mode
-            x['prob'] = prob
+            x['mode'] = [mode]
+            x['prob'] = [prob]
             return x
 
         def map_mlm(x):
@@ -126,7 +126,6 @@ def get_dataset(
             for name, v_tensor in y_copy.items():
                 y[name] = tf.squeeze(v_tensor, axis=0)
             x['3d_mask'] = tf.squeeze(prepare_3d_input_mask_mlm(x_copy['input_mask']), axis=0)
-
             for name, v_tensor in y.items():
                 x[name] = v_tensor
             return x
@@ -155,27 +154,32 @@ def get_dataset(
             x = map_mlm(item)
             x['masked_lm_positions'] = tf.cast(x['masked_lm_positions'], dtype=tf.int32)
             x['masked_lm_weights'] = tf.cast(x['masked_lm_weights'], dtype=tf.int32)
-            del x['input_mask']
-            x = add_mark(x, "mlm", prob)
+            x['input_mask'] = x['3d_mask']
+            del x['3d_mask']
+            # x = add_mark(x, "mlm", prob)
 
         # Prefix CLM
         elif prob < 0.66:
             x = map_pcmlm({"input_ids": input_ids})
             del x['input_mask']
-            x = add_mark(x, "prefix", prob)
+            x['input_mask'] = x['3d_mask']
+            del x['3d_mask']
+            # x = add_mark(x, "prefix", prob)
         # Causal LM
         else:
             x = map_cmlm({"input_ids": input_ids})
             del x['input_mask']
-            x = add_mark(x, "causal", prob)
+            x['input_mask'] = x['3d_mask']
+            del x['3d_mask']
+            # x = add_mark(x, "causal", prob)
         return x
 
     train_dataset = train_dataset.map(get_dataset_based_on_prob, num_parallel_calls=tf.data.AUTOTUNE)
     train_dataset = auto_batch(
         train_dataset,
         batch_size,
-        x_keys=['input_ids', 'input_type_ids', '3d_mask', 'masked_lm_positions'],
-        y_keys=['masked_lm_labels', 'masked_lm_weights', 'mode', 'prob'],
+        x_keys=['input_ids', 'input_type_ids', 'input_mask', 'masked_lm_positions'],
+        y_keys=['masked_lm_labels', 'masked_lm_weights'],
         shuffle=True,
     )
     train_dataset = train_dataset.filter(lambda x, y: filter_by_batch(x, y, batch_size))
@@ -375,7 +379,7 @@ def get_model(vocab_size):
                 return result
 
         model = MixEncoder(
-            config, is_training=True, use_dropout=True, use_masked_lm_positions=True, return_all_layer_outputs=True
+            config, is_training=True, use_dropout=True, use_masked_lm_positions=True, return_all_layer_outputs=False
         )
         model = model.get_model()
 
@@ -402,7 +406,7 @@ def get_optimizer(learning_rate, train_steps, warmup_steps, optimizer_type):
 
 def get_loss(loss_type):
 
-    if loss_type == 'joint':
+    if loss_type and loss_type == 'joint':
 
         def lm_loss(y_true_dict, y_pred_dict):
             """Joint loss over all layers"""

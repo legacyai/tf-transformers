@@ -163,6 +163,7 @@ def train_and_eval(
             with tf.GradientTape() as tape:
                 model_outputs = model(batch_inputs)
                 loss = compute_loss(batch_labels, model_outputs)
+                tf.debugging.check_numerics(loss['loss'], message='Loss value is either NaN or inf')
                 if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
                     loss_scaled = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
                 # TODO

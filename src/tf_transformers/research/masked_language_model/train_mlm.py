@@ -134,7 +134,7 @@ def get_optimizer(learning_rate, train_steps, warmup_steps, optimizer_type):
 
 def get_loss(loss_type):
 
-    if loss_type == 'joint':
+    if loss_type and loss_type == 'joint':
 
         def lm_loss(y_true_dict, y_pred_dict):
             """Joint loss over all layers"""

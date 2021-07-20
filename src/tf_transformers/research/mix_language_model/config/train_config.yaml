@@ -12,17 +12,17 @@ tokenizer:
 data:
   max_seq_len: 128
   max_predictions_per_batch: 20
-  batch_size: 512
+  batch_size: 2048
   min_sen_len:
   tfrecord_path_list: ['path1, path2']
 model:
   optimizer:
-    learning_rate: 5e-5
+    learning_rate: 1e-4
     train_steps: 2000000
     warmup_steps: 60000
     optimizer_type: adamw
   loss:
-    loss_type: joint
+    loss_type:
   epochs: 2
   steps_per_epoch: 200
   callback_steps: [100]
