@@ -100,6 +100,7 @@ gcloud alpha compute tpus tpu-vm create tft-free-tpu-malayalam \
   --version=v2-alpha
 
 
+  gcloud alpha compute tpus tpu-vm ssh tft-free-tpu --zone europe-west4-a --project tft-tpu
 
   gcloud alpha compute tpus tpu-vm ssh tft-free-tpu2 --zone europe-west4-a --project tft-tpu
 

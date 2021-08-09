@@ -213,8 +213,9 @@ def hf_dump_chars_to_textfile(file, dataset, data_keys, max_char=-1):
         char_count = 0
         for example in tqdm.tqdm(dataset):
             for k in data_keys:
-                line = example[k]
-                line = line + "\n"
+                article = example[k]
+                article = ' '.join(article.split("\n")).replace("\n", " ")
+                line = article + "\n"
                 char_count += len(line)
                 line_count += 1
                 outfp.write(line)

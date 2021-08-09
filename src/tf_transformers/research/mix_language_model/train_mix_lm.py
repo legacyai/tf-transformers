@@ -8,13 +8,12 @@ from transformers import T5Tokenizer
 
 from tf_transformers.core import TPUTrainer
 from tf_transformers.data import TFReader
-from tf_transformers.data.callbacks.mlm_callback import MLMCallback
 from tf_transformers.data.processors.mlm import (
     dynamic_causal_lm_from_features,
     dynamic_masking_from_features,
     dynamic_prefix_lm_from_features,
 )
-from tf_transformers.data.utils import auto_batch
+from tf_transformers.data.utils import separate_x_y
 from tf_transformers.layers.mask import prefix_mask
 from tf_transformers.losses import cross_entropy_loss
 from tf_transformers.optimization import create_optimizer
@@ -146,42 +145,6 @@ def get_dataset(
             """MLM"""
             x["input_ids"] = tf.RaggedTensor.from_tensor(tf.expand_dims(x["input_ids"], axis=0))
             x_copy, y_copy = dynamic_mlm_fn(x)
-
-            # Pad to max length
-            # Only masked lm positions needs to padded
-            length_to_fill = max_seq_len - max_predictions_per_batch
-
-            x_copy["masked_lm_positions"] = tf.concat(
-                [
-                    x_copy["masked_lm_positions"],
-                    tf.zeros(
-                        shape=(1, length_to_fill),
-                        dtype=x_copy["masked_lm_positions"].dtype,
-                    ),
-                ],
-                axis=1,
-            )
-            y_copy["masked_lm_labels"] = tf.concat(
-                [
-                    y_copy["masked_lm_labels"],
-                    tf.zeros(
-                        shape=(1, length_to_fill),
-                        dtype=y_copy["masked_lm_labels"].dtype,
-                    ),
-                ],
-                axis=1,
-            )
-            y_copy["masked_lm_weights"] = tf.concat(
-                [
-                    y_copy["masked_lm_weights"],
-                    tf.zeros(
-                        shape=(1, length_to_fill),
-                        dtype=y_copy["masked_lm_weights"].dtype,
-                    ),
-                ],
-                axis=1,
-            )
-
             # Squeeze
             x = {}
             for name, v_tensor in x_copy.items():
@@ -195,38 +158,7 @@ def get_dataset(
         def map_pcmlm(x):
             """Prefix Causal LM"""
             x, y = dynamic_prefix_lm(x)
-
-            # pad
-            length_to_fill = max_seq_len - tf.shape(x["input_ids"])[0]
-            for name in [
-                "input_ids",
-                "input_type_ids",
-                "input_mask",
-                "masked_lm_positions",
-                "masked_lm_labels",
-                "masked_lm_weights",
-            ]:
-                if name in x:
-                    x[name] = tf.concat(
-                        [
-                            x[name],
-                            tf.zeros(shape=(length_to_fill,), dtype=x[name].dtype),
-                        ],
-                        axis=0,
-                    )
-                    continue
-                if name in y:
-                    y[name] = tf.concat(
-                        [
-                            y[name],
-                            tf.zeros(shape=(length_to_fill,), dtype=y[name].dtype),
-                        ],
-                        axis=0,
-                    )
-                    continue
-
-            # Add mask
-            x["3d_mask"] = prefix_mask(x["input_mask"])
+            x["3d_mask"] = prefix_mask(tf.expand_dims(x["input_mask"], axis=0))
             for name, v_tensor in y.items():
                 x[name] = v_tensor
             return x
@@ -234,37 +166,7 @@ def get_dataset(
         def map_cmlm(x):
             """Causal LM"""
             x, y = dynamic_causal_lm(x)
-
-            # pad
-            length_to_fill = max_seq_len - tf.shape(x["input_ids"])[0]
-            for name in [
-                "input_ids",
-                "input_type_ids",
-                "input_mask",
-                "masked_lm_positions",
-                "masked_lm_labels",
-                "masked_lm_weights",
-            ]:
-                if name in x:
-                    x[name] = tf.concat(
-                        [
-                            x[name],
-                            tf.zeros(shape=(length_to_fill,), dtype=x[name].dtype),
-                        ],
-                        axis=0,
-                    )
-                    continue
-                if name in y:
-                    y[name] = tf.concat(
-                        [
-                            y[name],
-                            tf.zeros(shape=(length_to_fill,), dtype=y[name].dtype),
-                        ],
-                        axis=0,
-                    )
-                    continue
-
-            x["3d_mask"] = mask_causal_mask(x["input_ids"])
+            x["3d_mask"] = mask_causal_mask(x["input_mask"])
             for name, v_tensor in y.items():
                 x[name] = v_tensor
             return x
@@ -277,36 +179,50 @@ def get_dataset(
         # Do MLM
         if prob <= 0.33:
             x = map_mlm(item)
+            # Cast
             x["masked_lm_positions"] = tf.cast(x["masked_lm_positions"], dtype=tf.int32)
             x["masked_lm_weights"] = tf.cast(x["masked_lm_weights"], dtype=tf.int32)
-            x["input_mask"] = x["3d_mask"]
+            x["input_mask"] = tf.cast(x["3d_mask"], tf.int32)
             del x["3d_mask"]
             # x = add_mark(x, "mlm", prob)
 
         # Prefix CLM
         elif prob < 0.66:
             x = map_pcmlm({"input_ids": input_ids})
-            x["input_mask"] = x["3d_mask"]
+            x["input_mask"] = tf.cast(x["3d_mask"], tf.int32)
             del x["3d_mask"]
             # x = add_mark(x, "prefix", prob)
 
         else:
             x = map_cmlm({"input_ids": input_ids})
-            x["input_mask"] = x["3d_mask"]
+            x["input_mask"] = tf.cast(x["3d_mask"], tf.int32)
             del x["3d_mask"]
             # x = add_mark(x, "causal", prob)
         return x
 
     train_dataset = train_dataset.map(get_dataset_based_on_prob, num_parallel_calls=tf.data.AUTOTUNE)
-    train_dataset = auto_batch(
-        train_dataset,
-        batch_size,
-        x_keys=["input_ids", "input_type_ids", "input_mask", "masked_lm_positions"],
-        y_keys=["masked_lm_labels", "masked_lm_weights"],
-        shuffle=True,
-    )
-    train_dataset = train_dataset.filter(lambda x, y: filter_by_batch(x, y, batch_size))
+    _padded_shapes = {
+        'input_ids': [max_seq_len],
+        'input_type_ids': [max_seq_len],
+        'input_mask': [max_seq_len, max_seq_len],
+        'masked_lm_positions': [max_seq_len],
+        'masked_lm_labels': [max_seq_len],
+        'masked_lm_weights': [max_seq_len],
+    }
 
+    train_dataset = train_dataset.padded_batch(batch_size, padded_shapes=_padded_shapes)
+    x_keys = ['input_ids', 'input_type_ids', 'input_mask', 'masked_lm_positions']
+    y_keys = ['masked_lm_labels', 'masked_lm_weights']
+    train_dataset = train_dataset.map(lambda x: separate_x_y(x, x_keys, y_keys))
+    # train_dataset = auto_batch(
+    #     train_dataset,
+    #     batch_size,
+    #     x_keys=["input_ids", "input_type_ids", "input_mask", "masked_lm_positions"],
+    #     y_keys=["masked_lm_labels", "masked_lm_weights"],
+    #     shuffle=True,
+    # )
+    train_dataset = train_dataset.filter(lambda x, y: filter_by_batch(x, y, batch_size))
+    train_dataset = train_dataset.prefetch(tf.data.AUTOTUNE)
     return train_dataset
 
 
@@ -354,7 +270,7 @@ def get_model(vocab_size, batch_size):
                 input_mask = tf.keras.layers.Input(
                     shape=(self._sequence_length, self._sequence_length),
                     batch_size=self._batch_size,
-                    dtype=tf.float32,
+                    dtype=tf.int32,
                     name="input_mask",
                 )
                 input_type_ids = tf.keras.layers.Input(
@@ -632,7 +548,7 @@ def train(cfg):
     epochs = cfg.model.epochs
     steps_per_epoch = cfg.model.steps_per_epoch
     model_save_dir = cfg.model.model_save_dir
-    callback_steps = cfg.model.callback_steps
+    # callback_steps = cfg.model.callback_steps
 
     # Set callback
     # To use new sentencepiece model in T5 use like this
@@ -646,7 +562,7 @@ def train(cfg):
     }
     tokenizer_hf = T5Tokenizer(**t5_kwargs)
     tokenizer_hf.unique_no_split_tokens = tokenizer_hf.all_special_tokens
-    mlm_callback = MLMCallback(tokenizer_hf)
+    # mlm_callback = MLMCallback(tokenizer_hf)
 
     # Get trainer
     trainer = get_trainer(cfg.trainer.device_type, cfg.trainer.device_address, cfg.trainer.dtype)
@@ -667,8 +583,8 @@ def train(cfg):
         validation_interval_steps=None,
         steps_per_call=100,
         enable_xla=False,
-        callbacks=[mlm_callback],
-        callbacks_interval_steps=callback_steps,
+        callbacks=None,
+        callbacks_interval_steps=None,
         overwrite_checkpoint_dir=True,
         max_number_of_models=10,
         model_save_interval_steps=None,
