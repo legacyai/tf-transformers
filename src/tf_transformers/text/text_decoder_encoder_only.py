@@ -14,12 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Text Auto Regressive Decoder for Tensorflow Model and saved_model. This uses while loop
-This is Serializable as saved_model"""
+"""Text Auto Regressive Decoder for Tensorflow Model and saved_model"""
 import numpy as np
 import tensorflow as tf
 
-from tf_transformers.core import LegacyModel
 from tf_transformers.text import (
     _gather_beams,
     _log_prob_from_logits,
@@ -29,130 +27,118 @@ from tf_transformers.text import (
 from tf_transformers.utils import tf_utils
 
 
-class TextDecoderModel(tf.keras.layers.Layer):
-    """TextDecoderSerializable - This class is responsible for
-    saving the model along with decoding
-    operation as a saved_model, which makes deployment in production easier.
-    """
+class TextDecoderEncoderOnly(object):
+    """Decoder class"""
 
     def __init__(
         self,
         model,
-        mode,
-        max_iterations,
-        batch_size=None,
-        sequence_length=None,
-        max_sequence_length=None,
-        temperature=1.0,
-        alpha=0.0,
-        num_beams=1,
-        eos_id=-100,
-        do_sample=False,
-        top_k=0,
-        top_p=0,
-        num_return_sequences=1,
+        input_mask_ids=-1,
         input_type_ids=-1,
-        input_mask_ids=1,
     ):
-        """
+        """TextDecoder for Encoder Only Models like GPT2, BERT, Roberta etc
 
         Args:
-            model ([tf.keras.Model / tf.keras.Layer]): [The model with which decoding
-            has to be performed]
-            max_iterations ([int]): [Maximum iterations for decoding]
-            num_attention_heads ([int]): [Attention heads of model]
-            num_layers ([int]): [Number of model layers]
-            attention_state ([int]): [embedding_size//num_attention_heads]
-            mode ([str]): ['greedy' , 'beam', 'top_k_top_p']
-            batch_size:
-            sequence_length:
-            input_name_list ([List of int]): [Names of model inputs like input_ids,
-            input_mask, etc]
-            beam_size (int, optional): [Number of beam size]. Defaults to 1.
-            eos_id (int, optional): [end of sentence token id]. Defaults to -100.
-            do_sample (bool, optional): [Multinomial sampling]. Defaults to False.
-            top_k (int, optional): [top k]. Defaults to 0.
-            top_p (int, optional): [top p Nucleus]. Defaults to 0.
-            input_mask_ids (int, optional): [if your model has this, provide it].
-            Defaults to None.
-            input_type_ids (int, optional): [if your model has this, provide it].
-            Defaults to None.
-            num_return_sequences: (int): [No of return sequences for topk top beam].
-            Defaults to 1.
-        """
+            model (tf.keras.Model/layer): Model
+            input_mask_ids (int, optional): input_type_ids. Defaults to -1.
+            input_type_ids (int, optional): input_mask. Defaults to -1.
 
-        super(TextDecoderModel, self).__init__()
-
-        self.batch_size = batch_size
-        self.sequence_length = sequence_length
-        self.max_iterations = max_iterations
-
-        self.input_type_ids = input_type_ids
-
-        self.model = model
-
-        model_config = model.model_config
-        (
-            self.embedding_size,
-            self.num_attention_heads,
-            self.num_hidden_layers,
-            self.attention_state,
-        ) = self.auto_infer_config(model_config)
-
-        self.input_type_ids = input_type_ids
-        self.input_mask_ids = input_mask_ids
-        # Validate decoder type ids are there
-        self.validate_decoder_type_ids(model.input)
-
-        self.eos_id = eos_id
-        self.mode = mode
-
-        self.beam_size = num_beams
-        self.top_k = top_k
-        self.top_p = top_p
-        self.do_sample = do_sample
-        self.num_return_sequences = num_return_sequences
-
-        self.temperature = temperature
-        self.alpha = alpha
-
-    def validate_decoder_type_ids(self, inputs):
-        if "decoder_input_type_ids" in inputs:
-            if self.decoder_input_type_ids < 0:
-                raise ValueError(
-                    "Seems like you model has `decoder_input_type_ids`,\
-                         but it hasn't set yet. Please provide a valid positive index for `decoder_input_type_ids`"
-                )
-
-    def auto_infer_config(self, config):
-        """[summary]
-
-        Args:
-            config ([type]): [description]
+        Raises:
+            ValueError: [description]
 
         Returns:
             [type]: [description]
         """
-        embedding_size = config["embedding_size"]
-        decoder_num_attention_heads = config["num_attention_heads"]
-        decoder_num_hidden_layers = config["num_hidden_layers"]
-        attention_head_size = config["attention_head_size"]
-        return (
-            embedding_size,
-            decoder_num_attention_heads,
-            decoder_num_hidden_layers,
-            attention_head_size,
-        )
+        self.model = model
+        self.model_fn = None
+        self.input_type_ids = input_type_ids
+        self.input_mask_ids = input_mask_ids
+        # keras Model
+        if isinstance(model, tf.keras.Model):
+            self.model_fn = self.model
+            model_config = model.model_config
+            (
+                self.embedding_size,
+                self.num_attention_heads,
+                self.num_hidden_layers,
+                self.attention_state,
+            ) = self.auto_infer_config(model_config, saved_model=False)
 
-    def get_model(self):
-        # Call the model in init itself
-        inputs = {}
-        for input_name, input_tensor in self.model.input.items():
-            if input_name in ["input_ids", "input_type_ids", "input_mask"]:
-                inputs[input_name] = input_tensor
-        layer_outputs = self(inputs)
-        decoder_model = LegacyModel(inputs=inputs, outputs=layer_outputs, name="decoder_model")
-        return decoder_model
+            # Validate decoder type ids are there
+            self.validate_decoder_type_ids(model.input)
+
+        # hubLayer (Not supported)
+        # elif isinstance(model, hub.keras_layer.KerasLayer):
+        #     self.model_fn = self.model
+        else:
+            # saved model
+            if "saved_model" in str(type(self.model)):
+                # Extract signature
+                self.model_pb = self.model.signatures["serving_default"]
+
+                def model_fn(x):
+                    return self.model_pb(**x)
+
+                self.model_fn = model_fn
+
+            model_config = self.model.config
+            (
+                self.embedding_size,
+                self.num_attention_heads,
+                self.num_hidden_layers,
+                self.attention_state,
+            ) = self.auto_infer_config(model_config, saved_model=True)
+
+            # Validate decoder type ids are there
+            self.validate_decoder_type_ids(self.model_pb.structured_input_signature[1])
+
+        if self.model_fn is None:
+            raise ValueError("Please check the type of your model")
+        self.reserved_input_keys = ["input_ids", "input_mask", "input_type_ids"]
+
+    def validate_decoder_type_ids(self, inputs):
+        """Validate all extra IDS for models.
+
+        Args:
+            inputs (dict): Dict of Keras Inputs
+        Raises:
+            ValueError: If present and not provided
+            ValueError: If present and not provided
+        """
+        if "input_type_ids" in inputs:
+            if self.input_type_ids < 0:
+                raise ValueError(
+                    "Seems like you model has `input_type_ids`, \
+                        but it hasn't set yet. Please provide a valid positive index for `decoder_input_type_ids`"
+                )
+        if "input_mask" in inputs:
+            if self.input_mask_ids < 0:
+                raise ValueError(
+                    "Seems like you model has `input_mask_ids`, \
+                        but it hasn't set yet. Please provide a valid positive index for `decoder_input_type_ids`"
+                )
+
+    def auto_infer_config(self, config, saved_model=False):
+        """Automatically Infer size and shape from config
+
+        Args:
+            config (dict): Necessary Model config
+
+        Returns:
+            [embedding_size, num_attention_heads, num_hidden_layers, attention_head_size]: Numbers
+        """
+        if saved_model:
+            embedding_size = config["embedding_size"].numpy()
+            num_attention_heads = config["num_attention_heads"].numpy()
+            num_hidden_layers = config["num_hidden_layers"].numpy()
+            attention_head_size = config["attention_head_size"].numpy()
+            return (embedding_size, num_attention_heads, num_hidden_layers, attention_head_size)
+        else:
+            embedding_size = config["embedding_size"]
+            num_attention_heads = config["num_attention_heads"]
+            num_hidden_layers = config["num_hidden_layers"]
+            attention_head_size = config["attention_head_size"]
+            return (embedding_size, num_attention_heads, num_hidden_layers, attention_head_size)
 
     def reorder_past_batches(self, all_cache_key, all_cache_value, coordinates, beam_size):
         """Reorder the input batch based on beam predictions
@@ -173,26 +159,16 @@ class TextDecoderModel(tf.keras.layers.Layer):
         # all_cache_key   = tf.gather(all_cache_key, coordinates_reshaped , axis=1)
         # all_cache_value = tf.gather(all_cache_value, coordinates_reshaped, axis=1)
 
-        # coordinates_reshaped = coordinates[:, :beam_size, -1] + tf.expand_dims(
-        #     tf.range(tf.shape(coordinates)[0]) * beam_size, 1
-        # )
-        # # TODO: This is somewhat required in this specifc TextDecoderModel
-        # coordinates_reshaped = tf.reshape(coordinates_reshaped, -1)
-        # all_cache_key = tf.gather(all_cache_key, coordinates_reshaped, axis=1)
-        # all_cache_value = tf.gather(all_cache_value, coordinates_reshaped, axis=1)
+        coordinates_reshaped = coordinates[:, :beam_size, -1] + tf.expand_dims(
+            tf.range(tf.shape(coordinates)[0]) * beam_size, 1
+        )
+        coordinates_reshaped = tf.reshape(coordinates_reshaped, -1)
+        all_cache_key = tf.gather(all_cache_key, coordinates_reshaped, axis=1)
+        all_cache_value = tf.gather(all_cache_value, coordinates_reshaped, axis=1)
         return all_cache_key, all_cache_value
 
-    @tf.function
-    def call(self, inputs):
-        if self.mode == "greedy":
-            return self.greedy_decode(inputs)
-        if self.mode == "beam":
-            return self.beam_decode(inputs)
-        if self.mode == 'top_k_top_p':
-            return self.top_k_top_p(inputs)
-
     # Greedy Decoding
-    def greedy_decode(self, inputs_original):
+    def greedy_decode(self, inputs_original, max_iterations, do_sample=False, temperature=1.0, eos_id=-100):
         """
         Greedy Decoding
 
@@ -236,15 +212,15 @@ class TextDecoderModel(tf.keras.layers.Layer):
         # Iterate
         i = 0
         eos_found = False
-        while (i < self.max_iterations) and (eos_found is False):
+        while (i < max_iterations) and (eos_found is False):
 
-            result = self.model(inputs)
-            model_logits = result["last_token_logits"] / self.temperature
+            result = self.model_fn(inputs)
+            model_logits = result["last_token_logits"] / temperature
             all_cache_key = result["all_cache_key"]
             all_cache_value = result["all_cache_value"]
             past_length = result["past_length"]
 
-            if self.do_sample:
+            if do_sample:
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
                 prediction_probs = tf_utils.gather_values_from_2d_tensor(model_logits, prediction_ids)
                 input_ids = tf.cast(prediction_ids, tf.int32)
@@ -257,14 +233,14 @@ class TextDecoderModel(tf.keras.layers.Layer):
 
             all_predictions.append(input_ids)
 
-            if self.eos_id > -1:
+            if eos_id > -1:
                 temp_m = tf.concat(all_predictions, axis=1)
                 eos_check = tf.greater(
-                    tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(temp_m, self.eos_id), tf.int32), axis=[1])),
+                    tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(temp_m, eos_id), tf.int32), axis=[1])),
                     0,
                 )
                 if eos_check:
-                    matched_positions = tf.argmax(tf.cast(tf.equal(self.eos_id, temp_m), tf.int32), axis=1)
+                    matched_positions = tf.argmax(tf.cast(tf.equal(eos_id, temp_m), tf.int32), axis=1)
                     # matched_positions += 1
                     eos_found = True
 
@@ -296,14 +272,8 @@ class TextDecoderModel(tf.keras.layers.Layer):
 
             i += 1
 
-        all_predictions = tf.cast(tf.concat(all_predictions, axis=1), tf.int32)
-        #         matched_positions = tf.reshape(
-        #             tf.argmax(
-        #                 tf.cast(tf.equal(self.eos_id, all_predictions), tf.int32), axis=1
-        #             ),
-        #             -1,
-        #         )
-        matched_positions = tf.argmax(tf.cast(tf.equal(self.eos_id, all_predictions), tf.int32), axis=1)
+        all_predictions = tf.concat(all_predictions, axis=1)
+        matched_positions = tf.reshape(tf.argmax(tf.cast(tf.equal(eos_id, all_predictions), tf.int32), axis=1), -1)
         # no eos matched positions will be 0, replace with -1
         eos_pos_mask = tf.cast(tf.equal(matched_positions, 0), tf.int32) * -1
         matched_positions = tf.cast(matched_positions, tf.int32) + eos_pos_mask
@@ -318,14 +288,35 @@ class TextDecoderModel(tf.keras.layers.Layer):
             "prediction_probs": all_prediction_probs,  # 2D (batch_size x decoded_length)
         }
 
-    def beam_decode(self, inputs_original):
+    def beam_decode(
+        self,
+        inputs_original,
+        num_beams,
+        max_iterations,
+        temperature=1.0,
+        alpha=0.0,
+        top_k=0,
+        top_p=0,
+        do_sample=False,
+        eos_id=-100,
+    ):
 
         """
         Beam Decoding
 
+        inputs_original (dict): inputs
+        max_iterations (int): iterations
+        beam_size (int): beam size
+        do_sample (bool): Using multinomial distribution to sample the most likely \
+         word, still uses beam
+        temperature (float): control text generation
+        eos_id (int): Default -100
+        alpha (float): length penalty
+        top_k (int): Top K sampling
+        top_p (float): Between 0 and 1 . Nucleus sampling
         """
 
-        beam_size = self.beam_size
+        beam_size = num_beams
         # We need this to return
         inputs = inputs_original["input_ids"]
         batch_size = tf.shape(inputs)[0]
@@ -342,7 +333,7 @@ class TextDecoderModel(tf.keras.layers.Layer):
 
         # We take 2x beams
         beams_to_keep = 2 * beam_size
-        batch_size_updated = tf.shape(inputs_repeated["input_ids"])[0]
+        batch_size_updated = inputs_repeated["input_ids"].shape[0]
 
         # Initialize with zeros
         zero_entry = tf.zeros(
@@ -377,18 +368,18 @@ class TextDecoderModel(tf.keras.layers.Layer):
         # Iterate
         i = 0
         eos_found = False
-        while (i < self.max_iterations) and (eos_found is False):
-            result = self.model(inputs_repeated)
+        while (i < max_iterations) and (eos_found is False):
+            result = self.model_fn(inputs_repeated)
 
-            model_logits = result["last_token_logits"] / self.temperature
+            model_logits = result["last_token_logits"] / temperature
             all_cache_key = result["all_cache_key"]
             all_cache_value = result["all_cache_value"]
             past_length = result["past_length"]
 
-            if self.top_k > 0:
-                model_logits = self.top_k_logits(model_logits, k=self.top_k)
-            if self.top_p > 0:
-                model_logits = self.top_p_logits(model_logits, p=self.top_p)
+            if top_k > 0:
+                model_logits = top_k_logits(model_logits, k=top_k)
+            if top_p > 0:
+                model_logits = top_p_logits(model_logits, p=top_p)
 
             vocab_size = tf.shape(model_logits)[1]
             logits = tf.reshape(model_logits, (batch_size, beam_size, -1))
@@ -406,30 +397,26 @@ class TextDecoderModel(tf.keras.layers.Layer):
             log_probs = candidate_log_probs + tf.expand_dims(alive_log_probs, axis=2)
 
             # Add length penalty
-            length_penalty = tf.pow(((5.0 + (tf.cast(i, tf.float32) + 1.0)) / 6.0), self.alpha)
+            length_penalty = tf.pow(((5.0 + (tf.cast(i, tf.float32) + 1.0)) / 6.0), alpha)
             log_probs = log_probs / length_penalty
 
             # Each batch item has beam_size * vocab_size candidate sequences. For each
             # batch item, get the k candidates with the highest log probabilities.
             flat_log_probs = tf.reshape(log_probs, [-1, beam_size * vocab_size])
 
-            if self.do_sample:
+            if do_sample:
                 next_tokens = tf.random.categorical(
                     flat_log_probs, dtype=tf.int32, num_samples=beams_to_keep
-                )  # (batch_size, 2 * self.num_beams)
+                )  # (batch_size, 2 * num_beams)
 
                 # # Compute next scores
-                next_scores = tf.gather(flat_log_probs, next_tokens, batch_dims=1)  # (batch_size, 2 * self.num_beams)
+                next_scores = tf.gather(flat_log_probs, next_tokens, batch_dims=1)  # (batch_size, 2 * num_beams)
 
                 # # sort the sampled vector to make sure that the first \
-                # self.num_beams samples are the best
+                # num_beams samples are the best
                 next_scores_indices = tf.argsort(next_scores, direction="DESCENDING", axis=1)
-                next_scores = tf.gather(
-                    next_scores, next_scores_indices, batch_dims=1
-                )  # (batch_size, self.num_beams * 2)
-                next_tokens = tf.gather(
-                    next_tokens, next_scores_indices, batch_dims=1
-                )  # (batch_size, self.num_beams * 2)
+                next_scores = tf.gather(next_scores, next_scores_indices, batch_dims=1)  # (batch_size, num_beams * 2)
+                next_tokens = tf.gather(next_tokens, next_scores_indices, batch_dims=1)  # (batch_size, num_beams * 2)
 
                 topk_log_probs = next_scores
                 topk_indices = next_tokens
@@ -477,11 +464,11 @@ class TextDecoderModel(tf.keras.layers.Layer):
             if self.input_mask_ids > -1:
                 inputs_repeated["input_mask"] = tf.ones_like(inputs_repeated["input_ids"]) * self.input_mask_ids
 
-            if self.eos_id > -1:
+            if eos_id > -1:
                 eos_check = tf.greater(
                     tf.reduce_prod(
                         tf.reduce_sum(
-                            tf.cast(tf.equal(topk_alive_seq, self.eos_id), tf.int32),
+                            tf.cast(tf.equal(topk_alive_seq, eos_id), tf.int32),
                             axis=[2],
                         )
                     ),
@@ -492,7 +479,7 @@ class TextDecoderModel(tf.keras.layers.Layer):
                     matched_positions = (
                         tf.reshape(
                             tf.argmax(
-                                tf.cast(tf.equal(self.eos_id, topk_alive_seq), tf.int32),
+                                tf.cast(tf.equal(eos_id, topk_alive_seq), tf.int32),
                                 axis=2,
                             ),
                             -1,
@@ -503,7 +490,13 @@ class TextDecoderModel(tf.keras.layers.Layer):
 
             i += 1
 
-        matched_positions = tf.argmax(tf.cast(tf.equal(self.eos_id, topk_alive_seq), tf.int32), axis=2)
+        matched_positions = (
+            tf.reshape(
+                tf.argmax(tf.cast(tf.equal(eos_id, topk_alive_seq), tf.int32), axis=2),
+                -1,
+            )
+            - 1
+        )
         # no eos matched positions will be 0, replace with -1
         eos_pos_mask = tf.cast(tf.equal(matched_positions, 0), tf.int32) * -1
         matched_positions = tf.cast(matched_positions, tf.int32) + eos_pos_mask
@@ -516,24 +509,43 @@ class TextDecoderModel(tf.keras.layers.Layer):
             "matched_eos_pos": matched_positions,  # 1D (batch_size,)
         }
 
-    def top_k_top_p(self, inputs_original):
+    def top_k_top_p(
+        self,
+        inputs_original,
+        max_iterations,
+        top_k=0,
+        top_p=0,
+        temperature=1.0,
+        do_sample=True,
+        num_return_sequences=1,
+        eos_id=-100,
+    ):
         """
         Top TopK Decoding
 
+        inputs_original (dict): inputs
+        max_iterations (int): iterations
+        do_sample (bool): Using multinomial distribution to sample the most likely \
+         word, still uses beam
+        temperature (float): control text generation
+        eos_id (int): Default -100
+        alpha (float): length penalty
+        top_k (int): Top K sampling
+        top_p (float): Between 0 and 1 . Nucleus sampling
         """
 
         # We need this to return
         input_ids_original = inputs_original["input_ids"]
         batch_size = tf.shape(input_ids_original)[0]
-        max_sequence_length = tf.shape(input_ids_original)[1]  # noqa
+        max_sequence_length = tf.shape(input_ids_original)[1]
 
         # Repeat for beam search
         inputs_repeated = {}
         for input_key, input_value in inputs_original.items():
-            inputs_repeated[input_key] = tf.repeat(input_value, [self.num_return_sequences], axis=0)
+            inputs_repeated[input_key] = tf.repeat(input_value, [num_return_sequences], axis=0)
 
         # We take 2x beams
-        batch_size_updated = tf.shape(inputs_repeated["input_ids"])[0]
+        batch_size_updated = inputs_repeated["input_ids"].shape[0]
 
         # Initialize with zeros
         zero_entry = tf.zeros(
@@ -566,19 +578,19 @@ class TextDecoderModel(tf.keras.layers.Layer):
         # Iterate Over
         i = 0
         eos_found = False
-        while (i < self.max_iterations) and (eos_found is False):
-            result = self.model(inputs_repeated)
+        while (i < max_iterations) and (eos_found is False):
+            result = self.model_fn(inputs_repeated)
             model_logits = result["last_token_logits"]
             all_cache_key = result["all_cache_key"]
             all_cache_value = result["all_cache_value"]
             past_length = result["past_length"]
 
-            if self.top_k > 0:
-                model_logits = top_k_logits(model_logits, k=self.top_k)
-            if self.top_p > 0:
-                model_logits = top_p_logits(model_logits, p=self.top_p)
+            if top_k > 0:
+                model_logits = top_k_logits(model_logits, k=top_k)
+            if top_p > 0:
+                model_logits = top_p_logits(model_logits, p=top_p)
 
-            if self.do_sample:
+            if do_sample:
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
                 prediction_probs = tf_utils.gather_values_from_2d_tensor(model_logits, prediction_ids)
                 input_ids = tf.cast(prediction_ids, tf.int32)
@@ -615,14 +627,14 @@ class TextDecoderModel(tf.keras.layers.Layer):
             if self.input_mask_ids > -1:
                 inputs_repeated["input_mask"] = tf.ones_like(inputs_repeated["input_ids"]) * self.input_mask_ids
 
-            if self.eos_id:
+            if eos_id > -1:
                 temp_m = tf.concat(all_predictions, axis=1)
                 eos_check = tf.greater(
-                    tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(temp_m, self.eos_id), tf.int32), axis=[1])),
+                    tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(temp_m, eos_id), tf.int32), axis=[1])),
                     0,
                 )
                 if eos_check:
-                    matched_positions = tf.argmax(tf.cast(tf.equal(self.eos_id, temp_m), tf.int32), axis=1)
+                    matched_positions = tf.argmax(tf.cast(tf.equal(eos_id, temp_m), tf.int32), axis=1)
                     eos_found = True
 
             i += 1
@@ -630,7 +642,7 @@ class TextDecoderModel(tf.keras.layers.Layer):
         matched_positions = (
             tf.reshape(
                 tf.argmax(
-                    tf.cast(tf.equal(self.eos_id, tf.concat(all_predictions, axis=1)), tf.int32),
+                    tf.cast(tf.equal(eos_id, tf.concat(all_predictions, axis=1)), tf.int32),
                     axis=1,
                 ),
                 -1,
@@ -641,7 +653,7 @@ class TextDecoderModel(tf.keras.layers.Layer):
         eos_pos_mask = tf.cast(tf.equal(matched_positions, 0), tf.int32) * -1
         matched_positions = tf.cast(matched_positions, tf.int32) + eos_pos_mask
 
-        all_predictions = tf.reshape(tf.concat(all_predictions, axis=1), (batch_size, self.num_return_sequences, -1))
+        all_predictions = tf.reshape(tf.concat(all_predictions, axis=1), (batch_size, num_return_sequences, -1))
         all_prediction_probs = tf.transpose(all_prediction_probs)
         return {
             "iterations": i + 1,  # scalar
@@ -650,3 +662,67 @@ class TextDecoderModel(tf.keras.layers.Layer):
             "matched_eos_pos": matched_positions,  # 1D (batch_size,)
             "prediction_probs": all_prediction_probs,  # 2D (batch_size x decoded_length)
         }
+
+    def decode(
+        self,
+        inputs,
+        max_iterations,
+        num_beams=3,
+        num_return_sequences=1,
+        sampling_temperature=1.0,
+        alpha=0.0,
+        eos_id=-100,
+        top_k=0,
+        top_p=0,
+        do_sample=False,
+        mode="greedy",
+    ):
+        """
+        Decoding
+
+        inputs (dict): inputs
+        max_iterations (int): iterations
+        beam_size (int): beam size
+        do_sample (bool): Using multinomial distribution to sample the most likely \
+         word, still uses beam
+        temperature (float): control text generation
+        eos_id (int): Default -100
+        alpha (float): length penalty
+        top_k (int): Top K sampling
+        top_p (float): Between 0 and 1 . Nucleus sampling
+        mode (str): ['greedy' , 'beam', 'top_k_top_p']
+        """
+        if mode not in ['greedy', 'beam', 'top_k_top_p']:
+            raise ValueError("Unknown `mode` {}".format(mode))
+        if mode == "greedy":
+            result = self.greedy_decode(
+                inputs,
+                max_iterations=max_iterations,
+                temperature=sampling_temperature,
+                do_sample=do_sample,
+                eos_id=eos_id,
+            )
+        if mode == "beam":
+            result = self.beam_decode(
+                inputs,
+                max_iterations=max_iterations,
+                num_beams=num_beams,
+                temperature=sampling_temperature,
+                alpha=alpha,
+                top_k=top_k,
+                top_p=top_p,
+                do_sample=do_sample,
+                eos_id=eos_id,
+            )
+        if mode == "top_k_top_p":
+            result = self.top_k_top_p(
+                inputs,
+                max_iterations=max_iterations,
+                temperature=sampling_temperature,
+                top_k=top_k,
+                top_p=top_p,
+                do_sample=do_sample,
+                num_return_sequences=num_return_sequences,
+                eos_id=eos_id,
+            )
+        return result

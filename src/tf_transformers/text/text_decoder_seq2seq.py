@@ -7,6 +7,7 @@ from tf_transformers.text import (
     top_k_logits,
     top_p_logits,
 )
+from tf_transformers.utils import tf_utils
 
 
 class TextDecoderSeq2Seq(object):
@@ -16,8 +17,8 @@ class TextDecoderSeq2Seq(object):
         self,
         model,
         decoder_start_token_id,
-        decoder_input_mask_ids=-1,
-        decoder_input_type_ids=-1,
+        input_mask_ids=-1,
+        input_type_ids=-1,
     ):
         """[summary]
 
@@ -42,8 +43,8 @@ class TextDecoderSeq2Seq(object):
             [type]: [description]
         """
         self.decode_start_token_id = decoder_start_token_id
-        self.decoder_input_type_ids = decoder_input_type_ids
-        self.decoder_input_mask_ids = decoder_input_mask_ids
+        self.decoder_input_type_ids = input_type_ids
+        self.decoder_input_mask_ids = input_mask_ids
 
         self.model = model
         self.model_fn = None
@@ -156,22 +157,19 @@ class TextDecoderSeq2Seq(object):
         return all_cache_key, all_cache_value
 
     # Greedy Decoding
-    def greedy_decode(
-        self, tokenized_input_dict_original, max_iterations, do_sample=False, temperature=1.0, eos_id=-100
-    ):
+    def greedy_decode(self, inputs_original, max_iterations, do_sample=False, temperature=1.0, eos_id=-100):
         """
         Greedy Decoding
 
         text_list: a list of text
         length: 50 (decoding length)
         """
-        tokenized_input_dict = tokenized_input_dict_original.copy()
+        inputs = inputs_original.copy()
         # We need this to return
-        input_ids_original = tokenized_input_dict["encoder_input_ids"]
-
-        batch_size = tf.shape(tokenized_input_dict["encoder_input_ids"])[0]
+        input_ids_original = inputs["encoder_input_ids"]
+        batch_size = tf.shape(inputs["encoder_input_ids"])[0]
         # Initialize with zeros
-        encoder_sequence_length = tf.shape(tokenized_input_dict["encoder_input_ids"])[1]
+        encoder_sequence_length = tf.shape(inputs["encoder_input_ids"])[1]
         decoder_start_sequence_length = 1
 
         encoder_hidden_states = tf.zeros((batch_size, encoder_sequence_length, self.embedding_size))
@@ -195,25 +193,23 @@ class TextDecoderSeq2Seq(object):
         )
 
         # Inputs ready
-        tokenized_input_dict["decoder_input_ids"] = tf.cast(
-            tf.ones(shape=(batch_size, 1)) * self.decode_start_token_id, tf.int32
-        )
+        inputs["decoder_input_ids"] = tf.cast(tf.ones(shape=(batch_size, 1)) * self.decode_start_token_id, tf.int32)
 
         if self.decoder_input_type_ids > -1:
-            tokenized_input_dict["decoder_input_type_ids"] = (
-                tf.ones_like(tokenized_input_dict["decoder_input_ids"]) * self.decoder_input_type_ids
-            )
+            inputs["decoder_input_type_ids"] = tf.ones_like(inputs["decoder_input_ids"]) * self.decoder_input_type_ids
 
-        tokenized_input_dict["decoder_all_cache_key"] = all_cache_key
-        tokenized_input_dict["decoder_all_cache_value"] = all_cache_value
-        tokenized_input_dict["encoder_hidden_states"] = encoder_hidden_states
+        inputs["decoder_all_cache_key"] = all_cache_key
+        inputs["decoder_all_cache_value"] = all_cache_value
+        inputs["encoder_hidden_states"] = encoder_hidden_states
 
         all_predictions = []
+        all_prediction_probs = []
         matched_positions = tf.constant([-1] * batch_size)
-        # Iterate Over
-        for i in range(max_iterations):
+        i = 0
+        eos_found = False
+        while (i < max_iterations) and (eos_found is False):
 
-            result = self.model_fn(tokenized_input_dict)
+            result = self.model_fn(inputs)
 
             model_logits = result["last_token_logits"] / temperature
             all_cache_key = result["decoder_all_cache_key"]
@@ -223,35 +219,46 @@ class TextDecoderSeq2Seq(object):
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
                 prediction_probs = tf_utils.gather_values_from_2d_tensor(model_logits, prediction_ids)
                 input_ids = tf.cast(prediction_ids, tf.int32)
+                all_prediction_probs.append(prediction_probs)
             else:
                 prediction_ids = tf.argmax(model_logits, axis=1)
                 prediction_probs = tf.reduce_max(model_logits, axis=1)
                 input_ids = tf.expand_dims(prediction_ids, axis=1)
+                all_prediction_probs.append(prediction_probs)
 
             all_predictions.append(input_ids)
-            # temp_m = tf.concat(all_predictions, axis=1)
-            eos_check = tf.greater(
-                tf.reduce_prod(
-                    tf.reduce_sum(
-                        tf.cast(
-                            tf.equal(tf.concat(all_predictions, axis=1), eos_id),
-                            tf.int32,
-                        ),
-                        axis=[1],
-                    )
-                ),
-                0,
-            )
-            if eos_check:
-                break
+            if eos_id > -1:
+                temp_m = tf.concat(all_predictions, axis=1)
+                eos_check = tf.greater(
+                    tf.reduce_prod(
+                        tf.reduce_sum(
+                            tf.cast(
+                                tf.equal(tf.concat(all_predictions, axis=1), eos_id),
+                                tf.int32,
+                            ),
+                            axis=[1],
+                        )
+                    ),
+                    0,
+                )
+                if eos_check:
+                    matched_positions = tf.argmax(tf.cast(tf.equal(eos_id, temp_m), tf.int32), axis=1)
+                    eos_found = True
 
-            tokenized_input_dict["decoder_input_ids"] = tf.cast(input_ids, tf.int32)
-            tokenized_input_dict["decoder_all_cache_key"] = all_cache_key
-            tokenized_input_dict["decoder_all_cache_value"] = all_cache_value
-            tokenized_input_dict["encoder_hidden_states"] = encoder_hidden_states
+            inputs["decoder_input_ids"] = tf.cast(input_ids, tf.int32)
+            inputs["decoder_all_cache_key"] = all_cache_key
+            inputs["decoder_all_cache_value"] = all_cache_value
+            inputs["encoder_hidden_states"] = encoder_hidden_states
+
+            if self.decoder_input_type_ids > -1:
+                inputs["decoder_input_type_ids"] = (
+                    tf.ones_like(inputs["decoder_input_ids"]) * self.decoder_input_type_ids
+                )
+            if self.decoder_input_mask_ids > -1:
+                inputs["decoder_input_mask"] = tf.ones_like(inputs["decoder_input_ids"]) * self.decoder_input_mask_ids
 
             # We assume decoder_input_type_ids remains same throughout decoding process
-
+            i += 1
         matched_positions = tf.reshape(
             tf.argmax(
                 tf.cast(tf.equal(eos_id, tf.concat(all_predictions, axis=1)), tf.int32),
@@ -264,17 +271,19 @@ class TextDecoderSeq2Seq(object):
         matched_positions = tf.cast(matched_positions, tf.int32) + eos_pos_mask
 
         all_predictions = tf.expand_dims(tf.concat(all_predictions, axis=1), 1)
+        all_prediction_probs = tf.transpose(all_prediction_probs)
         return {
-            "iterations": i + 1,
-            "input_ids": input_ids_original,
-            "predicted_ids": all_predictions,
-            "matched_eos_pos": matched_positions,
+            "iterations": i + 1,  # scalar
+            "input_ids": input_ids_original,  # 2D batch_size x seq_length
+            "predicted_ids": all_predictions,  # 3D batch_size x 1 x decoded_length
+            "matched_eos_pos": matched_positions,  # 1D (batch_size,)
+            "prediction_probs": all_prediction_probs,  # 2D (batch_size x decoded_length)
         }
 
     def beam_decode(
         self,
-        tokenized_input_dict,
-        beam_size,
+        inputs_original,
+        num_beams,
         max_iterations,
         temperature=1.0,
         alpha=0.0,
@@ -284,37 +293,42 @@ class TextDecoderSeq2Seq(object):
         eos_id=-100,
     ):
 
-        """Supports Variable Batch Decoding for GPT2
+        """
+        Beam Decoding
 
-        text_list: a list of text
-        beam_size: int
-        length: number of steps to decode
-        vocab_size: vocabulary size
-        do_sample: Using multinomial distribution to \
-            sample the most likely word, still uses beam
-        eos_ids: list of IDS, to consider as decoder stop
+        inputs_original (dict): inputs
+        max_iterations (int): iterations
+        beam_size (int): beam size
+        do_sample (bool): Using multinomial distribution to sample the most likely \
+         word, still uses beam
+        temperature (float): control text generation
+        eos_id (int): Default -100
+        alpha (float): length penalty
+        top_k (int): Top K sampling
+        top_p (float): Between 0 and 1 . Nucleus sampling
         """
 
+        beam_size = num_beams
         # We need this to return
-        input_ids_original = tokenized_input_dict["encoder_input_ids"]
-        batch_size = tf.shape(tokenized_input_dict["encoder_input_ids"])[0]
+        inputs = inputs_original["encoder_input_ids"]
+        batch_size = tf.shape(inputs)[0]
+        max_sequence_length = tf.shape(inputs)[1]  # noqa
 
-        tokenized_input_dict_ragged = {}
+        inputs_repeated = {}
         # Repeat for beam search
-        for input_key, input_value in tokenized_input_dict.items():
-            tokenized_input_dict_ragged[input_key] = tf.repeat(input_value, [beam_size], axis=0)
+        for input_key, input_value in inputs_original.items():
+            inputs_repeated[input_key] = tf.repeat(input_value, [beam_size], axis=0)
 
         # We take 2x beams
         beams_to_keep = 2 * beam_size
-        batch_size_updated = tf.shape(tokenized_input_dict_ragged["encoder_input_ids"])[0]
+        batch_size_updated = inputs_repeated["encoder_input_ids"].shape[0]
         decoder_start_sequence_length = 1
 
         # Initialize with zeros
-        encoder_sequence_length = tf.shape(tokenized_input_dict_ragged["encoder_input_ids"])[1]
-        decoder_start_sequence_length = 1
+        encoder_sequence_length = tf.shape(inputs_repeated["encoder_input_ids"])[1]
 
         encoder_hidden_states = tf.zeros((batch_size_updated, encoder_sequence_length, self.embedding_size))
-        all_cache_key = tf.zeros(
+        zero_entry = tf.zeros(
             (
                 self.decoder_num_hidden_layers,
                 batch_size_updated,
@@ -323,49 +337,46 @@ class TextDecoderSeq2Seq(object):
                 self.decoder_attention_state,
             )
         )
-        all_cache_value = tf.zeros(
-            (
-                self.decoder_num_hidden_layers,
-                batch_size_updated,
-                self.decoder_num_attention_heads,
-                decoder_start_sequence_length,
-                self.decoder_attention_state,
-            )
-        )
+        all_cache_key = zero_entry
+        all_cache_value = zero_entry
 
         # Inputs ready
-        tokenized_input_dict_ragged["decoder_input_ids"] = tf.cast(
+        inputs_repeated["decoder_input_ids"] = tf.cast(
             tf.ones(shape=(batch_size_updated, 1)) * self.decode_start_token_id,
             tf.int32,
         )
-        tokenized_input_dict_ragged["decoder_all_cache_key"] = all_cache_key
-        tokenized_input_dict_ragged["decoder_all_cache_value"] = all_cache_value
-        tokenized_input_dict_ragged["encoder_hidden_states"] = encoder_hidden_states
+        inputs_repeated["decoder_all_cache_key"] = all_cache_key
+        inputs_repeated["decoder_all_cache_value"] = all_cache_value
+        inputs_repeated["encoder_hidden_states"] = encoder_hidden_states
 
+        # Type IDS
         if self.decoder_input_type_ids > -1:
-            tokenized_input_dict_ragged["decoder_input_type_ids"] = (
-                tf.ones_like(tokenized_input_dict_ragged["decoder_input_ids"]) * self.decoder_input_type_ids
+            inputs_repeated["decoder_input_type_ids"] = (
+                tf.ones_like(inputs_repeated["decoder_input_ids"]) * self.decoder_input_type_ids
             )
 
-        matched_positions = tf.constant([-1] * batch_size_updated)
+        # Input MASK
+        if self.decoder_input_mask_ids > -1:
+            inputs_repeated["decoder_input_mask"] = (
+                tf.ones_like(inputs_repeated["decoder_input_ids"]) * self.decoder_input_type_ids
+            )
 
         alive_log_probs = -np.inf * tf.ones((batch_size, beam_size - 1))
-
-        # alive_log_probs = tf.zeros((batch_size, beam_size-1))
 
         alive_log_probs = tf.concat([tf.zeros([batch_size, 1]), alive_log_probs], axis=1)
         alive_seq = tf.zeros((batch_size, beam_size, 1))
 
-        for i in range(max_iterations):
+        # Iterate
+        i = 0
+        eos_found = False
+        while (i < max_iterations) and (eos_found is False):
 
-            result = self.model_fn(tokenized_input_dict_ragged)
+            result = self.model_fn(inputs_repeated)
 
-            model_logits = result["last_token_logits"]
+            model_logits = result["last_token_logits"] / temperature
             all_cache_key = result["decoder_all_cache_key"]
             all_cache_value = result["decoder_all_cache_value"]
             encoder_hidden_states = result["encoder_hidden_states"]
-
-            model_logits = model_logits / temperature
 
             if top_k > 0:
                 model_logits = top_k_logits(model_logits, k=top_k)
@@ -430,22 +441,45 @@ class TextDecoderSeq2Seq(object):
                 all_cache_key, all_cache_value, coordinates, beam_size
             )
 
-            tokenized_input_dict_ragged["decoder_input_ids"] = tf.cast(input_ids, tf.int32)
-            tokenized_input_dict_ragged["decoder_all_cache_key"] = all_cache_key
-            tokenized_input_dict_ragged["decoder_all_cache_value"] = all_cache_value
-            tokenized_input_dict_ragged["encoder_hidden_states"] = encoder_hidden_states
+            inputs_repeated["decoder_input_ids"] = tf.cast(input_ids, tf.int32)
+            inputs_repeated["decoder_all_cache_key"] = all_cache_key
+            inputs_repeated["decoder_all_cache_value"] = all_cache_value
+            inputs_repeated["encoder_hidden_states"] = encoder_hidden_states
 
-            eos_check = tf.greater(
-                tf.reduce_prod(
-                    tf.reduce_sum(
-                        tf.cast(tf.equal(topk_alive_seq, eos_id), tf.int32),
-                        axis=[2],
+            if self.decoder_input_type_ids > -1:
+                inputs_repeated["decoder_input_type_ids"] = (
+                    tf.ones_like(inputs_repeated["decoder_input_ids"]) * self.decoder_input_type_ids
+                )
+            if self.decoder_input_mask_ids > -1:
+                inputs_repeated["decoder_input_mask"] = (
+                    tf.ones_like(inputs_repeated["decoder_input_ids"]) * self.decoder_input_mask_ids
+                )
+
+            if eos_id > -1:
+                eos_check = tf.greater(
+                    tf.reduce_prod(
+                        tf.reduce_sum(
+                            tf.cast(tf.equal(topk_alive_seq, eos_id), tf.int32),
+                            axis=[2],
+                        )
+                    ),
+                    0,
+                )
+                # We check for eos_id for all batches and all beams
+                if eos_check:
+                    matched_positions = (
+                        tf.reshape(
+                            tf.argmax(
+                                tf.cast(tf.equal(eos_id, topk_alive_seq), tf.int32),
+                                axis=2,
+                            ),
+                            -1,
+                        )
+                        - 1
                     )
-                ),
-                0,
-            )
-            if eos_check:
-                break
+                    eos_found = True
+
+            i += 1
 
         matched_positions = (
             tf.reshape(
@@ -458,16 +492,17 @@ class TextDecoderSeq2Seq(object):
         eos_pos_mask = tf.cast(tf.equal(matched_positions, 0), tf.int32) * -1
         matched_positions = tf.cast(matched_positions, tf.int32) + eos_pos_mask
 
+        # TODO : Add prediction_probs
         return {
-            "iterations": i + 1,
-            "input_ids": input_ids_original,
-            "predicted_ids": topk_alive_seq[:, :, 1:],  # to avoid initial 0
-            "matched_eos_pos": matched_positions - 1,
+            "iterations": i + 1,  # scalar
+            "input_ids": inputs,  # 2D batch_size x seq_length
+            "predicted_ids": topk_alive_seq[:, :, 1:],  # to avoid initial 0,  # 3D batch_size x 1 x decoded_length
+            "matched_eos_pos": matched_positions,  # 1D (batch_size,)
         }
 
     def top_k_top_p(
         self,
-        tokenized_input_dict,
+        inputs_original,
         max_iterations,
         top_k=0,
         top_p=0,
@@ -477,25 +512,38 @@ class TextDecoderSeq2Seq(object):
         eos_id=-100,
     ):
 
+        """
+        Top TopK Decoding
+
+        inputs_original (dict): inputs
+        max_iterations (int): iterations
+        do_sample (bool): Using multinomial distribution to sample the most likely \
+         word, still uses beam
+        temperature (float): control text generation
+        eos_id (int): Default -100
+        alpha (float): length penalty
+        top_k (int): Top K sampling
+        top_p (float): Between 0 and 1 . Nucleus sampling
+        """
+
         # We need this to return
-        input_ids_original = tokenized_input_dict["encoder_input_ids"]
-        batch_size = tf.shape(tokenized_input_dict["encoder_input_ids"])[0]
+        input_ids_original = inputs_original["encoder_input_ids"]
+        batch_size = tf.shape(input_ids_original)[0]
+        # max_sequence_length = tf.shape(input_ids_original)[1]
 
         # Repeat for beam search
-        tokenized_input_dict_ragged = {}
-        for input_key, input_value in tokenized_input_dict.items():
-            tokenized_input_dict_ragged[input_key] = tf.repeat(input_value, [num_return_sequences], axis=0)
+        inputs_repeated = {}
+        for input_key, input_value in inputs_original.items():
+            inputs_repeated[input_key] = tf.repeat(input_value, [num_return_sequences], axis=0)
 
         # We take 2x beams
-        batch_size_updated = tf.shape(tokenized_input_dict_ragged["encoder_input_ids"])[0]
+        batch_size_updated = inputs_repeated["encoder_input_ids"].shape[0]
         decoder_start_sequence_length = 1
+        encoder_sequence_length = tf.shape(inputs_repeated["encoder_input_ids"])[1]
 
         # Initialize with zeros
-        encoder_sequence_length = tf.shape(tokenized_input_dict_ragged["encoder_input_ids"])[1]
-        decoder_start_sequence_length = 1
-
         encoder_hidden_states = tf.zeros((batch_size_updated, encoder_sequence_length, self.embedding_size))
-        all_cache_key = tf.zeros(
+        zero_entry = tf.zeros(
             (
                 self.decoder_num_hidden_layers,
                 batch_size_updated,
@@ -504,43 +552,43 @@ class TextDecoderSeq2Seq(object):
                 self.decoder_attention_state,
             )
         )
-        all_cache_value = tf.zeros(
-            (
-                self.decoder_num_hidden_layers,
-                batch_size_updated,
-                self.decoder_num_attention_heads,
-                decoder_start_sequence_length,
-                self.decoder_attention_state,
-            )
-        )
+        all_cache_key = zero_entry
+        all_cache_value = zero_entry
 
         # Inputs ready
-        tokenized_input_dict_ragged["decoder_input_ids"] = tf.cast(
+        inputs_repeated["decoder_input_ids"] = tf.cast(
             tf.ones(shape=(batch_size_updated, 1)) * self.decode_start_token_id,
             tf.int32,
         )
-        tokenized_input_dict_ragged["decoder_all_cache_key"] = all_cache_key
-        tokenized_input_dict_ragged["decoder_all_cache_value"] = all_cache_value
-        tokenized_input_dict_ragged["encoder_hidden_states"] = encoder_hidden_states
+        inputs_repeated["decoder_all_cache_key"] = all_cache_key
+        inputs_repeated["decoder_all_cache_value"] = all_cache_value
+        inputs_repeated["encoder_hidden_states"] = encoder_hidden_states
 
+        # Type IDS
         if self.decoder_input_type_ids > -1:
-            tokenized_input_dict_ragged["decoder_input_type_ids"] = (
-                tf.ones_like(tokenized_input_dict_ragged["decoder_input_ids"]) * self.decoder_input_type_ids
+            inputs_repeated["decoder_input_type_ids"] = (
+                tf.ones_like(inputs_repeated["decoder_input_ids"]) * self.decoder_input_type_ids
+            )
+
+        # Input MASK
+        if self.decoder_input_mask_ids > -1:
+            inputs_repeated["decoder_input_mask"] = (
+                tf.ones_like(inputs_repeated["decoder_input_ids"]) * self.decoder_input_mask_ids
             )
 
         all_predictions = []
-        matched_positions = tf.constant([-1] * batch_size_updated)
+        all_prediction_probs = []
 
         # Iterate Over
-        for i in range(max_iterations):
-            result = self.model_fn(tokenized_input_dict_ragged)
+        i = 0
+        eos_found = False
+        while (i < max_iterations) and (eos_found is False):
+            result = self.model_fn(inputs_repeated)
 
-            model_logits = result["last_token_logits"]
+            model_logits = result["last_token_logits"] / temperature
             all_cache_key = result["decoder_all_cache_key"]
             all_cache_value = result["decoder_all_cache_value"]
             encoder_hidden_states = result["encoder_hidden_states"]
-
-            model_logits = model_logits / temperature
 
             if top_k > 0:
                 model_logits = top_k_logits(model_logits, k=top_k)
@@ -549,29 +597,42 @@ class TextDecoderSeq2Seq(object):
 
             if do_sample:
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
+                prediction_probs = tf_utils.gather_values_from_2d_tensor(model_logits, prediction_ids)
                 input_ids = tf.cast(prediction_ids, tf.int32)
+                all_prediction_probs.append(prediction_probs)
             else:
                 prediction_ids = tf.argmax(model_logits, axis=1)
+                prediction_probs = tf.reduce_max(model_logits, axis=1)
                 input_ids = tf.cast(tf.expand_dims(prediction_ids, axis=1), tf.int32)
+                all_prediction_probs.append(prediction_probs)
 
             all_predictions.append(input_ids)
 
-            tokenized_input_dict_ragged["decoder_input_ids"] = tf.cast(input_ids, tf.int32)
-            tokenized_input_dict_ragged["decoder_all_cache_key"] = all_cache_key
-            tokenized_input_dict_ragged["decoder_all_cache_value"] = all_cache_value
-            tokenized_input_dict_ragged["encoder_hidden_states"] = encoder_hidden_states
+            inputs_repeated["decoder_input_ids"] = tf.cast(input_ids, tf.int32)
+            inputs_repeated["decoder_all_cache_key"] = all_cache_key
+            inputs_repeated["decoder_all_cache_value"] = all_cache_value
+            inputs_repeated["encoder_hidden_states"] = encoder_hidden_states
 
-            eos_check = tf.greater(
-                tf.reduce_prod(
-                    tf.reduce_sum(
-                        tf.cast(tf.equal(tf.concat(all_predictions, axis=1), eos_id), tf.int32),
-                        axis=[1],
-                    )
-                ),
-                0,
-            )
-            if eos_check:
-                break
+            if self.decoder_input_type_ids > -1:
+                inputs_repeated["decoder_input_type_ids"] = (
+                    tf.ones_like(inputs_repeated["decoder_input_ids"]) * self.decoder_input_type_ids
+                )
+            if self.decoder_input_mask_ids > -1:
+                inputs_repeated["decoder_input_mask"] = (
+                    tf.ones_like(inputs_repeated["decoder_input_ids"]) * self.decoder_input_mask_ids
+                )
+
+            if eos_id > -1:
+                temp_m = tf.concat(all_predictions, axis=1)
+                eos_check = tf.greater(
+                    tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(temp_m, eos_id), tf.int32), axis=[1])),
+                    0,
+                )
+                if eos_check:
+                    matched_positions = tf.argmax(tf.cast(tf.equal(eos_id, temp_m), tf.int32), axis=1)
+                    eos_found = True
+
+            i += 1
 
         matched_positions = (
             tf.reshape(
@@ -588,19 +649,20 @@ class TextDecoderSeq2Seq(object):
         matched_positions = tf.cast(matched_positions, tf.int32) + eos_pos_mask
 
         all_predictions = tf.reshape(tf.concat(all_predictions, axis=1), (batch_size, num_return_sequences, -1))
-
+        all_prediction_probs = tf.transpose(all_prediction_probs)
         return {
-            "iterations": i + 1,
-            "input_ids": input_ids_original,
-            "predicted_ids": all_predictions,
-            "matched_eos_pos": matched_positions,
+            "iterations": i + 1,  # scalar
+            "input_ids": input_ids_original,  # 2D batch_size x seq_length
+            "predicted_ids": all_predictions,  # 3D batch_size x 1 x decoded_length
+            "matched_eos_pos": matched_positions,  # 1D (batch_size,)
+            "prediction_probs": all_prediction_probs,  # 2D (batch_size x decoded_length)
         }
 
     def decode(
         self,
-        tokenized_input_dict,
+        inputs,
         max_iterations,
-        beam_size=3,
+        num_beams=3,
         sampling_temperature=1.0,
         alpha=0.0,
         num_return_sequences=1,
@@ -610,9 +672,25 @@ class TextDecoderSeq2Seq(object):
         do_sample=False,
         mode="greedy",
     ):
+
+        """
+        Decoding
+
+        inputs (dict): inputs
+        max_iterations (int): iterations
+        beam_size (int): beam size
+        do_sample (bool): Using multinomial distribution to sample the most likely \
+         word, still uses beam
+        temperature (float): control text generation
+        eos_id (int): Default -100
+        alpha (float): length penalty
+        top_k (int): Top K sampling
+        top_p (float): Between 0 and 1 . Nucleus sampling
+        mode (str): ['greedy' , 'beam', 'top_k_top_p']
+        """
         if mode == "greedy":
             result = self.greedy_decode(
-                tokenized_input_dict,
+                inputs,
                 max_iterations=max_iterations,
                 temperature=sampling_temperature,
                 do_sample=do_sample,
@@ -620,9 +698,9 @@ class TextDecoderSeq2Seq(object):
             )
         if mode == "beam":
             result = self.beam_decode(
-                tokenized_input_dict,
+                inputs,
                 max_iterations=max_iterations,
-                beam_size=beam_size,
+                num_beams=num_beams,
                 temperature=sampling_temperature,
                 alpha=alpha,
                 top_k=top_k,
@@ -632,7 +710,7 @@ class TextDecoderSeq2Seq(object):
             )
         if mode == "top_k_top_p":
             result = self.top_k_top_p(
-                tokenized_input_dict,
+                inputs,
                 max_iterations=max_iterations,
                 temperature=sampling_temperature,
                 top_k=top_k,

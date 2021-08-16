@@ -28,7 +28,7 @@ from tf_transformers.text import (
 from tf_transformers.utils import tf_utils
 
 
-class TextDecoderSerializable(tf.keras.layers.Layer):
+class TextDecoderEncoderOnlySerializable(tf.keras.layers.Layer):
     """TextDecoderSerializable - This class is responsible for
     saving the model along with decoding
     operation as a saved_model, which makes deployment in production easier.
@@ -40,7 +40,6 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
         mode,
         max_iterations=None,
         batch_size=None,
-        sequence_length=None,
         max_sequence_length=None,
         temperature=1.0,
         alpha=0.0,
@@ -80,14 +79,11 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
             Defaults to 1.
         """
 
-        super(TextDecoderSerializable, self).__init__()
+        super(TextDecoderEncoderOnlySerializable, self).__init__()
 
         self.batch_size = batch_size
-        self.sequence_length = sequence_length
+        self.sequence_length = max_sequence_length
         self.max_iterations = max_iterations
-
-        self.input_type_ids = input_type_ids
-
         self.model = model
 
         model_config = model.model_config
@@ -103,7 +99,6 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
         # Validate decoder type ids are there
         self.validate_decoder_type_ids(model.input)
 
-        # self.input_name_list = input_name_list
         self.input_name_list, self.model_inputs = self.get_inputs()
         self.input_name_map = {i: k for i, k in enumerate(self.input_name_list)}
 
@@ -138,8 +133,8 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
         if "input_type_ids" in inputs:
             if self.input_type_ids < 0:
                 raise ValueError(
-                    "Seems like you model has `decoder_input_type_ids`,\
-                         but it hasn't set yet. Please provide a valid positive index for `decoder_input_type_ids`"
+                    "Seems like you model has `input_type_ids`,\
+                         but it hasn't set yet. Please provide a valid positive index for `input_type_ids`"
                 )
 
     def auto_infer_config(self, config, saved_model=False):
@@ -885,7 +880,7 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
             inputs["past_length"] = past_length
 
             model_outputs = self.model(inputs)
-            model_logits = model_outputs["last_token_logits"]
+            model_logits = model_outputs["last_token_logits"] / self.temperature
 
             if self.top_k > 0:
                 model_logits = top_k_logits(model_logits, k=self.top_k)
@@ -983,7 +978,7 @@ class TextDecoderSerializable(tf.keras.layers.Layer):
 
             # First pass to the model
             model_outputs = self.model(model_inputs)
-            model_logits = model_outputs["last_token_logits"]
+            model_logits = model_outputs["last_token_logits"] / self.tem
 
             if self.top_k > 0:
                 model_logits = top_k_logits(model_logits, k=self.top_k)

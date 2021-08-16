@@ -16,65 +16,77 @@
 # ==============================================================================
 """Test t5 Models"""
 
+import os
 import unittest
-
 import tensorflow as tf
+
+
+import shutil
+import tempfile
 from absl import logging
 from transformers import T5Tokenizer as Tokenizer
 
-from tf_transformers.models import t5Model as Model
+from tf_transformers.models import T5Model as Model
+from tf_transformers.text import TextDecoder, TextDecoderSerializable
 
 logging.get_absl_logger().name = "t5_testing"
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["PYTHONWARNINGS"] = "ignore"
 
 MODEL_NAME = 't5-small'
-
-
+DECODER_START_ID = 0
+DECODER_EOS_ID = 1
 class ModelTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         print("--------------------setUP--------------------------------------")
         self.model = Model.from_pretrained(MODEL_NAME)
-        # self.model_ar  = Model.from_pretrained(MODEL_NAME, use_auto_regressive=True)
+        self.model_ar, self.config = Model.from_pretrained(
+            MODEL_NAME, decoder_kwargs={'use_auto_regressive': True}, use_auto_regressive=True, return_config=True
+        )
         self.tokenizer = Tokenizer.from_pretrained(MODEL_NAME)
 
-    #@unittest.skip
+    @unittest.skip
     def test_tf_conversion(self):
-        import shutil
 
         try:
             shutil.rmtree("/tmp/tf_transformers_cache/{}".format(MODEL_NAME))
         except:
             pass
-        model = Model.from_pretrained(MODEL_NAME, convert_fn_type='tf')
+        _ = Model.from_pretrained(MODEL_NAME, convert_fn_type='tf')
         logging.info("Test: TF Conversion. ✅")
 
-    # @unittest.skip
+    @unittest.skip
     def test_pt_conversion(self):
-        import shutil
-
         try:
             shutil.rmtree("/tmp/tf_transformers_cache/{}".format(MODEL_NAME))
         except:
             pass
-        model = Model.from_pretrained(MODEL_NAME, convert_fn_type='pt')
+        _ = Model.from_pretrained(MODEL_NAME, convert_fn_type='pt')
         logging.info("Test: PT Conversion. ✅")
 
-    @unittest.skip("mt5 has to be fine tuned for this")
+    @unittest.skip
     def test_auto_regressive(self):
         """Test Text Generation using Non Cache and Cached"""
 
-        text = "Sachin Tendulkar is one of the finest"
-        inputs_tf = self.tokenizer(text, return_tensors="tf")
-        inputs = {}
-        inputs["input_ids"] = inputs_tf["input_ids"]
+        # T5 text generation without caching
+        text = "translate English to German: The house is wonderful and we wish to be here :)"
 
+        # Create inputs
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
+        inputs = {}
+        inputs['encoder_input_ids'] = inputs_hf['input_ids']
+        inputs['encoder_input_mask'] = inputs_hf['attention_mask']
+        inputs['decoder_input_ids'] = tf.constant([[DECODER_START_ID]])
+
+        # Iterate
         predictions_non_auto_regressive = []
         predictions_prob_non_auto_regressive = []
 
-        for i in range(10):
+        for i in range(13):
             outputs = self.model(inputs)
             predicted_ids = tf.cast(tf.expand_dims(tf.argmax(outputs["last_token_logits"], axis=1), 1), tf.int32)
-            inputs["input_ids"] = tf.concat([inputs["input_ids"], predicted_ids], axis=1)
+            inputs["decoder_input_ids"] = tf.concat([inputs["decoder_input_ids"], predicted_ids], axis=1)
             predictions_non_auto_regressive.append(predicted_ids)
             predictions_prob_non_auto_regressive.append(
                 tf.expand_dims(tf.reduce_max(outputs["last_token_logits"], axis=1), 1)
@@ -82,300 +94,362 @@ class ModelTest(unittest.TestCase):
         predictions_non_auto_regressive = tf.concat(predictions_non_auto_regressive, axis=1)
         predictions_prob_non_auto_regressive = tf.concat(predictions_prob_non_auto_regressive, axis=1)
 
-        # -------------------------------------------------------------------------------------------- # noqa
-        # Cached
-        inputs_tf = self.tokenizer(text, return_tensors="tf")
+        # -------------------------------------------------------------------------------------------------------------#
+        # Text generation with cache
+        encoder_hidden_dim = self.config['embedding_size']
+        num_hidden_layers = self.config['num_hidden_layers']
+        num_attention_heads = self.config['num_attention_heads']
+        attention_head_size = self.config['attention_head_size']
+
+        # Inputs
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
+        encoder_input_ids = inputs_hf['input_ids']
+        encoder_input_mask = inputs_hf['attention_mask']
+
+        batch_size = tf.shape(encoder_input_ids)[0]
+        seq_length = tf.shape(encoder_input_ids)[1]
+
+        decoder_input_ids = tf.reshape([0] * batch_size.numpy(), (batch_size, 1))
+
+        encoder_hidden_states = tf.zeros((batch_size, seq_length, encoder_hidden_dim))
+        decoder_all_cache_key = tf.zeros(
+            (num_hidden_layers, batch_size, num_attention_heads, seq_length, attention_head_size)
+        )
+        decoder_all_cahce_value = tf.zeros(
+            (num_hidden_layers, batch_size, num_attention_heads, seq_length, attention_head_size)
+        )
+
         inputs = {}
-        inputs["input_ids"] = inputs_tf["input_ids"]
+        inputs['encoder_input_ids'] = encoder_input_ids
+        inputs['encoder_input_mask'] = encoder_input_mask
+        inputs['decoder_input_ids'] = decoder_input_ids
+        inputs['encoder_hidden_states'] = encoder_hidden_states
+        inputs['decoder_all_cache_key'] = decoder_all_cache_key
+        inputs['decoder_all_cache_value'] = decoder_all_cahce_value
 
-        seq_length = tf.shape(inputs["input_ids"])[1]
-        batch_size = tf.shape(inputs["input_ids"])[0]
-
-        inputs["all_cache_key"] = tf.zeros((12, batch_size, 12, seq_length, 64))
-        inputs["all_cache_value"] = tf.zeros((12, batch_size, 12, seq_length, 64))
-        inputs["past_length"] = tf.zeros(shape=(1, batch_size), dtype=tf.int32)
+        # Iterate
         predictions_auto_regressive = []
         predictions_prob_auto_regressive = []
 
-        past_lengths = []
-        for i in range(10):
+        for i in range(13):
             outputs = self.model_ar(inputs)
             predicted_ids = tf.cast(tf.expand_dims(tf.argmax(outputs["last_token_logits"], axis=1), 1), tf.int32)
-            inputs["input_ids"] = predicted_ids
-            inputs["all_cache_key"] = outputs["all_cache_key"]
-            inputs["all_cache_value"] = outputs["all_cache_value"]
-            inputs["past_length"] = outputs["past_length"]
-            past_lengths.append(inputs["past_length"])
+            inputs["decoder_input_ids"] = predicted_ids
+            inputs["decoder_all_cache_key"] = outputs["decoder_all_cache_key"]
+            inputs["decoder_all_cache_value"] = outputs["decoder_all_cache_value"]
+            inputs["encoder_hidden_states"] = outputs["encoder_hidden_states"]
             predictions_auto_regressive.append(predicted_ids)
             predictions_prob_auto_regressive.append(
                 tf.expand_dims(tf.reduce_max(outputs["last_token_logits"], axis=1), 1)
             )
         predictions_auto_regressive = tf.concat(predictions_auto_regressive, axis=1)
         predictions_prob_auto_regressive = tf.concat(predictions_prob_auto_regressive, axis=1)
-        # Assert predictions
-        tf.debugging.assert_near(predictions_prob_auto_regressive, predictions_prob_non_auto_regressive, rtol=1.0)
-        tf.debugging.assert_equal(predictions_auto_regressive, predictions_non_auto_regressive)
-        logging.info("Test: Successful Auto Regressive Encoder. ✅")
 
-    @unittest.skip("mt5 has to be fine tuned for this")
-    def test_auto_regressive_batch(self):
-        """Test Batch Text Generation Auto Regressive"""
-        text = ['Sachin Tendulkar is one of the finest', 'I love stars because']
-        # -1 is important
-        input_ids = tf.ragged.constant(self.tokenizer(text)["input_ids"]).to_tensor(-1)
-        inputs = {}
-        inputs["input_ids"] = input_ids
+        # ----------------------------------------------------------------------------------------#
+        expected_outputs = [[644, 4598, 229, 19250, 64, 558, 7805, 1382, 1110, 3, 10, 61, 1]]
+        tf.assert_equal(predictions_non_auto_regressive, predictions_auto_regressive, expected_outputs)
+        tf.debugging.assert_near(predictions_non_auto_regressive, predictions_auto_regressive, rtol=1.0)
+        logging.info("Test: Successful Auto Regressive Encoder Decoder. ✅")
 
-        seq_length = tf.shape(inputs["input_ids"])[1]
-        batch_size = tf.shape(inputs["input_ids"])[0]
+    @unittest.skip
+    def test_auto_regressive_saved_model_greedy(self):
+        """Test Auto Regressive using Decoder Saved Model - Greedy"""
+        # Text generation using saved_model with TextDecoder
 
-        inputs["all_cache_key"] = tf.zeros((12, batch_size, 12, seq_length, 64))
-        inputs["all_cache_value"] = tf.zeros((12, batch_size, 12, seq_length, 64))
-        inputs["past_length"] = tf.zeros(shape=(1, batch_size), dtype=tf.int32)
-        predictions_auto_regressive = []
-        predictions_prob_auto_regressive = []
+        text = "translate English to German: The house is wonderful and we wish to be here :)"
 
-        past_lengths = []
-        for i in range(10):
-            outputs = self.model_ar(inputs)
-            predicted_ids = tf.cast(tf.expand_dims(tf.argmax(outputs["last_token_logits"], axis=1), 1), tf.int32)
-
-            if i == 0:
-                masks = tf.cast(tf.not_equal(input_ids, -1), tf.float32)
-                masks = tf.reshape(
-                    masks,
-                    (1, batch_size, 1, seq_length, 1),
-                )
-                outputs["all_cache_key"] = outputs["all_cache_key"] * masks
-                outputs["all_cache_value"] = outputs["all_cache_value"] * masks
-
-            inputs["input_ids"] = predicted_ids
-            inputs["all_cache_key"] = outputs["all_cache_key"]
-            inputs["all_cache_value"] = outputs["all_cache_value"]
-            inputs["past_length"] = outputs["past_length"]
-            past_lengths.append(inputs["past_length"])
-            predictions_auto_regressive.append(predicted_ids)
-            predictions_prob_auto_regressive.append(
-                tf.expand_dims(tf.reduce_max(outputs["last_token_logits"], axis=1), 1)
-            )
-
-        predictions_auto_regressive = tf.concat(predictions_auto_regressive, axis=1)
-        predictions_prob_auto_regressive = tf.concat(predictions_prob_auto_regressive, axis=1)
-        expected_prediction = [
-            [1938, 287, 262, 995, 13, 679, 318, 257, 845, 922],
-            [484, 821, 523, 881, 517, 621, 655, 257, 3491, 13],
-        ]
-        expected_probs = [
-            [
-                -110.00343322753906,
-                -84.10372161865234,
-                -60.758541107177734,
-                -94.87692260742188,
-                -72.66572570800781,
-                -124.67924499511719,
-                -100.1087417602539,
-                -103.07884216308594,
-                -108.038330078125,
-                -108.75567626953125,
-            ],
-            [
-                -92.4664535522461,
-                -122.232177734375,
-                -114.12687683105469,
-                -110.21340942382812,
-                -106.74520111083984,
-                -108.79459381103516,
-                -89.76094055175781,
-                -84.4063720703125,
-                -102.25302124023438,
-                -78.72990417480469,
-            ],
-        ]
-        tf.debugging.assert_equal(predictions_auto_regressive.numpy().tolist(), expected_prediction)
-        tf.debugging.assert_near(predictions_prob_auto_regressive.numpy().tolist(), expected_probs)
-        logging.info("Test: Successful Batch Auto Regressive Encoder. ✅")
-
-    @unittest.skip("mt5 has to be fine tuned for this")
-    def test_auto_regressive_saved_model(self):
-        """Test Auto Regressive using Decoder Saved Model"""
-        import shutil
-        import tempfile
-
-        from tf_transformers.text import TextDecoder
-
-        text = ['Sachin Tendulkar is one of the finest', 'I love stars because']
-
-        dirpath = tempfile.mkdtemp()
-        saved_model_dir = "{}/model_pb".format(dirpath)
+        # Save as saved model
+        saved_model_dir = tempfile.mkdtemp()
         self.model_ar.save_as_serialize_module(saved_model_dir, overwrite=True)
 
-        # Load saved model .
+        # Load saved model
         loaded = tf.saved_model.load(saved_model_dir)
-        decoder = TextDecoder(model=loaded)
+        decoder = TextDecoder(model=loaded, decoder_start_token_id=DECODER_START_ID)  # for t5
 
-        # Pad -1
-        input_ids = tf.ragged.constant(self.tokenizer(text)["input_ids"]).to_tensor(-1)
+        # Inputs
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
         inputs = {}
-        inputs["input_ids"] = input_ids
-        decoder_results = decoder.decode(inputs, mode="greedy", max_iterations=10, eos_id=-100)
-        predicted_ids = decoder_results["predicted_ids"].numpy().tolist()
-        expected_ids = [
-            [[1938, 287, 262, 995, 13, 679, 318, 257, 845, 922]],
-            [[484, 821, 523, 881, 517, 621, 655, 257, 3491, 13]],
-        ]
-        tf.debugging.assert_equal(predicted_ids, expected_ids)
-        shutil.rmtree(dirpath)
-        logging.info("Test: Successful Batch Auto Regressive Encoder Saved Model. ✅")
+        inputs['encoder_input_ids'] = inputs_hf['input_ids']
+        inputs['encoder_input_mask'] = inputs_hf['attention_mask']
 
-    @unittest.skip("mt5 has to be fine tuned for this")
-    def test_auto_regressive_keras_model(self):
-        """Test Auto Regressive using Decoder Keras Model"""
+        decoder_results = decoder.decode(inputs, mode='greedy', max_iterations=13, eos_id=1)
+
+        expected_outputs = [[644, 4598, 229, 19250, 64, 558, 7805, 1382, 1110, 3, 10, 61, 1]]
+        print("Decoder ", decoder_results['predicted_ids'].numpy().tolist()[0])
+        assert decoder_results['predicted_ids'].numpy().tolist()[0] == expected_outputs
+        logging.info("Test: Successful Saved Model Greedy. ✅")
+        shutil.rmtree(saved_model_dir)
+
+    @unittest.skip
+    def test_auto_regressive_keras_model_greedy(self):
+        """Test Auto Regressive using Decoder Keras Model - Greedy"""
+        # Text generation using saved_model with TextDecoder
+
         from tf_transformers.text import TextDecoder
 
-        text = ['Sachin Tendulkar is one of the finest', 'I love stars because']
+        text = "translate English to German: The house is wonderful and we wish to be here :)"
 
-        decoder = TextDecoder(model=self.model_ar)
+        decoder = TextDecoder(model=self.model_ar, decoder_start_token_id=DECODER_START_ID)  # for t5
 
-        # Pad -1
-        input_ids = tf.ragged.constant(self.tokenizer(text)["input_ids"]).to_tensor(-1)
+        # Inputs
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
         inputs = {}
-        inputs["input_ids"] = input_ids
-        decoder_results = decoder.decode(inputs, mode="greedy", max_iterations=10, eos_id=-100)
-        predicted_ids = decoder_results["predicted_ids"].numpy().tolist()
-        expected_ids = [
-            [[1938, 287, 262, 995, 13, 679, 318, 257, 845, 922]],
-            [[484, 821, 523, 881, 517, 621, 655, 257, 3491, 13]],
-        ]
-        tf.debugging.assert_equal(predicted_ids, expected_ids)
-        logging.info("Test: Successful Batch Auto Regressive Encoder Keras Model. ✅")
+        inputs['encoder_input_ids'] = inputs_hf['input_ids']
+        inputs['encoder_input_mask'] = inputs_hf['attention_mask']
 
-    # def test_auto_regressive_encoder_decoder():
-    #     from transformers import GPT2Tokenizer
+        decoder_results = decoder.decode(inputs, mode='greedy', max_iterations=13, eos_id=1)
 
-    #     tokenizer = GPT2Tokenizer.from_pretrained(model_name)
-    #     from tf_transformers.models import EncoderDecoder
+        expected_outputs = [[644, 4598, 229, 19250, 64, 558, 7805, 1382, 1110, 3, 10, 61, 1]]
 
-    #     # Without Cache
-    #     encoder_layer, encoder_config = GPT2Model.get_model(
-    #         model_name=model_name, mask_mode="user_defined", return_layer=True
-    #     )
-    #     decoder_layer, decoder_config = GPT2Model.get_model(model_name=model_name, return_layer=True, use_decoder=True)
+        print("Decoder ", decoder_results['predicted_ids'].numpy().tolist()[0])
 
-    #     # Decoder layer wont load from checkpoint
-    #     # As the graph is different
+        assert decoder_results['predicted_ids'].numpy().tolist()[0] == expected_outputs
+        logging.info("Test: Successful Keras Model Greedy. ✅")
 
-    #     # Get decoder variables index and name as dict
-    #     # Assign encoder weights to decoder wherever it matches variable name
-    #     num_assigned = 0
-    #     decoder_var = {var.name: index for index, var in enumerate(decoder_layer.variables)}
-    #     for encoder_var in encoder_layer.variables:
-    #         if encoder_var.name in decoder_var:
-    #             index = decoder_var[encoder_var.name]
-    #             decoder_layer.variables[index].assign(encoder_var)
-    #             num_assigned += 1
+    # @unittest.skip
+    def test_auto_regressive_saved_model_beam(self):
+        """Test Auto Regressive using Decoder Saved Model - Beam"""
+        # Text generation using saved_model with TextDecoder
 
-    #     model = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True, share_encoder=True)
+        text = "translate English to German: The house is wonderful and we wish to be here :)"
 
-    #     # Check encoder decoder generation without caching
+        # Save as saved model
+        saved_model_dir = tempfile.mkdtemp()
+        self.model_ar.save_as_serialize_module(saved_model_dir, overwrite=True)
 
-    #     text = "Sachin Tendulkar is one of the finest"
-    #     encoder_input_ids = tf.expand_dims(tf.ragged.constant(tokenizer(text)["input_ids"]), 0)
-    #     encoder_input_mask = tf.ones_like(encoder_input_ids)
-    #     decoder_input_ids = tf.constant([[1]])
+        # Load saved model
+        loaded = tf.saved_model.load(saved_model_dir)
+        decoder = TextDecoder(model=loaded, decoder_start_token_id=DECODER_START_ID)  # for t5
 
-    #     inputs = {}
-    #     inputs["encoder_input_ids"] = encoder_input_ids
-    #     inputs["encoder_input_mask"] = encoder_input_mask
-    #     inputs["decoder_input_ids"] = decoder_input_ids
+        # Inputs
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
+        inputs = {}
+        inputs['encoder_input_ids'] = inputs_hf['input_ids']
+        inputs['encoder_input_mask'] = inputs_hf['attention_mask']
 
-    #     predictions_non_auto_regressive = []
-    #     predictions_prob_non_auto_regressive = []
+        decoder_results = decoder.decode(inputs, mode='beam', num_beams=3, max_iterations=13, eos_id=DECODER_EOS_ID)
+        top_prediction = decoder_results['predicted_ids'].numpy().tolist()[0][0]
+        expected_outputs = [[644, 4598, 229, 19250, 64, 558, 7805, 1382, 1110, 3, 10, 61, 1]]
 
-    #     for i in range(10):
-    #         outputs = model(inputs)
-    #         predicted_ids = tf.cast(tf.expand_dims(tf.argmax(outputs["last_token_logits"], axis=1), 1), tf.int32)
-    #         inputs["encoder_input_ids"] = tf.concat([inputs["encoder_input_ids"], predicted_ids], axis=1)
-    #         inputs["encoder_input_mask"] = tf.ones_like(inputs["encoder_input_ids"])
-    #         predictions_non_auto_regressive.append(predicted_ids)
-    #         predictions_prob_non_auto_regressive.append(
-    #             tf.expand_dims(tf.reduce_max(outputs["last_token_logits"], axis=1), 1)
-    #         )
-    #     predictions_non_auto_regressive = tf.concat(predictions_non_auto_regressive, axis=1)
-    #     predictions_prob_non_auto_regressive = tf.concat(predictions_prob_non_auto_regressive, axis=1)
+        assert [top_prediction] == expected_outputs
+        logging.info("Test: Successful Saved Model Beam. ✅")
+        shutil.rmtree(saved_model_dir)
 
-    #     # Cache
+    # @unittest.skip
+    def test_auto_regressive_keras_model_beam(self):
+        """Test Auto Regressive using Decoder Keras Model - Beam"""
+        # Text generation using saved_model with TextDecoder
 
-    #     encoder_layer, encoder_config = GPT2Model.get_model(
-    #         model_name=model_name, mask_mode="user_defined", return_layer=True
-    #     )
-    #     decoder_layer, decoder_config = GPT2Model.get_model(
-    #         model_name=model_name, return_layer=True, use_decoder=True, use_auto_regressive=True
-    #     )
+        text = "translate English to German: The house is wonderful and we wish to be here :)"
 
-    #     # Decoder layer wont load from checkpoint
-    #     # As the graph is different
+        decoder = TextDecoder(model=self.model_ar, decoder_start_token_id=DECODER_START_ID)  # for t5
 
-    #     # Get decoder variables index and name as dict
-    #     # Assign encoder weights to decoder wherever it matches variable name
-    #     num_assigned = 0
-    #     decoder_var = {var.name: index for index, var in enumerate(decoder_layer.variables)}
-    #     for encoder_var in encoder_layer.variables:
-    #         if encoder_var.name in decoder_var:
-    #             index = decoder_var[encoder_var.name]
-    #             decoder_layer.variables[index].assign(encoder_var)
-    #             num_assigned += 1
+        # Inputs
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
+        inputs = {}
+        inputs['encoder_input_ids'] = inputs_hf['input_ids']
+        inputs['encoder_input_mask'] = inputs_hf['attention_mask']
 
-    #     model = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True, share_encoder=True)
-    #     # Check encoder decoder generation  caching
+        decoder_results = decoder.decode(inputs, mode='beam', num_beams=3, max_iterations=13, eos_id=DECODER_EOS_ID)
+        top_prediction = decoder_results['predicted_ids'].numpy().tolist()[0][0]
+        expected_outputs = [[644, 4598, 229, 19250, 64, 558, 7805, 1382, 1110, 3, 10, 61, 1]]
 
-    #     encoder_hidden_dim = encoder_config["embedding_size"]
-    #     num_hidden_layers = decoder_config["num_hidden_layers"]
-    #     num_attention_heads = decoder_config["num_attention_heads"]
-    #     attention_head_size = decoder_config["attention_head_size"]
+        assert [top_prediction] == expected_outputs
+        logging.info("Test: Successful Keras Model Beam. ✅")
 
-    #     text = "Sachin Tendulkar is one of the finest"
-    #     encoder_input_ids = tf.expand_dims(tf.ragged.constant(tokenizer(text)["input_ids"]), 0)
-    #     encoder_input_mask = tf.ones_like(encoder_input_ids)
-    #     decoder_input_ids = tf.constant([[1]])
+    @unittest.skip
+    def test_auto_regressive_saved_model_topktopP(self):
+        """Test Auto Regressive using Decoder Saved Model - topktopP"""
+        # Text generation using saved_model with TextDecoder
 
-    #     batch_size = tf.shape(encoder_input_ids)[0]
-    #     seq_length = tf.shape(encoder_input_ids)[1]
+        text = "translate English to German: The house is wonderful and we wish to be here :)"
 
-    #     encoder_hidden_states = tf.zeros((batch_size, seq_length, 768))
-    #     decoder_all_cache_key = tf.zeros(
-    #         (num_hidden_layers, batch_size, num_attention_heads, seq_length, attention_head_size)
-    #     )
-    #     decoder_all_cahce_value = tf.zeros(
-    #         (num_hidden_layers, batch_size, num_attention_heads, seq_length, attention_head_size)
-    #     )
+        # Save as saved model
+        saved_model_dir = tempfile.mkdtemp()
+        self.model_ar.save_as_serialize_module(saved_model_dir, overwrite=True)
 
-    #     inputs = {}
-    #     inputs["encoder_input_ids"] = encoder_input_ids
-    #     inputs["encoder_input_mask"] = encoder_input_mask
-    #     inputs["decoder_input_ids"] = decoder_input_ids
-    #     inputs["encoder_hidden_states"] = encoder_hidden_states
-    #     inputs["decoder_all_cache_key"] = decoder_all_cache_key
-    #     inputs["decoder_all_cache_value"] = decoder_all_cahce_value
+        # Load saved model
+        loaded = tf.saved_model.load(saved_model_dir)
+        decoder = TextDecoder(model=loaded, decoder_start_token_id=DECODER_START_ID)  # for t5
 
-    #     predictions_auto_regressive = []
-    #     predictions_prob_auto_regressive = []
+        # Inputs
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
+        inputs = {}
+        inputs['encoder_input_ids'] = inputs_hf['input_ids']
+        inputs['encoder_input_mask'] = inputs_hf['attention_mask']
 
-    #     for i in range(10):
-    #         outputs = model(inputs)
-    #         predicted_ids = tf.cast(tf.expand_dims(tf.argmax(outputs["last_token_logits"], axis=1), 1), tf.int32)
-    #         inputs["input_ids"] = predicted_ids
-    #         inputs["decoder_all_cache_key"] = outputs["decoder_all_cache_key"]
-    #         inputs["decoder_all_cache_value"] = outputs["decoder_all_cache_value"]
-    #         inputs["encoder_hidden_states"] = outputs["encoder_hidden_states"]
-    #         predictions_auto_regressive.append(predicted_ids)
-    #         predictions_prob_auto_regressive.append(
-    #             tf.expand_dims(tf.reduce_max(outputs["last_token_logits"], axis=1), 1)
-    #         )
-    #     predictions_auto_regressive = tf.concat(predictions_auto_regressive, axis=1)
-    #     predictions_prob_auto_regressive = tf.concat(predictions_prob_auto_regressive, axis=1)
+        _ = decoder.decode(inputs, mode='top_k_top_p', top_k=100, top_p=0.6, max_iterations=13, eos_id=DECODER_EOS_ID)
 
-    #     tf.assert_equal(predictions_auto_regressive, predictions_non_auto_regressive)
-    #     logging.info("Test: Successful Auto Regressive Encoder Decoder.")
+        logging.info("Test: Successful Saved Model top K top P. ✅")
+        shutil.rmtree(saved_model_dir)
+
+    @unittest.skip
+    def test_auto_regressive_keras_model_topktopP(self):
+        """Test Auto Regressive using Decoder Keras Model - topktopP"""
+
+        text = "translate English to German: The house is wonderful and we wish to be here :)"
+
+        decoder = TextDecoder(model=self.model_ar, decoder_start_token_id=DECODER_START_ID)  # for t5
+
+        # Inputs
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
+        inputs = {}
+        inputs['encoder_input_ids'] = inputs_hf['input_ids']
+        inputs['encoder_input_mask'] = inputs_hf['attention_mask']
+
+        _ = decoder.decode(inputs, mode='top_k_top_p', top_k=100, top_p=0.6, max_iterations=13, eos_id=DECODER_EOS_ID)
+
+        logging.info("Test: Successful Keras Model top k top P. ✅")
+
+    @unittest.skip
+    def test_auto_regressive_serializable_greedy(self):
+        # Text generation using saved_model with TextDecoderSerializable
+        decoder = TextDecoderSerializable(
+            model=self.model_ar,
+            decoder_start_token_id=DECODER_START_ID,
+            max_iterations=15,
+            mode="greedy",
+            do_sample=False,
+            eos_id=DECODER_EOS_ID,
+        )
+
+        # Save
+        saved_model_dir = tempfile.mkdtemp()
+        decoder_model = decoder.get_model()
+        decoder_model.save_serialized(saved_model_dir, overwrite=True)
+
+        # Load
+        loaded_decoder = tf.saved_model.load(saved_model_dir)
+        model_pb_decoder = loaded_decoder.signatures['serving_default']
+
+        text = "translate English to German: The house is wonderful and we wish to be here :)"
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
+        inputs = {}
+        inputs['encoder_input_ids'] = inputs_hf['input_ids']
+        inputs['encoder_input_mask'] = inputs_hf['attention_mask']
+
+        decoder_results_serialized = model_pb_decoder(**inputs)
+        expected_outputs = [[644, 4598, 229, 19250, 64, 558, 7805, 1382, 1110, 3, 10, 61, 1]]
+        assert decoder_results_serialized['predicted_ids'].numpy().tolist()[0] == expected_outputs
+        shutil.rmtree(saved_model_dir)
+        logging.info("Test: Successful Serializable Model Greedy. ✅")
+
+    @unittest.skip
+    def test_auto_regressive_serializable_beam(self):
+        # loaded   = tf.saved_model.load(saved_model_dir)
+        decoder = TextDecoderSerializable(
+            model=self.model_ar,
+            decoder_start_token_id=DECODER_START_ID,
+            max_iterations=15,
+            num_beams=3,
+            mode="beam",
+            do_sample=False,
+            eos_id=DECODER_EOS_ID,
+        )
+
+        # Save
+        saved_model_dir = tempfile.mkdtemp()
+        decoder_model = decoder.get_model()
+        decoder_model.save_serialized(saved_model_dir, overwrite=True)
+
+        # Load
+        loaded_decoder = tf.saved_model.load(saved_model_dir)
+        model_pb_decoder = loaded_decoder.signatures['serving_default']
+
+        text = "translate English to German: The house is wonderful and we wish to be here :)"
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
+        inputs = {}
+        inputs['encoder_input_ids'] = inputs_hf['input_ids']
+        inputs['encoder_input_mask'] = inputs_hf['attention_mask']
+
+        decoder_results_serialized = model_pb_decoder(**inputs)
+        top_prediction = decoder_results_serialized['predicted_ids'].numpy().tolist()[0][0]
+        expected_outputs = [[644, 4598, 229, 19250, 64, 558, 7805, 1382, 1110, 3, 10, 61, 1]]
+        assert [top_prediction] == expected_outputs
+        shutil.rmtree(saved_model_dir)
+        shutil.rmtree(saved_model_dir)
+        logging.info("Test: Successful Serializable Model Beam. ✅")
+
+    @unittest.skip
+    def test_auto_regressive_serializable_top_k_top_p(self):
+        # loaded   = tf.saved_model.load(saved_model_dir)
+        decoder = TextDecoderSerializable(
+            model=self.model_ar,
+            decoder_start_token_id=DECODER_START_ID,
+            max_iterations=15,
+            top_k=100,
+            top_p=0.7,
+            mode="top_k_top_p",
+            do_sample=False,
+            eos_id=DECODER_EOS_ID,
+        )
+
+        # Save
+        saved_model_dir = tempfile.mkdtemp()
+        decoder_model = decoder.get_model()
+        decoder_model.save_serialized(saved_model_dir, overwrite=True)
+
+        # Load
+        loaded_decoder = tf.saved_model.load(saved_model_dir)
+        model_pb_decoder = loaded_decoder.signatures['serving_default']
+
+        text = "translate English to German: The house is wonderful and we wish to be here :)"
+        inputs_hf = self.tokenizer(text, return_tensors='tf')
+        inputs = {}
+        inputs['encoder_input_ids'] = inputs_hf['input_ids']
+        inputs['encoder_input_mask'] = inputs_hf['attention_mask']
+
+        _ = model_pb_decoder(**inputs)
+        shutil.rmtree(saved_model_dir)
+        logging.info("Test: Successful Serializable Model Beam. ✅")
+
+    @unittest.skip
+    def test_tflite(self):
+        """Test T5 Tflite"""
+        model = Model.from_pretrained(
+            model_name=MODEL_NAME,
+            convert_fn_type='tf',
+            encoder_kwargs={'batch_size': 1, 'sequence_length': 32},
+            decoder_kwargs={'batch_size': 1, 'sequence_length': 32},
+        )
+
+        tempdir = tempfile.mkdtemp()
+        model.save_serialized(tempdir, overwrite=True)
+
+        converter = tf.lite.TFLiteConverter.from_saved_model("{}".format(tempdir))  # path to the SavedModel directory
+        converter.experimental_new_converter = True
+
+        tflite_model = converter.convert()
+        open("{}/converted_model.tflite".format(tempdir), "wb").write(tflite_model)
+
+        # Load the TFLite model and allocate tensors.
+        interpreter = tf.lite.Interpreter(model_path="{}/converted_model.tflite".format(tempdir))
+        interpreter.allocate_tensors()
+
+        # Get input and output tensors.
+        input_details = interpreter.get_input_details()
+        output_details = interpreter.get_output_details()
+
+        # Get result
+        # encoder input_ids
+        interpreter.set_tensor(
+            input_details[0]['index'],
+            tf.random.uniform(input_details[0]['shape'], minval=0, maxval=100, dtype=tf.int32),
+        )
+        # input_mask
+        interpreter.set_tensor(input_details[1]['index'], tf.ones(input_details[1]['shape'], dtype=tf.int32))
+
+        # decoder input ids
+        interpreter.set_tensor(
+            input_details[2]['index'],
+            tf.random.uniform(input_details[2]['shape'], minval=0, maxval=100, dtype=tf.int32),
+        )
+        interpreter.invoke()
+        tflite_output = interpreter.get_tensor(output_details[-1]['index'])
+
+        tf.debugging.assert_equal(tflite_output.shape, (1, 32, 32128))
+        logging.info("Test: TFlite Conversion. ✅")
+        shutil.rmtree(tempdir)
 
 
 if __name__ == '__main__':

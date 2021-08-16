@@ -80,9 +80,9 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model, model_config = Model.from_pretrained(model_name=model_name)
+        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
-        model, model_config = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
+        model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
 
         from tf_transformers.text import TextDecoder
 
@@ -101,9 +101,9 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model, model_config = Model.from_pretrained(model_name=model_name)
+        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
-        model, model_config = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
+        model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
 
         # Save as saved_model
         model.save_as_serialize_module(self.temp_dir, overwrite=True)
@@ -131,9 +131,9 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model, model_config = Model.from_pretrained(model_name=model_name)
+        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
-        model, model_config = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
+        model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
         # Make decoder model
         from tf_transformers.text import TextDecoderSerializable
 
@@ -187,9 +187,9 @@ class TftBenchmark:
                 return _decoder_fn
 
             model_name = self.cfg.benchmark.model.name
-            model, model_config = Model.from_pretrained(model_name=model_name)
+            model = Model.from_pretrained(model_name=model_name)
             # Load Auto Regressive Version
-            model, model_config = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
+            model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
             # Make decoder model
             from tf_transformers.text import TextDecoderSerializable
 
@@ -220,9 +220,9 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model, model_config = Model.from_pretrained(model_name=model_name)
+        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
-        model, model_config = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
+        model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
         # Make decoder model
         from tf_transformers.text import TextDecoderModel
 
@@ -252,9 +252,9 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model, model_config = Model.from_pretrained(model_name=model_name)
+        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
-        model, model_config = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
+        model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
         # Make decoder model
         from tf_transformers.text import TextDecoderModel
 

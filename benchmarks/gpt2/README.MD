@@ -1,7 +1,43 @@
 
-1. Run benchmark_run.py
 
-## GPT2 Benchmark
+## Benchmark GPT2 with TFT and HuggingFace PT, TF and JAX
+
+
+* Please make sure to install hydra-cc ,as all configs are managed using hydra
+* By default all configurations are designed to run on GPU
+* The following benchmarks ran on Volta V100 32 GB
+
+
+### Run
+
+a. **TFT** ( **bechmark.data.take_sample=true** , to run on  a small subset )
+
+```
+python run.py +benchmark=tft bechmark.data.take_sample=true
+```
+
+b. **HF PT**
+
+```
+python run.py +benchmark=hf bechmark.model.type=pt
+```
+c. **HF JAX**
+
+```
+python run.py +benchmark=hf bechmark.model.type=jax
+```
+d. **HF TF**
+
+```
+python run.py +benchmark=hf bechmark.model.type=tf
+```
+
+
+
+
+## Official Benchmarks on CNN DailyMail
+
+
 
 
 ### Greedy Decode

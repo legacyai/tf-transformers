@@ -47,8 +47,8 @@ def normalize_model_name(model_name):
     return model_name.lower().replace("-", "_").strip()
 
 
-class t5Model(ModelWrapper):
-    """t5 Encoder Wrapper"""
+class T5Model(ModelWrapper):
+    """T5 Encoder Wrapper"""
 
     def __init__(self, model_name='alt5', cache_dir=None, save_checkpoint_cache=True):
         """
@@ -56,7 +56,7 @@ class t5Model(ModelWrapper):
             model_name (str): Model name
             cache_dir (str): cache dir to save the mode checkpoints
         """
-        super(t5Model, self).__init__(
+        super(T5Model, self).__init__(
             model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=save_checkpoint_cache
         )
 
