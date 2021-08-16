@@ -142,26 +142,29 @@ class LegacyModel(tf.keras.Model):
 
             self.loss = loss or {}  # Backwards compat.
 
-    def load_checkpoint(self, checkpoint_dir):
+    def load_checkpoint(self, checkpoint_dir, checkpoint_path=None, **kwargs):
         """[summary]
 
         Args:
             checkpoint_dir ([str]): [Location of the model]
         """
-        checkpoint = tf.train.Checkpoint(model=self)
-        manager = tf.train.CheckpointManager(checkpoint, directory=checkpoint_dir, max_to_keep=1)
-        status = checkpoint.restore(manager.latest_checkpoint)
+        checkpoint = tf.train.Checkpoint(model=self, **kwargs)
+        if not checkpoint:
+            checkpoint_path = tf.train.latest_checkpoint(checkpoint_dir)
+
+        status = checkpoint.restore(checkpoint_path)
         # Important
         if status.assert_existing_objects_matched():
-            logging.info("Successful: Model checkpoints matched and loaded from {}".format(checkpoint_dir))
+            logging.info("Successful: Model checkpoints matched and loaded from {}".format(checkpoint_path))
         else:
             logging.info("Failed to load the checkpoint. Status Assertion Failed.")
 
-    def save_checkpoint(self, checkpoint_dir, overwrite=False):
+    def save_checkpoint(self, checkpoint_dir, overwrite=False, **kwargs):
         """Save checkpoint
 
         Args:
             checkpoint_dir ([str]): [Location of the model]
+            kwargs: Extra arguments to save as model
 
         Returns:
             None
@@ -173,10 +176,11 @@ class LegacyModel(tf.keras.Model):
                 raise FileExistsError()
 
         # If you want to save the model as checkpoints
-        checkpoint = tf.train.Checkpoint(model=self)
-        manager = tf.train.CheckpointManager(checkpoint, directory=checkpoint_dir, max_to_keep=1)
-        manager.save()
-        logging.info("Successful: Saved model at {}".format(manager.latest_checkpoint))
+        checkpoint = tf.train.Checkpoint(model=self, **kwargs)
+        checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
+        checkpoint.save(file_prefix=checkpoint_prefix)
+        checkpoint_written = tf.train.latest_checkpoint(checkpoint_dir)
+        logging.info("Successful: Saved model at {}".format(checkpoint_written))
 
     def save_as_serialize_module(self, directory, overwrite=False):
         """Save as tf.saved_model.save (.pb)

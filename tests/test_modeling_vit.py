@@ -39,14 +39,6 @@ class ModelTest(unittest.TestCase):
     @unittest.skip
     def test_tf_conversion(self):
         raise NotImplementedError()
-        # import shutil
-
-        # try:
-        #     shutil.rmtree("/tmp/tf_transformers_cache/{}".format(MODEL_NAME))
-        # except:
-        #     pass
-        # model = Model.from_pretrained(MODEL_NAME, convert_fn_type='tf')
-        # logging.info("Test: TF Conversion. ✅")
 
     #@unittest.skip
     def test_pt_conversion(self):
