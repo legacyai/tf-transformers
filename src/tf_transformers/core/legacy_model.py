@@ -16,6 +16,8 @@
 # ==============================================================================
 """Extending  tf.keras.Model to LegacyModel for serialization and checkpoint support"""
 
+import os
+
 import tensorflow as tf
 from absl import logging
 
@@ -170,8 +172,6 @@ class LegacyModel(tf.keras.Model):
             None
         """
         if not overwrite:
-            import os
-
             if os.path.exists(checkpoint_dir):
                 raise FileExistsError()
 
