@@ -1,0 +1,5 @@
+
+device:
+  type: gpu
+  num_gpus: 2
+  tpu_address:

@@ -5,6 +5,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
 # C extensions
 *.so
 
@@ -17,6 +18,7 @@ lang_code_data/
 
 #hydra outputs
 benchmarks/*/outputs
+outputs
 
 # Distribution / packaging
 .Python
