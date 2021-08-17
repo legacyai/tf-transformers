@@ -149,7 +149,7 @@ class LegacyModel(tf.keras.Model):
             checkpoint_dir ([str]): [Location of the model]
         """
         checkpoint = tf.train.Checkpoint(model=self, **kwargs)
-        if not checkpoint:
+        if not checkpoint_path:
             checkpoint_path = tf.train.latest_checkpoint(checkpoint_dir)
 
         status = checkpoint.restore(checkpoint_path)

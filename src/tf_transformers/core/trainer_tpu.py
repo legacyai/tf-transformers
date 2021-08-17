@@ -43,7 +43,7 @@ def flat_metric_dict(metric_dict):
     return dict_flatten
 
 
-def save_model_checkpoints(model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models):
+def save_model_checkpoints(model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models, **kwargs):
     # Model checkpoint
     if not overwrite_checkpoint_dir:
         import os
@@ -51,7 +51,7 @@ def save_model_checkpoints(model, overwrite_checkpoint_dir, model_checkpoint_dir
         if os.path.exists(model_checkpoint_dir):
             raise FileExistsError("Model directory exists")
 
-    checkpoint = tf.train.Checkpoint(model=model)
+    checkpoint = tf.train.Checkpoint(model=model, **kwargs)
     manager = tf.train.CheckpointManager(checkpoint, directory=model_checkpoint_dir, max_to_keep=max_number_of_models)
     return manager
 
@@ -325,6 +325,7 @@ def train_and_eval(
 
 class TPUTrainer:
     def __init__(self, tpu_address=None, dtype='fp32'):
+
         distribution_strategy = 'tpu'
         allowed_dtypes = ['fp32', 'bf16']
         if dtype not in allowed_dtypes:
@@ -370,6 +371,7 @@ class TPUTrainer:
         max_number_of_models=10,
         model_save_interval_steps=None,
         repeat_dataset=True,
+        latest_checkpoint=None,
     ):
 
         if steps_per_epoch:
@@ -401,10 +403,14 @@ class TPUTrainer:
         # Make unique names
         training_loss_names = list(set(_training_loss_names))
         validation_loss_names = list(set(_validation_loss_names))
+
         # Checkpoint manager
         checkpoint_manager = save_model_checkpoints(
-            model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models
+            model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models, opt=optimizer
         )
+
+        # Try to load latest checkpoint
+        model.load_checkpoint(checkpoint_dir=model_checkpoint_dir, checkpoint_path=latest_checkpoint, opt=optimizer)
 
         # Get metric dicts before distributing the dataset
         # ddistributed datasets has no attribute .take

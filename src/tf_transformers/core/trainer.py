@@ -379,7 +379,8 @@ class Trainer:
         overwrite_checkpoint_dir=False,
         max_number_of_models=10,
         model_save_interval_steps=None,
-        repeat_dataset=False,
+        repeat_dataset=True,
+        latest_checkpoint=None,
     ):
 
         if steps_per_epoch:
@@ -392,6 +393,8 @@ class Trainer:
         logging.info("Policy: ----> {}".format(keras_utils.get_policy_name()))
         logging.info("Strategy: ---> {}".format(self.distribution_strategy))
         logging.info("Num GPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
+
+        tf.keras.backend.clear_session()
 
         # Under Strategy Scope
         with self.distribution_strategy.scope():
@@ -418,6 +421,9 @@ class Trainer:
         checkpoint_manager = save_model_checkpoints(
             model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models
         )
+
+        # Try to load latest checkpoint
+        model.load_checkpoint(checkpoint_dir=model_checkpoint_dir, checkpoint_path=latest_checkpoint, opt=optimizer)
 
         # Get metric dicts before distributing the dataset
         # ddistributed datasets has no attribute .take
@@ -469,4 +475,6 @@ class Trainer:
         history['training_history'] = training_history
         history['validation_hsitory'] = validation_history
         history['callbacks'] = callback_scores
+
+        # Save json
         return history
