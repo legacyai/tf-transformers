@@ -269,6 +269,12 @@ def train_and_eval(
                 for callback in callbacks:
                     score = callback(trainer_kwargs)
                     callback_scores.append(score)
+
+                    # Try to write a callback scores (only on epoch end)
+                    # If we are returning a dict like {'exact_match': 81} or
+                    # {'rougue-1': 30} etc . . . .
+                    if score and isinstance(score, dict):
+                        write_metrics(score, val_summary_writer, epoch)
             return callback_scores
 
     # Loop starts here
