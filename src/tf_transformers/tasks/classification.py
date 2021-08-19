@@ -1,5 +1,6 @@
 import tensorflow as tf
-from tf_transformers.core import LegacyModel, LegacyLayer
+
+from tf_transformers.core import LegacyLayer, LegacyModel
 
 
 class Classification_Model(LegacyLayer):
@@ -42,6 +43,6 @@ class Classification_Model(LegacyLayer):
 
     def get_model(self):
         layer_output = self(self.model.input)
-        model = LegacyModel(inputs=self.model.input, outputs=layer_output, name="span_selection")
+        model = LegacyModel(inputs=self.model.input, outputs=layer_output, name="classification")
         model.model_config = self.model_config
         return model
