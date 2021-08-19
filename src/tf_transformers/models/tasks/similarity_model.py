@@ -1,5 +1,6 @@
 import tensorflow as tf
-from tf_transformers.core import LegacyModel, LegacyLayer
+
+from tf_transformers.core import LegacyLayer, LegacyModel
 
 
 class Similarity_Model(LegacyLayer):
@@ -18,7 +19,7 @@ class Similarity_Model(LegacyLayer):
 
     def get_mean_embeddings(self, token_embeddings, input_mask):
         """ """
-        cls_embeddings = token_embeddings[:, 0, :]  # 0 is CLS (<s>)
+        # cls_embeddings = token_embeddings[:, 0, :]  # 0 is CLS (<s>)
         # mask PAD tokens
         token_emb_masked = token_embeddings * tf.cast(tf.expand_dims(input_mask, 2), tf.float32)
         total_non_padded_tokens_per_batch = tf.cast(tf.reduce_sum(input_mask, axis=1), tf.float32)

@@ -1,5 +1,6 @@
 import tensorflow as tf
-from tf_transformers.core import LegacyModel, LegacyLayer
+
+from tf_transformers.core import LegacyLayer, LegacyModel
 
 
 class Span_Selection_Model(LegacyLayer):
