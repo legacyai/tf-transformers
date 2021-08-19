@@ -427,7 +427,8 @@ def convert_bert_tf(model, config, model_name):
     inputs = tokenizer(text, return_tensors="tf")
     outputs_hf = model_hf(**inputs)
     outputs_hf = tf.argmax(outputs_hf.last_hidden_state, axis=2)[0].numpy()
-
+    
+    
     # BertMLM
     from transformers import TFBertForMaskedLM
 

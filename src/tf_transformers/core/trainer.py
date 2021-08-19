@@ -327,7 +327,7 @@ def train_and_eval(
     return training_history, validation_history, callback_scores
 
 
-class Trainer:
+class GPUTrainer:
     def __init__(
         self,
         distribution_strategy,

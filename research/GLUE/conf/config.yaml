@@ -1,5 +1,16 @@
-
-device:
+data:
+    train_batch_size: 32
+    eval_batch_size: 64
+    take_sample: false
+    max_seq_length: 128
+trainer:
   type: gpu
+  dtype: fp32
   num_gpus: 2
   tpu_address:
+  epochs: 3
+  strategy: mirrored
+optimizer:
+  learning_rate: 2e-5
+  loss_type:
+     
