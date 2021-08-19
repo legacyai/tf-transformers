@@ -8,7 +8,7 @@ class Classification_Model(LegacyLayer):
         self, model, num_classes, use_all_layers=False, activation=None, is_training=False, use_dropout=False, **kwargs
     ):
         super(Classification_Model, self).__init__(
-            is_training=is_training, use_dropout=use_dropout, name=self.model.name, **kwargs
+            is_training=is_training, use_dropout=use_dropout, name=model.name, **kwargs
         )
 
         self.model = model
