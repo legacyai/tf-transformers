@@ -24,6 +24,29 @@ def cross_entropy_loss(labels, logits, label_weights=None):
     return loss  # A tensor of loss of n examples equal to batch_size
 
 
+def cross_entropy_loss_for_classification(labels, logits, label_weights=None):
+    """
+    logits: (.. , vocab_size)
+    labels: (.. ) rank should be less than logits
+    label_weights: labels shape
+
+    Faster than above implementation
+    """
+
+    per_example_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels)
+    if label_weights is None:
+        label_weights = tf.ones_like(labels)
+    label_weights = tf.cast(label_weights, tf.float32)
+    per_example_loss = tf.cast(per_example_loss, tf.float32)
+    per_example_loss = per_example_loss * label_weights
+    # Take mean along axis=1 and then divide that first
+    # Otherwise float16 will overflow
+    #numerator = tf.reduce_sum(per_example_loss, axis=1)
+    #denominator = tf.reduce_sum(label_weights, axis=1)
+    # loss = tf.math.divide_no_nan(numerator, denominator)
+    return per_example_loss  # A tensor of loss of n examples equal to batch_size
+
+
 def cross_entropy_loss_label_smoothing(labels, logits, smoothing=0.1, label_weights=None):
     """
     logits: (.. , vocab_size)

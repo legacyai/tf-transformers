@@ -383,6 +383,8 @@ class TPUTrainer:
         if steps_per_epoch:
             logging.info("Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.")
         if callbacks:
+            if callbacks_interval_steps is None:
+                callbacks_interval_steps = [None for callback in callbacks]
             assert len(callbacks) == len(callbacks_interval_steps)
 
         # Enable XLA

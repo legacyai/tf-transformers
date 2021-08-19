@@ -5,9 +5,10 @@ from tf_transformers.core import GPUTrainer, TPUTrainer
 
 MODEL_NAME = "albert-base-v2"
 
-def get_model():
-    
-    model = Model.from_pretrained(MODEL_NAME)
+def get_model(return_all_layer_outputs, is_training, use_dropout):
+    model = Model.from_pretrained(MODEL_NAME, return_all_layer_outputs=return_all_layer_outputs,
+                                 is_training=is_training, 
+                                 use_dropout=use_dropout)
     return model
 
 def get_tokenizer():

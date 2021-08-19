@@ -379,7 +379,7 @@ class GPUTrainer:
         validation_loss_fn=None,
         validation_interval_steps=None,
         steps_per_call=100,
-        enable_xla=True,
+        enable_xla=False,
         callbacks=None,
         callbacks_interval_steps=None,
         overwrite_checkpoint_dir=False,
@@ -392,6 +392,8 @@ class GPUTrainer:
         if steps_per_epoch:
             logging.info("Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.")
         if callbacks:
+            if callbacks_interval_steps is None:
+                callbacks_interval_steps = [None for callback in callbacks]
             assert len(callbacks) == len(callbacks_interval_steps)
 
         # Enable XLA
@@ -409,9 +411,8 @@ class GPUTrainer:
 
             # Optimizer
             optimizer = optimizer_fn()
-            # TPU do not need this
-            if not self.use_tpu:
-                optimizer = configure_optimizer(optimizer, use_float16=self.use_float16, loss_scale=self.loss_scale)
+
+            optimizer = configure_optimizer(optimizer, use_float16=self.use_float16, loss_scale=self.loss_scale)
 
         # We use this to avoid inferring names from loss functions
         _training_loss_names = ['loss']

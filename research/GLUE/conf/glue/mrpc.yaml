@@ -2,4 +2,5 @@ task:
     name: mrpc
 data:
   name: mrpc
+  num_classes: 2
   

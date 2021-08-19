@@ -144,22 +144,27 @@ class LegacyModel(tf.keras.Model):
 
             self.loss = loss or {}  # Backwards compat.
 
-    def load_checkpoint(self, checkpoint_dir, checkpoint_path=None, **kwargs):
+    def load_checkpoint(self, checkpoint_dir=None, checkpoint_path=None, **kwargs):
         """[summary]
 
         Args:
             checkpoint_dir ([str]): [Location of the model]
         """
         checkpoint = tf.train.Checkpoint(model=self, **kwargs)
-        if not checkpoint_path:
+        if checkpoint_path is None and checkpoint_dir:
             checkpoint_path = tf.train.latest_checkpoint(checkpoint_dir)
-
-        status = checkpoint.restore(checkpoint_path)
-        # Important
-        if status.assert_existing_objects_matched():
-            logging.info("Successful: Model checkpoints matched and loaded from {}".format(checkpoint_path))
+        if checkpoint_path is None:
+            if checkpoint_dir:
+                logging.info("No checkpoint found in {}".format(checkpoint_dir))
+            else:
+                logging.info("No checkpoint found")
         else:
-            logging.info("Failed to load the checkpoint. Status Assertion Failed.")
+            status = checkpoint.restore(checkpoint_path)
+            # Important
+            if status.assert_existing_objects_matched():
+                logging.info("Successful: Model checkpoints matched and loaded from {}".format(checkpoint_path))
+            else:
+                logging.info("Failed to load the checkpoint. Status Assertion Failed.")
 
     def save_checkpoint(self, checkpoint_dir, overwrite=False, **kwargs):
         """Save checkpoint
