@@ -253,6 +253,7 @@ def train_and_eval(
                 for callback, callback_steps in zip(callbacks, callbacks_interval_steps):
                     if callback_steps and (global_step % callback_steps == 0):
                         logging.info("Callbacks in progress at step {} . . . .".format(global_step))
+                        logging.info("Call back score {}".format(score))
                         score = callback(trainer_kwargs)
                         callback_scores.append(score)
                     else:
@@ -266,7 +267,7 @@ def train_and_eval(
                 for callback in callbacks:
                     score = callback(trainer_kwargs)
                     callback_scores.append(score)
-
+                    logging.info("Call back score {}".format(score))
                     # Try to write a callback scores (only on epoch end)
                     # If we are returning a dict like {'exact_match': 81} or
                     # {'rougue-1': 30} etc . . . .
@@ -279,6 +280,7 @@ def train_and_eval(
     train_summary_writer, val_summary_writer = get_tensorboard_writers(model_checkpoint_dir)
     validation_history = {}
     training_history = {}
+    all_callback_scores = []
     global_step = 0
     epoch_end = False
     total_examples_processed = 0
@@ -303,6 +305,8 @@ def train_and_eval(
 
                 # Call Callbacks
                 callback_scores = do_callbacks(callbacks)
+                if callback_scores:
+                    all_callback_scores.append(callback_scores)
 
                 # Train Metrics
                 training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
@@ -321,12 +325,14 @@ def train_and_eval(
         save_model(epoch_end)
         do_validation(validation_dataset_distributed)
         callback_scores = do_callbacks(callbacks)
+        if callback_scores:
+            all_callback_scores.append(callback_scores)
         epoch_end = False
 
     # Flatten the results
     training_history = flat_metric_dict(training_history)
     validation_history = flat_metric_dict(validation_history)
-    return training_history, validation_history, callback_scores
+    return training_history, validation_history, all_callback_scores
 
 
 class TPUTrainer:

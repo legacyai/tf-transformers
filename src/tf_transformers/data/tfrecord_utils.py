@@ -76,7 +76,7 @@ class TFWriter(object):
         schema,
         file_name="file",
         model_dir=None,
-        tag="dev",
+        tag="eval",
         n_files=10,
         shuffle=True,
         max_files_per_record=10000,
@@ -110,7 +110,7 @@ class TFWriter(object):
         self.is_schema_valid(schema)
         self.tag = tag
 
-        if tag not in ["train", "dev"]:
+        if tag not in ["train", "eval"]:
             logging.info("Unknown tag {} found".format(tag))
             raise Exception("Unknwon Tag")
 

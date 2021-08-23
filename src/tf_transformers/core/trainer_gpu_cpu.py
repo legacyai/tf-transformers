@@ -252,11 +252,12 @@ def train_and_eval(
         if not epoch_end:
             callback_scores = None
             if callbacks and callbacks_interval_steps:
-                logging.info("Callbacks in progress at step {} . . . .".format(global_step))
                 callback_scores = []
                 for callback, callback_steps in zip(callbacks, callbacks_interval_steps):
                     if callback_steps and (global_step % callback_steps == 0):
+                        logging.info("Callbacks in progress at step {} . . . .".format(global_step))
                         score = callback(trainer_kwargs)
+                        logging.info("Call back score {}".format(score))
                         callback_scores.append(score)
                     else:
                         callback_scores.append(None)
@@ -269,7 +270,7 @@ def train_and_eval(
                 for callback in callbacks:
                     score = callback(trainer_kwargs)
                     callback_scores.append(score)
-
+                    logging.info("Call back score {}".format(score))
                     # Try to write a callback scores (only on epoch end)
                     # If we are returning a dict like {'exact_match': 81} or
                     # {'rougue-1': 30} etc . . . .
@@ -282,8 +283,10 @@ def train_and_eval(
     train_summary_writer, val_summary_writer = get_tensorboard_writers(model_checkpoint_dir)
     validation_history = {}
     training_history = {}
+    all_callback_scores = []
     global_step = 0
     epoch_end = False
+    total_examples_processed = 0
     STEPS = steps_per_epoch // steps_per_call
     for epoch in range(1, epochs + 1):
         # start_epoch_time = time.time()
@@ -292,20 +295,27 @@ def train_and_eval(
                 steps_covered = (step + 1) * steps_per_call
                 global_step += steps_per_call
                 tepoch.set_description(
-                    "Epoch {}/{} --- Step {}/{} --- ".format(epoch, epochs, steps_covered, steps_per_epoch)
+                    "Epoch {}/{} --- Step {}/{} --- total examples {}".format(
+                        epoch, epochs, steps_covered, steps_per_epoch, total_examples_processed
+                    )
                 )
                 # Call Train
                 do_train(train_dataset_iter)
-
+                total_examples_processed += steps_per_call * GLOBAL_BATCH_SIZE
+                
+                # Call Validation
                 # Call Validation
                 do_validation(validation_dataset_distributed)
 
                 # Call Callbacks
                 callback_scores = do_callbacks(callbacks)
+                if callback_scores:
+                    all_callback_scores.append(callback_scores)
 
                 # Train Metrics
                 training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
                 training_history[global_step] = training_result
+
                 write_metrics(training_result, train_summary_writer, global_step)
                 # training_result["learning_rate"] = learning_rate_holder.result().numpy()
                 # learning_rate_holder.reset_states()
@@ -319,12 +329,14 @@ def train_and_eval(
         save_model(epoch_end)
         do_validation(validation_dataset_distributed)
         callback_scores = do_callbacks(callbacks)
+        if callback_scores:
+            all_callback_scores.append(callback_scores)
         epoch_end = False
 
     # Flatten the results
     training_history = flat_metric_dict(training_history)
-    validation_history = flat_metric_dict(validation_history)
-    return training_history, validation_history, callback_scores
+    validation_history = flat_metric_dict(validation_history)    
+    return training_history, validation_history, all_callback_scores
 
 
 class GPUTrainer:

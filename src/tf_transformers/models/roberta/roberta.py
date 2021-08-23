@@ -160,7 +160,7 @@ class RobertaEncoder(LegacyLayer):
         self.call_fn = self.get_call_method(self._config_dict)
         # Initialize model
         self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
-
+        
     def get_model(self, initialize_only=False):
         """Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
         Args:

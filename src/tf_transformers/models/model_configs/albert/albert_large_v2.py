@@ -13,6 +13,5 @@ config = {
     "type_vocab_size": 2,
     "vocab_size": 30000,
     "layer_norm_epsilon": 1e-12,
-    "mask_mode": "user_defined",
     "embedding_projection_size": 1024,
 }
