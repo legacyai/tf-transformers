@@ -16,6 +16,7 @@
 # ==============================================================================
 """TF 2.0 Albert Model"""
 
+from typing import Dict
 import tensorflow as tf
 from absl import logging
 
@@ -26,9 +27,37 @@ from tf_transformers.layers.mask import CausalMask, SelfAttentionMask, prefix_ma
 from tf_transformers.layers.transformer import TransformerBERT
 from tf_transformers.utils import tf_utils
 
+from typing import Dict
 logging.set_verbosity("INFO")
 
 
+ALBERT_START_DOCSTRING = r"""
+
+    This model inherits from :class:`~tf_transformers.core.LegacyLayer`. Check the superclass documentation details
+    and design inspiration of LegacyLayer.
+
+    This model is also a `tf.keras.layers.Layer <https://www.tensorflow.org/api_docs/python/tf/keras/layers>`__ subclass. Use
+    it as a regular TF 2.0 Keras layer and refer to the TF 2.0 documentation for all matter related to general usage
+    and behavior.
+
+    .. note::
+
+        TF 2.0 models accepts two formats as inputs:
+
+        - having all inputs as dict . 
+
+        This second option is recommended and useful when using :meth:`tf.keras.Model.fit` method which currently requires having all
+        the tensors in the first argument of the model call function: :obj:`model(inputs)`.
+
+        Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+        
+            - a dictionary with one or several input Tensors associated to the input names given in the docstring:
+              :obj:`model({"input_ids": input_ids, "input_mask": input_mask, "input_type_ids": input_type_ids})`
+
+    Args:
+        config (:class:`~tf_transformers.TransformerConfig`): Model configuration class with all details of
+        general parameters of Transformer based models.
+"""
 class AlbertEncoder(LegacyLayer):
     """Albert based encoder / Decoder .
     ALBERT: A Lite BERT for Self-supervised Learning of Language Representations
@@ -42,18 +71,18 @@ class AlbertEncoder(LegacyLayer):
 
     def __init__(
         self,
-        config,
-        mask_mode="user_defined",
-        name="albert",
-        use_dropout=False,
-        is_training=False,
-        use_auto_regressive=False,
-        use_decoder=False,
-        batch_size=None,
-        sequence_length=None,
-        use_mlm_layer=True,
-        use_masked_lm_positions=False,
-        return_all_layer_outputs=False,
+        config: Dict,
+        mask_mode: str ="user_defined",
+        name: str="albert",
+        use_dropout: bool=False,
+        is_training: bool=False,
+        use_auto_regressive: bool =False,
+        use_decoder: bool=False,
+        batch_size: bool=None,
+        sequence_length: bool=None,
+        use_mlm_layer: bool=True,
+        use_masked_lm_positions: bool=False,
+        return_all_layer_outputs: bool=False,
         **kwargs,
     ):
 
