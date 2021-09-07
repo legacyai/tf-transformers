@@ -46,7 +46,7 @@ class ModelTest(unittest.TestCase):
         )
         self.tokenizer = Tokenizer.from_pretrained(MODEL_NAME)
 
-    @unittest.skip
+    #@unittest.skip
     def test_tf_conversion(self):
 
         try:
@@ -56,7 +56,7 @@ class ModelTest(unittest.TestCase):
         _ = Model.from_pretrained(MODEL_NAME, convert_fn_type='tf')
         logging.info("Test: TF Conversion. ✅")
 
-    @unittest.skip
+    #@unittest.skip
     def test_pt_conversion(self):
         try:
             shutil.rmtree("/tmp/tf_transformers_cache/{}".format(MODEL_NAME))
@@ -108,15 +108,15 @@ class ModelTest(unittest.TestCase):
 
         batch_size = tf.shape(encoder_input_ids)[0]
         seq_length = tf.shape(encoder_input_ids)[1]
-
+        decoder_seq_length = 1 # We expect to provide only DECODER_START_TOKEN_ID to decoder
         decoder_input_ids = tf.reshape([0] * batch_size.numpy(), (batch_size, 1))
 
         encoder_hidden_states = tf.zeros((batch_size, seq_length, encoder_hidden_dim))
         decoder_all_cache_key = tf.zeros(
-            (num_hidden_layers, batch_size, num_attention_heads, seq_length, attention_head_size)
+            (num_hidden_layers, batch_size, num_attention_heads, decoder_seq_length, attention_head_size)
         )
         decoder_all_cahce_value = tf.zeros(
-            (num_hidden_layers, batch_size, num_attention_heads, seq_length, attention_head_size)
+            (num_hidden_layers, batch_size, num_attention_heads, decoder_seq_length, attention_head_size)
         )
 
         inputs = {}
@@ -206,7 +206,7 @@ class ModelTest(unittest.TestCase):
         assert decoder_results['predicted_ids'].numpy().tolist()[0] == expected_outputs
         logging.info("Test: Successful Keras Model Greedy. ✅")
 
-    # @unittest.skip
+    @unittest.skip
     def test_auto_regressive_saved_model_beam(self):
         """Test Auto Regressive using Decoder Saved Model - Beam"""
         # Text generation using saved_model with TextDecoder
@@ -235,7 +235,7 @@ class ModelTest(unittest.TestCase):
         logging.info("Test: Successful Saved Model Beam. ✅")
         shutil.rmtree(saved_model_dir)
 
-    # @unittest.skip
+    @unittest.skip
     def test_auto_regressive_keras_model_beam(self):
         """Test Auto Regressive using Decoder Keras Model - Beam"""
         # Text generation using saved_model with TextDecoder

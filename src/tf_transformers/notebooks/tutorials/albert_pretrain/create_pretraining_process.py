@@ -16,17 +16,14 @@
 # coding=utf-8
 """Create masked LM/next sentence masked_lm TF examples for ALBERT."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
+
 import collections
-import random
-import tokenization
+
 import numpy as np
 import six
-from six.moves import range
-from six.moves import zip
-import tensorflow as tf
+import tokenization
+from six.moves import range, zip
 
 
 class TrainingInstance(object):
@@ -58,7 +55,7 @@ class TrainingInstance(object):
 def parse_instances(instances, tokenizer, max_seq_length, max_predictions_per_seq):
     """Create TF example files from `TrainingInstance`s."""
     all_results = []
-    for (inst_index, instance) in enumerate(instances):
+    for (_inst_index, instance) in enumerate(instances):
         input_ids = tokenizer.convert_tokens_to_ids(instance.tokens)
         input_mask = [1] * len(input_ids)
         segment_ids = list(instance.segment_ids)

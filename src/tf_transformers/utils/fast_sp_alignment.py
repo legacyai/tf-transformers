@@ -89,7 +89,7 @@ def fast_sp_alignment(sentence, tokenizer, SPECIAL_PIECE):
         # Try to re-align if possible
         try:
             orig_to_new_index, aligned_words = realign_words(original_words, sub_words_mapped, SPECIAL_PIECE)
-        except:
+        except:  # noqa
             # if re-align fails, then tokenize like word-piece tokenizer
             # biut, using sentence piece
             aligned_words = original_words

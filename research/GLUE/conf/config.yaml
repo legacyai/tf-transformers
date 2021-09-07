@@ -16,4 +16,3 @@ optimizer:
 model:
   is_training: true
   use_dropout: true
-     

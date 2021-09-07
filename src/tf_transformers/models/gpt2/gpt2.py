@@ -312,7 +312,7 @@ class GPT2Encoder(LegacyLayer):
         # First word of last layer outputs [CLS]
         # batch_size x embedding_size
         # batch_size x sequence_length x embedding_size
-        token_embeddings = tf.cast(encoder_outputs[-1],  dtype=tf_utils.get_dtype())
+        token_embeddings = tf.cast(encoder_outputs[-1], dtype=tf_utils.get_dtype())
         token_logits = tf.matmul(
             token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
         )
@@ -688,6 +688,28 @@ class GPT2Encoder(LegacyLayer):
         all_cache_key = inputs["all_cache_key"]
         all_cache_value = inputs["all_cache_value"]
 
+        #  We pass zero tensor for cache_key/cache_value at step 0, with decoder_sequence_length =1
+        # Assuming we start by considering "one" decoder token to condition on
+        # Even for step 1 , decoder_sequence_length = 1 remains same , as we start concacatanating
+        # cache_key/cache_value from step 2 onwards. So, for step 0, decoder_sequence_length =
+        # tf.shape(all_cache_key)[3] -1
+        def _get_decoder_sequence_length_step0(input_ids):
+            decoder_current_sequence_length = tf.shape(all_cache_key)[3] - 1
+            return decoder_current_sequence_length
+
+        # From step 1, we do not substract - 1, we just use it as decoder_sequence_length is aligned
+        # from step 1
+        def _get_decoder_sequence_length_step_other(input_ids):
+            decoder_current_sequence_length = tf.shape(all_cache_key)[3]
+            return decoder_current_sequence_length
+
+        # This is useful only for positional embedding layer. T5 models dont have this
+        decoder_current_sequence_length = tf.cond(
+            tf.equal(tf.reduce_sum(all_cache_key), 0),
+            lambda: _get_decoder_sequence_length_step0(all_cache_key),
+            lambda: _get_decoder_sequence_length_step_other(all_cache_key),
+        )
+
         all_cache_key = [
             tf.squeeze(item, axis=0)
             for item in tf.split(all_cache_key, num_or_size_splits=self._config_dict["num_hidden_layers"], axis=0)
@@ -698,7 +720,7 @@ class GPT2Encoder(LegacyLayer):
         ]
 
         # 1. Collect Word Embeddings
-        sequence_length = tf.shape(input_ids)[1]
+        sequence_length = tf.shape(input_ids)[1]  # noqa
         embeddings = self._embedding_layer(input_ids)
         # Add word_embeddings + position_embeddings + type_embeddings
         if self._type_embeddings_layer:
@@ -706,7 +728,8 @@ class GPT2Encoder(LegacyLayer):
             type_embeddings = self._type_embeddings_layer(input_type_ids)
             embeddings = embeddings + type_embeddings
         if self._positional_embedding_layer:
-            positional_embeddings = self._positional_embedding_layer(sequence_length)
+
+            positional_embeddings = self._positional_embedding_layer(decoder_current_sequence_length)
             # Make it 3D for sum ( For decoder we decode one at a time)
             positional_embeddings = tf.expand_dims(positional_embeddings, 0)
             embeddings = embeddings + positional_embeddings

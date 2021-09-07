@@ -26,6 +26,7 @@ from tf_transformers.core.performance_utils import (
     is_float16,
     set_mixed_precision_policy,
 )
+from tf_transformers.utils import tf_utils
 
 
 def flat_metric_dict(metric_dict):
@@ -302,7 +303,7 @@ def train_and_eval(
                 # Call Train
                 do_train(train_dataset_iter)
                 total_examples_processed += steps_per_call * GLOBAL_BATCH_SIZE
-                
+
                 # Call Validation
                 # Call Validation
                 do_validation(validation_dataset_distributed)
@@ -335,7 +336,7 @@ def train_and_eval(
 
     # Flatten the results
     training_history = flat_metric_dict(training_history)
-    validation_history = flat_metric_dict(validation_history)    
+    validation_history = flat_metric_dict(validation_history)
     return training_history, validation_history, all_callback_scores
 
 
@@ -412,7 +413,11 @@ class GPUTrainer:
         keras_utils.set_session_config(enable_xla=enable_xla)
         logging.info("Policy: ----> {}".format(keras_utils.get_policy_name()))
         logging.info("Strategy: ---> {}".format(self.distribution_strategy))
-        logging.info("Num GPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
+        _is_gpu_available, _num_gpus_present = tf_utils.is_gpu_available()
+        if _is_gpu_available:
+            logging.info("Num GPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
+        else:
+            logging.info("Num CPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
 
         tf.keras.backend.clear_session()
 

@@ -253,8 +253,8 @@ def train_and_eval(
                 for callback, callback_steps in zip(callbacks, callbacks_interval_steps):
                     if callback_steps and (global_step % callback_steps == 0):
                         logging.info("Callbacks in progress at step {} . . . .".format(global_step))
-                        logging.info("Call back score {}".format(score))
                         score = callback(trainer_kwargs)
+                        logging.info("Call back score {}".format(score))
                         callback_scores.append(score)
                     else:
                         callback_scores.append(None)

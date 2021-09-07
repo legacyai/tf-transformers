@@ -16,17 +16,16 @@
 # coding=utf-8
 """Tokenization classes."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import collections
 import unicodedata
+
+import sentencepiece as spm
 import six
-from six.moves import range
 import tensorflow.compat.v1 as tf
 import tensorflow_hub as hub
-import sentencepiece as spm
+from six.moves import range
 
 SPIECE_UNDERLINE = "▁".encode("utf-8")
 

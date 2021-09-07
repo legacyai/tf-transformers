@@ -41,8 +41,8 @@ def cross_entropy_loss_for_classification(labels, logits, label_weights=None):
     per_example_loss = per_example_loss * label_weights
     # Take mean along axis=1 and then divide that first
     # Otherwise float16 will overflow
-    #numerator = tf.reduce_sum(per_example_loss, axis=1)
-    #denominator = tf.reduce_sum(label_weights, axis=1)
+    # numerator = tf.reduce_sum(per_example_loss, axis=1)
+    # denominator = tf.reduce_sum(label_weights, axis=1)
     # loss = tf.math.divide_no_nan(numerator, denominator)
     return per_example_loss  # A tensor of loss of n examples equal to batch_size
 

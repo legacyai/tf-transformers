@@ -3,8 +3,8 @@ from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer, LegacyModel
-from tf_transformers.layers import T5LayerNormalization, OnDeviceEmbedding, PositionEmbedding
-from tf_transformers.layers.mask import CausalMask, CrossAttentionMask, SelfAttentionMask, prefix_mask
+from tf_transformers.layers import T5LayerNormalization
+from tf_transformers.layers.mask import CausalMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerT5
 from tf_transformers.utils import tf_utils
 
@@ -163,12 +163,12 @@ class T5Encoder(LegacyLayer):
             dtype=tf.int32,
             name="input_type_ids",
         )
-        masked_lm_positions = tf.keras.layers.Input(
-            shape=(None,),
-            batch_size=self._batch_size,
-            dtype=tf.int32,
-            name="masked_lm_positions",
-        )
+        # masked_lm_positions = tf.keras.layers.Input(
+        #     shape=(None,),
+        #     batch_size=self._batch_size,
+        #     dtype=tf.int32,
+        #     name="masked_lm_positions",
+        # )
         inputs = {}
         inputs["input_ids"] = input_ids  # Default
         # if mask_mode != 'causal', user has to provde mask
@@ -544,7 +544,10 @@ class T5Encoder(LegacyLayer):
             type_embeddings = self._type_embeddings_layer(input_type_ids)
             embeddings = embeddings + type_embeddings
         if self._positional_embedding_layer:
-            positional_embeddings = self._positional_embedding_layer(sequence_length)
+
+            # T5/MT5 doesn't have positional embedding, so this is not useful
+            # Still, in case to use it in future, check def call_decoder_auto_regressive in Roberta Model
+            positional_embeddings = self._positional_embedding_layer(sequence_length)  # noqa
             # Make it 3D for sum ( For decoder we decode one at a time)
             positional_embeddings = tf.expand_dims(positional_embeddings, 0)
             embeddings = embeddings + positional_embeddings

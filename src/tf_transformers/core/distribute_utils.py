@@ -16,8 +16,11 @@
 
 import json
 import os
+from logging import warning
 
 import tensorflow as tf
+
+from tf_transformers.utils import tf_utils
 
 
 def _collective_communication(all_reduce_alg):
@@ -138,6 +141,7 @@ def get_distribution_strategy(
         `num_gpus` is larger than 1; or `num_gpus` is negative or if
         `distribution_strategy` is `tpu` but `tpu_address` is not specified.
     """
+    _is_gpu_available, _num_gpus_present = tf_utils.is_gpu_available()
     del kwargs
     if num_gpus < 0:
         raise ValueError("`num_gpus` can not be negative.")
@@ -178,6 +182,12 @@ def get_distribution_strategy(
 
     if distribution_strategy == "one_device":
         if num_gpus == 0:
+            if _is_gpu_available:
+                raise warning(
+                    "You have {} GPUs available in your system . But you have set `num_gpus=0`".format(
+                        _num_gpus_present
+                    )
+                )
             return tf.distribute.OneDeviceStrategy("device:CPU:0")
         if num_gpus > 1:
             raise ValueError("`OneDeviceStrategy` can not be used for more than " "one device.")
@@ -185,8 +195,18 @@ def get_distribution_strategy(
 
     if distribution_strategy == "mirrored":
         if num_gpus == 0:
+            if _is_gpu_available:
+                raise warning(
+                    "You have {} GPUs available in your system . But you have set `num_gpus=0`".format(
+                        _num_gpus_present
+                    )
+                )
             devices = ["device:CPU:0"]
         else:
+            if _is_gpu_available is False:
+                raise ValueError(
+                    "No GPUs found in your system. Choose a different strategy with `num_gpus=0` or set `strategy=off`"
+                )
             devices = ["device:GPU:%d" % i for i in range(num_gpus)]
         return tf.distribute.MirroredStrategy(
             devices=devices, cross_device_ops=_mirrored_cross_device_ops(all_reduce_alg, num_packs)

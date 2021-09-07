@@ -109,7 +109,7 @@ class TFWriter(object):
         # Schema Check
         self.is_schema_valid(schema)
         self.tag = tag
-
+        print("Tag", tag)
         if tag not in ["train", "eval"]:
             logging.info("Unknown tag {} found".format(tag))
             raise Exception("Unknwon Tag")

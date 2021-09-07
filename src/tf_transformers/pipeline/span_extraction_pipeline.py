@@ -3,8 +3,13 @@ import collections
 import tensorflow as tf
 
 from tf_transformers.data import TFProcessor
-from tf_transformers.data.squad_utils_sp import *
-from tf_transformers.data.squad_utils_sp import _compute_softmax, _get_best_indexes
+from tf_transformers.data.squad_utils_sp import (
+    _compute_softmax,
+    _get_best_indexes,
+    convert_question_context_to_standard_format,
+    example_to_features_using_fast_sp_alignment_test,
+    post_clean_train_squad,
+)
 from tf_transformers.utils.tokenization import BasicTokenizer
 
 
@@ -102,7 +107,7 @@ class Span_Extraction_Pipeline:
         # for TFProcessor
         def local_parser():
             for f in dev_features:
-                yield tokenizer_fn(f)
+                yield self.tokenizer_fn(f)
 
         # Create dataset
         tf_processor = TFProcessor()
@@ -228,7 +233,7 @@ class Span_Extraction_Pipeline:
                         total_scores.append(
                             prelim_predictions[top_n].start_log_prob + prelim_predictions[top_n].end_log_prob
                         )
-                    except:
+                    except:  # noqa
                         predicted_text = ""
                         qas_id_answer[qas_id] = ""
                         skipped.append(qas_id)
@@ -246,10 +251,10 @@ class Span_Extraction_Pipeline:
             final_result[qas_id]["answers"] = answer_dict
             return final_result
 
-    def __call__(self, questions, contexts, qas_ids=[]):
+    def __call__(self, questions, contexts, qas_ids=None):
 
         # If qas_id is empty, we assign positions as id
-        if qas_ids == []:
+        if qas_ids is None:
             qas_ids = [i for i in range(len(questions))]
         # each question should have a context
         assert len(questions) == len(contexts) == len(qas_ids)

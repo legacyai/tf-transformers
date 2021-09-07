@@ -374,7 +374,7 @@ def _convert_single_example_to_feature_fast_sp_train(
     tok_to_orig_index = []
     orig_to_tok_index = []
     all_doc_tokens = []
-    for (i, token) in enumerate(aligned_words):
+    for (i, _token) in enumerate(aligned_words):
         orig_to_tok_index.append(len(all_doc_tokens))
         sub_tokens = sub_words_mapped[i]
         for sub_token in sub_tokens:
@@ -422,7 +422,7 @@ def _convert_single_example_to_feature_fast_sp_train(
         start_offset += min(length, doc_stride)
 
     all_results = []
-    for (doc_span_index, doc_span) in enumerate(doc_spans):
+    for (_doc_span_index, doc_span) in enumerate(doc_spans):
         span_is_impossible = example["is_impossible"]
         start_position = None
         end_position = None
@@ -508,7 +508,7 @@ def example_to_features_using_fast_sp_alignment_test(
         tok_to_orig_index = []
         orig_to_tok_index = []
         all_doc_tokens = []
-        for (i, token) in enumerate(aligned_words):
+        for (i, _token) in enumerate(aligned_words):
             orig_to_tok_index.append(len(all_doc_tokens))
             sub_tokens = sub_words_mapped[i]
             for sub_token in sub_tokens:
@@ -537,7 +537,7 @@ def example_to_features_using_fast_sp_alignment_test(
                 break
             start_offset += min(length, doc_stride)
 
-        for (doc_span_index, doc_span) in enumerate(doc_spans):
+        for (_doc_span_index, doc_span) in enumerate(doc_spans):
             doc_start = doc_span.start
             doc_end = doc_span.start + doc_span.length - 1
 

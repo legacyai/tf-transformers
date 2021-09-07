@@ -449,7 +449,7 @@ class MetricsContainer(Container):
                     if weighted_metric_obj is None:
                         continue
                     weighted_metric_obj.update_state(y_t, y_p, sample_weight=sw)
-        except:
+        except:  # noqa
             pass
 
     def _get_metric_objects(self, metrics, y_t, y_p):

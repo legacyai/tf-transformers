@@ -50,7 +50,7 @@ def normalize_model_name(model_name):
 class T5Model(ModelWrapper):
     """T5 Encoder Wrapper"""
 
-    def __init__(self, model_name='alt5', cache_dir=None, save_checkpoint_cache=True):
+    def __init__(self, model_name='t5', cache_dir=None, save_checkpoint_cache=True):
         """
         Args:
             model_name (str): Model name

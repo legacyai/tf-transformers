@@ -42,7 +42,6 @@ def share_embedding_layers(encoder_layer, decoder_layer):
             decoder_layer._type_embeddings_layer = encoder_layer._type_embeddings_layer
     except Exception as e:
         logging.info(e)
-        pass
 
     try:
         if encoder_layer._positional_embedding_layer and decoder_layer._positional_embedding_layer:
@@ -53,7 +52,6 @@ def share_embedding_layers(encoder_layer, decoder_layer):
             decoder_layer._positional_embedding_layer = encoder_layer._positional_embedding_layer
     except Exception as e:
         logging.info(e)
-        pass
 
 
 def share_encoder_layers(encoder_layer, decoder_layer):
@@ -75,29 +73,24 @@ def share_encoder_layers(encoder_layer, decoder_layer):
             dec_layer._attention_layer_norm = enc_layer._attention_layer_norm
         except Exception as e:
             logging.warn(e)
-            pass
         try:
             dec_layer._intermediate_dense = enc_layer._intermediate_dense
         except Exception as e:
             logging.warn(e)
-            pass
         try:
             dec_layer._output_dense = enc_layer._output_dense
         except Exception as e:
             logging.warn(e)
-            pass
         try:
             dec_layer._output_layer_norm = enc_layer._output_layer_norm
         except Exception as e:
             logging.warn(e)
-            pass
 
     try:
         if encoder_layer._pooler_layer and decoder_layer._pooler_layer:
             decoder_layer._pooler_layer = encoder_layer._pooler_layer
     except Exception as e:
         logging.warn(e)
-        pass
 
     try:
         if encoder_layer._use_mlm_layer and decoder_layer._use_mlm_layer:
@@ -107,7 +100,6 @@ def share_encoder_layers(encoder_layer, decoder_layer):
                 decoder_layer._masked_lm_bias = encoder_layer._masked_lm_bias
     except Exception as e:
         logging.warn(e)
-        pass
 
 
 class EncoderDecoder(LegacyLayer):

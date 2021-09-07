@@ -214,3 +214,14 @@ def gather_values_from_2d_tensor(value_tensor, index_tensor):
         [batch_range, tf.cast(index_tensor, dtype=batch_range.dtype)], axis=1
     )  # 2D (batch_size, 2)
     return tf.gather_nd(value_tensor, index_tensor_2d)  # (batch_size, )
+
+
+def is_gpu_available():
+    counter = 0
+    devices = tf.config.list_physical_devices()
+    for device in devices:
+        if 'GPU' in device.name:
+            counter += 1
+    if counter == 0:
+        return False, counter
+    return True, counter

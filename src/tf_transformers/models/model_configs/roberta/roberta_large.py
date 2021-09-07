@@ -12,5 +12,5 @@ config = {
     "num_hidden_layers": 24,
     "type_vocab_size": 1,
     "vocab_size": 50265,
-    "layer_norm_epsilon": 1e-05
+    "layer_norm_epsilon": 1e-05,
 }

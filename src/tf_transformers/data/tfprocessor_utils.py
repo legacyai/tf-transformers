@@ -84,7 +84,7 @@ class TFProcessor(object):
                 if len(v.shape.dims) == 1:
                     _padded_shapes[k] = [None]
                 if len(v.shape.dims) == 0:
-                     _padded_shapes[k] = []
+                    _padded_shapes[k] = []
                 if len(v.shape.dims) > 1:
                     raise ValueError("Seems like `{}` has 2 dimensional or more".format(v))
 
