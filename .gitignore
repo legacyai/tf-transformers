@@ -9,6 +9,9 @@ __pycache__/
 # C extensions
 *.so
 
+# DS store
+.DS_Store
+
 # tests and logs
 tests/fixtures/*
 !tests/fixtures/sample_text_no_unicode.txt
