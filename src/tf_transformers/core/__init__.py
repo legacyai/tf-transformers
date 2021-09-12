@@ -21,3 +21,4 @@ from tf_transformers.core.model_wrapper import ModelWrapper
 from tf_transformers.core.trainer_gpu_cpu import GPUTrainer
 from tf_transformers.core.trainer_single_device import SingleDeviceTrainer
 from tf_transformers.core.trainer_tpu import TPUTrainer
+from tf_transformers.core.transformer_config import TransformerConfig

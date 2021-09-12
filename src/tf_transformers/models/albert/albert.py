@@ -16,7 +16,8 @@
 # ==============================================================================
 """TF 2.0 Albert Model"""
 
-from typing import Dict
+from typing import Dict, Union
+
 import tensorflow as tf
 from absl import logging
 
@@ -26,63 +27,42 @@ from tf_transformers.layers import BiasLayer, MaskedLM, dense_einsum
 from tf_transformers.layers.mask import CausalMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerBERT
 from tf_transformers.utils import tf_utils
+from tf_transformers.utils.docstring_file_utils import add_start_docstrings
+from tf_transformers.utils.docstring_utils import (
+    CALL_DECODER_AUTO_REGRESSIVE_DOCSTRING,
+    CALL_DECODER_DOCSTRING,
+    CALL_ENCODER_AUTO_REGRESSIVE_DOCSTRING,
+    CALL_ENCODER_DOCSTRING,
+    ENCODER_CLASS_DOCSTRING,
+    MAIN_CALL_DOCSTRING,
+)
 
-from typing import Dict
+_class_model = ''
+_class_encoder = 'tf_transformers.models.AlbertEncoder'
+_sample_model_example = 'albert-base-v2'
+
 logging.set_verbosity("INFO")
 
 
-ALBERT_START_DOCSTRING = r"""
-
-    This model inherits from :class:`~tf_transformers.core.LegacyLayer`. Check the superclass documentation details
-    and design inspiration of LegacyLayer.
-
-    This model is also a `tf.keras.layers.Layer <https://www.tensorflow.org/api_docs/python/tf/keras/layers>`__ subclass. Use
-    it as a regular TF 2.0 Keras layer and refer to the TF 2.0 documentation for all matter related to general usage
-    and behavior.
-
-    .. note::
-
-        TF 2.0 models accepts two formats as inputs:
-
-        - having all inputs as dict . 
-
-        This second option is recommended and useful when using :meth:`tf.keras.Model.fit` method which currently requires having all
-        the tensors in the first argument of the model call function: :obj:`model(inputs)`.
-
-        Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
-        
-            - a dictionary with one or several input Tensors associated to the input names given in the docstring:
-              :obj:`model({"input_ids": input_ids, "input_mask": input_mask, "input_type_ids": input_type_ids})`
-
-    Args:
-        config (:class:`~tf_transformers.TransformerConfig`): Model configuration class with all details of
-        general parameters of Transformer based models.
-"""
+@add_start_docstrings(
+    "Albert Model :",
+    ENCODER_CLASS_DOCSTRING.format("tf_transformers.models.albert.AlbertConfig"),
+)
 class AlbertEncoder(LegacyLayer):
-    """Albert based encoder / Decoder .
-    ALBERT: A Lite BERT for Self-supervised Learning of Language Representations
-    Authors: Zhenzhong Lan, Mingda Chen, Sebastian Goodman, Kevin Gimpel, Piyush Sharma, Radu Soricut
-    
-    Implementation of Albert in TF2.0
-
-    Paper: https://arxiv.org/abs/1909.11942
-    Official Code: https://github.com/google-research/albert
-    """
-
     def __init__(
         self,
         config: Dict,
-        mask_mode: str ="user_defined",
-        name: str="albert",
-        use_dropout: bool=False,
-        is_training: bool=False,
-        use_auto_regressive: bool =False,
-        use_decoder: bool=False,
-        batch_size: bool=None,
-        sequence_length: bool=None,
-        use_mlm_layer: bool=True,
-        use_masked_lm_positions: bool=False,
-        return_all_layer_outputs: bool=False,
+        mask_mode: str = "user_defined",
+        name: str = "albert",
+        use_dropout: bool = False,
+        is_training: bool = False,
+        use_auto_regressive: bool = False,
+        use_decoder: bool = False,
+        batch_size: bool = None,
+        sequence_length: bool = None,
+        use_mlm_layer: bool = True,
+        use_masked_lm_positions: bool = False,
+        return_all_layer_outputs: bool = False,
         **kwargs,
     ):
 
@@ -202,10 +182,11 @@ class AlbertEncoder(LegacyLayer):
         # Initialize model
         self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
 
-    def get_model(self, initialize_only=False):
+    def get_model(self: LegacyLayer, initialize_only: bool = False):
         """Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
         Args:
-            self: model (tf.keras.Layer) instance
+            self: Model layer
+            initialize_only: If False, model (LegacyModel) wont be returned.
         """
 
         input_ids = tf.keras.layers.Input(
@@ -312,27 +293,11 @@ class AlbertEncoder(LegacyLayer):
         model.model_config = self._config_dict
         return model
 
-    def call_encoder(self, inputs):
-        """Forward pass of an Encoder
-
-        Args:
-            inputs ([dict of tf.Tensor]): This is the input to the model.
-
-            'input_ids'         --> tf.int32 (b x s)
-            'input_mask'        --> tf.int32 (b x s) # optional
-            'input_type_ids'    --> tf.int32 (b x s) # optional
-
-        Returns:
-            [dict of tf.Tensor]: Output from the model
-
-            'cls_output'        --> tf.float32 (b x s) # optional
-            'token_embeddings'  --> tf.float32 (b x s x h)
-            'all_layer_token_embeddings' --> tf.float32 (List of (b x s x h)
-                                              from all layers)
-            'all_layer_cls_output'       --> tf.float32 (List of (b x s)
-                                              from all layers)
-        """
-
+    @add_start_docstrings(
+        "Forward pass of Albert :",
+        CALL_ENCODER_DOCSTRING,
+    )
+    def call_encoder(self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]) -> Dict[str, tf.Tensor]:
         # 1. Collect Word Embeddings
         input_ids = inputs["input_ids"]
         sequence_length = tf.shape(input_ids)[1]
@@ -424,51 +389,13 @@ class AlbertEncoder(LegacyLayer):
 
         return result
 
-    def call_encoder_auto_regressive(self, inputs):
-        """Encoder when auto_regressive is True.
-
-        Args:
-            inputs ([dict of tf.Tensor]): For caching we have few extra inputs here.
-
-            'input_ids'         --> tf.int32 (b x s)
-            'input_mask'        --> tf.int32 (b x s) # optional
-            'input_type_ids'    --> tf.int32 (b x s) # optional
-
-            'all_cache_key'     --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'all_cache_value'    --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'past_length'       --> tf.int32 (1 x sequence_length)
-        Returns:
-            [dict of tf.Tensor]: Output from the model
-
-            'cls_output'        --> tf.float32 (b x s) # optional
-            'token_embeddings'  --> tf.float32 (b x s x h)
-
-            'all_cache_key'     --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'all_cache_value'    --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'past_length'       --> tf.int32 (1 x sequence_length)
-
-        """
-
+    @add_start_docstrings(
+        "Forward pass of Albert Auto Regressive/ Text Generation :",
+        CALL_ENCODER_AUTO_REGRESSIVE_DOCSTRING,
+    )
+    def call_encoder_auto_regressive(
+        self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]
+    ) -> Dict[str, tf.Tensor]:
         # 1. Gather necessary inputs
         input_ids_mod = inputs["input_ids"]
         all_cache_key = inputs["all_cache_key"]
@@ -640,29 +567,11 @@ class AlbertEncoder(LegacyLayer):
             "last_token_logits": last_token_logits,
         }
 
-    def call_decoder(self, inputs):
-        """Forward pass of an Decoder
-
-        Args:
-            inputs ([dict of tf.Tensor]): This is the input to the model.
-
-            'input_ids'         --> tf.int32 (b x s)
-            'input_mask'        --> tf.int32 (b x s) # optional
-            'input_type_ids'    --> tf.int32 (b x s) # optional
-
-            'encoder_hidden_states' --> tf.float32 (b x s x h)
-            'decoder_encoder_mask'  --> tf.float32 (b x es x ds)
-
-        Returns:
-            [dict of tf.Tensor]: Output from the model
-
-            'cls_output'        --> tf.float32 (b x s) # optional
-            'token_embeddings'  --> tf.float32 (b x s x h)
-            'all_layer_token_embeddings' --> tf.float32 (List of (b x s x h)
-                                              from all layers)
-            'all_layer_cls_output'       --> tf.float32 (List of (b x s)
-                                              from all layers)
-        """
+    @add_start_docstrings(
+        "Forward pass of Albert Decoder :",
+        CALL_DECODER_DOCSTRING,
+    )
+    def call_decoder(self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]) -> Dict[str, tf.Tensor]:
         input_ids = inputs["input_ids"]
         encoder_output = inputs["encoder_hidden_states"]
         decoder_encoder_mask = inputs["decoder_encoder_mask"]
@@ -684,7 +593,6 @@ class AlbertEncoder(LegacyLayer):
         embeddings = self._intermediate_embedding_projection(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
         # Initialize `attention_mask` as empty list
-        attention_mask = []
 
         # 3. Attention  Mask
         attention_mask = []
@@ -757,50 +665,13 @@ class AlbertEncoder(LegacyLayer):
 
         return result
 
-    def call_decoder_auto_regressive(self, inputs):
-        """Decoder when auto_regressive is True.
-
-        Args:
-            inputs ([dict of tf.Tensor]): For caching we have few extra inputs here.
-
-            'input_ids'         --> tf.int32 (b x s)
-            'input_mask'        --> tf.int32 (b x s) # optional
-            'input_type_ids'    --> tf.int32 (b x s) # optional
-
-            'all_cache_key'     --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'all_cache_value'    --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'past_length'       --> tf.int32 (1 x sequence_length)
-        Returns:
-            [dict of tf.Tensor]: Output from the model
-
-            'cls_output'        --> tf.float32 (b x s) # optional
-            'token_embeddings'  --> tf.float32 (b x s x h)
-
-            'all_cache_key'     --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'all_cache_value'    --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'past_length'       --> tf.int32 (1 x sequence_length)
-
-        """
+    @add_start_docstrings(
+        "Forward pass of Albert Decoder Auto Regressive/ Text Generation :",
+        CALL_DECODER_AUTO_REGRESSIVE_DOCSTRING,
+    )
+    def call_decoder_auto_regressive(
+        self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]
+    ) -> Dict[str, tf.Tensor]:
         input_ids = inputs["input_ids"]
         encoder_hidden_state = inputs["encoder_hidden_states"]
         decoder_encoder_mask = inputs["decoder_encoder_mask"]
@@ -917,15 +788,20 @@ class AlbertEncoder(LegacyLayer):
             "last_token_logits": last_token_logits,
         }
 
-    def call(self, inputs):
-        """Call method"""
+    @add_start_docstrings(
+        "Albert Call method :",
+        MAIN_CALL_DOCSTRING,
+    )
+    def call(self, inputs: Dict[str, tf.Tensor]):
         outputs = self.call_fn(inputs)
         return outputs
 
-    def get_embedding_table(self):
+    def get_embedding_table(self) -> tf.Tensor:
+        """Return Embedding Table"""
         return self._embedding_layer.embeddings
 
-    def get_config(self):
+    def get_config(self) -> Dict:
+        """Return Configuration dict"""
         return self._config_dict
 
     @property

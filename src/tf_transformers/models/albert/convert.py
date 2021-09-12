@@ -22,7 +22,6 @@ from tf_transformers.core import keras_utils
 
 def assert_model_results(model):
     def get_expected_text(model_name):
-        print("Model name", model_name)
         if model_name == "bert_base_uncased":
             expected_text = ". i want to buy the car because it is cheap.."
         if model_name == "bert_base_cased" or model_name == "bert_large_cased":
@@ -369,9 +368,7 @@ def convert_albert_tf(model, config, model_name):
     from transformers import TFAlbertModel
 
     model_hf = TFAlbertModel.from_pretrained(model_name)
-
     from_to_variable_dict = {var.name: var for var in model_hf.variables}
-
     tf_transformers_model_index_dict = {}
     for index, var in enumerate(model.variables):
         tf_transformers_model_index_dict[var.name] = index
@@ -380,9 +377,7 @@ def convert_albert_tf(model, config, model_name):
     assigned_map = []
     # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
-
         index = tf_transformers_model_index_dict[legacy_var]
-
         if "query/kernel:0" in legacy_var or "key/kernel:0" in legacy_var or "value/kernel:0" in legacy_var:
             # huggingface (2D) to tf_transformers (3D)
             model.variables[index].assign(
@@ -416,7 +411,6 @@ def convert_albert_tf(model, config, model_name):
             # from_to_variable_dict.get(original_var)).numpy(),\
             #  tf.reduce_sum(model.variables[index]).numpy()))
             continue
-
         model.variables[index].assign(from_to_variable_dict.get(original_var))
         assigned_map.append((original_var, legacy_var))
 
@@ -450,6 +444,7 @@ def convert_albert_tf(model, config, model_name):
     mapping_dict = dict(zip(tf_vars, hf_vars))
     # HF model variable name to variable values, for fast retrieval
     hf_variable_dict = {var.name: var for var in model_hf.variables}
+
     for var in model.variables:
         if var.name in tf_vars:
             hf_var_name = mapping_dict[var.name]

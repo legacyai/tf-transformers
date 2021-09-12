@@ -18,7 +18,9 @@
 import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Callable, Dict, Union
 
+import tensorflow as tf
 from absl import logging
 
 logging.set_verbosity("INFO")
@@ -30,38 +32,38 @@ HF_VERSION = "4.6.0"
 class ModelWrapper(ABC):
     """Model Wrapper for all models"""
 
-    def __init__(self, model_name, cache_dir, save_checkpoint_cache):
+    def __init__(self, model_name: str, cache_dir: Union[str, None], save_checkpoint_cache: bool):
         """
 
         Args:
-            cache_dir ([str]): [None/ cache_dir string]
-            model_name ([str]): [name of the model]
+            model_name: Model name as per in HF Transformers
+            cache_dir_path : Path to cache directory . Default is :obj:`/tmp/tf_transformers/cache`
+            save_checkpoint_cache: :obj:`bool`. Whether to save the converted model in cache directory.
         """
         self.model_name = model_name
-        self.cache_dir = cache_dir
         self.save_checkpoint_cache = save_checkpoint_cache
         if cache_dir is None:
-            self.cache_dir = tempfile.gettempdir()
+            cache_dir = tempfile.gettempdir()
 
-        self.cache_dir = Path(self.cache_dir, _PREFIX_DIR)
+        self.cache_dir = Path(cache_dir, _PREFIX_DIR)
         self.create_cache_dir(self.cache_dir)
         self.model_path = Path(self.cache_dir, self.model_name)
         self.hf_version = HF_VERSION
 
     @abstractmethod
-    def update_config(self):
+    def update_config(self, tft_config: Dict, hf_config: Dict):
+        """This is custom to the models."""
         pass
 
-    def _update_kwargs_and_config(self, kwargs, config):
-        """keywords in kwargs has to be updated oi  config
+    def _update_kwargs_and_config(self, kwargs: Dict, config: Dict):
+        """keywords in kwargs has to be updated in  config
         Otherwise it wont be recongnized by the Model
 
         Args:
-            kwargs (dict): Keyword arguments for the model
-            config (dict): Model config
+            kwargs : Keyword arguments for the model
+            config : Model config
 
-        Returns:
-            [dict]: Updated kwargs
+
         """
         kwargs_copy = kwargs.copy()
 
@@ -71,21 +73,28 @@ class ModelWrapper(ABC):
                 del kwargs_copy[key]
         return kwargs_copy
 
-    def create_cache_dir(self, cache_path):
+    def create_cache_dir(self, cache_path: Path):
         """Create Cache Directory
 
         Args:
-            cache_path ([type]): [Path object]
+            cache_path : Path
         """
         if not cache_path.exists():  # If cache path not exists
             cache_path.mkdir()
 
-    def convert_hf_to_tf(self, model, config, convert_tf_fn, convert_pt_fn):
-        """Convert TTF from HF
+    def convert_hf_to_tf(
+        self,
+        model: tf.keras.Model,
+        config: Dict,
+        convert_tf_fn: Union[Callable, None],
+        convert_pt_fn: Union[Callable, None],
+    ):
+        """Convert HF to TFT
 
         Args:
-            model ([tf.keras.Model]): [tf-transformer model]
-            convert_fn ([function]): [Function which converts HF to TTF]
+            config: Dict
+            convert_tf_fn: TF based conversion function from HF to TFT
+            convert_pt_fn: PT based conversion function from HF to TFT
         """
         # HF has '-' , instead of '_'
         import transformers
