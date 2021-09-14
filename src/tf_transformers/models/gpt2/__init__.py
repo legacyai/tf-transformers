@@ -14,5 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from tf_transformers.models.gpt2.configuration_gpt2 import GPT2Config
 from tf_transformers.models.gpt2.gpt2 import GPT2Encoder
 from tf_transformers.models.gpt2.gpt2_model import GPT2Model

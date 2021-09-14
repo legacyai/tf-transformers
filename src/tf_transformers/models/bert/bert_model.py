@@ -14,59 +14,54 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from typing import Dict, Optional, Union
+
 from absl import logging
 
 from tf_transformers.core import ModelWrapper
 from tf_transformers.models.bert import BertEncoder as Encoder
+from tf_transformers.models.bert.configuration_bert import BertConfig as ModelConfig
 from tf_transformers.models.bert.convert import convert_bert_pt as convert_pt
 from tf_transformers.models.bert.convert import convert_bert_tf as convert_tf
-from tf_transformers.utils import get_config
+from tf_transformers.utils.docstring_file_utils import add_start_docstrings
+from tf_transformers.utils.docstring_utils import (
+    ENCODER_MODEL_CONFIG_DOCSTRING,
+    ENCODER_PRETRAINED_DOCSTRING,
+)
 
-DEFAULT_CONFIG = {
-    "attention_probs_dropout_prob": 0.1,
-    "hidden_act": "gelu",
-    "intermediate_act": "gelu",
-    "hidden_dropout_prob": 0.1,
-    "embedding_size": 768,
-    "initializer_range": 0.02,
-    "intermediate_size": 3072,
-    "max_position_embeddings": 512,
-    "num_attention_heads": 12,
-    "attention_head_size": 64,
-    "num_hidden_layers": 12,
-    "type_vocab_size": 2,
-    "vocab_size": 28996,
-    "layer_norm_epsilon": 1e-12,
-    "mask_mode": "user_defined",
-}
+code_example = r'''
 
+        >>> from tf_transformers.models import  BertModel
+        >>> model = BertModel.from_pretrained("bert-base-uncased")
+        >>> batch_size = 5
+        >>> sequence_length = 64
+        >>> input_ids = tf.random.uniform(shape=(batch_size, sequence_length), dtype=tf.int32)
+        >>> input_type_ids = tf.zeros_like(input_ids)
+        >>> input_mask = tf.ones_like(input_ids)
+        >>> inputs = {{'input_ids': input_ids, 'input_type_ids':input_type_ids, 'input_mask': input_mask}
+        >>> outputs = model(inputs)
 
-def normalize_model_name(model_name):
-    return model_name.lower().replace("-", "_").strip()
+'''
 
 
 class BertModel(ModelWrapper):
     """Bert Encoder Wrapper"""
 
-    def __init__(self, model_name='bert', cache_dir=None, save_checkpoint_cache=True):
-        """
-        Args:
-            model_name (str): Model name
-            cache_dir (str): cache dir to save the mode checkpoints
-        """
+    def __init__(
+        self, model_name: str = 'bert', cache_dir: Union[str, None] = None, save_checkpoint_cache: bool = True
+    ):
         super(BertModel, self).__init__(
             model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=save_checkpoint_cache
         )
 
-    def update_config(self, tft_config, hf_config):
-        """Update tft config with hf config.
-
+    def update_config(self, tft_config: Dict, hf_config: Dict):
+        """Update tft config with hf config. Useful while converting.
         Args:
-            tft_config ([type]): [description]
-            hf_config ([type]): [description]
+            tft_config: Dict of TFT configuration.
+            hf_config: Dict of HF configuration.
         """
         tft_config["vocab_size"] = hf_config["vocab_size"]
-        tft_config["embedding_size"] = hf_config["hidden_size"]
+        tft_config["embedding_size"] = hf_config["embedding_size"]
         tft_config["intermediate_size"] = hf_config["intermediate_size"]
         tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
         tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]
@@ -77,22 +72,27 @@ class BertModel(ModelWrapper):
         return tft_config
 
     @classmethod
-    def from_config(cls, config, return_layer=False, **kwargs):
-
-        config = config.copy()
+    @add_start_docstrings(
+        "Bert Model from config :",
+        ENCODER_MODEL_CONFIG_DOCSTRING.format(
+            "transformers.models.BertEncoder", "tf_transformers.models.bert.BertConfig"
+        ),
+    )
+    def from_config(cls, config: ModelConfig, return_layer: bool = False, **kwargs):
+        config_dict = config.to_dict()
+        # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
         cls_ref = cls()
-        # if we allow names other than
-        # whats in the class, we might not be able
+        # if we allow names other than whats in the class, we might not be able
         # to convert from hf properly.
         if "name" in kwargs:
             del kwargs["name"]
 
-        kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config)
+        kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
 
         # if a config is provided, we wont be doing any extra .
         # Just create a model and return it with random_weights
-        #  (Distribute strategy fails)
-        model_layer = Encoder(config, **kwargs_copy)
+        # (Distribute strategy fails)
+        model_layer = Encoder(config_dict, **kwargs_copy)
         model = model_layer.get_model()
         logging.info("Create model from config")
         if return_layer:
@@ -100,52 +100,36 @@ class BertModel(ModelWrapper):
         return model
 
     @classmethod
+    @add_start_docstrings(
+        "Bert Model Pretrained with example :",
+        ENCODER_PRETRAINED_DOCSTRING.format(
+            "tf_transformers.models.BertModel", "tf_transformers.models.BertEncoder", "bert-base-uncased", code_example
+        ),
+    )
     def from_pretrained(
         cls,
-        model_name,
-        cache_dir=None,
-        model_checkpoint_dir=None,
-        convert_from_hf=True,
-        return_layer=False,
-        return_config=False,
-        convert_fn_type="both",
-        save_checkpoint_cache=True,
-        load_from_cache=True,
+        model_name: str,
+        cache_dir: Union[str, None] = None,
+        model_checkpoint_dir: Optional[str] = None,
+        convert_from_hf: bool = True,
+        return_layer: bool = False,
+        return_config: bool = False,
+        convert_fn_type: Optional[str] = "both",
+        save_checkpoint_cache: bool = True,
+        load_from_cache: bool = True,
         **kwargs,
     ):
-        """Return tf.keras.Model / LegacyModel .
-
-
-        Args:
-            model_name (str): Name of the model
-            cache_dir ([type], optional): [description]. Defaults to None.
-            model_checkpoint_dir ([type], optional): [description]. Defaults to None.
-            convert_from_hf (bool, optional): [description]. Defaults to True.
-            return_layer (bool, optional): [description]. Defaults to False.
-            convert_fn_type: ['both' , 'tf', 'pt'] . If both , we use both functions to fallback to another if
-            one fails.
-
-        Returns:
-            [type]: [description]
-        """
-        module_name = "tf_transformers.models.model_configs.bert"
-        tft_model_name = normalize_model_name(model_name)
-
         # Load a base config and then overwrite it
-        config = DEFAULT_CONFIG.copy()
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
-        try:
-            # If a config present as a part of tft load it
-            config = get_config(module_name, tft_model_name)
-        except Exception as e:
-            logging.warn(e)
+        config = ModelConfig()
+        config_dict = config.to_dict()
 
         try:
             from transformers import PretrainedConfig
 
             hf_config = PretrainedConfig.from_pretrained(model_name)
             hf_config = hf_config.to_dict()
-            config = cls_ref.update_config(config, hf_config)
+            config_dict = cls_ref.update_config(config_dict, hf_config)
         except Exception as e:
             logging.info("Error: {}".format(e))
             logging.info("Failed loading config from HuggingFace")
@@ -156,8 +140,8 @@ class BertModel(ModelWrapper):
         if "name" in kwargs:
             del kwargs["name"]
 
-        kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config)
-        model_layer = Encoder(config, **kwargs_copy)
+        kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
+        model_layer = Encoder(config_dict, **kwargs_copy)
         model = model_layer.get_model()
 
         # Give preference to model_checkpoint_dir
@@ -176,14 +160,14 @@ class BertModel(ModelWrapper):
                 if convert_fn_type == "both":
                     cls_ref.convert_hf_to_tf(
                         model,
-                        config,
+                        config_dict,
                         convert_tf_fn=convert_tf,
                         convert_pt_fn=convert_pt,
                     )
                 if convert_fn_type == "tf":
-                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=convert_tf, convert_pt_fn=None)
+                    cls_ref.convert_hf_to_tf(model, config_dict, convert_tf_fn=convert_tf, convert_pt_fn=None)
                 if convert_fn_type == "pt":
-                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=None, convert_pt_fn=convert_pt)
+                    cls_ref.convert_hf_to_tf(model, config_dict, convert_tf_fn=None, convert_pt_fn=convert_pt)
 
         if return_layer:
             if return_config:

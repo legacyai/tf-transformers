@@ -14,5 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from tf_transformers.models.mt5.configuration_mt5 import MT5Config
 from tf_transformers.models.mt5.mt5 import MT5Encoder
-from tf_transformers.models.mt5.mt5_model import mt5Model
+from tf_transformers.models.mt5.mt5_model import MT5Model

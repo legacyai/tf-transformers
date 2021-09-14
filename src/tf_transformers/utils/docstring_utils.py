@@ -1,6 +1,5 @@
 ENCODER_PRETRAINED_DOCSTRING = r"""
-        AlbertModel (:class:`{0}`) is a wrapper around
-        AlbertEncoder (:class:`{1}`).
+        (:class:`{0}`) is a wrapper around (:class:`{1}`).
 
         Instantiates a :class:`~{1}` from a :obj:`model_name`
 
@@ -27,6 +26,10 @@ ENCODER_PRETRAINED_DOCSTRING = r"""
                 :class:`~{1}`.
         Returns:
             LegacyModel/LegacyLayer with or without config.
+
+        Examples::
+
+            {3}
 
         """
 

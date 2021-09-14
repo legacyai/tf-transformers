@@ -77,6 +77,11 @@ class TransformerConfig:
         num_hidden_groups (:obj:`int`, `optional`, defaults to 1):
             Number of groups for the hidden layers, parameters in the same group are shared.
             This is useful only for models like Albert, where we share parameters across layers.
+        bidirectional (:obj:`bool`, `optional`, defaults to True):
+            For relative positional embeddings, Encoder has :obj:`bidirectional=True`, while Decoder has
+            :obj:`bidirectional=False`.
+        positional_buckets (:obj:`int`, `optional`, defaults to 32):
+
 
     """
 
@@ -99,6 +104,8 @@ class TransformerConfig:
         layer_norm_epsilon=None,
         position_embedding_type="absolute",
         num_hidden_groups=1,
+        positional_buckets=None,
+        bidirectional=None,
         cls_token_id=None,
         sep_token_id=None,
         decoder_start_token_id=None,
@@ -122,6 +129,8 @@ class TransformerConfig:
         self.layer_norm_epsilon = layer_norm_epsilon
         self.position_embedding_type = position_embedding_type
         self.num_hidden_groups = num_hidden_groups
+        self.bidirectional = bidirectional
+        self.positional_buckets = positional_buckets
 
         # Convert attributes to dict and del "self" from that
         self._inputs = locals()

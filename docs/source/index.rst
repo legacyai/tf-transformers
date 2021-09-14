@@ -1,25 +1,20 @@
-Transformers
+Tensorflow Transformers (tf-transformers)
 =======================================================================================================================
 
-State-of-the-art Natural Language Processing for Jax, Pytorch and TensorFlow
+State-of-the-art Faster Natural Language Processing in TensorFlow 2.0.
 
-🤗 Transformers (formerly known as `pytorch-transformers` and `pytorch-pretrained-bert`) provides general-purpose
-architectures (BERT, GPT-2, RoBERTa, XLM, DistilBert, XLNet...) for Natural Language Understanding (NLU) and Natural
-Language Generation (NLG) with over 32+ pretrained models in 100+ languages and deep interoperability between Jax,
-PyTorch and TensorFlow.
+tf-transformers  provides general-purpose
+architectures (BERT, GPT-2, RoBERTa, T5, Seq2Seq...) for Natural Language Understanding (NLU) and Natural
+Language Generation (NLG) with over 32+ pretrained models in 100+ languages in TensorFlow 2.0.
 
-This is the documentation of our repository `transformers <https://github.com/huggingface/transformers>`__. You can
-also follow our `online course <https://huggingface.co/course>`__ that teaches how to use this library, as well as the
-other libraries developed by Hugging Face and the Hub.
+tf-transformers is the fastest library for Transformer based architectures, comparing to existing similar
+implementations in TensorFlow 2.0. It is 80x faster comparing to famous similar libraries like HuggingFace Tensorflow
+2.0 implementations. For more details about benchmarking please look `BENCHMARK` here.
 
-If you are looking for custom support from the Hugging Face team
------------------------------------------------------------------------------------------------------------------------
+This is the documentation of our repository `tf-transformers <https://github.com/legacyai/tf-transformers>`__. You can
+also follow our `DOCUMENTATION`__ that teaches how to use this library, as well as the
+other features of this library.
 
-.. raw:: html
-
-    <a target="_blank" href="https://huggingface.co/support">
-        <img alt="HuggingFace Expert Acceleration Program" src="https://huggingface.co/front/thumbnails/support.png" style="max-width: 600px; border: 1px solid #eee; border-radius: 4px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
-    </a><br>
 
 Features
 -----------------------------------------------------------------------------------------------------------------------
@@ -34,7 +29,7 @@ State-of-the-art NLP for everyone:
 - AI/ML/NLP teachers and educators
 
 ..
-    Copyright 2020 The HuggingFace Team. All rights reserved.
+    Copyright 2020 TFT team and The HuggingFace Team. All rights reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
     the License. You may obtain a copy of the License at
@@ -457,5 +452,12 @@ Flax), PyTorch, and/or TensorFlow.
     :maxdepth: 2
     :caption: Models
 
+    notebooks/test_sample
+
     model_doc/albert
+    model_doc/bert
+    model_doc/gpt2
+    model_doc/t5
+    model_doc/mt5.rst
+    model_doc/roberta.rst
     model_doc/parallelism

@@ -14,5 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from tf_transformers.models.t5.configuration_t5 import T5Config
 from tf_transformers.models.t5.t5 import T5Encoder
 from tf_transformers.models.t5.t5_model import T5Model

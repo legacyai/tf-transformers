@@ -14,37 +14,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from typing import Dict, Optional, Union
+
 from absl import logging
 
 from tf_transformers.core import ModelWrapper
 from tf_transformers.models.encoder_decoder import EncoderDecoder
 from tf_transformers.models.t5 import T5Encoder as Encoder
+from tf_transformers.models.t5.configuration_t5 import T5Config as ModelConfig
 from tf_transformers.models.t5.convert import convert_t5_pt as convert_pt
 from tf_transformers.models.t5.convert import convert_t5_tf as convert_tf
-from tf_transformers.utils import get_config
+from tf_transformers.utils.docstring_file_utils import add_start_docstrings
+from tf_transformers.utils.docstring_utils import (
+    ENCODER_MODEL_CONFIG_DOCSTRING,
+    ENCODER_PRETRAINED_DOCSTRING,
+)
 
-DEFAULT_CONFIG = {
-    "attention_probs_dropout_prob": 0.1,
-    "hidden_act": "gelu",
-    "intermediate_act": "relu",
-    "hidden_dropout_prob": 0.1,
-    "embedding_size": 512,
-    "initializer_range": 0.02,
-    "intermediate_size": 2048,
-    "max_position_embeddings": -1,
-    "num_attention_heads": 8,
-    "attention_head_size": 64,
-    "num_hidden_layers": 6,
-    "vocab_size": 32128,
-    "type_vocab_size": -1,
-    "layer_norm_epsilon": 1e-06,
-    "bidirectional": True,
-    "positional_buckets": 32,
-}
+code_example = r'''
 
+        >>> from tf_transformers.models import  T5Model
+        >>> model = T5Model.from_pretrained("t5-small")
+        >>> batch_size = 5
+        >>> encoder_sequence_length = 64 # Encoder
+        >>> decoder_sequence_length = 37 # Decoder
+        >>> encoder_input_ids = tf.random.uniform(shape=(batch_size, encoder_sequence_length), dtype=tf.int32)
+        >>> decoder_input_ids = tf.random.uniform(shape=(batch_size, decoder_sequence_length), dtype=tf.int32)
+        >>> encoder_input_mask = tf.ones_like(encoder_input_ids)
+        >>> inputs = {{'encoder_input_ids': input_ids, 'encoder_input_mask': encoder_input_mask, \
+            "decoder_input_ids": decoder_input_ids}
+        >>> outputs = model(inputs)
 
-def normalize_model_name(model_name):
-    return model_name.lower().replace("-", "_").strip()
+'''
 
 
 class T5Model(ModelWrapper):
@@ -60,12 +60,11 @@ class T5Model(ModelWrapper):
             model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=save_checkpoint_cache
         )
 
-    def update_config(self, tft_config, hf_config):
-        """Update tft config with hf config.
-
+    def update_config(self, tft_config: Dict, hf_config: Dict):
+        """Update tft config with hf config. Useful while converting.
         Args:
-            tft_config ([type]): [description]
-            hf_config ([type]): [description]
+            tft_config: Dict of TFT configuration.
+            hf_config: Dict of HF configuration.
         """
         tft_config["vocab_size"] = hf_config["vocab_size"]
         tft_config["embedding_size"] = hf_config["d_model"]
@@ -80,9 +79,14 @@ class T5Model(ModelWrapper):
         return tft_config
 
     @classmethod
+    @add_start_docstrings(
+        "T5 Model from config :",
+        ENCODER_MODEL_CONFIG_DOCSTRING.format("transformers.models.T5Encoder", "tf_transformers.models.t5.T5Config"),
+    )
     def from_config(cls, config, return_layer=False, encoder_kwargs=None, decoder_kwargs=None, **kwargs):
 
-        config = config.copy()
+        config_dict = config.to_dict()
+        # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
         cls_ref = cls()
         # if we allow names other than
         # whats in the class, we might not be able
@@ -94,23 +98,23 @@ class T5Model(ModelWrapper):
         if encoder_kwargs:
             if not isinstance(encoder_kwargs, dict):
                 raise ValueError("encoder kwargs should be dict")
-            encoder_kwargs_copy = cls_ref._update_kwargs_and_config(encoder_kwargs, config)
+            encoder_kwargs_copy = cls_ref._update_kwargs_and_config(encoder_kwargs, config_dict)
 
         # if a config is provided, we wont be doing any extra .
         # Just create a model and return it with random_weights
-        #  (Distribute strategy fails)
-        config["bidirectional"] = True
-        encoder_layer = Encoder(config=config, name="t5_encoder", **encoder_kwargs_copy)
+        # (Distribute strategy fails)
+        config_dict["bidirectional"] = True
+        encoder_layer = Encoder(config=config_dict, name="t5_encoder", **encoder_kwargs_copy)
 
         decoder_kwargs_copy = {}
         if decoder_kwargs:
             if not isinstance(decoder_kwargs, dict):
                 raise ValueError("decoder kwargs should be dict")
-            decoder_kwargs_copy = cls_ref._update_kwargs_and_config(decoder_kwargs, config)
+            decoder_kwargs_copy = cls_ref._update_kwargs_and_config(decoder_kwargs, config_dict)
 
-        config["bidirectional"] = False
+        config_dict["bidirectional"] = False
         decoder_layer = Encoder(
-            config=config, name="t5_decoder", use_decoder=True, mask_mode="causal", **decoder_kwargs_copy
+            config=config_dict, name="t5_decoder", use_decoder=True, mask_mode="causal", **decoder_kwargs_copy
         )
         model_layer = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True)
         model = model_layer.get_model()
@@ -120,54 +124,38 @@ class T5Model(ModelWrapper):
         return model
 
     @classmethod
+    @add_start_docstrings(
+        "T5 Model Pretrained with example :",
+        ENCODER_PRETRAINED_DOCSTRING.format(
+            "tf_transformers.models.T5Model", "tf_transformers.models.T5Encoder", "t5-small", code_example
+        ),
+    )
     def from_pretrained(
         cls,
-        model_name,
-        cache_dir=None,
-        model_checkpoint_dir=None,
-        convert_from_hf=True,
-        return_layer=False,
-        return_config=False,
-        convert_fn_type="both",
-        encoder_kwargs=None,
-        decoder_kwargs=None,
-        save_checkpoint_cache=True,
-        load_from_cache=True,
+        model_name: str,
+        cache_dir: Union[str, None] = None,
+        model_checkpoint_dir: Optional[str] = None,
+        convert_from_hf: bool = True,
+        return_layer: bool = False,
+        return_config: bool = False,
+        convert_fn_type: Optional[str] = "both",
+        encoder_kwargs: Optional[Dict] = None,
+        decoder_kwargs: Optional[Dict] = None,
+        save_checkpoint_cache: bool = True,
+        load_from_cache: bool = True,
         **kwargs,
     ):
-        """Return tf.keras.Model / LegacyModel .
-
-
-        Args:
-            model_name (str): Name of the model
-            cache_dir ([type], optional): [description]. Defaults to None.
-            model_checkpoint_dir ([type], optional): [description]. Defaults to None.
-            convert_from_hf (bool, optional): [description]. Defaults to True.
-            return_layer (bool, optional): [description]. Defaults to False.
-            convert_fn_type: ['both' , 'tf', 'pt'] . If both , we use both functions to fallback to another if
-            one fails.
-
-        Returns:
-            [type]: [description]
-        """
-        module_name = "tf_transformers.models.model_configs.t5"
-        tft_model_name = normalize_model_name(model_name)
-
         # Load a base config and then overwrite it
-        config = DEFAULT_CONFIG.copy()
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
-        try:
-            # If a config present as a part of tft load it
-            config = get_config(module_name, tft_model_name)
-        except Exception as e:
-            logging.warn(e)
+        config = ModelConfig()
+        config_dict = config.to_dict()
 
         try:
             from transformers import PretrainedConfig
 
             hf_config = PretrainedConfig.from_pretrained(model_name)
             hf_config = hf_config.to_dict()
-            config = cls_ref.update_config(config, hf_config)
+            config_dict = cls_ref.update_config(config_dict, hf_config)
         except Exception as e:
             logging.info("Error: {}".format(e))
             logging.info("Failed loading config from HuggingFace")
@@ -182,23 +170,23 @@ class T5Model(ModelWrapper):
         if encoder_kwargs:
             if not isinstance(encoder_kwargs, dict):
                 raise ValueError("encoder kwargs should be dict")
-            encoder_kwargs_copy = cls_ref._update_kwargs_and_config(encoder_kwargs, config)
+            encoder_kwargs_copy = cls_ref._update_kwargs_and_config(encoder_kwargs, config_dict)
 
         # if a config is provided, we wont be doing any extra .
         # Just create a model and return it with random_weights
         #  (Distribute strategy fails)
-        config["bidirectional"] = True
-        encoder_layer = Encoder(config=config, name="t5_encoder", **encoder_kwargs_copy)
+        config_dict["bidirectional"] = True
+        encoder_layer = Encoder(config=config_dict, name="t5_encoder", **encoder_kwargs_copy)
 
         decoder_kwargs_copy = {}
         if decoder_kwargs:
             if not isinstance(decoder_kwargs, dict):
                 raise ValueError("decoder kwargs should be dict")
-            decoder_kwargs_copy = cls_ref._update_kwargs_and_config(decoder_kwargs, config)
+            decoder_kwargs_copy = cls_ref._update_kwargs_and_config(decoder_kwargs, config_dict)
 
-        config["bidirectional"] = False
+        config_dict["bidirectional"] = False
         decoder_layer = Encoder(
-            config=config, name="t5_decoder", use_decoder=True, mask_mode="causal", **decoder_kwargs_copy
+            config=config_dict, name="t5_decoder", use_decoder=True, mask_mode="causal", **decoder_kwargs_copy
         )
         model_layer = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True)
         model = model_layer.get_model()
@@ -218,19 +206,19 @@ class T5Model(ModelWrapper):
                 if convert_fn_type == "both":
                     cls_ref.convert_hf_to_tf(
                         model,
-                        config,
+                        config_dict,
                         convert_tf_fn=convert_tf,
                         convert_pt_fn=convert_pt,
                     )
                 if convert_fn_type == "tf":
-                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=convert_tf, convert_pt_fn=None)
+                    cls_ref.convert_hf_to_tf(model, config_dict, convert_tf_fn=convert_tf, convert_pt_fn=None)
                 if convert_fn_type == "pt":
-                    cls_ref.convert_hf_to_tf(model, config, convert_tf_fn=None, convert_pt_fn=convert_pt)
+                    cls_ref.convert_hf_to_tf(model, config_dict, convert_tf_fn=None, convert_pt_fn=convert_pt)
 
         if return_layer:
             if return_config:
-                return model_layer, config
+                return model_layer, config_dict
             return model_layer
         if return_config:
-            return model, config
+            return model, config_dict
         return model

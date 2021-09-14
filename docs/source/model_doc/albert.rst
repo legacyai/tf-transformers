@@ -42,6 +42,10 @@ Tips:
 - ALBERT uses repeating layers which results in a small memory footprint, however the computational cost remains
   similar to a BERT-like architecture with the same number of hidden layers as it has to iterate through the same
   number of (repeating) layers.
+- ALBERT was trained with the masked language modeling (MLM) and Sentence Order Prediction (SOP) objectives. It is
+  efficient at predicting masked tokens and at NLU in general, but is not optimal for text generation. But it is good
+  in finding coherent text compared to other Attention based models.
+
 
 `Paper👆 <https://arxiv.org/abs/1909.11942>`__
 `Official Code👆 <https://github.com/google-research/albert>`__

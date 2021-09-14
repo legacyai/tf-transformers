@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""TF 2.0 GPT2 Model"""
+
+from typing import Dict, Union
+
 import tensorflow as tf
 from absl import logging
 
@@ -23,23 +27,24 @@ from tf_transformers.layers import GPT2LayerNormalization
 from tf_transformers.layers.mask import CausalMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerGPT2
 from tf_transformers.utils import tf_utils
+from tf_transformers.utils.docstring_file_utils import add_start_docstrings
+from tf_transformers.utils.docstring_utils import (
+    CALL_DECODER_AUTO_REGRESSIVE_DOCSTRING,
+    CALL_DECODER_DOCSTRING,
+    CALL_ENCODER_AUTO_REGRESSIVE_DOCSTRING,
+    CALL_ENCODER_DOCSTRING,
+    ENCODER_CLASS_DOCSTRING,
+    MAIN_CALL_DOCSTRING,
+)
 
 logging.set_verbosity("INFO")
 
 
+@add_start_docstrings(
+    "GPT2 Model :",
+    ENCODER_CLASS_DOCSTRING.format("tf_transformers.models.gpt2.GPT2Config"),
+)
 class GPT2Encoder(LegacyLayer):
-    """GPT2 based encoder / Decoder .
-    Language Models are Unsupervised Multitask Learners
-    Authors: Alec Radford , Jeffrey Wu , Rewon Child ,
-            David Luan , Dario Amodei ,Ilya Sutskever
-
-    Implementation of GPT2 in TF2.0
-    Paper: https://arxiv.org/abs/1810.04805
-    Official Code: https://github.com/openai/gpt-2
-
-
-    """
-
     def __init__(
         self,
         config,
@@ -150,10 +155,11 @@ class GPT2Encoder(LegacyLayer):
         # Initialize model
         self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
 
-    def get_model(self, initialize_only=False):
+    def get_model(self: LegacyLayer, initialize_only: bool = False):
         """Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
         Args:
-            self: model (tf.keras.Layer) instance
+            self: Model layer
+            initialize_only: If False, model (LegacyModel) wont be returned.
         """
 
         input_ids = tf.keras.layers.Input(
@@ -253,26 +259,11 @@ class GPT2Encoder(LegacyLayer):
         model.model_config = self._config_dict
         return model
 
-    def call_encoder(self, inputs):
-        """Forward pass of an Encoder
-
-        Args:
-            inputs ([dict of tf.Tensor]): This is the input to the model.
-
-            'input_ids'         --> tf.int32 (b x s)
-            'input_mask'        --> tf.int32 (b x s) # optional
-            'input_type_ids'    --> tf.int32 (b x s) # optional
-
-        Returns:
-            [dict of tf.Tensor]: Output from the model
-
-            'cls_output'        --> tf.float32 (b x s) # optional
-            'token_embeddings'  --> tf.float32 (b x s x h)
-            'all_layer_token_embeddings' --> tf.float32 (List of (b x s x h)
-                                              from all layers)
-            'all_layer_cls_output'       --> tf.float32 (List of (b x s)
-                                              from all layers)
-        """
+    @add_start_docstrings(
+        "Forward pass of GPT2 :",
+        CALL_ENCODER_DOCSTRING,
+    )
+    def call_encoder(self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]) -> Dict[str, tf.Tensor]:
 
         # 1. Collect Word Embeddings
         input_ids = inputs["input_ids"]
@@ -339,51 +330,13 @@ class GPT2Encoder(LegacyLayer):
 
         return result
 
-    def call_encoder_auto_regressive(self, inputs):
-        """Encoder when auto_regressive is True.
-
-        Args:
-            inputs ([dict of tf.Tensor]): For caching we have few extra inputs here.
-
-            'input_ids'         --> tf.int32 (b x s)
-            'input_mask'        --> tf.int32 (b x s) # optional
-            'input_type_ids'    --> tf.int32 (b x s) # optional
-
-            'all_cache_key'     --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'all_cache_value'    --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'past_length'       --> tf.int32 (1 x sequence_length)
-        Returns:
-            [dict of tf.Tensor]: Output from the model
-
-            'cls_output'        --> tf.float32 (b x s) # optional
-            'token_embeddings'  --> tf.float32 (b x s x h)
-
-            'all_cache_key'     --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'all_cache_value'    --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'past_length'       --> tf.int32 (1 x sequence_length)
-
-        """
-
+    @add_start_docstrings(
+        "Forward pass of GPT2 Auto Regressive/ Text Generation :",
+        CALL_ENCODER_AUTO_REGRESSIVE_DOCSTRING,
+    )
+    def call_encoder_auto_regressive(
+        self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]
+    ) -> Dict[str, tf.Tensor]:
         # 1. Gather necessary inputs
         input_ids_mod = inputs["input_ids"]
         all_cache_key = inputs["all_cache_key"]
@@ -545,29 +498,11 @@ class GPT2Encoder(LegacyLayer):
             "last_token_logits": last_token_logits,
         }
 
-    def call_decoder(self, inputs):
-        """Forward pass of an Decoder
-
-        Args:
-            inputs ([dict of tf.Tensor]): This is the input to the model.
-
-            'input_ids'         --> tf.int32 (b x s)
-            'input_mask'        --> tf.int32 (b x s) # optional
-            'input_type_ids'    --> tf.int32 (b x s) # optional
-
-            'encoder_hidden_states' --> tf.float32 (b x s x h)
-            'decoder_encoder_mask'  --> tf.float32 (b x es x ds)
-
-        Returns:
-            [dict of tf.Tensor]: Output from the model
-
-            'cls_output'        --> tf.float32 (b x s) # optional
-            'token_embeddings'  --> tf.float32 (b x s x h)
-            'all_layer_token_embeddings' --> tf.float32 (List of (b x s x h)
-                                              from all layers)
-            'all_layer_cls_output'       --> tf.float32 (List of (b x s)
-                                              from all layers)
-        """
+    @add_start_docstrings(
+        "Forward pass of GPT2 Decoder :",
+        CALL_DECODER_DOCSTRING,
+    )
+    def call_decoder(self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]) -> Dict[str, tf.Tensor]:
         input_ids = inputs["input_ids"]
         encoder_output = inputs["encoder_hidden_states"]
         decoder_encoder_mask = inputs["decoder_encoder_mask"]
@@ -587,8 +522,6 @@ class GPT2Encoder(LegacyLayer):
         # 2. Norm + dropout
         # embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self.use_dropout)
-        # Initialize `attention_mask` as empty list
-        attention_mask = []
 
         # 3. Attention  Mask
         attention_mask = []
@@ -638,50 +571,13 @@ class GPT2Encoder(LegacyLayer):
 
         return result
 
-    def call_decoder_auto_regressive(self, inputs):
-        """Decoder when auto_regressive is True.
-
-        Args:
-            inputs ([dict of tf.Tensor]): For caching we have few extra inputs here.
-
-            'input_ids'         --> tf.int32 (b x s)
-            'input_mask'        --> tf.int32 (b x s) # optional
-            'input_type_ids'    --> tf.int32 (b x s) # optional
-
-            'all_cache_key'     --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'all_cache_value'    --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'past_length'       --> tf.int32 (1 x sequence_length)
-        Returns:
-            [dict of tf.Tensor]: Output from the model
-
-            'cls_output'        --> tf.float32 (b x s) # optional
-            'token_embeddings'  --> tf.float32 (b x s x h)
-
-            'all_cache_key'     --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'all_cache_value'    --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
-
-            'past_length'       --> tf.int32 (1 x sequence_length)
-
-        """
+    @add_start_docstrings(
+        "Forward pass of GPT2 Decoder Auto Regressive/ Text Generation :",
+        CALL_DECODER_AUTO_REGRESSIVE_DOCSTRING,
+    )
+    def call_decoder_auto_regressive(
+        self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]
+    ) -> Dict[str, tf.Tensor]:
         input_ids = inputs["input_ids"]
         encoder_hidden_state = inputs["encoder_hidden_states"]
         decoder_encoder_mask = inputs["decoder_encoder_mask"]
@@ -785,15 +681,20 @@ class GPT2Encoder(LegacyLayer):
             "last_token_logits": last_token_logits,
         }
 
-    def call(self, inputs):
-        """Call method"""
+    @add_start_docstrings(
+        "GPT2 Call method :",
+        MAIN_CALL_DOCSTRING,
+    )
+    def call(self, inputs: Dict[str, tf.Tensor]):
         outputs = self.call_fn(inputs)
         return outputs
 
-    def get_embedding_table(self):
+    def get_embedding_table(self) -> tf.Tensor:
+        """Return Embedding Table"""
         return self._embedding_layer.embeddings
 
-    def get_config(self):
+    def get_config(self) -> Dict:
+        """Return Configuration dict"""
         return self._config_dict
 
     @property

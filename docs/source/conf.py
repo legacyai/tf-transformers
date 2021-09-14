@@ -44,17 +44,26 @@ needs_sphinx = '2.1'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+
+# Do we need "recommonmark"?
+sys.path.append(os.path.abspath('sphinxext'))
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
     "sphinx.ext.coverage",
     "sphinx.ext.napoleon",
-    "recommonmark",
-    "sphinx.ext.viewcode",
     "sphinx_markdown_tables",
+    "sphinx.ext.viewcode",
     "sphinxext.opengraph",
     "sphinx_copybutton",
+    'sphinx.ext.autosummary',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
+    'matplotlib.sphinxext.plot_directive',
+    'sphinx_autodoc_typehints',
+    'myst_nb',
 ]
+
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
@@ -156,6 +165,7 @@ execution_excludepatterns = [
     'notebooks/Neural_Network_and_Data_Loading.*',
     'notebooks/score_matching.*',
     'notebooks/maml.*',
+    'notebooks/.ipynb_*',
     # Strange error apparently due to asynchronous cell execution
     'notebooks/thinking_in_jax.*',
     # TODO(jakevdp): enable execution on these

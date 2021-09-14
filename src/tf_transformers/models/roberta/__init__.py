@@ -14,5 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from tf_transformers.models.roberta.configuration_roberta import RobertaConfig
 from tf_transformers.models.roberta.roberta import RobertaEncoder
 from tf_transformers.models.roberta.roberta_model import RobertaModel

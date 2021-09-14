@@ -14,27 +14,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ====================================================================
-""" ALBERT model configuration """
+""" Roberta model configuration """
 from tf_transformers.core import TransformerConfig
 
 
-class AlbertConfig(TransformerConfig):
+class RobertaConfig(TransformerConfig):
     r"""
-    This is the configuration class to store the configuration of a :class:`~tf_transformers.models.AlbertModel`.
+    This is the configuration class to store the configuration of a :class:`~tf_transformers.models.RobertaModel`.
     It is used to instantiate an ALBERT model according to the specified arguments, defining the model architecture.
     Instantiating a configuration with the defaults will yield a similar configuration to that of the
-    ALBERT `base <https://huggingface.co/albert-base-v2>`__ architecture.
+    ALBERT `base <https://huggingface.co/bert-base-uncased>`__ architecture.
 
     Configuration objects inherit from :class:`~tf_transformers.models.TransformerConfig` and can be used to control the model
     outputs. Read the documentation from :class:`~tf_transformers.models.TransformerConfig` for more information.
 
     Args:
-        vocab_size (:obj:`int`, `optional`, defaults to 30000):
+        vocab_size (:obj:`int`, `optional`, defaults to 30522):
             Vocabulary size of the ALBERT model. Defines the number of different tokens that can be represented by the
-            :obj:`inputs_ids` passed when calling :class:`~tf_transformers.model.AlbertModel` or
-            :class:`~tf_transformers.models.AlbertEncoder`.
+            :obj:`inputs_ids` passed when calling :class:`~tf_transformers.model.RobertaModel` or
+            :class:`~tf_transformers.models.RobertaEncoder`.
         embedding_size (:obj:`int`, `optional`, defaults to 128):
             Dimensionality of vocabulary embeddings.
+        embedding_projection_size (:obj:`int`):
+            Dimensionality of the encoder layers and the pooler layer. Useful for Roberta.
         num_hidden_layers (:obj:`int`, `optional`, defaults to 12):
             Number of hidden layers in the Transformer encoder.
         num_attention_heads (:obj:`int`, `optional`, defaults to 12):
@@ -43,8 +45,6 @@ class AlbertConfig(TransformerConfig):
             Size of attention heads in each layer. Normally (embedding_size//num_attention_heads).
         intermediate_size (:obj:`int`, `optional`, defaults to 3072):
             The dimensionality of the "intermediate" (often named feed-forward) layer in the Transformer encoder.
-        inner_group_num (:obj:`int`, `optional`, defaults to 1):
-            The number of inner repetition of attention and ffn.
         hidden_act (:obj:`str` or :obj:`Callable`, `optional`, defaults to :obj:`"gelu"`):
             The non-linear activation function (function or string) in the encoder and pooler. If string,
             :obj:`"gelu"`, :obj:`"relu"`, :obj:`"silu"` and many are supported.
@@ -54,8 +54,8 @@ class AlbertConfig(TransformerConfig):
             The maximum sequence length that this model might ever be used with. Typically set this to something large
             (e.g., 512 or 1024 or 2048).
         type_vocab_size (:obj:`int`, `optional`, defaults to 2):
-            The vocabulary size of the :obj:`token_type_ids` passed when calling :class:`~transformers.AlbertModel` or
-            :class:`~transformers.TFAlbertModel`.
+            The vocabulary size of the :obj:`token_type_ids` passed when calling :class:`~transformers.RobertaModel` or
+            :class:`~transformers.TFRobertaModel`.
         initializer_range (:obj:`float`, `optional`, defaults to 0.02):
             The standard deviation of the truncated_normal_initializer for initializing all weight matrices.
         layer_norm_epsilon (:obj:`float`, `optional`, defaults to 1e-12):
@@ -69,22 +69,24 @@ class AlbertConfig(TransformerConfig):
             <https://arxiv.org/abs/1803.02155>`__. For more information on :obj:`"relative_key_query"`, please refer to
             `Method 4` in `Improve Transformer Models with Better Relative Position Embeddings (Huang et al.)
             <https://arxiv.org/abs/2009.13658>`__.
+        num_hidden_groups (:obj:`int`, `optional`, defaults to 1):
+            Number of groups for the hidden layers, parameters in the same group are shared.
 
     Examples::
 
-        >>> from tf_transformers.models import AlbertConfig, AlbertModel
+        >>> from tf_transformers.models import RobertaConfig, RobertaModel
         >>> # Initializing an bert-base-uncased style configuration
-        >>> configuration = AlbertConfig()
+        >>> configuration = RobertaConfig()
 
-        >>> # Initializing an Bert different style configuration
-        >>> configuration_new = AlbertConfig(
+        >>> # Initializing an Roberta different style configuration
+        >>> configuration_new = RobertaConfig(
         ...      embedding_size=768,
         ...      num_attention_heads=12,
         ...      intermediate_size=3072,
         ...  )
 
         >>> # Initializing a model from the original configuration
-        >>> model = AlbertModel.from_config(configuration)
+        >>> model = RobertaModel.from_config(configuration)
 
         >>> # Accessing the model configuration
         >>> configuration = model._config_dict # This has more details than original configuration
@@ -92,9 +94,8 @@ class AlbertConfig(TransformerConfig):
 
     def __init__(
         self,
-        vocab_size=30000,
-        embedding_size=128,
-        embedding_projection_size=768,
+        vocab_size=50265,
+        embedding_size=768,
         num_hidden_layers=12,
         num_attention_heads=64,
         attention_head_size=64,
@@ -104,11 +105,10 @@ class AlbertConfig(TransformerConfig):
         hidden_dropout_prob=0,
         attention_probs_dropout_prob=0,
         max_position_embeddings=512,
-        type_vocab_size=2,
+        type_vocab_size=1,
         initializer_range=0.02,
-        layer_norm_epsilon=1e-12,
+        layer_norm_epsilon=1e-5,
         position_embedding_type="absolute",
-        num_hidden_groups=1,
     ):
         super().__init__(
             vocab_size=vocab_size,

@@ -20,7 +20,9 @@ from absl import logging
 
 from tf_transformers.core import ModelWrapper
 from tf_transformers.models.albert import AlbertEncoder as Encoder
-from tf_transformers.models.albert.configuration_albert import AlbertConfig
+from tf_transformers.models.albert.configuration_albert import (
+    AlbertConfig as ModelConfig,
+)
 from tf_transformers.models.albert.convert import convert_albert_pt as convert_pt
 from tf_transformers.models.albert.convert import convert_albert_tf as convert_tf
 from tf_transformers.utils.docstring_file_utils import add_start_docstrings
@@ -28,6 +30,20 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_MODEL_CONFIG_DOCSTRING,
     ENCODER_PRETRAINED_DOCSTRING,
 )
+
+code_example = r'''
+
+        >>> from tf_transformers.models import  AlbertModel
+        >>> model = AlbertModel.from_pretrained("albert-base-v2")
+        >>> batch_size = 5
+        >>> sequence_length = 64
+        >>> input_ids = tf.random.uniform(shape=(batch_size, sequence_length), dtype=tf.int32)
+        >>> input_type_ids = tf.zeros_like(input_ids)
+        >>> input_mask = tf.ones_like(input_ids)
+        >>> inputs = {{'input_ids': input_ids, 'input_type_ids':input_type_ids, 'input_mask': input_mask}
+        >>> outputs = model(inputs)
+
+'''
 
 
 class AlbertModel(ModelWrapper):
@@ -65,7 +81,7 @@ class AlbertModel(ModelWrapper):
             "transformers.models.AlbertEncoder", "tf_transformers.models.albert.AlbertConfig"
         ),
     )
-    def from_config(cls, config: AlbertConfig, return_layer: bool = False, **kwargs):
+    def from_config(cls, config: ModelConfig, return_layer: bool = False, **kwargs):
         config_dict = config.to_dict()
         # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
         cls_ref = cls()
@@ -88,9 +104,9 @@ class AlbertModel(ModelWrapper):
 
     @classmethod
     @add_start_docstrings(
-        "Albert Model Pretrained :",
+        "Albert Model Pretrained with example :",
         ENCODER_PRETRAINED_DOCSTRING.format(
-            "tf_transformers.models.AlbertModel", "tf_transformers.models.AlbertEncoder", "albert-base-v2"
+            "tf_transformers.models.AlbertModel", "tf_transformers.models.AlbertEncoder", "albert-base-v2", code_example
         ),
     )
     def from_pretrained(
@@ -108,7 +124,7 @@ class AlbertModel(ModelWrapper):
     ):
         # Load a base config and then overwrite it
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
-        config = AlbertConfig()
+        config = ModelConfig()
         config_dict = config.to_dict()
 
         try:
