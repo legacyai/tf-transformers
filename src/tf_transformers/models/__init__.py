@@ -15,6 +15,7 @@
 # limitations under the License.
 # ==============================================================================
 from tf_transformers.models.albert import AlbertEncoder, AlbertModel
+from tf_transformers.models.bart import BartEncoder, BartModel
 from tf_transformers.models.bert import BertEncoder, BertModel
 from tf_transformers.models.encoder_decoder import EncoderDecoder
 from tf_transformers.models.gpt2 import GPT2Encoder, GPT2Model

@@ -20,11 +20,11 @@ import tensorflow as tf
 
 from tf_transformers.core import LegacyLayer
 from tf_transformers.layers import dense_einsum
-from tf_transformers.layers.attention import MultiHeadAttention
+from tf_transformers.layers.attention import BartAttention
 from tf_transformers.utils import tf_utils
 
 
-class TransformerBERT(LegacyLayer):
+class TransformerBART(LegacyLayer):
     """Transformer
 
     This layer implements the Transformer from "Attention Is All You Need".
@@ -81,7 +81,7 @@ class TransformerBERT(LegacyLayer):
                 inside encoder.
             is_decoder: bool
         """
-        super(TransformerBERT, self).__init__(name=name, is_training=is_training, use_dropout=use_dropout, **kwargs)
+        super(TransformerBART, self).__init__(name=name, is_training=is_training, use_dropout=use_dropout, **kwargs)
         # mostly embedding_size is same as projecting after attention
         self._hidden_size = hidden_size
         self._num_heads = num_attention_heads
@@ -139,7 +139,7 @@ class TransformerBERT(LegacyLayer):
         )
 
         # Self Attention Layer
-        self._attention_layer = MultiHeadAttention(
+        self._attention_layer = BartAttention(
             num_heads=self._num_heads,
             head_size=self._attention_head_size,
             dropout_rate=self._attention_dropout_rate,
@@ -170,7 +170,7 @@ class TransformerBERT(LegacyLayer):
         # Cross Attention for Decoder
         if self._use_decoder:
             # Cross Attention layer
-            self._cross_attention_layer = MultiHeadAttention(
+            self._cross_attention_layer = BartAttention(
                 num_heads=self._num_heads,
                 head_size=self._attention_head_size,
                 dropout_rate=self._attention_dropout_rate,
@@ -210,7 +210,7 @@ class TransformerBERT(LegacyLayer):
         self._output_layer_norm = tf.keras.layers.LayerNormalization(
             name="output_layer_norm", axis=-1, epsilon=self._layer_norm_epsilon, dtype=tf.float32
         )
-        super(TransformerBERT, self).build(input_shape)
+        super(TransformerBART, self).build(input_shape)
 
     def get_config(self):
         config = {
@@ -230,7 +230,7 @@ class TransformerBERT(LegacyLayer):
             "is_training": self.is_training,
             "use_auto_regressive": self._use_auto_regressive,
         }
-        base_config = super(TransformerBERT, self).get_config()
+        base_config = super(TransformerBART, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
     def call_encoder(self, inputs, cache_key=None, cache_value=None):
@@ -266,7 +266,7 @@ class TransformerBERT(LegacyLayer):
         """
         input_tensor, attention_mask, encoder_output, decoder_encoder_mask = inputs
 
-        # Decoder Self Attention
+        # Decoder Self Attention (Call goes to bart_attention.py call_training)
         attention_inputs = [input_tensor, input_tensor]
         if attention_mask is not None:
             attention_inputs.append(attention_mask)
@@ -278,7 +278,6 @@ class TransformerBERT(LegacyLayer):
         attention_output = self._attention_output_dense(attention_output)
         attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
         attention_output = self._attention_layer_norm(attention_output + input_tensor)
-
         if self._use_decoder:
             # Cross Attention
             attention_output_copy = tf.identity(attention_output, name="attention_output_copy")
@@ -298,7 +297,6 @@ class TransformerBERT(LegacyLayer):
             attention_output, _, _ = self._cross_attention_layer(
                 attention_inputs_for_decoder, cache_key=cache_key_cross, cache_value=cache_value_cross
             )
-
             attention_output = self._cross_attention_output_dense(attention_output)
             attention_output = self._attention_dropout(attention_output, training=self.use_dropout)
             attention_output_copy = tf.cast(attention_output_copy, dtype=tf_utils.get_dtype())

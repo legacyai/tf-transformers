@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-import math
 
 import tensorflow as tf
 
@@ -24,8 +23,8 @@ from tf_transformers.layers.mask import masked_softmax
 from tf_transformers.utils import tf_utils
 
 
-class MultiHeadAttention(LegacyLayer):
-    """MultiHeadAttention layer.
+class BartAttention(LegacyLayer):
+    """MultiHeadAttention layer, with scaling query_vector.
 
     This is an implementation of multi-headed attention based on "Attention
     is all you Need". If `from_tensor` and `to_tensor` are the same, then
@@ -76,7 +75,7 @@ class MultiHeadAttention(LegacyLayer):
             bias_constraint: Constraint for dense layer kernels.
         """
         kwargs["name"] = name
-        super(MultiHeadAttention, self).__init__(is_training=is_training, **kwargs)
+        super(BartAttention, self).__init__(is_training=is_training, **kwargs)
         self._num_heads = num_heads
         self._head_size = head_size
         self._is_training = is_training
@@ -141,7 +140,7 @@ class MultiHeadAttention(LegacyLayer):
             "kernel_constraint": tf.keras.constraints.serialize(self._kernel_constraint),
             "bias_constraint": tf.keras.constraints.serialize(self._bias_constraint),
         }
-        base_config = super(MultiHeadAttention, self).get_config()
+        base_config = super(BartAttention, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
     @staticmethod
@@ -239,6 +238,8 @@ class MultiHeadAttention(LegacyLayer):
         query_tensor, key_tensor, value_tensor = tf.cond(
             tf.equal(tf.reduce_sum(cache_key), 0.0), lambda: left(), lambda: right()
         )
+        # An extra scaling is required for Bart.
+        query_tensor = query_tensor * (self._head_size ** -0.5)
         # Scalar dimensions referenced here:
         #   B = batch size (number of sequences)
         #   F = `from_tensor` sequence length
@@ -248,7 +249,8 @@ class MultiHeadAttention(LegacyLayer):
         #   E = `embedding_dimension`
 
         attention_scores = tf.einsum("BNFH,BNTH->BNFT", query_tensor, key_tensor)
-        attention_scores = tf.multiply(attention_scores, 1.0 / math.sqrt(float(self._head_size)))
+        # BART doesnt have this
+        # attention_scores = tf.multiply(attention_scores, 1.0 / math.sqrt(float(self._head_size)))
         # Normalize the attention scores to probabilities.
         # `attention_probs` = [B, N, F, T]
         attention_scores_mask = tf.cast(tf.equal(attention_scores, 0.0), tf.float32) * -10000
@@ -281,6 +283,8 @@ class MultiHeadAttention(LegacyLayer):
         #   H = `size_per_head`
         # `query_tensor` = [B, F, N ,H]
         query_tensor = self._query_dense(from_tensor)
+        # An extra scaling is required for Bart.
+        query_tensor = query_tensor * (self._head_size ** -0.5)
 
         # `key_tensor` = [B, T, N, H]
         key_tensor = self._key_dense(to_tensor)
@@ -297,9 +301,11 @@ class MultiHeadAttention(LegacyLayer):
         #      "BNFH,BNTH->BNFT",  query_tensor, key_tensor)
 
         attention_scores = tf.matmul(query_tensor, key_tensor, transpose_b=True)
+        # BART dont have this
+        # attention_scores = tf.multiply(attention_scores, 1.0 / math.sqrt(float(self._head_size)))
 
-        attention_scores = tf.multiply(attention_scores, 1.0 / math.sqrt(float(self._head_size)))
         attention_probs = self._masked_softmax([attention_scores, attention_mask])
+
         # This is actually dropping out entire tokens to attend to, which might
         # seem a bit unusual, but is taken from the original Transformer paper.
         attention_probs = self._dropout(attention_probs, training=self.use_dropout)
@@ -311,7 +317,7 @@ class MultiHeadAttention(LegacyLayer):
         return self.merge_attention_heads(context_layer), key_tensor, value_tensor
 
     def call(self, inputs, cache_key=None, cache_value=None):
-        # For decoder this function is used for training and inference
+        # For decoder this function is used for inference and if cache_key is not None
         if (self._is_training is False and self._use_auto_regressive) or cache_key is not None:
             attention_states, key_tensor, value_tensor = self.call_predict(inputs, cache_key, cache_value)
             return attention_states, key_tensor, value_tensor

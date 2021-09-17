@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from tf_transformers.layers.attention.bart_attention import BartAttention
 from tf_transformers.layers.attention.bert_attention import MultiHeadAttention
 from tf_transformers.layers.attention.bigbird_attention import BigBirdAttention
 from tf_transformers.layers.attention.gpt2_attention import GPT2Attention

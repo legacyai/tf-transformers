@@ -6,3 +6,5 @@
 6. Test ViT.
 7. Add multi GPU inference.
 8. Add jupytext.
+9. Make use_mlm_layer strictly optional.
+10. Fix model=encoder in TransformerBERT and TransformerBART

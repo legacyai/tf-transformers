@@ -449,7 +449,7 @@ def convert_bert_tf(model, config, model_name):
     ]
     mapping_dict = dict(zip(tf_vars, hf_vars))
     # HF model variable name to variable values, for fast retrieval
-    hf_variable_dict = {var.name: var for var in model_hf.variables}
+    hf_variable_dict = {var.name: var for var in model_hf.variables if var.name in hf_vars}
     for var in model.variables:
         if var.name in tf_vars:
             hf_var_name = mapping_dict[var.name]

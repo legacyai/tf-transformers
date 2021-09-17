@@ -197,7 +197,7 @@ def convert_roberta_pt(model, config, model_name):
             assigned_map.append((original_var, legacy_var))
             continue
 
-        # Robert ave 514 embeddings, we are taking [2:] (512)
+        # Roberta ave 514 embeddings, we are taking [2:] (512)
         if "positional_embeddings" in legacy_var:
             model.variables[index].assign(from_to_variable_dict.get(original_var)[2:])
             assigned_map.append((original_var, legacy_var))
