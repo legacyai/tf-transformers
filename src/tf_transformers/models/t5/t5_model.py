@@ -143,6 +143,7 @@ class T5Model(ModelWrapper):
         decoder_kwargs: Optional[Dict] = None,
         save_checkpoint_cache: bool = True,
         load_from_cache: bool = True,
+        use_auto_regressive: bool = False,
         **kwargs,
     ):
         # Load a base config and then overwrite it
@@ -185,8 +186,15 @@ class T5Model(ModelWrapper):
             decoder_kwargs_copy = cls_ref._update_kwargs_and_config(decoder_kwargs, config_dict)
 
         config_dict["bidirectional"] = False
+        if "use_auto_regressive" in decoder_kwargs_copy:
+            del decoder_kwargs_copy["use_auto_regressive"]
         decoder_layer = Encoder(
-            config=config_dict, name="t5_decoder", use_decoder=True, mask_mode="causal", **decoder_kwargs_copy
+            config=config_dict,
+            name="t5_decoder",
+            use_decoder=True,
+            mask_mode="causal",
+            use_auto_regressive=use_auto_regressive,
+            **decoder_kwargs_copy,
         )
         model_layer = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True)
         model = model_layer.get_model()

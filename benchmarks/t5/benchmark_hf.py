@@ -1,11 +1,11 @@
-"""TFTBechmark scripts"""
+"""HFBechmark scripts"""
 import shutil
 import tempfile
 import time
 
 import tqdm
 from datasets import load_dataset
-from transformers import GPT2TokenizerFast
+from transformers import T5TokenizerFast
 
 _ALLOWED_DECODER_TYPES = [
     "tf",
@@ -27,8 +27,7 @@ class HFBenchmark:
         self.model_name = cfg.benchmark.model.name
 
         # Hardcode gpt-medium (gpt2 is not working some issues)
-        self.tokenizer = GPT2TokenizerFast.from_pretrained(self.model_name)
-        self.tokenizer.pad_token = self.tokenizer.eos_token_id
+        self.tokenizer = T5TokenizerFast.from_pretrained(self.model_name)
 
         self.temp_dir = tempfile.mkdtemp()
 
@@ -45,7 +44,15 @@ class HFBenchmark:
         batch_size = cfg.benchmark.data.batch_size
         max_length = cfg.benchmark.data.max_length
 
-        dataset = load_dataset(dataset_name, "3.0.0", split="test")
+        try:
+            dataset = load_dataset(dataset_name, "3.0.0", split="test")
+        except:
+            from datasets import load_from_disk
+
+            dataset = load_from_disk("/mnt/home/PRE_MODELS/HuggingFace_models/datasets/{}/".format(dataset_name))[
+                "test"
+            ]
+
         if take_sample:
             dataset = dataset.select(range(50))
 
@@ -81,7 +88,15 @@ class HFBenchmark:
         max_length = cfg.benchmark.data.max_length
         device = cfg.benchmark.task.device
 
-        dataset = load_dataset(dataset_name, "3.0.0", split="test")
+        try:
+            dataset = load_dataset(dataset_name, "3.0.0", split="test")
+        except:
+            from datasets import load_from_disk
+
+            dataset = load_from_disk("/mnt/home/PRE_MODELS/HuggingFace_models/datasets/{}/".format(dataset_name))[
+                "test"
+            ]
+
         if take_sample:
             dataset = dataset.select(range(50))
 
@@ -113,7 +128,15 @@ class HFBenchmark:
         batch_size = cfg.benchmark.data.batch_size
         max_length = cfg.benchmark.data.max_length
 
-        dataset = load_dataset(dataset_name, "3.0.0", split="test")
+        try:
+            dataset = load_dataset(dataset_name, "3.0.0", split="test")
+        except:
+            from datasets import load_from_disk
+
+            dataset = load_from_disk("/mnt/home/PRE_MODELS/HuggingFace_models/datasets/{}/".format(dataset_name))[
+                "test"
+            ]
+
         if take_sample:
             dataset = dataset.select(range(50))
 
@@ -162,22 +185,16 @@ class HFBenchmark:
 
             return _decoder_fn
 
-        from transformers import GPT2Config as Config
-        from transformers import TFGPT2LMHeadModel as Model
+        from transformers import TFT5ForConditionalGeneration as Model
 
-        # model_name = self.cfg.benchmark.model.name
-        # model = Model.from_pretrained(model_name=model_name) # somehow link is broken
-
-        configuration = Config()
-        model = Model(configuration)
-        # Dummy initialize
-        dummy = model(input_ids=tf.constant([[1, 2]]))  # noqa
+        model_name = self.cfg.benchmark.model.name
+        model = Model.from_pretrained(model_name)
 
         text_generation_kwargs = self.cfg.benchmark.text_generation
         return decoder_fn(model, text_generation_kwargs)
 
     def _load_pt(self):
-        """Load using KerasModel"""
+        """Load using PTModel"""
 
         def decoder_fn(model, text_generation_kwargs):
             text_generation_kwargs = dict(text_generation_kwargs)
@@ -189,17 +206,12 @@ class HFBenchmark:
             return _decoder_fn
 
         import torch
-        from transformers import GPT2Config as Config
-        from transformers import GPT2LMHeadModel as Model
+        from transformers import T5ForConditionalGeneration as Model
 
         device = self.cfg.benchmark.task.device
         device = torch.device(device)
 
-        # model_name = self.cfg.benchmark.model.name
-        # model = Model.from_pretrained(model_name=model_name) # somehow link is broken
-
-        configuration = Config()
-        model = Model(configuration)
+        model = Model.from_pretrained(self.model_name)
         model.to(device)
         model.eval()
 
@@ -207,14 +219,13 @@ class HFBenchmark:
         return decoder_fn(model, text_generation_kwargs)
 
     def _load_jax(self):
-        """Load using KerasModel"""
+        """Load using JaxModel"""
         import jax
         import jax.numpy as jnp
         import numpy as np
         from flax.jax_utils import replicate
 
         # from flax.training.common_utils import shard
-
         def my_shard(xs, device_count=1):
             return jax.tree_map(lambda x: x.reshape((device_count, -1) + x.shape[1:]), xs)
 
@@ -243,13 +254,10 @@ class HFBenchmark:
 
             return _decoder_fn
 
-        from transformers import FlaxGPT2LMHeadModel as Model
+        from transformers import FlaxT5ForConditionalGeneration as Model
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(
-            model_name,
-            pad_token_id=50256,
-        )  # somehow link is broken
+        model = Model.from_pretrained(model_name)
 
         num_devices = 1
         rng = jax.random.PRNGKey(0)

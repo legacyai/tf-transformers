@@ -158,13 +158,16 @@ class LegacyModel(tf.keras.Model):
                 logging.info("No checkpoint found in {}".format(checkpoint_dir))
             else:
                 logging.info("No checkpoint found")
+            return None
         else:
             status = checkpoint.restore(checkpoint_path)
             # Important
             if status.assert_existing_objects_matched():
                 logging.info("Successful: Model checkpoints matched and loaded from {}".format(checkpoint_path))
+                return checkpoint
             else:
                 logging.info("Failed to load the checkpoint. Status Assertion Failed.")
+        return None
 
     def save_checkpoint(self, checkpoint_dir, overwrite=False, **kwargs):
         """Save checkpoint

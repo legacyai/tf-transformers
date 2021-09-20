@@ -180,7 +180,7 @@ def get_distribution_strategy(
             communication=_collective_communication(all_reduce_alg)
         )
 
-    if distribution_strategy == "one_device":
+    if distribution_strategy == "one_device" or distribution_strategy == "cpu":
         if num_gpus == 0:
             if _is_gpu_available:
                 raise warning(

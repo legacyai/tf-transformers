@@ -151,6 +151,7 @@ class BartModel(ModelWrapper):
         decoder_kwargs: Optional[Dict] = None,
         save_checkpoint_cache: bool = True,
         load_from_cache: bool = True,
+        use_auto_regressive: bool = True,
         **kwargs,
     ):
         # Load a base config and then overwrite it
@@ -191,8 +192,15 @@ class BartModel(ModelWrapper):
                 raise ValueError("decoder kwargs should be dict")
             decoder_kwargs_copy = cls_ref._update_kwargs_and_config(decoder_kwargs, config_dict)
 
+        if "use_auto_regressive" in decoder_kwargs_copy:
+            del decoder_kwargs_copy["use_auto_regressive"]
         decoder_layer = Encoder(
-            config=config_dict, name="bart_decoder", use_decoder=True, mask_mode="causal", **decoder_kwargs_copy
+            config=config_dict,
+            name="bart_decoder",
+            use_decoder=True,
+            mask_mode="causal",
+            use_auto_regressive=use_auto_regressive,
+            **decoder_kwargs_copy,
         )
 
         # Share embeddings

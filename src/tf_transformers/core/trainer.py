@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+import os
+from typing import Callable, List
+
 import tensorflow as tf
 import tqdm
 from absl import logging
@@ -42,21 +45,8 @@ def flat_metric_dict(metric_dict):
     return dict_flatten
 
 
-def save_model_checkpoints(model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models):
-    # Model checkpoint
-    if not overwrite_checkpoint_dir:
-        import os
-
-        if os.path.exists(model_checkpoint_dir):
-            raise FileExistsError("Model directory exists")
-
-    checkpoint = tf.train.Checkpoint(model=model)
-    manager = tf.train.CheckpointManager(checkpoint, directory=model_checkpoint_dir, max_to_keep=max_number_of_models)
-    return manager
-
-
-def get_loss_metric_dict(training_loss_names, validation_loss_names):
-
+def get_loss_metric_dict(training_loss_names: List, validation_loss_names: List):
+    """Get metric based on names"""
     training_loss_dict_metric = {name: tf.keras.metrics.Mean(name, dtype=tf.float32) for name in training_loss_names}
     training_loss_dict_metric["learning_rate"] = tf.keras.metrics.Mean(
         "learning_rate", dtype=tf.float32
@@ -71,7 +61,21 @@ def get_loss_metric_dict(training_loss_names, validation_loss_names):
     return training_loss_dict_metric, validation_loss_dict_metric
 
 
+def save_model_checkpoints(model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models, **kwargs):
+    """Return checkpoint manager"""
+    if not overwrite_checkpoint_dir:
+        import os
+
+        if os.path.exists(model_checkpoint_dir):
+            raise FileExistsError("Model directory exists")
+
+    checkpoint = tf.train.Checkpoint(model=model, **kwargs)
+    manager = tf.train.CheckpointManager(checkpoint, directory=model_checkpoint_dir, max_to_keep=max_number_of_models)
+    return manager
+
+
 def get_and_reset_metric_from_dict(metric_dict):
+    """Convert metric to dict of results and reset"""
     if not metric_dict:
         return {}
     metric_result = {name: metric.result().numpy() for name, metric in metric_dict.items()}
@@ -81,8 +85,9 @@ def get_and_reset_metric_from_dict(metric_dict):
 
 
 def get_tensorboard_writers(model_checkpoint_dir):
-    train_log_dir = model_checkpoint_dir + "/logs/train"
-    test_log_dir = model_checkpoint_dir + "/logs/dev"
+    """Tensorboard Writer"""
+    train_log_dir = os.path.join(model_checkpoint_dir, "logs/train")
+    test_log_dir = os.path.join(model_checkpoint_dir, "logs/dev")
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
     test_summary_writer = tf.summary.create_file_writer(test_log_dir)
     return train_summary_writer, test_summary_writer
@@ -93,6 +98,7 @@ def train_and_eval(
     optimizer,
     strategy,
     epochs,
+    global_step,
     steps_per_epoch,
     steps_per_call,
     train_dataset_iter,
@@ -103,27 +109,33 @@ def train_and_eval(
     validation_loss_fn,
     validation_loss_dict_metric,
     validation_interval_steps,
-    mixed_precision,
     callbacks,
     callbacks_interval_steps,
     trainer_kwargs,
-    checkpoint_manager,
     model_checkpoint_dir,
     model_save_interval_steps,
 ):
-    def save_model(epoch_end=False):
+    def save_model(checkpoint_manager, epoch_end=False):
+        """Save model"""
+        if checkpoint_manager is None:
+            checkpoint_manager = save_model_checkpoints(
+                model, True, model_checkpoint_dir, 10, opt=optimizer, step=tf.Variable(global_step)
+            )
         if not epoch_end:
             if model_save_interval_steps:
                 if global_step % model_save_interval_steps == 0:
                     checkpoint_manager.save()
                     logging.info("Model saved at step {}".format(global_step))
         else:
+            print("Saving global step", global_step)
+            for var in optimizer.variables():
+                print(var.name, '---->', tf.reduce_sum(var))
             checkpoint_manager.save()
             logging.info("Model saved at epoch {}".format(epoch))
 
-    # @tf.function(experimental_relax_shapes=True)
     def write_metrics(metric_dict, writer, step):
-        # @tf.function
+        """Write metrics here"""
+
         def _write(step):
             # other model code would go here
             with writer.as_default():
@@ -151,108 +163,17 @@ def train_and_eval(
         # Avergae loss per global batch size , recommended
         for name, loss in per_example_loss.items():
             per_example_loss_averaged[name] = tf.nn.compute_average_loss(loss, global_batch_size=GLOBAL_BATCH_SIZE)
+
+            # per_example_loss_averaged[name] = tf.reduce_sum(per_example_loss_averaged[name])
         return per_example_loss_averaged
 
-    # Train Functions
-    @tf.function
-    def do_train(iterator):
-        """The step function for one training step"""
-
-        def train_step(dist_inputs):
-            """The computation to run on each device."""
-            batch_inputs, batch_labels = dist_inputs
-            with tf.GradientTape() as tape:
-                model_outputs = model(batch_inputs)
-                loss = compute_loss(batch_labels, model_outputs)
-                tf.debugging.check_numerics(loss['loss'], message='Loss value is either NaN or inf')
-                if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-                    loss_scaled = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
-                # TODO
-                # Scales down the loss for gradients to be invariant from replicas.
-                # loss = loss / strategy.num_replicas_in_sync
-            if mixed_precision:
-                scaled_gradients = tape.gradient(loss_scaled["loss"], model.trainable_variables)
-                grads = optimizer.get_unscaled_gradients(scaled_gradients)
-            else:
-                grads = tape.gradient(loss["loss"], model.trainable_variables)
-            optimizer.apply_gradients(zip(grads, model.trainable_variables))
-            # training_loss.update_state(loss * strategy.num_replicas_in_sync)
-            return loss
-
-        for _ in tf.range(tf.convert_to_tensor(steps_per_call)):
-            dist_inputs = next(iterator)
-            loss = strategy.run(train_step, args=(dist_inputs,))
-            # strategy reduce
-            loss = {
-                name: strategy.reduce(tf.distribute.ReduceOp.MEAN, loss_value, axis=None)
-                for name, loss_value in loss.items()
-            }
-            for name, loss_value in loss.items():
-                training_loss = training_loss_dict_metric[name]
-                training_loss.update_state(loss_value)
-            # Get current learning rate
-            if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
-                current_lr = optimizer._optimizer._decayed_lr(tf.float32)
-            else:
-                current_lr = optimizer._decayed_lr(tf.float32)
-            training_loss_dict_metric["learning_rate"].update_state(current_lr)
-            # training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
-
-    # do validation
-    def do_validation(validation_dataset_distributed):
-        """Validation step"""
-
-        @tf.function
-        def _validate_step(dist_inputs):
-
-            batch_inputs, batch_labels = dist_inputs
-            model_outputs = model(batch_inputs)
-            loss = compute_loss_valid(batch_labels, model_outputs)
-            return loss
-
-        if not epoch_end:
-            if (
-                validation_dataset_distributed
-                and validation_loss_fn
-                and validation_interval_steps
-                and (global_step % validation_interval_steps == 0)
-            ):
-                logging.info("Validation in progress at step {} . . . .".format(global_step))
-                with tqdm.tqdm(validation_dataset_distributed, unit=" Val batch ") as val_batches:
-                    for dist_inputs in val_batches:
-                        loss = strategy.run(_validate_step, args=(dist_inputs,))
-                        for name, loss_value in loss.items():
-                            loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
-                            validation_loss = validation_loss_dict_metric[name]
-                            validation_loss.update_state(loss_value)
-
-                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
-                validation_history[global_step] = validation_result
-                write_metrics(validation_result, val_summary_writer, global_step)
-                logging.info("Validation result at step {}".format(validation_result))
-                print("\n")
-        else:
-            if validation_dataset_distributed and validation_loss_fn:
-                logging.info("Validation in progress at epoch end {} . . . .".format(epoch))
-                with tqdm.tqdm(validation_dataset_distributed, unit=" Val batch ") as val_batches:
-                    for dist_inputs in val_batches:
-                        loss = strategy.run(_validate_step, args=(dist_inputs,))
-                        for name, loss_value in loss.items():
-                            loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
-                            validation_loss = validation_loss_dict_metric[name]
-                            validation_loss.update_state(loss_value)
-
-                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
-                write_metrics(validation_result, val_summary_writer, global_step)
-                # validation_history[global_step] = validation_result
-                logging.info("Validation result at epoch {} is {}".format(epoch, validation_result))
-                print("\n")
-
+    # Callbacks
     def do_callbacks(callbacks):
         """Call callbacks"""
         if not epoch_end:
             callback_scores = None
             if callbacks and callbacks_interval_steps:
+                # each callback can have separate interval steps
                 callback_scores = []
                 for callback, callback_steps in zip(callbacks, callbacks_interval_steps):
                     if callback_steps and (global_step % callback_steps == 0):
@@ -279,15 +200,117 @@ def train_and_eval(
                         write_metrics(score, val_summary_writer, epoch)
             return callback_scores
 
+    # Validation
+    def do_validation(validation_dataset_distributed):
+        """Validation step"""
+
+        @tf.function
+        def _validate_step(dist_inputs):
+
+            batch_inputs, batch_labels = dist_inputs
+            model_outputs = model(batch_inputs)
+            loss = compute_loss_valid(batch_labels, model_outputs)
+            return loss
+
+        if validation_dataset_distributed:
+            iterator = iter(validation_dataset_distributed)
+
+        if not epoch_end:
+            if (
+                validation_dataset_distributed
+                and validation_loss_fn
+                and validation_interval_steps
+                and (global_step % validation_interval_steps == 0)
+            ):
+                print(2 * "\n")
+                logging.info("Validation in progress at step {} . . . .".format(global_step))
+                with tqdm.tqdm(validation_dataset_distributed, unit=" Val batch ") as val_batches:
+                    for _ in val_batches:
+                        dist_inputs = next(iterator)
+                        loss = strategy.run(_validate_step, args=(dist_inputs,))
+                        for name, loss_value in loss.items():
+                            loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
+                            validation_loss = validation_loss_dict_metric[name]
+                            validation_loss.update_state(loss_value)
+
+                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
+                logging.info("Validation result at step {}".format(validation_result))
+                validation_history[global_step] = validation_result
+                write_metrics(validation_result, val_summary_writer, global_step)
+                print("\n")
+        else:
+            if validation_dataset_distributed and validation_loss_fn:
+                logging.info("Validation in progress at epoch end {} . . . .".format(epoch))
+                with tqdm.tqdm(validation_dataset_distributed, unit=" Val batch ") as val_batches:
+                    for _ in val_batches:
+                        dist_inputs = next(iterator)
+                        loss = strategy.run(_validate_step, args=(dist_inputs,))
+                        for name, loss_value in loss.items():
+                            loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
+                            validation_loss = validation_loss_dict_metric[name]
+                            validation_loss.update_state(loss_value)
+
+                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
+                write_metrics(validation_result, val_summary_writer, global_step)
+                validation_history[global_step] = validation_result
+                logging.info("Validation result at epoch {} is {}".format(epoch, validation_result))
+                print(2 * "\n")
+
+    # Train Functions
+    @tf.function
+    def do_train(iterator):
+        """The step function for one training step"""
+
+        def train_step(dist_inputs):
+            """The computation to run on each device."""
+            batch_inputs, batch_labels = dist_inputs
+            with tf.GradientTape() as tape:
+                model_outputs = model(batch_inputs)
+                loss = compute_loss(batch_labels, model_outputs)
+                tf.debugging.check_numerics(loss['loss'], message='Loss value is either NaN or inf')
+                # Means we are in GPU fp16 mixed precision
+                if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+                    loss_scaled = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
+                    scaled_gradients = tape.gradient(loss_scaled["loss"], model.trainable_variables)
+                    grads = optimizer.get_unscaled_gradients(scaled_gradients)
+                else:
+                    grads = tape.gradient(loss["loss"], model.trainable_variables)
+                # TODO
+                # Scales down the loss for gradients to be invariant from replicas.
+                # loss = loss / strategy.num_replicas_in_sync
+            optimizer.apply_gradients(zip(grads, model.trainable_variables))
+            # training_loss.update_state(loss * strategy.num_replicas_in_sync)
+            return loss
+
+        for _ in tf.range(tf.convert_to_tensor(steps_per_call)):
+            dist_inputs = next(iterator)
+            loss = strategy.run(train_step, args=(dist_inputs,))
+            # strategy reduce (SUM) is important
+            # If not SUM, final loss might not be a good representative of global batch
+            loss = {
+                name: strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
+                for name, loss_value in loss.items()
+            }
+            for name, loss_value in loss.items():
+                training_loss = training_loss_dict_metric[name]
+                training_loss.update_state(loss_value)
+            # Get current learning rate
+            # Get current learning rate
+            if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
+                current_lr = optimizer._optimizer._decayed_lr(tf.float32)
+            else:
+                current_lr = optimizer._decayed_lr(tf.float32)
+            training_loss_dict_metric["learning_rate"].update_state(current_lr)
+
     # Loop starts here
     # Get Tensorboard writers
     train_summary_writer, val_summary_writer = get_tensorboard_writers(model_checkpoint_dir)
     validation_history = {}
     training_history = {}
     all_callback_scores = []
-    global_step = 0
     epoch_end = False
     total_examples_processed = 0
+    checkpoint_manager = None  # Define it to be None here . Check save_model.
     STEPS = steps_per_epoch // steps_per_call
     for epoch in range(1, epochs + 1):
         # start_epoch_time = time.time()
@@ -304,7 +327,6 @@ def train_and_eval(
                 do_train(train_dataset_iter)
                 total_examples_processed += steps_per_call * GLOBAL_BATCH_SIZE
 
-                # Call Validation
                 # Call Validation
                 do_validation(validation_dataset_distributed)
 
@@ -323,12 +345,14 @@ def train_and_eval(
                 tepoch.set_postfix(**training_result)
 
                 # Save model
-                save_model()
+                save_model(checkpoint_manager)
 
         # Do after every epoch
         epoch_end = True
-        save_model(epoch_end)
+        save_model(checkpoint_manager, epoch_end)
+        print()
         do_validation(validation_dataset_distributed)
+        print()
         callback_scores = do_callbacks(callbacks)
         if callback_scores:
             all_callback_scores.append(callback_scores)
@@ -340,18 +364,51 @@ def train_and_eval(
     return training_history, validation_history, all_callback_scores
 
 
-class GPUTrainer:
+class Trainer:
+    """Trainer for the Models"""
+
     def __init__(
         self,
-        distribution_strategy,
-        num_gpus=0,
-        all_reduce_alg=None,
-        num_packs=1,
-        tpu_address=None,
-        dtype='fp32',
-        loss_scale='dynamic',
+        distribution_strategy: str,
+        tpu_address: str = None,
+        dtype: str = 'fp32',
+        num_gpus: int = 0,
+        all_reduce_alg: str = None,
+        num_packs: int = 1,
+        loss_scale: str = 'dynamic',
     ):
+        """Trainer class
 
+        Args:
+            distribution_strategy (:obj:`str`): a string specifying which distribution strategy to
+            use. Accepted values are :obj:`("off", "one_device", "mirrored",
+            "parameter_server", "multi_worker_mirrored", "cpu", and "tpu")` -- case
+            insensitive. "tpu" means to use TPUStrategy using `tpu_address`.
+            "off" means to use the default strategy which is obtained from
+            tf.distribute.get_strategy (for details on the default strategy, see
+            https://www.tensorflow.org/guide/distributed_training#default_strategy)
+
+            tpu_address (:obj:`str`, `optional`, defaults to None): If you training in cloud TPU VM,
+            you can pass :obj:(`local`). If you are connecting to TPU from a different machine, provide
+            the name of the machine.
+            dtype (:obj:`str`, `optional`, defaults to fp32): The dtype for training. Supported
+            values are :obj:`(fp32, fp16)` for GPU and :obj:`(fp32, bf16)` for TPU.
+            num_gpus (:obj:`int`, `optional`, defaults to 0): Number of GPUs.
+            all_reduce_alg (:obj:`str`, `optional`, defaults to None): Supported values are
+            :obj:`(ring, nccl)`.
+            num_packs (:obj:`int`, `optional`, defaults to 1): an integer specifying number of packs
+            for the cross device op.
+            loss_scale (:obj:`str`, `optional`, defaults to dynamic): Loss scaling for optimizer in the case
+            of dtype=fp16.
+
+        Raises:
+            ValueError: [description]
+
+        Returns:
+            [type]: [description]
+        """
+
+        self.distribution_strategy_name = distribution_strategy
         self.distribution_strategy = get_distribution_strategy(
             distribution_strategy=distribution_strategy,
             num_gpus=num_gpus,
@@ -378,60 +435,60 @@ class GPUTrainer:
 
     def run(
         self,
-        model_fn,
-        optimizer_fn,
-        train_dataset,
-        train_loss_fn,
-        epochs,
-        steps_per_epoch,
-        model_checkpoint_dir,
-        batch_size,
-        training_loss_names=None,
-        validation_loss_names=None,
-        validation_dataset=None,
-        validation_loss_fn=None,
-        validation_interval_steps=None,
-        steps_per_call=100,
-        enable_xla=False,
-        callbacks=None,
-        callbacks_interval_steps=None,
-        overwrite_checkpoint_dir=False,
-        max_number_of_models=10,
-        model_save_interval_steps=None,
-        repeat_dataset=True,
-        latest_checkpoint=None,
+        model_fn: Callable,
+        optimizer_fn: Callable,
+        train_dataset: tf.data.Dataset,
+        train_loss_fn: Callable,
+        epochs: int,
+        steps_per_epoch: int,
+        model_checkpoint_dir: str,
+        batch_size: int,
+        training_loss_names: List = None,
+        validation_loss_names: List = None,
+        validation_dataset: tf.data.Dataset = None,
+        validation_loss_fn: Callable = None,
+        validation_interval_steps: int = None,
+        steps_per_call: int = 100,
+        enable_xla: bool = False,
+        callbacks: List = None,
+        callbacks_interval_steps: List = None,
+        overwrite_checkpoint_dir: bool = False,
+        max_number_of_models: int = 10,
+        model_save_interval_steps: bool = None,
+        repeat_dataset: bool = True,
+        latest_checkpoint: str = None,
     ):
 
         if steps_per_epoch:
             logging.info("Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.")
         if callbacks:
+            # We want `callbacks` and `callbacks_interval_steps` to be list.
             if callbacks_interval_steps is None:
                 callbacks_interval_steps = [None for callback in callbacks]
             assert len(callbacks) == len(callbacks_interval_steps)
 
         # Enable XLA
-        keras_utils.set_session_config(enable_xla=enable_xla)
+        if enable_xla:
+            # Enable XLA
+            keras_utils.set_session_config(enable_xla=enable_xla)
+
+        # This should be outisde the distribution scope (important)
+        tf.keras.backend.clear_session()
+
+        # Log info
         logging.info("Policy: ----> {}".format(keras_utils.get_policy_name()))
         logging.info("Strategy: ---> {}".format(self.distribution_strategy))
         _is_gpu_available, _num_gpus_present = tf_utils.is_gpu_available()
-        if _is_gpu_available:
-            logging.info("Num GPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
+        if self.distribution_strategy_name == 'tpu':
+            logging.info("Num TPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
         else:
-            logging.info("Num CPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
-
-        tf.keras.backend.clear_session()
-
-        # Under Strategy Scope
-        with self.distribution_strategy.scope():
-            # Model
-            model = model_fn()
-
-            # Optimizer
-            optimizer = optimizer_fn()
-
-            optimizer = configure_optimizer(optimizer, use_float16=self.use_float16, loss_scale=self.loss_scale)
+            if _is_gpu_available:
+                logging.info("Num GPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
+            else:
+                logging.info("Num CPU Devices: ---> {}".format(self.distribution_strategy.num_replicas_in_sync))
 
         # We use this to avoid inferring names from loss functions
+        # We need this names for metrics and tensorboards.
         _training_loss_names = ['loss']
         _validation_loss_names = ['loss']
         if training_loss_names:
@@ -441,19 +498,31 @@ class GPUTrainer:
         # Make unique names
         training_loss_names = list(set(_training_loss_names))
         validation_loss_names = list(set(_validation_loss_names))
-        # Checkpoint manager
-        checkpoint_manager = save_model_checkpoints(
-            model, overwrite_checkpoint_dir, model_checkpoint_dir, max_number_of_models
-        )
 
-        # Try to load latest checkpoint
-        model.load_checkpoint(checkpoint_dir=model_checkpoint_dir, checkpoint_path=latest_checkpoint, opt=optimizer)
+        # Under Strategy Scope
+        with self.distribution_strategy.scope():
+            # Model
+            model = model_fn()
 
-        # Get metric dicts before distributing the dataset
-        # ddistributed datasets has no attribute .take
-        training_loss_dict_metric, validation_loss_dict_metric = get_loss_metric_dict(
-            training_loss_names, validation_loss_names
+            # Optimizer
+            optimizer = optimizer_fn()
+
+            # Only for GPU fp16
+            if self.use_float16:
+                # Configure Optimizer for fp16 if True
+                optimizer = configure_optimizer(optimizer, use_float16=self.use_float16, loss_scale=self.loss_scale)
+
+        # Load and restore
+        ckpt = model.load_checkpoint(
+            checkpoint_dir=model_checkpoint_dir, checkpoint_path=latest_checkpoint, opt=optimizer, step=tf.Variable(0)
         )
+        # If checkpoint is not None, means its succesful
+        global_step = 0
+        if ckpt:
+            global_step = ckpt.step.numpy()
+            optimizer = ckpt.opt
+            logging.info("Succesfully restored existing checkpoints from step {}".format(global_step))
+
         # Distribute dataset
         if not repeat_dataset:
             train_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
@@ -468,9 +537,14 @@ class GPUTrainer:
             validation_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
                 validation_dataset
             )
-
         # Make train dataset iterator
         train_dataset_distributed = iter(train_dataset_distributed)
+
+        # Get metric dicts before distributing the dataset
+        # ddistributed datasets has no attribute .take
+        training_loss_dict_metric, validation_loss_dict_metric = get_loss_metric_dict(
+            training_loss_names, validation_loss_names
+        )
 
         history = {}
         training_history, validation_history, callback_scores = train_and_eval(
@@ -478,6 +552,7 @@ class GPUTrainer:
             optimizer,
             self.distribution_strategy,
             epochs,
+            global_step,
             steps_per_epoch,
             steps_per_call,
             train_dataset_distributed,
@@ -488,11 +563,9 @@ class GPUTrainer:
             validation_loss_fn,
             validation_loss_dict_metric,
             validation_interval_steps,
-            self.use_float16,
             callbacks,
             callbacks_interval_steps,
             locals(),
-            checkpoint_manager,
             model_checkpoint_dir,
             model_save_interval_steps,
         )

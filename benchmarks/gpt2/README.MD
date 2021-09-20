@@ -19,17 +19,22 @@ python run.py +benchmark=tft bechmark.data.take_sample=true
 b. **HF PT**
 
 ```
-python run.py +benchmark=hf bechmark.model.type=pt
+python run.py +benchmark=hf benchmark.model.type=pt
 ```
+For beam search
+
+```
+python run.py benchmark=hf benchmark.model.type=pt +benchmark.text_generation.num_beams=3
+
 c. **HF JAX**
 
 ```
-python run.py +benchmark=hf bechmark.model.type=jax
+python run.py +benchmark=hf benchmark.model.type=jax
 ```
 d. **HF TF**
 
 ```
-python run.py +benchmark=hf bechmark.model.type=tf
+python run.py +benchmark=hf benchmark.model.type=tf
 ```
 
 
