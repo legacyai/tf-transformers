@@ -87,7 +87,7 @@ def get_and_reset_metric_from_dict(metric_dict):
 def get_tensorboard_writers(model_checkpoint_dir):
     """Tensorboard Writer"""
     train_log_dir = os.path.join(model_checkpoint_dir, "logs/train")
-    test_log_dir = os.path.join(model_checkpoint_dir, "logs/dev")
+    test_log_dir = os.path.join(model_checkpoint_dir, "logs/eval")
     train_summary_writer = tf.summary.create_file_writer(train_log_dir)
     test_summary_writer = tf.summary.create_file_writer(test_log_dir)
     return train_summary_writer, test_summary_writer
@@ -114,12 +114,13 @@ def train_and_eval(
     trainer_kwargs,
     model_checkpoint_dir,
     model_save_interval_steps,
+    max_number_of_models,
 ):
     def save_model(checkpoint_manager, epoch_end=False):
         """Save model"""
         if checkpoint_manager is None:
             checkpoint_manager = save_model_checkpoints(
-                model, True, model_checkpoint_dir, 10, opt=optimizer, step=tf.Variable(global_step)
+                model, True, model_checkpoint_dir, max_number_of_models, opt=optimizer, step=tf.Variable(global_step)
             )
         if not epoch_end:
             if model_save_interval_steps:
@@ -452,7 +453,6 @@ class Trainer:
         enable_xla: bool = False,
         callbacks: List = None,
         callbacks_interval_steps: List = None,
-        overwrite_checkpoint_dir: bool = False,
         max_number_of_models: int = 10,
         model_save_interval_steps: bool = None,
         repeat_dataset: bool = True,
@@ -568,6 +568,7 @@ class Trainer:
             locals(),
             model_checkpoint_dir,
             model_save_interval_steps,
+            max_number_of_models,
         )
         history['training_history'] = training_history
         history['validation_hsitory'] = validation_history

@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# mypy: ignore-errors
+
 # coding=utf-8
 # Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.
 # All Rights Reserved.

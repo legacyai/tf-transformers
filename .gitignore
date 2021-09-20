@@ -21,7 +21,7 @@ lang_code_data/
 
 #hydra outputs
 benchmarks/*/outputs
-outputs
+outputs/
 
 # Distribution / packaging
 .Python

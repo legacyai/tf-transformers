@@ -245,7 +245,7 @@ class TransformerBART(LegacyLayer):
         if attention_mask is not None:
             attention_inputs.append(attention_mask)
 
-        # attention_inputs = [from_tensor, to_tensor, attention_mask]
+        # attention_inputs = [from_tensor, to_tensor, attention_mask] ((b x s x 768))
         attention_output, key, value = self._attention_layer(
             attention_inputs, cache_key=cache_key, cache_value=cache_value
         )

@@ -10,3 +10,4 @@
 10. Fix model=encoder in TransformerBERT and TransformerBART
 11. Check validate tf.function by moving the metric update inside tf.function.
     Check the effect of strategy.run(tf.reduce_op.SUM)
+12. Add gradient clipping.
