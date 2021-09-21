@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""A simple callback for some common metrics in Tensorflow 2.0"""
+"""A simple metric callback for some common metrics in Tensorflow 2.0"""
 import tensorflow as tf
+import tqdm
 from absl import logging
 
 from tf_transformers.callbacks.metric_callback_list import get_callback
@@ -71,6 +72,20 @@ class MetricCallback:
             for dist_inputs in dataset:
                 strategy.run(validate_step, args=(dist_inputs,))
 
+        def run_dataset_non_distributed(dataset):
+            """The step function for one validation step"""
+
+            def validate_step(dist_inputs):
+                """The computation to run on each device."""
+                batch_inputs, batch_labels = dist_inputs
+                model_outputs = model(batch_inputs)
+                predicted_ids = tf.argmax(model_outputs[self.prediction_column], axis=1)
+                # metric_dict['sample'](batch_labels, predicted_ids)
+                metric.update_state(batch_labels[self.label_column], predicted_ids)
+
+            for dist_inputs in tqdm.tqdm(dataset):
+                validate_step(dist_inputs)
+
         @tf.function
         def run_dataset_all_layers(dataset):
             """The step function for one validation step"""
@@ -89,6 +104,23 @@ class MetricCallback:
             for dist_inputs in dataset:
                 strategy.run(validate_step, args=(dist_inputs,))
 
+        def run_dataset_all_layers_non_distributed(dataset):
+            """The step function for one validation step"""
+
+            def validate_step(dist_inputs):
+                """The computation to run on each device."""
+                batch_inputs, batch_labels = dist_inputs
+                model_outputs = model(batch_inputs)[self.prediction_column]
+
+                layer_no = 1
+                for per_layer_output in model_outputs:
+                    predicted_ids = tf.argmax(per_layer_output, axis=1)
+                    metric_dict[layer_no].update_state(batch_labels[self.label_column], predicted_ids)
+                    layer_no += 1
+
+            for dist_inputs in tqdm.tqdm(dataset):
+                validate_step(dist_inputs)
+
         # Model from trainer
         model = traininer_kwargs['model']
         # Strategy
@@ -103,7 +135,7 @@ class MetricCallback:
             if validation_dataset_distributed:
                 run_dataset_all_layers(validation_dataset_distributed)
             elif self.validation_dataset:
-                run_dataset_all_layers(self.validation_dataset)
+                run_dataset_all_layers_non_distributed(self.validation_dataset)
 
             result = {}
             for i in range(1, num_layers + 1):
@@ -116,7 +148,7 @@ class MetricCallback:
             if validation_dataset_distributed:
                 run_dataset(validation_dataset_distributed)
             elif self.validation_dataset:
-                run_dataset(self.validation_dataset)
+                run_dataset_non_distributed(self.validation_dataset)
 
             result = metric.result()
             metric.reset_states()

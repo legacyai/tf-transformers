@@ -14,7 +14,7 @@ from hydra import compose
 from model import get_model, get_optimizer, get_tokenizer, get_trainer
 from omegaconf import DictConfig
 
-from tf_transformers.callbacks.metrics import MetricCallback
+from tf_transformers.callbacks.metrics import F1Callback, MetricCallback
 from tf_transformers.data import TFReader, TFWriter
 from tf_transformers.losses.loss_wrapper import get_1d_classification_loss
 from tf_transformers.models import Classification_Model
@@ -173,7 +173,6 @@ def run_mrpc(cfg: DictConfig):
     max_seq_length = cfg.glue.data.max_seq_length
     take_sample = cfg.data.take_sample
     train_batch_size = cfg.data.train_batch_size
-    metric_name = cfg.glue.callbacks.metric_name
 
     # Load tokenizer
     tokenizer = get_tokenizer()
@@ -224,6 +223,8 @@ def run_mrpc(cfg: DictConfig):
         return_all_layer_outputs = True
         training_loss_names = ['loss_{}'.format(i + 1) for i in range(NUM_LAYERS)]
         validation_loss_names = training_loss_names
+
+    # Load Model
     model_fn = get_classification_model(
         cfg.glue.data.num_classes, return_all_layer_outputs, cfg.model.is_training, cfg.model.use_dropout
     )
@@ -236,7 +237,8 @@ def run_mrpc(cfg: DictConfig):
     model_checkpoint_dir = os.path.join(temp_dir, "models", task_name)
 
     # Callback
-    callback = MetricCallback(metric_name=metric_name)
+    acc_callback = MetricCallback(metric_name='binary_accuracy')
+    f1_callback = F1Callback()
 
     history = trainer.run(
         model_fn=model_fn,
@@ -254,7 +256,7 @@ def run_mrpc(cfg: DictConfig):
         validation_interval_steps=None,
         steps_per_call=1,
         enable_xla=False,
-        callbacks=[callback],
+        callbacks=[acc_callback, f1_callback],
         callbacks_interval_steps=None,
         max_number_of_models=10,
         model_save_interval_steps=None,
