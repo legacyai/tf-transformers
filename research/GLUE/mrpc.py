@@ -10,12 +10,16 @@ import tempfile
 import datasets
 import hydra
 from absl import logging
+from hydra import compose
 from model import get_model, get_optimizer, get_tokenizer, get_trainer
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 
+from tf_transformers.callbacks.metrics import MetricCallback
 from tf_transformers.data import TFReader, TFWriter
 from tf_transformers.losses.loss_wrapper import get_1d_classification_loss
 from tf_transformers.models import Classification_Model
+
+logging.set_verbosity("INFO")
 
 NUM_LAYERS = 12  # Number of hidden_layers
 
@@ -62,13 +66,13 @@ def write_tfrecord(
         "labels": ("var_len", "int"),
     }
 
-    # Create a temp dir
-    if os.path.exists(tfrecord_dir):
-        logging.info("TFrecords exists in the directory {}".format(tfrecord_dir))
-        return True
     if mode == "train":
         # Write tf records
         train_data_dir = os.path.join(tfrecord_dir, "train")
+        # Create a temp dir
+        if os.path.exists(train_data_dir):
+            logging.info("TFrecords exists in the directory {}".format(train_data_dir))
+            return True
         tfwriter = TFWriter(schema=schema, model_dir=train_data_dir, tag='train', verbose_counter=verbose)
         data_train = data
         # Take sample
@@ -79,6 +83,10 @@ def write_tfrecord(
     if mode == "eval":
         # Write tfrecords
         eval_data_dir = os.path.join(tfrecord_dir, "eval")
+        # Create a temp dir
+        if os.path.exists(eval_data_dir):
+            logging.info("TFrecords exists in the directory {}".format(eval_data_dir))
+            return True
         tfwriter = TFWriter(schema=schema, model_dir=eval_data_dir, tag='eval', verbose_counter=verbose)
         data_eval = data
         # Take sample
@@ -156,16 +164,16 @@ def get_classification_model(num_classes: int, return_all_layer_outputs: bool, i
     return model_fn
 
 
-@hydra.main(config_path="config/glue", config_name="mrpc.yaml")
+@hydra.main(config_path="config")
 def run_mrpc(cfg: DictConfig):
-    print("Run MRPC")
-    print(OmegaConf.to_yaml(cfg))
-
+    logging.info("Run MRPC")
+    cfg = compose(config_name="config", overrides=["+glue=mrpc"])
     task_name = cfg.glue.task.name
     data_name = cfg.glue.data.name
-    max_seq_length = cfg.data.max_seq_length
+    max_seq_length = cfg.glue.data.max_seq_length
     take_sample = cfg.data.take_sample
     train_batch_size = cfg.data.train_batch_size
+    metric_name = cfg.glue.callbacks.metric_name
 
     # Load tokenizer
     tokenizer = get_tokenizer()
@@ -175,7 +183,7 @@ def run_mrpc(cfg: DictConfig):
 
     # Write TFRecords
     temp_dir = tempfile.gettempdir()
-    tfrecord_dir = os.path.join(temp_dir, task_name)
+    tfrecord_dir = os.path.join(temp_dir, "tfrecord", task_name)
 
     # Train
     write_tfrecord(
@@ -194,7 +202,7 @@ def run_mrpc(cfg: DictConfig):
     # Read TFRecords Validation
     eval_tfrecord_dir = os.path.join(tfrecord_dir, "eval")
     eval_dataset, total_eval_examples = read_tfrecord(
-        eval_tfrecord_dir, cfg.data.train_batch_size, shuffle=False, drop_remainder=False
+        eval_tfrecord_dir, cfg.data.eval_batch_size, shuffle=False, drop_remainder=False
     )
 
     # Load optimizer
@@ -204,7 +212,7 @@ def run_mrpc(cfg: DictConfig):
 
     # Load trainer
     trainer = get_trainer(
-        distribution_strategy=cfg.trainer.strategy, num_gpus=cfg.trainer.num_gpus, tpu_address=cfg.tpu_address
+        distribution_strategy=cfg.trainer.strategy, num_gpus=cfg.trainer.num_gpus, tpu_address=cfg.trainer.tpu_address
     )
 
     # Load model function
@@ -227,7 +235,8 @@ def run_mrpc(cfg: DictConfig):
     steps_per_epoch = total_train_examples // train_batch_size
     model_checkpoint_dir = os.path.join(temp_dir, "models", task_name)
 
-    callback = None  # Need to be defined
+    # Callback
+    callback = MetricCallback(metric_name=metric_name)
 
     history = trainer.run(
         model_fn=model_fn,
@@ -247,7 +256,6 @@ def run_mrpc(cfg: DictConfig):
         enable_xla=False,
         callbacks=[callback],
         callbacks_interval_steps=None,
-        overwrite_checkpoint_dir=True,
         max_number_of_models=10,
         model_save_interval_steps=None,
         repeat_dataset=True,
@@ -255,7 +263,3 @@ def run_mrpc(cfg: DictConfig):
     )
 
     return history
-
-
-if __name__ == "__main__":
-    history = run_mrpc()

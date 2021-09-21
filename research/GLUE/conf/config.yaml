@@ -3,8 +3,8 @@ data:
     eval_batch_size: 64
     take_sample: false
     max_seq_length: 128
+    static_padding: false
 trainer:
-  type: gpu
   dtype: fp32
   num_gpus: 2
   tpu_address:
@@ -12,7 +12,7 @@ trainer:
   strategy: mirrored
 optimizer:
   learning_rate: 2e-5
-  loss_type:
+  loss_type: 'joint'
 model:
   is_training: true
   use_dropout: true

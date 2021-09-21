@@ -15,7 +15,6 @@
 # limitations under the License.
 # ==============================================================================
 import os
-import time
 from typing import Callable, List
 
 import tensorflow as tf
@@ -31,16 +30,6 @@ from tf_transformers.core.performance_utils import (
     set_mixed_precision_policy,
 )
 from tf_transformers.utils import tf_utils
-
-
-def flat_callback_scores(callback_scores: List):
-    callback_scores_flatten = []
-    for item in callback_scores:
-        if all(v is None for v in item):
-            continue
-        callback_scores_flatten.append(item)
-
-    return callback_scores_flatten
 
 
 def flat_metric_dict(metric_dict):
@@ -131,12 +120,7 @@ def train_and_eval(
         """Save model"""
         if checkpoint_manager is None:
             checkpoint_manager = save_model_checkpoints(
-                model,
-                True,
-                model_checkpoint_dir,
-                max_number_of_models,
-                opt=optimizer,
-                step=tf.Variable(global_step, dtype=tf.int64),
+                model, True, model_checkpoint_dir, max_number_of_models, opt=optimizer, step=tf.Variable(global_step)
             )
         if not epoch_end:
             if model_save_interval_steps:
@@ -193,7 +177,7 @@ def train_and_eval(
                     if callback_steps and (global_step % callback_steps == 0):
                         logging.info("Callbacks in progress at step {} . . . .".format(global_step))
                         score = callback(trainer_kwargs)
-                        logging.info("Callback score {} at step {}".format(score, global_step))
+                        logging.info("Call back score {}".format(score))
                         callback_scores.append(score)
                     else:
                         callback_scores.append(None)
@@ -206,7 +190,7 @@ def train_and_eval(
                 for callback in callbacks:
                     score = callback(trainer_kwargs)
                     callback_scores.append(score)
-                    logging.info("Callback score {} at epoch {}".format(score, epoch))
+                    logging.info("Call back score {}".format(score))
                     # Try to write a callback scores (only on epoch end)
                     # If we are returning a dict like {'exact_match': 81} or
                     # {'rougue-1': 30} etc . . . .
@@ -214,51 +198,61 @@ def train_and_eval(
                         write_metrics(score, val_summary_writer, epoch)
             return callback_scores
 
-    # Validation Functions
-    # Infer number of steps for validation data, otherwise
-    # it will run indefinitely inside tf.function
-    validation_steps = 0
-    if validation_dataset_distributed:
-        for _ in validation_dataset_distributed:
-            validation_steps += 1
+    # Validation
+    def do_validation(validation_dataset_distributed):
+        """Validation step"""
 
-    @tf.function
-    def _do_validation(dataset):
-        """The step function for one validation step"""
+        @tf.function
+        def _validate_step(dist_inputs):
 
-        def validate_step(dist_inputs):
-            """The computation to run on each device."""
             batch_inputs, batch_labels = dist_inputs
             model_outputs = model(batch_inputs)
             loss = compute_loss_valid(batch_labels, model_outputs)
             return loss
 
-        for dist_inputs in dataset:
-            loss = strategy.run(validate_step, args=(dist_inputs,))
-            # strategy reduce (SUM) is important
-            # If not SUM, final loss might not be a good representative of global batch
-            loss = {
-                name: strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
-                for name, loss_value in loss.items()
-            }
-            for name, loss_value in loss.items():
-                validation_loss = validation_loss_dict_metric[name]
-                validation_loss.update_state(loss_value)
+        if validation_dataset_distributed:
+            iterator = iter(validation_dataset_distributed)
 
-    def do_validation(validation_dataset_distributed):
-        """Batch validation"""
-        with tqdm.trange(validation_steps, unit=" Validation batch ") as val_bar:
-            step_counter = 0
-            _do_validation(validation_dataset_distributed)
-            # for _ in val_bar:
-            #     step_counter += 1
-            val_bar.set_description(
-                "Epoch {}/{} --- Val Step {}/{} ".format(epoch, epochs, step_counter, validation_steps)
-            )
+        if not epoch_end:
+            if (
+                validation_dataset_distributed
+                and validation_loss_fn
+                and validation_interval_steps
+                and (global_step % validation_interval_steps == 0)
+            ):
+                print(2 * "\n")
+                logging.info("Validation in progress at step {} . . . .".format(global_step))
+                with tqdm.tqdm(validation_dataset_distributed, unit=" Val batch ") as val_batches:
+                    for _ in val_batches:
+                        dist_inputs = next(iterator)
+                        loss = strategy.run(_validate_step, args=(dist_inputs,))
+                        for name, loss_value in loss.items():
+                            loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
+                            validation_loss = validation_loss_dict_metric[name]
+                            validation_loss.update_state(loss_value)
 
-            validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
-            val_bar.set_postfix(**validation_result)
-        return validation_result
+                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
+                logging.info("Validation result at step {}".format(validation_result))
+                validation_history[global_step] = validation_result
+                write_metrics(validation_result, val_summary_writer, global_step)
+                print("\n")
+        else:
+            if validation_dataset_distributed and validation_loss_fn:
+                logging.info("Validation in progress at epoch end {} . . . .".format(epoch))
+                with tqdm.tqdm(validation_dataset_distributed, unit=" Val batch ") as val_batches:
+                    for _ in val_batches:
+                        dist_inputs = next(iterator)
+                        loss = strategy.run(_validate_step, args=(dist_inputs,))
+                        for name, loss_value in loss.items():
+                            loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
+                            validation_loss = validation_loss_dict_metric[name]
+                            validation_loss.update_state(loss_value)
+
+                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
+                write_metrics(validation_result, val_summary_writer, global_step)
+                validation_history[global_step] = validation_result
+                logging.info("Validation result at epoch {} is {}".format(epoch, validation_result))
+                print(2 * "\n")
 
     # Train Functions
     @tf.function
@@ -299,6 +293,7 @@ def train_and_eval(
                 training_loss = training_loss_dict_metric[name]
                 training_loss.update_state(loss_value)
             # Get current learning rate
+            # Get current learning rate
             if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
                 current_lr = optimizer._optimizer._decayed_lr(tf.float32)
             else:
@@ -331,15 +326,7 @@ def train_and_eval(
                 total_examples_processed += steps_per_call * GLOBAL_BATCH_SIZE
 
                 # Call Validation
-                if not epoch_end:
-                    if (
-                        validation_dataset_distributed
-                        and validation_loss_fn
-                        and validation_interval_steps
-                        and (global_step % validation_interval_steps == 0)
-                    ):
-                        validation_result = do_validation(validation_dataset_distributed)
-                        validation_history[global_step] = validation_result
+                do_validation(validation_dataset_distributed)
 
                 # Call Callbacks
                 callback_scores = do_callbacks(callbacks)
@@ -362,25 +349,16 @@ def train_and_eval(
         epoch_end = True
         save_model(checkpoint_manager, epoch_end)
         print()
-        time.sleep(0.1)  # Sleep for 1 second, to make print neater
-
-        validation_result = None
-        if validation_dataset_distributed:
-            validation_result = do_validation(validation_dataset_distributed)
-            validation_history[global_step] = validation_result
+        do_validation(validation_dataset_distributed)
         print()
-        time.sleep(0.1)  # Sleep for 1 second, to make print neater
         callback_scores = do_callbacks(callbacks)
         if callback_scores:
             all_callback_scores.append(callback_scores)
         epoch_end = False
-        print()
-        time.sleep(0.1)  # Sleep for 1 second, to make print neater
 
     # Flatten the results
     training_history = flat_metric_dict(training_history)
     validation_history = flat_metric_dict(validation_history)
-    all_callback_scores = flat_callback_scores(all_callback_scores)
     return training_history, validation_history, all_callback_scores
 
 
@@ -536,7 +514,7 @@ class Trainer:
                 checkpoint_dir=model_checkpoint_dir,
                 checkpoint_path=latest_checkpoint,
                 opt=optimizer,
-                step=tf.Variable(0, dtype=tf.int64),
+                step=tf.Variable(0),
             )
 
         # If checkpoint is not None, means its succesful
@@ -560,7 +538,6 @@ class Trainer:
             validation_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
                 validation_dataset
             )
-
         # Make train dataset iterator
         train_dataset_distributed = iter(train_dataset_distributed)
 
