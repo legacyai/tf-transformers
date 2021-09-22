@@ -1,7 +1,31 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""This is the main script to run GLUE benchmark"""
 import hydra
 import pandas as pd
+from cola import run_cola
+from mnli import run_mnli
 from mrpc import run_mrpc
 from omegaconf import DictConfig
+from qnli import run_qnli
+from qqp import run_qqp
+from rte import run_rte
+from sst2 import run_sst2
+from stsb import run_stsb
 
 
 def flat_callbacks_to_df(history):
@@ -25,6 +49,34 @@ def run_glue(cfg):
     history = run_mrpc(cfg)
     df_mrpcs = flat_callbacks_to_df(history)  # noqa
 
+    # Run MNLI
+    history = run_mnli(cfg)
+    df_mnli = flat_callbacks_to_df(history)  # noqa
+
+    # Run COLA
+    history = run_cola(cfg)
+    df_cola = flat_callbacks_to_df(history)  # noqa
+
+    # Run QNLI
+    history = run_qnli(cfg)
+    df_qnli = flat_callbacks_to_df(history)  # noqa
+
+    # Run QQP
+    history = run_qqp(cfg)
+    df_qnli = flat_callbacks_to_df(history)  # noqa
+
+    # Run RTE
+    history = run_rte(cfg)
+    df_rte = flat_callbacks_to_df(history)  # noqa
+
+    # Run SST2
+    history = run_sst2(cfg)
+    df_sst2 = flat_callbacks_to_df(history)  # noqa
+
+    # Run STSB
+    history = run_stsb(cfg)
+    df_stsb = flat_callbacks_to_df(history)  # noqa
+
     return True
 
 
@@ -46,6 +98,34 @@ def run(cfg: DictConfig) -> None:
         # Run mrpc
         if "mrpc" in cfg_dict["glue"]["task"]["name"]:
             run_mrpc(cfg)
+
+        # Run mnli
+        if "mnli" in cfg_dict["glue"]["task"]["name"]:
+            run_mnli(cfg)
+
+        # Run cola
+        if "cola" in cfg_dict["glue"]["task"]["name"]:
+            run_cola(cfg)
+
+        # Run qnli
+        if "qnli" in cfg_dict["glue"]["task"]["name"]:
+            run_qnli(cfg)
+
+        # Run qqp
+        if "qqp" in cfg_dict["glue"]["task"]["name"]:
+            run_qqp(cfg)
+
+        # Run rte
+        if "rte" in cfg_dict["glue"]["task"]["name"]:
+            run_rte(cfg)
+
+        # Run sst2
+        if "sst2" in cfg_dict["glue"]["task"]["name"]:
+            run_sst2(cfg)
+
+        # Run stsb
+        if "stsb" in cfg_dict["glue"]["task"]["name"]:
+            run_stsb(cfg)
 
 
 if __name__ == "__main__":

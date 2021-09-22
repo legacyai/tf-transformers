@@ -1,0 +1,6 @@
+task:
+    name: rte
+data:
+  name: rte
+  num_classes: 2
+  max_seq_length: 256

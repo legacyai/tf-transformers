@@ -1,0 +1,6 @@
+task:
+    name: cola
+data:
+  name: cola
+  num_classes: 2
+  max_seq_length: 256

@@ -15,15 +15,26 @@
 # limitations under the License.
 # ==============================================================================
 """A simple metric callback for some common metrics in Tensorflow 2.0"""
+
 import tensorflow as tf
 import tqdm
 from absl import logging
-from sklearn.metrics import f1_score
+from scipy.stats import pearsonr, spearmanr
+from sklearn.metrics import accuracy_score, f1_score, matthews_corrcoef
+
+_ALL_METRIC_NAMES = {
+    'accuracy_score': accuracy_score,
+    'f1_score': f1_score,
+    'matthews_corrcoef': matthews_corrcoef,
+    'pearsonr': pearsonr,
+    'spearmanr': spearmanr,
+}
 
 
-class F1Callback:
+class SklearnMetricCallback:
     def __init__(
         self,
+        metric_name_list=('accuracy_score', 'f1_score'),
         label_column: str = 'labels',
         prediction_column: str = 'class_logits',
         validation_dataset: tf.data.Dataset = None,
@@ -35,11 +46,15 @@ class F1Callback:
             y_column (str): the key of model predictions.
             validation_dataset (tf.data.Dataset, optional): Validation dataset
         """
+        for metric_name in metric_name_list:
+            if metric_name not in _ALL_METRIC_NAMES:
+                raise ValueError(
+                    "metric {} not found in supported metric list {}".format(metric_name, _ALL_METRIC_NAMES)
+                )
+        self.metric_name_list = metric_name_list
         self.validation_dataset = validation_dataset
         self.label_column = label_column
         self.prediction_column = prediction_column
-
-        self.metric_name = 'f1_score'
 
     def __call__(self, traininer_kwargs):
         """This is getting called inside the trainer class"""
@@ -73,8 +88,13 @@ class F1Callback:
 
             for dist_inputs in tqdm.tqdm(dataset):
                 validate_step(dist_inputs)
-            score = f1_score(y_true=labels_full, y_pred=predicted_ids_full)
-            return {self.metric_name: score}
+
+            result = {}
+            for metric_name in self.metric_name_list:
+                metric_obj = _ALL_METRIC_NAMES[metric_name]
+                score = metric_obj(y_true=labels_full, y_pred=predicted_ids_full)
+                result[metric_name] = score
+            return result
 
         def run_dataset_all_layers_non_distributed(num_hidden_layers, dataset):
             """The step function for one validation step"""
@@ -99,8 +119,10 @@ class F1Callback:
 
             result = {}
             for layer_no, predicted_ids_full in predictions_per_layer.items():
-                score = f1_score(y_true=labels_full, y_pred=predicted_ids_full)
-                result['{}_layer_{}'.format(self.metric_name, str(layer_no))] = score
+                for metric_name in self.metric_name_list:
+                    metric_obj = _ALL_METRIC_NAMES[metric_name]
+                    score = metric_obj(y_true=labels_full, y_pred=predicted_ids_full)
+                    result['{}_layer_{}'.format(metric_name, str(layer_no))] = score
 
             return result
 

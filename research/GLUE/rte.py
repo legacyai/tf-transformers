@@ -14,11 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-# mrpc
-# The Microsoft Research Paraphrase Corpus (Dolan & Brockett, 2005) is a corpus of sentence pairs automatically
-# extracted from online news sources, with human annotations for whether the sentences in the pair are semantically equivalent.
-"""MRPC in Tensorflow 2.0
-Task: Binary Classification.
+# The Recognizing Textual Entailment (RTE) datasets come from a series of annual textual entailment challenges.
+# The authors of the benchmark combined the data from RTE1 (Dagan et al., 2006), RTE2 (Bar Haim et al., 2006),
+# RTE3 (Giampiccolo et al., 2007), and RTE5 (Bentivogli et al., 2009). Examples are constructed based on
+# news and Wikipedia text. The authors of the benchmark convert all datasets to a two-class split, where for
+# three-class datasets they collapse neutral and contradiction into not entailment, for consistency.
+"""RTE in Tensorflow 2.0
+Task: Binary Classifications.
 """
 
 import glob
@@ -184,9 +186,9 @@ def get_classification_model(num_classes: int, return_all_layer_outputs: bool, i
 
 
 @hydra.main(config_path="config")
-def run_mrpc(cfg: DictConfig):
-    logging.info("Run MRPC")
-    cfg = compose(config_name="config", overrides=["+glue=mrpc"])
+def run_rte(cfg: DictConfig):
+    logging.info("Run RTE")
+    cfg = compose(config_name="config", overrides=["+glue=rte"])
     task_name = cfg.glue.task.name
     data_name = cfg.glue.data.name
     max_seq_length = cfg.glue.data.max_seq_length
@@ -207,7 +209,7 @@ def run_mrpc(cfg: DictConfig):
     write_tfrecord(
         data["train"], max_seq_length, tokenizer, tfrecord_dir, mode="train", take_sample=take_sample, verbose=10000
     )
-    # Validation
+    # Validation matched
     write_tfrecord(
         data["validation"], max_seq_length, tokenizer, tfrecord_dir, mode="eval", take_sample=take_sample, verbose=1000
     )
@@ -256,7 +258,7 @@ def run_mrpc(cfg: DictConfig):
     model_checkpoint_dir = os.path.join(temp_dir, "models", task_name)
 
     # Callback
-    metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score', 'f1_score'))
+    metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score'))
 
     history = trainer.run(
         model_fn=model_fn,

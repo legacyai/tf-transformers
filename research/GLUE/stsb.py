@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-# mrpc
-# The Microsoft Research Paraphrase Corpus (Dolan & Brockett, 2005) is a corpus of sentence pairs automatically
-# extracted from online news sources, with human annotations for whether the sentences in the pair are semantically equivalent.
-"""MRPC in Tensorflow 2.0
-Task: Binary Classification.
+# The Semantic Textual Similarity Benchmark (Cer et al., 2017) is a collection of sentence pairs
+# drawn from news headlines, video and image captions, and natural language inference data.
+# Each pair is human-annotated with a similarity score from 1 to 5.
+"""STSB in Tensorflow 2.0
+Task: Binary Classifications.
 """
 
 import glob
@@ -28,6 +28,7 @@ import tempfile
 
 import datasets
 import hydra
+import tensorflow as tf
 from absl import logging
 from hydra import compose
 from model import get_model, get_optimizer, get_tokenizer, get_trainer
@@ -35,7 +36,6 @@ from omegaconf import DictConfig
 
 from tf_transformers.callbacks.metrics import SklearnMetricCallback
 from tf_transformers.data import TFReader, TFWriter
-from tf_transformers.losses.loss_wrapper import get_1d_classification_loss
 from tf_transformers.models import Classification_Model
 
 logging.set_verbosity("INFO")
@@ -54,12 +54,12 @@ def write_tfrecord(
 
         for f in data:
             input_ids_s1 = (
-                [tokenizer.cls_token] + tokenizer.tokenize(f['sentence1'])[: max_seq_length - 2] + [tokenizer.sep_token]
+                [tokenizer.cls_token] + tokenizer.tokenize(f['question'])[: max_seq_length - 2] + [tokenizer.sep_token]
             )  # -2 to add CLS and SEP
             input_ids_s1 = tokenizer.convert_tokens_to_ids(input_ids_s1)
             input_type_ids_s1 = [0] * len(input_ids_s1)  # 0 for s1
 
-            input_ids_s2 = tokenizer.tokenize(f['sentence2'])[: max_seq_length - 1] + [
+            input_ids_s2 = tokenizer.tokenize(f['sentence'])[: max_seq_length - 1] + [
                 tokenizer.sep_token
             ]  # -1 to add SEP
             input_ids_s2 = tokenizer.convert_tokens_to_ids(input_ids_s2)
@@ -165,6 +165,35 @@ def read_tfrecord(
     return dataset, stats['total_records']
 
 
+def get_mse_loss(loss_type):
+    """Mean Square Loss"""
+
+    def mse_loss(labels, logits):
+        loss = tf.keras.losses.MSE(labels, logits)
+        return loss
+
+    if loss_type and loss_type == 'joint':
+        # Joint loss
+        def loss_fn(y_true_dict, y_pred_dict):
+            loss_dict = {}
+            loss_holder = []
+            for layer_count, class_logits in enumerate(y_pred_dict['class_logits']):
+                loss = mse_loss(y_true_dict['labels'], class_logits)
+                loss_dict['loss_{}'.format(layer_count + 1)] = loss
+                loss_holder.append(loss)
+            loss_dict['loss'] = tf.reduce_mean(loss_holder, axis=0)
+
+    else:
+        # Single final layer loss
+        def loss_fn(y_true_dict, y_pred_dict):
+            loss_dict = {}
+            loss = mse_loss(y_true_dict['labels'], y_pred_dict['class_logits'])
+            loss_dict['loss'] = loss
+            return loss
+
+    return loss_fn
+
+
 def get_classification_model(num_classes: int, return_all_layer_outputs: bool, is_training: bool, use_dropout: bool):
     """Classification Model"""
 
@@ -184,9 +213,9 @@ def get_classification_model(num_classes: int, return_all_layer_outputs: bool, i
 
 
 @hydra.main(config_path="config")
-def run_mrpc(cfg: DictConfig):
-    logging.info("Run MRPC")
-    cfg = compose(config_name="config", overrides=["+glue=mrpc"])
+def run_stsb(cfg: DictConfig):
+    logging.info("Run STSB")
+    cfg = compose(config_name="config", overrides=["+glue=stsb"])
     task_name = cfg.glue.task.name
     data_name = cfg.glue.data.name
     max_seq_length = cfg.glue.data.max_seq_length
@@ -207,7 +236,7 @@ def run_mrpc(cfg: DictConfig):
     write_tfrecord(
         data["train"], max_seq_length, tokenizer, tfrecord_dir, mode="train", take_sample=take_sample, verbose=10000
     )
-    # Validation
+    # Validation matched
     write_tfrecord(
         data["validation"], max_seq_length, tokenizer, tfrecord_dir, mode="eval", take_sample=take_sample, verbose=1000
     )
@@ -249,14 +278,14 @@ def run_mrpc(cfg: DictConfig):
     )
 
     # Load loss fn
-    loss_fn = get_1d_classification_loss(loss_type=loss_type)
+    loss_fn = get_mse_loss(loss_type=loss_type)
 
     # Run
     steps_per_epoch = total_train_examples // train_batch_size
     model_checkpoint_dir = os.path.join(temp_dir, "models", task_name)
 
     # Callback
-    metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score', 'f1_score'))
+    metric_callback = SklearnMetricCallback(metric_name_list=('pearsonr', 'spearmanr'))
 
     history = trainer.run(
         model_fn=model_fn,

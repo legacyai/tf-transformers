@@ -14,10 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-# mrpc
-# The Microsoft Research Paraphrase Corpus (Dolan & Brockett, 2005) is a corpus of sentence pairs automatically
-# extracted from online news sources, with human annotations for whether the sentences in the pair are semantically equivalent.
-"""MRPC in Tensorflow 2.0
+# The Corpus of Linguistic Acceptability consists of English acceptability judgments drawn from books and journal
+# articles on linguistic theory. Each example is a sequence of words annotated with whether it is a grammatical English sentence.
+"""COLA in Tensorflow 2.0
 Task: Binary Classification.
 """
 
@@ -53,22 +52,12 @@ def write_tfrecord(
     def get_tfrecord_example(data):
 
         for f in data:
-            input_ids_s1 = (
-                [tokenizer.cls_token] + tokenizer.tokenize(f['sentence1'])[: max_seq_length - 2] + [tokenizer.sep_token]
+            input_ids = (
+                [tokenizer.cls_token] + tokenizer.tokenize(f['sentence'])[: max_seq_length - 2] + [tokenizer.sep_token]
             )  # -2 to add CLS and SEP
-            input_ids_s1 = tokenizer.convert_tokens_to_ids(input_ids_s1)
-            input_type_ids_s1 = [0] * len(input_ids_s1)  # 0 for s1
-
-            input_ids_s2 = tokenizer.tokenize(f['sentence2'])[: max_seq_length - 1] + [
-                tokenizer.sep_token
-            ]  # -1 to add SEP
-            input_ids_s2 = tokenizer.convert_tokens_to_ids(input_ids_s2)
-            input_type_ids_s2 = [1] * len(input_ids_s2)  # 1 for s2
-
-            # concatanate two sentences
-            input_ids = input_ids_s1 + input_ids_s2
-            input_type_ids = input_type_ids_s1 + input_type_ids_s2
-            input_mask = [1] * len(input_ids)  # 1 for s2
+            input_ids = tokenizer.convert_tokens_to_ids(input_ids)
+            input_mask = [1] * len(input_ids)
+            input_type_ids = [0] * len(input_ids)
 
             result = {}
             result['input_ids'] = input_ids
@@ -184,9 +173,9 @@ def get_classification_model(num_classes: int, return_all_layer_outputs: bool, i
 
 
 @hydra.main(config_path="config")
-def run_mrpc(cfg: DictConfig):
-    logging.info("Run MRPC")
-    cfg = compose(config_name="config", overrides=["+glue=mrpc"])
+def run_cola(cfg: DictConfig):
+    logging.info("Run COLA")
+    cfg = compose(config_name="config", overrides=["+glue=cola"])
     task_name = cfg.glue.task.name
     data_name = cfg.glue.data.name
     max_seq_length = cfg.glue.data.max_seq_length
@@ -256,7 +245,7 @@ def run_mrpc(cfg: DictConfig):
     model_checkpoint_dir = os.path.join(temp_dir, "models", task_name)
 
     # Callback
-    metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score', 'f1_score'))
+    metric_callback = SklearnMetricCallback(metric_name_list=('matthews_corrcoef'))
 
     history = trainer.run(
         model_fn=model_fn,

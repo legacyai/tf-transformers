@@ -14,11 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-# mrpc
-# The Microsoft Research Paraphrase Corpus (Dolan & Brockett, 2005) is a corpus of sentence pairs automatically
-# extracted from online news sources, with human annotations for whether the sentences in the pair are semantically equivalent.
-"""MRPC in Tensorflow 2.0
-Task: Binary Classification.
+# The Stanford Question Answering Dataset is a question-answering dataset consisting of question-paragraph pairs,
+# where one of the sentences in the paragraph (drawn from Wikipedia) contains the answer to the corresponding question
+# (written by an annotator). The authors of the benchmark convert the task into sentence pair classification by
+# forming a pair between each question and each sentence in the corresponding context, and filtering out pairs
+# with low lexical overlap between the question and the context sentence. The task is to determine whether
+# the context sentence contains the answer to the question. This modified version of the original task removes the
+# requirement that the model select the exact answer, but also removes the simplifying assumptions that the answer is
+# always present in the input and that lexical overlap is a reliable cue.
+"""QNLI in Tensorflow 2.0
+Task: Binary Classifications.
 """
 
 import glob
@@ -54,12 +59,12 @@ def write_tfrecord(
 
         for f in data:
             input_ids_s1 = (
-                [tokenizer.cls_token] + tokenizer.tokenize(f['sentence1'])[: max_seq_length - 2] + [tokenizer.sep_token]
+                [tokenizer.cls_token] + tokenizer.tokenize(f['question'])[: max_seq_length - 2] + [tokenizer.sep_token]
             )  # -2 to add CLS and SEP
             input_ids_s1 = tokenizer.convert_tokens_to_ids(input_ids_s1)
             input_type_ids_s1 = [0] * len(input_ids_s1)  # 0 for s1
 
-            input_ids_s2 = tokenizer.tokenize(f['sentence2'])[: max_seq_length - 1] + [
+            input_ids_s2 = tokenizer.tokenize(f['sentence'])[: max_seq_length - 1] + [
                 tokenizer.sep_token
             ]  # -1 to add SEP
             input_ids_s2 = tokenizer.convert_tokens_to_ids(input_ids_s2)
@@ -184,9 +189,9 @@ def get_classification_model(num_classes: int, return_all_layer_outputs: bool, i
 
 
 @hydra.main(config_path="config")
-def run_mrpc(cfg: DictConfig):
-    logging.info("Run MRPC")
-    cfg = compose(config_name="config", overrides=["+glue=mrpc"])
+def run_qnli(cfg: DictConfig):
+    logging.info("Run QNLI")
+    cfg = compose(config_name="config", overrides=["+glue=qnli"])
     task_name = cfg.glue.task.name
     data_name = cfg.glue.data.name
     max_seq_length = cfg.glue.data.max_seq_length
@@ -207,7 +212,7 @@ def run_mrpc(cfg: DictConfig):
     write_tfrecord(
         data["train"], max_seq_length, tokenizer, tfrecord_dir, mode="train", take_sample=take_sample, verbose=10000
     )
-    # Validation
+    # Validation matched
     write_tfrecord(
         data["validation"], max_seq_length, tokenizer, tfrecord_dir, mode="eval", take_sample=take_sample, verbose=1000
     )
@@ -256,7 +261,7 @@ def run_mrpc(cfg: DictConfig):
     model_checkpoint_dir = os.path.join(temp_dir, "models", task_name)
 
     # Callback
-    metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score', 'f1_score'))
+    metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score'))
 
     history = trainer.run(
         model_fn=model_fn,
