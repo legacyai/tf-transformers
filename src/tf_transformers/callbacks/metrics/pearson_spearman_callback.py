@@ -19,15 +19,15 @@
 import tensorflow as tf
 import tqdm
 from absl import logging
-from sklearn.metrics import accuracy_score, f1_score, matthews_corrcoef
+from scipy.stats import pearsonr, spearmanr
 
-_ALL_METRIC_NAMES = {'accuracy_score': accuracy_score, 'f1_score': f1_score, 'matthews_corrcoef': matthews_corrcoef}
+_ALL_METRIC_NAMES = {'pearsonr': pearsonr, 'spearmanr': spearmanr}
 
 
-class SklearnMetricCallback:
+class PearsonSpearmanCallback:
     def __init__(
         self,
-        metric_name_list=('accuracy_score', 'f1_score'),
+        metric_name_list=('pearsonr', 'spearmanr'),
         label_column: str = 'labels',
         prediction_column: str = 'class_logits',
         validation_dataset: tf.data.Dataset = None,
@@ -67,17 +67,17 @@ class SklearnMetricCallback:
         def run_dataset_non_distributed(dataset):
             """The step function for one validation step"""
 
-            predicted_ids_full = []
+            predicted_scores_full = []
             labels_full = []
 
             def validate_step(dist_inputs):
                 """The computation to run on each device."""
                 batch_inputs, batch_labels = dist_inputs
                 model_outputs = model(batch_inputs)
-                predicted_ids = tf.argmax(model_outputs[self.prediction_column], axis=1).numpy()
+                predicted_scores = tf.squeeze(model_outputs[self.prediction_column], axis=1).numpy()
 
-                predicted_ids_full.extend(predicted_ids)
-                labels_full.extend(batch_labels[self.label_column].numpy())
+                predicted_scores_full.extend(predicted_scores)
+                labels_full.extend(tf.squeeze(batch_labels[self.label_column], axis=1).numpy())
 
             for dist_inputs in tqdm.tqdm(dataset):
                 validate_step(dist_inputs)
@@ -85,8 +85,8 @@ class SklearnMetricCallback:
             result = {}
             for metric_name in self.metric_name_list:
                 metric_obj = _ALL_METRIC_NAMES[metric_name]
-                score = metric_obj(y_true=labels_full, y_pred=predicted_ids_full)
-                result[metric_name] = score
+                score = metric_obj(predicted_scores_full, labels_full)
+                result[metric_name] = score[0]
             return result
 
         def run_dataset_all_layers_non_distributed(num_hidden_layers, dataset):
@@ -99,23 +99,23 @@ class SklearnMetricCallback:
                 """The computation to run on each device."""
                 batch_inputs, batch_labels = dist_inputs
                 model_outputs = model(batch_inputs)[self.prediction_column]
-                labels_full.extend(batch_labels[self.label_column].numpy())
+                labels_full.extend(tf.squeeze(batch_labels[self.label_column], axis=1).numpy())
 
                 layer_no = 1
                 for per_layer_output in model_outputs:
-                    predicted_ids = tf.argmax(per_layer_output, axis=1).numpy()
-                    predictions_per_layer[layer_no].extend(predicted_ids)
+                    predicted_scores = tf.squeeze(per_layer_output, axis=1).numpy()
+                    predictions_per_layer[layer_no].extend(predicted_scores)
                     layer_no += 1
 
             for dist_inputs in tqdm.tqdm(dataset):
                 validate_step(dist_inputs)
 
             result = {}
-            for layer_no, predicted_ids_full in predictions_per_layer.items():
+            for layer_no, predicted_scores_full in predictions_per_layer.items():
                 for metric_name in self.metric_name_list:
                     metric_obj = _ALL_METRIC_NAMES[metric_name]
-                    score = metric_obj(y_true=labels_full, y_pred=predicted_ids_full)
-                    result['{}_layer_{}'.format(metric_name, str(layer_no))] = score
+                    score = metric_obj(predicted_scores_full, labels_full)
+                    result['{}_layer_{}'.format(metric_name, str(layer_no))] = score[0]
 
             return result
 

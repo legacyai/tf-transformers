@@ -245,7 +245,7 @@ def run_cola(cfg: DictConfig):
     model_checkpoint_dir = os.path.join(temp_dir, "models", task_name)
 
     # Callback
-    metric_callback = SklearnMetricCallback(metric_name_list=('matthews_corrcoef'))
+    metric_callback = SklearnMetricCallback(metric_name_list=('matthews_corrcoef',))
 
     history = trainer.run(
         model_fn=model_fn,

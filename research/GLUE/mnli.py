@@ -268,7 +268,7 @@ def run_mnli(cfg: DictConfig):
     model_checkpoint_dir = os.path.join(temp_dir, "models", task_name)
 
     # Callback
-    metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score'))
+    metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score',))
 
     history = trainer.run(
         model_fn=model_fn,

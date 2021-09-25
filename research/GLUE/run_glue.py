@@ -48,34 +48,42 @@ def run_glue(cfg):
     # Run MRPC
     history = run_mrpc(cfg)
     df_mrpcs = flat_callbacks_to_df(history)  # noqa
+    df_mrpcs.to_csv("mrpc_eval.csv", index=False)
 
     # Run MNLI
     history = run_mnli(cfg)
     df_mnli = flat_callbacks_to_df(history)  # noqa
+    df_mnli.to_csv("mnli_eval.csv", index=False)
 
     # Run COLA
     history = run_cola(cfg)
     df_cola = flat_callbacks_to_df(history)  # noqa
+    df_cola.to_csv("cola_eval.csv", index=False)
 
     # Run QNLI
     history = run_qnli(cfg)
     df_qnli = flat_callbacks_to_df(history)  # noqa
+    df_qnli.to_csv("qnli_eval.csv", index=False)
 
     # Run QQP
     history = run_qqp(cfg)
-    df_qnli = flat_callbacks_to_df(history)  # noqa
+    df_qqp = flat_callbacks_to_df(history)  # noqa
+    df_qqp.to_csv("qqp_eval.csv", index=False)
 
     # Run RTE
     history = run_rte(cfg)
     df_rte = flat_callbacks_to_df(history)  # noqa
+    df_rte.to_csv("rte_eval.csv", index=False)
 
     # Run SST2
     history = run_sst2(cfg)
     df_sst2 = flat_callbacks_to_df(history)  # noqa
+    df_sst2.to_csv("sst2_eval.csv", index=False)
 
     # Run STSB
     history = run_stsb(cfg)
     df_stsb = flat_callbacks_to_df(history)  # noqa
+    df_stsb.to_csv("stsb_eval.csv", index=False)
 
     return True
 

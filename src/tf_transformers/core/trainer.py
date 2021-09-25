@@ -141,11 +141,13 @@ def train_and_eval(
         if not epoch_end:
             if model_save_interval_steps:
                 if global_step % model_save_interval_steps == 0:
-                    checkpoint_manager.save()
-                    logging.info("Model saved at step {}".format(global_step))
+                    checkpoint_manager.save(checkpoint_number=global_step)
+                    logging.info(
+                        "Model saved at step {} at {}".format(global_step, checkpoint_manager.latest_checkpoint)
+                    )
         else:
-            checkpoint_manager.save()
-            logging.info("Model saved at epoch {}".format(epoch))
+            checkpoint_manager.save(checkpoint_number=epoch)
+            logging.info("Model saved at epoch {} at {}".format(epoch, checkpoint_manager.latest_checkpoint))
 
     def write_metrics(metric_dict, writer, step):
         """Write metrics here"""

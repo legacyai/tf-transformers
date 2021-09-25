@@ -1,7 +1,6 @@
 import sentencepiece
 import tensorflow as tf
 import tensorflow_text as tf_text
-from absl import logging
 
 # tok2 = T5Tokenizer(**kwargs)
 # tok2.unique_no_split_tokens = tok2.all_special_tokens
@@ -52,7 +51,6 @@ class SentencepieceTokenizer(tf.keras.layers.Layer):
         self,
         *,
         lower_case,
-        special_tokens,
         model_file_path=None,
         model_serialized_proto=None,
         add_cls_sep=False,
@@ -117,24 +115,25 @@ class SentencepieceTokenizer(tf.keras.layers.Layer):
 
         self._vocab = get_vocab(self._model_serialized_proto)
         self._lower_case = lower_case
-        self.add_cls_sep = add_cls_sep
+
+        # self.add_cls_sep = add_cls_sep
         self.tokenize_with_offsets = tokenize_with_offsets
 
-        if special_tokens:
-            self._special_tokens_dict = self._create_special_tokens_dict(special_tokens)
-        else:
-            logging.info("If no special tokens , please set `special_tokens=None`")
-            self._special_tokens_dict = {}
+        #         if special_tokens:
+        #             self._special_tokens_dict = self._create_special_tokens_dict(special_tokens)
+        #         else:
+        #             logging.info("If no special tokens , please set `special_tokens=None`")
+        #             self._special_tokens_dict = {}
 
-        if self.add_cls_sep:
-            if self.tokenize_with_offsets:
-                raise ValueError("`add_cls_sep` not supported with `tokenize_with_offsets")
-            assert cls_token is not None
-            assert sep_token is not None
-            assert cls_token in self._special_tokens_dict
-            assert sep_token in self._special_tokens_dict
-            self._cls_id = self._vocab[cls_token]
-            self._sep_id = self._vocab[sep_token]
+        #         if self.add_cls_sep:
+        #             if self.tokenize_with_offsets:
+        #                 raise ValueError("`add_cls_sep` not supported with `tokenize_with_offsets")
+        #             assert cls_token is not None
+        #             assert sep_token is not None
+        #             assert cls_token in self._special_tokens_dict
+        #             assert sep_token in self._special_tokens_dict
+        #             self._cls_id = self._vocab[cls_token]
+        #             self._sep_id = self._vocab[sep_token]
 
         self._nbest_size = nbest_size
         self._alpha = alpha
@@ -150,7 +149,7 @@ class SentencepieceTokenizer(tf.keras.layers.Layer):
     def vocab_size(self):
         return self._tokenizer.vocab_size()
 
-    def call(self, inputs):
+    def call(self, inputs, add_special_tokens=False):
         """Calls `text.SentencepieceTokenizer` on inputs.
         Args:
           inputs: A string Tensor of shape `(batch_size,)`.
@@ -199,8 +198,7 @@ class SentencepieceTokenizer(tf.keras.layers.Layer):
         else:
             tokens = self._tokenizer.tokenize(inputs)
             tokens = _reshape(tokens)
-            if self.add_cls_sep:
-                tokens = self._add_cls_sep(tokens)
+
             return {'input_ids': tokens}
 
     def get_config(self):
@@ -228,14 +226,14 @@ class SentencepieceTokenizer(tf.keras.layers.Layer):
         """
         return self._special_tokens_dict
 
-    def _create_special_tokens_dict(self, special_tokens):
-        """Create special tokens"""
-        special_vocab = {}
-        for tok in special_tokens:
-            if tok not in self._vocab:
-                raise ValueError("Special token `{}` not found in vocab".format(tok))
-            special_vocab[tok] = self._vocab[tok]
-        return special_vocab
+    #     def _create_special_tokens_dict(self, special_tokens):
+    #         """Create special tokens"""
+    #         special_vocab = {}
+    #         for tok in special_tokens:
+    #             if tok not in self._vocab:
+    #                 raise ValueError("Special token `{}` not found in vocab".format(tok))
+    #             special_vocab[tok] = self._vocab[tok]
+    #         return special_vocab
 
     def get_model(self):
         """Convert Keras Layer to Model"""

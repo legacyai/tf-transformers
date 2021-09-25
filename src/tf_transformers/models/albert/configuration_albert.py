@@ -113,6 +113,7 @@ class AlbertConfig(TransformerConfig):
         super().__init__(
             vocab_size=vocab_size,
             embedding_size=embedding_size,
+            embedding_projection_size=embedding_projection_size,
             num_hidden_layers=num_hidden_layers,
             num_attention_heads=num_attention_heads,
             attention_head_size=attention_head_size,
@@ -126,4 +127,5 @@ class AlbertConfig(TransformerConfig):
             initializer_range=initializer_range,
             layer_norm_epsilon=layer_norm_epsilon,
             position_embedding_type=position_embedding_type,
+            num_hidden_groups=num_hidden_groups,
         )

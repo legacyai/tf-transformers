@@ -18,7 +18,7 @@
 # drawn from news headlines, video and image captions, and natural language inference data.
 # Each pair is human-annotated with a similarity score from 1 to 5.
 """STSB in Tensorflow 2.0
-Task: Binary Classifications.
+Task: Regression.
 """
 
 import glob
@@ -34,7 +34,7 @@ from hydra import compose
 from model import get_model, get_optimizer, get_tokenizer, get_trainer
 from omegaconf import DictConfig
 
-from tf_transformers.callbacks.metrics import SklearnMetricCallback
+from tf_transformers.callbacks.metrics import PearsonSpearmanCallback
 from tf_transformers.data import TFReader, TFWriter
 from tf_transformers.models import Classification_Model
 
@@ -54,12 +54,12 @@ def write_tfrecord(
 
         for f in data:
             input_ids_s1 = (
-                [tokenizer.cls_token] + tokenizer.tokenize(f['question'])[: max_seq_length - 2] + [tokenizer.sep_token]
+                [tokenizer.cls_token] + tokenizer.tokenize(f['sentence1'])[: max_seq_length - 2] + [tokenizer.sep_token]
             )  # -2 to add CLS and SEP
             input_ids_s1 = tokenizer.convert_tokens_to_ids(input_ids_s1)
             input_type_ids_s1 = [0] * len(input_ids_s1)  # 0 for s1
 
-            input_ids_s2 = tokenizer.tokenize(f['sentence'])[: max_seq_length - 1] + [
+            input_ids_s2 = tokenizer.tokenize(f['sentence2'])[: max_seq_length - 1] + [
                 tokenizer.sep_token
             ]  # -1 to add SEP
             input_ids_s2 = tokenizer.convert_tokens_to_ids(input_ids_s2)
@@ -82,7 +82,7 @@ def write_tfrecord(
         "input_ids": ("var_len", "int"),
         "input_mask": ("var_len", "int"),
         "input_type_ids": ("var_len", "int"),
-        "labels": ("var_len", "int"),
+        "labels": ("var_len", "float"),
     }
 
     if mode == "train":
@@ -182,6 +182,7 @@ def get_mse_loss(loss_type):
                 loss_dict['loss_{}'.format(layer_count + 1)] = loss
                 loss_holder.append(loss)
             loss_dict['loss'] = tf.reduce_mean(loss_holder, axis=0)
+            return loss_dict
 
     else:
         # Single final layer loss
@@ -189,7 +190,7 @@ def get_mse_loss(loss_type):
             loss_dict = {}
             loss = mse_loss(y_true_dict['labels'], y_pred_dict['class_logits'])
             loss_dict['loss'] = loss
-            return loss
+            return loss_dict
 
     return loss_fn
 
@@ -285,7 +286,7 @@ def run_stsb(cfg: DictConfig):
     model_checkpoint_dir = os.path.join(temp_dir, "models", task_name)
 
     # Callback
-    metric_callback = SklearnMetricCallback(metric_name_list=('pearsonr', 'spearmanr'))
+    metric_callback = PearsonSpearmanCallback(metric_name_list=('pearsonr', 'spearmanr'))
 
     history = trainer.run(
         model_fn=model_fn,
