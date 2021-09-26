@@ -11,6 +11,7 @@ __pycache__/
 
 # DS store
 .DS_Store
+.DS_Store/
 
 # tests and logs
 tests/fixtures/*

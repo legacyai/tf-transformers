@@ -39,6 +39,10 @@ class LegacyModuleCustom(tf.Module):
         # Possible an Encoder Decoder model
         if "decoder" in model.model_config:
             model_config = model.model_config["decoder"]
+            # Only for decoder
+            self.config["decoder_start_token_id"] = tf.Variable(
+                model_config["decoder_start_token_id"], name="decoder_start_token_id"
+            )
         else:
             model_config = model.model_config
         self.config["embedding_size"] = tf.Variable(model_config["embedding_size"], name="embedding_size")

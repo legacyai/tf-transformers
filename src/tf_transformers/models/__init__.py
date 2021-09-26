@@ -29,6 +29,7 @@ from tf_transformers.models.roberta import RobertaConfig, RobertaEncoder, Robert
 from tf_transformers.models.t5 import T5Config, T5Encoder, T5Model, T5TokenizerTFText
 from tf_transformers.models.tasks import (
     Classification_Model,
+    MaskedLMModel,
     Similarity_Model,
     Span_Selection_Model,
     Token_Classification_Model,

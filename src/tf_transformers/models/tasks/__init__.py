@@ -15,6 +15,7 @@
 # limitations under the License.
 # ==============================================================================
 from tf_transformers.models.tasks.classification import Classification_Model
+from tf_transformers.models.tasks.maked_lm_model import MaskedLMModel
 from tf_transformers.models.tasks.similarity_model import Similarity_Model
 from tf_transformers.models.tasks.span_selection import Span_Selection_Model
 from tf_transformers.models.tasks.token_classification import Token_Classification_Model

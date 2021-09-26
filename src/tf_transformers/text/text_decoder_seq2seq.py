@@ -62,6 +62,10 @@ class TextDecoderSeq2Seq(object):
             # Validate decoder type ids are there
             self.validate_decoder_type_ids(model.input)
 
+            if self.decoder_start_token_id is None:
+                self.decoder_start_token_id = decoder_config['decoder_start_token_id']
+                print("Using default `decoder_start_token_id` {} from the model".format(self.decoder_start_token_id))
+
         # hubLayer (Not supported)
         # elif isinstance(model, hub.keras_layer.KerasLayer):
         #     self.model_fn = self.model
@@ -83,6 +87,10 @@ class TextDecoderSeq2Seq(object):
                 self.decoder_num_hidden_layers,
                 self.decoder_attention_state,
             ) = self.auto_infer_config(decoder_config, saved_model=True)
+
+            if self.decoder_start_token_id is None:
+                self.decoder_start_token_id = decoder_config['decoder_start_token_id']
+                print("Using default `decoder_start_token_id` {} from the model".format(self.decoder_start_token_id))
 
             # Validate decoder type ids are there
             self.validate_decoder_type_ids(self.model_pb.structured_input_signature[1])

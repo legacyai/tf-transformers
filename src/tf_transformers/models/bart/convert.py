@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+from absl import logging
 
 from tf_transformers.core import keras_utils
 
@@ -50,6 +51,24 @@ def convert_bart_pt(model, config, model_name):
     Returns:
         a function
     """
+
+    # When dropout, use_auto_regressive is enabled assertion won't work
+    SKIP_ASSERT = False
+    # LegacyLayer
+    if isinstance(model, tf.keras.layers.Layer):
+        local_config = model._config_dict
+    # LegacyModel
+    elif isinstance(model, tf.keras.Model):
+        local_config = model.model_config
+    else:
+        raise ValueError("Unknown model type {}".format(type(model)))
+
+    if local_config['use_dropout']:
+        logging.warn("Note: As `use_dropout` is True we will skip Assertions, please verify the model.")
+        SKIP_ASSERT = True
+    if local_config['use_auto_regressive']:
+        logging.warn("Note: As `use_auto_regressive` is True we will skip Assertions, please verify the model.")
+        SKIP_ASSERT = True
 
     import torch
 
@@ -312,28 +331,29 @@ def convert_bart_pt(model, config, model_name):
         model.variables[index].assign(from_to_variable_dict.get(original_var))
         assigned_map.append((original_var, legacy_var))
 
-    from transformers import BartTokenizer
+    if SKIP_ASSERT is False:
+        from transformers import BartTokenizer
 
-    tokenizer = BartTokenizer.from_pretrained(model_name)
-    text = "This is a long sentence to check how close models are."
-    inputs = tokenizer(text, return_tensors="pt")
-    decoder_input_ids = torch.tensor([[2, 3, 175, 879]])
-    with torch.no_grad():
-        outputs_hf = model_hf(inputs["input_ids"], decoder_input_ids=decoder_input_ids)
-    outputs_hf = torch.sum(outputs_hf["last_hidden_state"], dim=-1).numpy()
+        tokenizer = BartTokenizer.from_pretrained(model_name)
+        text = "This is a long sentence to check how close models are."
+        inputs = tokenizer(text, return_tensors="pt")
+        decoder_input_ids = torch.tensor([[2, 3, 175, 879]])
+        with torch.no_grad():
+            outputs_hf = model_hf(inputs["input_ids"], decoder_input_ids=decoder_input_ids)
+        outputs_hf = torch.sum(outputs_hf["last_hidden_state"], dim=-1).numpy()
 
-    inputs_tf = {}
-    inputs = tokenizer(text, return_tensors="tf")
-    inputs_tf["encoder_input_ids"] = inputs["input_ids"]
-    inputs_tf["encoder_input_mask"] = inputs["attention_mask"]
-    decoder_input_ids = tf.constant([[2, 3, 175, 879]])
-    inputs_tf["decoder_input_ids"] = decoder_input_ids
-    outputs_tf = model(inputs_tf)
-    outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
+        inputs_tf = {}
+        inputs = tokenizer(text, return_tensors="tf")
+        inputs_tf["encoder_input_ids"] = inputs["input_ids"]
+        inputs_tf["encoder_input_mask"] = inputs["attention_mask"]
+        decoder_input_ids = tf.constant([[2, 3, 175, 879]])
+        inputs_tf["decoder_input_ids"] = decoder_input_ids
+        outputs_tf = model(inputs_tf)
+        outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
 
-    # Output embeddings check .
-    if keras_utils.get_policy_name() == 'float32':
-        tf.debugging.assert_near(outputs_hf, outputs_tf, rtol=1.0)
+        # Output embeddings check .
+        if keras_utils.get_policy_name() == 'float32':
+            tf.debugging.assert_near(outputs_hf, outputs_tf, rtol=1.0)
 
 
 def convert_bart_tf(model, config, model_name):
@@ -345,6 +365,24 @@ def convert_bart_tf(model, config, model_name):
     Returns:
         a function
     """
+
+    # When dropout, use_auto_regressive is enabled assertion won't work
+    SKIP_ASSERT = False
+    # LegacyLayer
+    if isinstance(model, tf.keras.layers.Layer):
+        local_config = model._config_dict
+    # LegacyModel
+    elif isinstance(model, tf.keras.Model):
+        local_config = model.model_config
+    else:
+        raise ValueError("Unknown model type {}".format(type(model)))
+
+    if local_config['use_dropout']:
+        logging.warn("Note: As `use_dropout` is True we will skip Assertions, please verify the model.")
+        SKIP_ASSERT = True
+    if local_config['use_auto_regressive']:
+        logging.warn("Note: As `use_auto_regressive` is True we will skip Assertions, please verify the model.")
+        SKIP_ASSERT = True
 
     import transformers
 
@@ -598,22 +636,23 @@ def convert_bart_tf(model, config, model_name):
         model.variables[index].assign(from_to_variable_dict.get(original_var))
         assigned_map.append((original_var, legacy_var))
 
-    from transformers import BartTokenizer
+    if SKIP_ASSERT is False:
+        from transformers import BartTokenizer
 
-    tokenizer = BartTokenizer.from_pretrained(model_name)
-    text = "This is a long sentence to check how close models are."
-    inputs = tokenizer(text, return_tensors="tf")
-    decoder_input_ids = tf.constant([[2, 3, 175, 879]])
-    outputs_hf = model_hf(inputs["input_ids"], decoder_input_ids=decoder_input_ids)
-    outputs_hf = tf.reduce_sum(outputs_hf["last_hidden_state"], axis=-1).numpy()
+        tokenizer = BartTokenizer.from_pretrained(model_name)
+        text = "This is a long sentence to check how close models are."
+        inputs = tokenizer(text, return_tensors="tf")
+        decoder_input_ids = tf.constant([[2, 3, 175, 879]])
+        outputs_hf = model_hf(inputs["input_ids"], decoder_input_ids=decoder_input_ids)
+        outputs_hf = tf.reduce_sum(outputs_hf["last_hidden_state"], axis=-1).numpy()
 
-    inputs_tf = {}
-    inputs_tf["encoder_input_ids"] = inputs["input_ids"]
-    inputs_tf["encoder_input_mask"] = inputs["attention_mask"]
-    inputs_tf["decoder_input_ids"] = decoder_input_ids
-    outputs_tf = model(inputs_tf)
-    outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
+        inputs_tf = {}
+        inputs_tf["encoder_input_ids"] = inputs["input_ids"]
+        inputs_tf["encoder_input_mask"] = inputs["attention_mask"]
+        inputs_tf["decoder_input_ids"] = decoder_input_ids
+        outputs_tf = model(inputs_tf)
+        outputs_tf = tf.reduce_sum(outputs_tf["token_embeddings"], axis=-1).numpy()
 
-    # Output embeddings check .
-    if keras_utils.get_policy_name() == 'float32':
-        tf.debugging.assert_near(outputs_hf, outputs_tf, rtol=1.0)
+        # Output embeddings check .
+        if keras_utils.get_policy_name() == 'float32':
+            tf.debugging.assert_near(outputs_hf, outputs_tf, rtol=1.0)

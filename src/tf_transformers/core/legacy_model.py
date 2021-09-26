@@ -199,6 +199,27 @@ class LegacyModel(tf.keras.Model):
         Returns:
             None
         """
+        import warnings
+
+        warnings.warn("`save_as_serialize_module` wil be deprecated soon, start using `save_transformers_serialized`.")
+        if not overwrite:
+            import os
+
+            if os.path.exists(directory):
+                raise FileExistsError()
+
+        module = LegacyModuleCustom(self)
+        module.save(directory)
+
+    def save_transformers_serialized(self, directory, overwrite=False):
+        """Save as tf.saved_model.save (.pb)
+
+        Args:
+            directory ([str]): [Location of the model]
+
+        Returns:
+            None
+        """
         if not overwrite:
             import os
 

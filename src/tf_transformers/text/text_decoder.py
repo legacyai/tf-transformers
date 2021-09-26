@@ -75,9 +75,11 @@ def TextDecoderSerializable(
     assert isinstance(model, tf.keras.Model)
     if "decoder" in model.model_config:
         if decoder_start_token_id is None:
-            raise ValueError(
-                "You are passing a Seq2Seq model like T5. Please pass a value for\
-                `decoder_start_token_id`, normall BOS while generation."
+            import warnings
+
+            warnings.warn(
+                "You are passing a Seq2Seq model like T5, BART etc. Provided \
+                `decoder_start_token_id` is None. We will try to infer it automatically from the model."
             )
         return TextDecoderSerializableSeq2Seq(
             model=model,

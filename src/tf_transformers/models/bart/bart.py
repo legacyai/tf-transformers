@@ -38,6 +38,8 @@ from tf_transformers.utils.docstring_utils import (
 
 logging.set_verbosity("INFO")
 
+BART_DECODER_START_TOKEN_ID = 2
+
 
 @add_start_docstrings(
     "Bart Model :",

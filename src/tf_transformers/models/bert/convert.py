@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+from absl import logging
 
 from tf_transformers.core import keras_utils
 
@@ -50,6 +51,24 @@ def convert_bert_pt(model, config, model_name):
     Returns:
         a function
     """
+
+    # When dropout, use_auto_regressive is enabled assertion won't work
+    SKIP_ASSERT = False
+    # LegacyLayer
+    if isinstance(model, tf.keras.layers.Layer):
+        local_config = model._config_dict
+    # LegacyModel
+    elif isinstance(model, tf.keras.Model):
+        local_config = model.model_config
+    else:
+        raise ValueError("Unknown model type {}".format(type(model)))
+
+    if local_config['use_dropout']:
+        logging.warn("Note: As `use_dropout` is True we will skip Assertions, please verify the model.")
+        SKIP_ASSERT = True
+    if local_config['use_auto_regressive']:
+        logging.warn("Note: As `use_auto_regressive` is True we will skip Assertions, please verify the model.")
+        SKIP_ASSERT = True
 
     import torch
 
@@ -200,13 +219,20 @@ def convert_bert_pt(model, config, model_name):
         model.variables[index].assign(from_to_variable_dict.get(original_var))
         assigned_map.append((original_var, legacy_var))
 
-    from transformers import BertTokenizer
+    if SKIP_ASSERT is False:
+        from transformers import BertTokenizer
 
-    tokenizer = BertTokenizer.from_pretrained(model_name)
-    text = "[CLS] i want to [MASK] the car because it is cheap. [SEP]"
-    inputs = tokenizer(text, return_tensors="pt")
-    outputs_pt = model_hf(**inputs)
-    outputs_pt = torch.argmax(outputs_pt.last_hidden_state, dim=2)[0].numpy()
+        tokenizer = BertTokenizer.from_pretrained(model_name)
+        text = "[CLS] i want to [MASK] the car because it is cheap. [SEP]"
+        inputs = tokenizer(text, return_tensors="pt")
+        outputs_pt = model_hf(**inputs)
+        outputs_pt = torch.argmax(outputs_pt.last_hidden_state, dim=2)[0].numpy()
+
+    # Do the following only if model is MaskedLMModel
+    from tf_transformers.models import MaskedLMModel
+
+    if not isinstance(model, MaskedLMModel):
+        return True
 
     from transformers import BertForMaskedLM
 
@@ -238,22 +264,23 @@ def convert_bert_pt(model, config, model_name):
                 continue
             var.assign(hf_variable_dict[hf_var_name])
 
-    inputs = tokenizer(text, return_tensors="pt")
-    outputs_pt_mlm = model_hf(**inputs)
-    text_pt = tokenizer.decode(torch.argmax(outputs_pt_mlm[0], dim=2)[0])
-    del model_hf
+    if SKIP_ASSERT is False:
+        inputs = tokenizer(text, return_tensors="pt")
+        outputs_pt_mlm = model_hf(**inputs)
+        text_pt = tokenizer.decode(torch.argmax(outputs_pt_mlm[0], dim=2)[0])
+        del model_hf
 
-    inputs = tokenizer(text, return_tensors="tf")
-    inputs_tf = {}
-    inputs_tf["input_ids"] = inputs["input_ids"]
-    inputs_tf["input_type_ids"] = inputs["token_type_ids"]
-    inputs_tf["input_mask"] = inputs["attention_mask"]
-    outputs_tf = model(inputs_tf)
-    text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
+        inputs = tokenizer(text, return_tensors="tf")
+        inputs_tf = {}
+        inputs_tf["input_ids"] = inputs["input_ids"]
+        inputs_tf["input_type_ids"] = inputs["token_type_ids"]
+        inputs_tf["input_mask"] = inputs["attention_mask"]
+        outputs_tf = model(inputs_tf)
+        text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
 
-    assert text_pt == text_tf
-    outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
-    tf.debugging.assert_equal(outputs_pt, outputs_tf)
+        assert text_pt == text_tf
+        outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
+        tf.debugging.assert_equal(outputs_pt, outputs_tf)
 
 
 def convert_bert_tf(model, config, model_name):
@@ -265,6 +292,24 @@ def convert_bert_tf(model, config, model_name):
     Returns:
         a function
     """
+
+    # When dropout, use_auto_regressive is enabled assertion won't work
+    SKIP_ASSERT = False
+    # LegacyLayer
+    if isinstance(model, tf.keras.layers.Layer):
+        local_config = model._config_dict
+    # LegacyModel
+    elif isinstance(model, tf.keras.Model):
+        local_config = model.model_config
+    else:
+        raise ValueError("Unknown model type {}".format(type(model)))
+
+    if local_config['use_dropout']:
+        logging.warn("Note: As `use_dropout` is True we will skip Assertions, please verify the model.")
+        SKIP_ASSERT = True
+    if local_config['use_auto_regressive']:
+        logging.warn("Note: As `use_auto_regressive` is True we will skip Assertions, please verify the model.")
+        SKIP_ASSERT = True
 
     import transformers
 
@@ -420,13 +465,20 @@ def convert_bert_tf(model, config, model_name):
         model.variables[index].assign(from_to_variable_dict.get(original_var))
         assigned_map.append((original_var, legacy_var))
 
-    from transformers import BertTokenizer
+    if SKIP_ASSERT is False:
+        from transformers import BertTokenizer
 
-    tokenizer = BertTokenizer.from_pretrained(model_name)
-    text = "[CLS] i want to [MASK] the car because it is cheap. [SEP]"
-    inputs = tokenizer(text, return_tensors="tf")
-    outputs_hf = model_hf(**inputs)
-    outputs_hf = tf.argmax(outputs_hf.last_hidden_state, axis=2)[0].numpy()
+        tokenizer = BertTokenizer.from_pretrained(model_name)
+        text = "[CLS] i want to [MASK] the car because it is cheap. [SEP]"
+        inputs = tokenizer(text, return_tensors="tf")
+        outputs_hf = model_hf(**inputs)
+        outputs_hf = tf.argmax(outputs_hf.last_hidden_state, axis=2)[0].numpy()
+
+    # Do the following only if model is MaskedLMModel
+    from tf_transformers.models import MaskedLMModel
+
+    if not isinstance(model, MaskedLMModel):
+        return True
 
     # BertMLM
     from transformers import TFBertForMaskedLM
@@ -455,19 +507,20 @@ def convert_bert_tf(model, config, model_name):
             hf_var_name = mapping_dict[var.name]
             var.assign(hf_variable_dict[hf_var_name])
 
-    inputs = tokenizer(text, return_tensors="tf")
-    outputs_hf_mlm = model_hf(**inputs)
-    text_hf = tokenizer.decode(tf.argmax(outputs_hf_mlm[0], axis=2)[0])
-    del model_hf
+    if SKIP_ASSERT is False:
+        inputs = tokenizer(text, return_tensors="tf")
+        outputs_hf_mlm = model_hf(**inputs)
+        text_hf = tokenizer.decode(tf.argmax(outputs_hf_mlm[0], axis=2)[0])
+        del model_hf
 
-    inputs_tf = {}
-    inputs_tf["input_ids"] = inputs["input_ids"]
-    inputs_tf["input_type_ids"] = inputs["token_type_ids"]
-    inputs_tf["input_mask"] = inputs["attention_mask"]
-    outputs_tf = model(inputs_tf)
-    text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
+        inputs_tf = {}
+        inputs_tf["input_ids"] = inputs["input_ids"]
+        inputs_tf["input_type_ids"] = inputs["token_type_ids"]
+        inputs_tf["input_mask"] = inputs["attention_mask"]
+        outputs_tf = model(inputs_tf)
+        text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
 
-    assert text_hf == text_tf
-    outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
-    if keras_utils.get_policy_name() == 'float32':
-        tf.debugging.assert_equal(outputs_hf, outputs_tf)
+        assert text_hf == text_tf
+        outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
+        if keras_utils.get_policy_name() == 'float32':
+            tf.debugging.assert_equal(outputs_hf, outputs_tf)

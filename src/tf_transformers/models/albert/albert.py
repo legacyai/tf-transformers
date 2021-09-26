@@ -668,7 +668,6 @@ class AlbertEncoder(LegacyLayer):
     def call_decoder_auto_regressive(
         self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]
     ) -> Dict[str, tf.Tensor]:
-
         input_ids = inputs["input_ids"]
         encoder_hidden_state = inputs["encoder_hidden_states"]
         decoder_encoder_mask = inputs["decoder_encoder_mask"]

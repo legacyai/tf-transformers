@@ -81,6 +81,10 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             self.decoder_attention_state,
         ) = self.auto_infer_config(decoder_config)
 
+        if self.decoder_start_token_id is None:
+            self.decoder_start_token_id = model.model_config["decoder"]['decoder_start_token_id']
+            print("Using default `decoder_start_token_id` {} from the model".format(self.decoder_start_token_id))
+
         self.decoder_input_type_ids = input_type_ids
         # Input mask for decoder is highly unlikely to happen, as it is "causal" in auto regressive tasks
         # Still we are keeping it

@@ -20,6 +20,9 @@ class Span_Selection_Model(LegacyLayer):
             bias_initializer="zeros",
         )
 
+        # Initialize model
+        self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
+
     def call(self, inputs):
         result = self.model(inputs)
         start_logits_outputs = []
@@ -45,8 +48,11 @@ class Span_Selection_Model(LegacyLayer):
                 "end_logits": end_logits,
             }
 
-    def get_model(self):
-        layer_output = self(self.model.input)
-        model = LegacyModel(inputs=self.model.input, outputs=layer_output, name="span_selection")
+    def get_model(self, initialize_only):
+        inputs = self.model.input
+        layer_outputs = self(inputs)
+        if initialize_only:
+            return inputs, layer_outputs
+        model = LegacyModel(inputs=inputs, outputs=layer_outputs, name="span_selection")
         model.model_config = self.model_config
         return model

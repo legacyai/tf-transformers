@@ -23,7 +23,6 @@ from absl import logging
 
 from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer, LegacyModel
-from tf_transformers.layers import BiasLayer, MaskedLM
 from tf_transformers.layers.mask import CausalMask, SelfAttentionMask, prefix_mask
 from tf_transformers.layers.transformer import TransformerBERT
 from tf_transformers.utils import tf_utils
@@ -47,18 +46,16 @@ logging.set_verbosity("INFO")
 class RobertaEncoder(LegacyLayer):
     def __init__(
         self,
-        config,
-        mask_mode="user_defined",
-        name="roberta",
-        use_dropout=False,
-        is_training=False,
-        use_auto_regressive=False,
-        use_decoder=False,
-        batch_size=None,
-        sequence_length=None,
-        use_mlm_layer=True,
-        use_masked_lm_positions=False,
-        return_all_layer_outputs=False,
+        config: Dict,
+        mask_mode: str = "user_defined",
+        name: str = "roberta",
+        use_dropout: bool = False,
+        is_training: bool = False,
+        use_auto_regressive: bool = False,
+        use_decoder: bool = False,
+        batch_size: bool = None,
+        sequence_length: bool = None,
+        return_all_layer_outputs: bool = False,
         **kwargs,
     ):
         # IMPORTANT: Because saved_model causes some serialization problems here
@@ -79,8 +76,6 @@ class RobertaEncoder(LegacyLayer):
         self._use_decoder = use_decoder
         self._batch_size = batch_size
         self._sequence_length = sequence_length
-        self._use_masked_lm_positions = use_masked_lm_positions
-        self._use_mlm_layer = use_mlm_layer
         self._return_all_layer_outputs = return_all_layer_outputs
 
         # self._self_setattr_tracking = False
@@ -100,8 +95,6 @@ class RobertaEncoder(LegacyLayer):
             "use_dropout": self._use_dropout,
             "batch_size": self._batch_size,
             "sequence_length": self._sequence_length,
-            "use_mlm_layer": self._use_mlm_layer,
-            "use_masked_lm_positions": self._use_masked_lm_positions,
             "return_all_layer_outputs": self._return_all_layer_outputs,
         }
         # Update config dict with passed config
@@ -151,16 +144,6 @@ class RobertaEncoder(LegacyLayer):
             name="pooler_transform",
         )
 
-        # Default True for BERT and Albert
-        if self._use_mlm_layer:
-            self._masked_lm_layer = MaskedLM(
-                hidden_size=config["embedding_size"],
-                layer_norm_epsilon=config["layer_norm_epsilon"],
-                activation=config["hidden_act"],
-                name="mlm",
-            )
-            self._masked_lm_bias = BiasLayer(name="mlm/transform")
-
         self.call_fn = self.get_call_method(self._config_dict)
         # Initialize model
         self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
@@ -190,12 +173,6 @@ class RobertaEncoder(LegacyLayer):
             dtype=tf.int32,
             name="input_type_ids",
         )
-        masked_lm_positions = tf.keras.layers.Input(
-            shape=(None,),
-            batch_size=self._batch_size,
-            dtype=tf.int32,
-            name="masked_lm_positions",
-        )
         inputs = {}
         inputs["input_ids"] = input_ids  # Default
         # if mask_mode != 'causal', user has to provde mask
@@ -204,9 +181,6 @@ class RobertaEncoder(LegacyLayer):
         # If type mebddings required
         if self._type_embeddings_layer:
             inputs["input_type_ids"] = input_type_ids
-        # if masked_lm_positions
-        if self._use_masked_lm_positions:
-            inputs["masked_lm_positions"] = masked_lm_positions
 
         # Auto Regressive is activated only when is_training=False
         if self._is_training is False and self._use_auto_regressive:
@@ -323,20 +297,10 @@ class RobertaEncoder(LegacyLayer):
         # batch_size x sequence_length x embedding_size
         token_embeddings = encoder_outputs[-1]
 
-        # check for masked lm positions
-        # only for encoder forward pass. This is for MaskedLM training
-        if "masked_lm_positions" in inputs:
-            masked_lm_positions = inputs["masked_lm_positions"]
-        else:
-            masked_lm_positions = None
-
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
         token_logits = tf.matmul(
-            token_embeddings_mlm, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
+            token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
         )
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
-        token_logits = self._masked_lm_bias(token_logits)
+
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         result = {
@@ -355,14 +319,11 @@ class RobertaEncoder(LegacyLayer):
                 )
                 all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
 
-                # token logits per layer
-                layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
                 layer_token_logits = tf.matmul(
-                    layer_token_embeddings_mlm,
+                    per_layer_token_embeddings,
                     tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
                     transpose_b=True,
                 )
-                layer_token_logits = self._masked_lm_bias(layer_token_logits)
                 all_token_logits.append(layer_token_logits)
 
             result["all_layer_token_embeddings"] = encoder_outputs
@@ -498,11 +459,8 @@ class RobertaEncoder(LegacyLayer):
         cls_output = self._pooler_layer(cls_token_tensor)
         # batch_size x sequence_length x embedding_size
         token_embeddings = encoder_outputs[-1]
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings)
-        token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
-        token_logits = self._masked_lm_bias(token_logits)
+        token_logits = tf.matmul(token_embeddings, self.get_embedding_table(), transpose_b=True)
+        last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         def step_0_gather(past_length, token_embeddings):
             cache_length = tf.reduce_sum(tf.cast(tf.not_equal(input_ids_mod, -1), tf.int32), axis=1) - 1
@@ -599,18 +557,10 @@ class RobertaEncoder(LegacyLayer):
         # batch_size x sequence_length x embedding_size
         token_embeddings = decoder_outputs[-1]
 
-        # check for masked lm positions
-        # only for encoder forward pass. This is for MaskedLM training
-        if "masked_lm_positions" in inputs:
-            masked_lm_positions = inputs["masked_lm_positions"]
-        else:
-            masked_lm_positions = None
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
         token_logits = tf.matmul(
-            token_embeddings_mlm, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
+            token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
         )
-        token_logits = self._masked_lm_bias(token_logits)
+
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         result = {
@@ -629,14 +579,11 @@ class RobertaEncoder(LegacyLayer):
                 )
                 all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
 
-                # token logits per layer
-                layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
                 layer_token_logits = tf.matmul(
-                    layer_token_embeddings_mlm,
+                    per_layer_token_embeddings,
                     tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
                     transpose_b=True,
                 )
-                layer_token_logits = self._masked_lm_bias(layer_token_logits)
                 all_token_logits.append(layer_token_logits)
 
             result["all_layer_token_embeddings"] = decoder_outputs
@@ -680,8 +627,6 @@ class RobertaEncoder(LegacyLayer):
             lambda: _get_decoder_sequence_length_step_other(all_cache_key),
         )
 
-        # # 3 is sequence length position
-        # -1 is to make sure if length is 1, position is 0 and so on
         all_cache_key = [
             tf.squeeze(item, axis=0)
             for item in tf.split(all_cache_key, num_or_size_splits=self._config_dict["num_hidden_layers"], axis=0)
@@ -754,11 +699,7 @@ class RobertaEncoder(LegacyLayer):
         cls_output = self._pooler_layer(cls_token_tensor)
         # batch_size x sequence_length x embedding_size
         token_embeddings = decoder_outputs[-1]
-        # MaskedLM layer only project it and normalize (b x s x h)
-        token_embeddings_mlm = self._masked_lm_layer(token_embeddings)
-        token_logits = tf.matmul(token_embeddings_mlm, self.get_embedding_table(), transpose_b=True)
-        # token_logits         =  tf.nn.bias_add(token_logits, self._masked_lm_bias)
-        token_logits = self._masked_lm_bias(token_logits)
+        token_logits = tf.matmul(token_embeddings, self.get_embedding_table(), transpose_b=True)
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         return {

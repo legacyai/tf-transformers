@@ -109,6 +109,7 @@ class BartConfig(TransformerConfig):
         initializer_range=0.02,
         layer_norm_epsilon=1e-5,
         position_embedding_type="absolute",
+        decoder_start_token_id=2,
     ):
         super().__init__(
             vocab_size=vocab_size,
@@ -126,4 +127,5 @@ class BartConfig(TransformerConfig):
             initializer_range=initializer_range,
             layer_norm_epsilon=layer_norm_epsilon,
             position_embedding_type=position_embedding_type,
+            decoder_start_token_id=decoder_start_token_id,
         )

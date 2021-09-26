@@ -49,15 +49,9 @@ Lower compute costs, smaller carbon footprint:
 Choose the right framework for every part of a model's lifetime:
 
 - Train state-of-the-art models in 3 lines of code
-- Deep interoperability between Jax, Pytorch and TensorFlow models
-- Move a single model between Jax/PyTorch/TensorFlow frameworks at will
+- Complete support for Tensorflow 2.0 models.
 - Seamlessly pick the right framework for training, evaluation, production
 
-The support for Jax is still experimental (with a few models right now), expect to see it grow in the coming months!
-
-`All the model checkpoints <https://huggingface.co/models>`__ are seamlessly integrated from the huggingface.co `model
-hub <https://huggingface.co>`__ where they are uploaded directly by `users <https://huggingface.co/users>`__ and
-`organizations <https://huggingface.co/organizations>`__.
 
 Current number of checkpoints: |checkpoints|
 
@@ -447,6 +441,15 @@ Flax), PyTorch, and/or TensorFlow.
 +-----------------------------+----------------+----------------+-----------------+--------------------+--------------+
 |            XLNet            |       ✅       |       ✅       |       ✅        |         ✅         |      ❌      |
 +-----------------------------+----------------+----------------+-----------------+--------------------+--------------+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Get started
+
+    introduction_docs/quicktour
+    introduction_docs/installation
+    introduction_docs/philosophy
+    introduction_docs/glossary
 
 .. toctree::
     :maxdepth: 2

@@ -131,6 +131,7 @@ class TransformerConfig:
         self.num_hidden_groups = num_hidden_groups
         self.bidirectional = bidirectional
         self.positional_buckets = positional_buckets
+        self.decoder_start_token_id = decoder_start_token_id
 
         # Convert attributes to dict and del "self" from that
         self._inputs = locals()

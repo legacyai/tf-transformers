@@ -38,6 +38,8 @@ from tf_transformers.utils.docstring_utils import (
 
 logging.set_verbosity("INFO")
 
+T5_DECODER_START_TOKEN_ID = 0
+
 
 @add_start_docstrings(
     "T5 Model :",

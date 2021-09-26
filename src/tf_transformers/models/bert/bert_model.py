@@ -61,7 +61,7 @@ class BertModel(ModelWrapper):
             hf_config: Dict of HF configuration.
         """
         tft_config["vocab_size"] = hf_config["vocab_size"]
-        tft_config["embedding_size"] = hf_config["embedding_size"]
+        tft_config["embedding_size"] = hf_config["hidden_size"]
         tft_config["intermediate_size"] = hf_config["intermediate_size"]
         tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
         tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]
