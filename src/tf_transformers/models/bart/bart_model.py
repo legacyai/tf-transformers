@@ -151,7 +151,7 @@ class BartModel(ModelWrapper):
         decoder_kwargs: Optional[Dict] = None,
         save_checkpoint_cache: bool = True,
         load_from_cache: bool = True,
-        use_auto_regressive: bool = True,
+        use_auto_regressive: bool = False,
         **kwargs,
     ):
         # Load a base config and then overwrite it

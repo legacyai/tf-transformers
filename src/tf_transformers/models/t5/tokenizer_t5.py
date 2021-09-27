@@ -376,25 +376,26 @@ class T5TokenizerLayer(tf.keras.layers.Layer):
         return model
 
 
+def create_cache_dir(cache_path: Path):
+    """Create Cache Directory
+
+    Args:
+        cache_path : Path
+    """
+    if not cache_path.exists():  # If cache path not exists
+        cache_path.mkdir()
+
+
 class T5TokenizerTFText:
     def __init__(self) -> None:
         pass
-
-    def create_cache_dir(self, cache_path: Path):
-        """Create Cache Directory
-
-        Args:
-            cache_path : Path
-        """
-        if not cache_path.exists():  # If cache path not exists
-            cache_path.mkdir()
 
     @classmethod
     def from_pretrained(cls, model_name: str, out_type=tf.int32):
         """We load tokenizer from HuggingFace and pass to TFtext"""
         cache_dir = tempfile.gettempdir()
         cache_dir = Path(cache_dir, _PREFIX_DIR)
-        cls.create_cache_dir(_, cache_dir)  # noqa
+        cls.create_cache_dir(cache_dir)
 
         cache_path = Path(cache_dir, model_name)
 

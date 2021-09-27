@@ -54,20 +54,20 @@ def convert_bart_pt(model, config, model_name):
 
     # When dropout, use_auto_regressive is enabled assertion won't work
     SKIP_ASSERT = False
-    # LegacyLayer
-    if isinstance(model, tf.keras.layers.Layer):
-        local_config = model._config_dict
-    # LegacyModel
-    elif isinstance(model, tf.keras.Model):
-        local_config = model.model_config
-    else:
-        raise ValueError("Unknown model type {}".format(type(model)))
+    try:
+        # LegacyLayer
+        local_config = model._config_dict['decoder']
+    except Exception as e:
+        # LegacyModel
+        local_config = model.model_config['decoder']
 
     if local_config['use_dropout']:
         logging.warn("Note: As `use_dropout` is True we will skip Assertions, please verify the model.")
         SKIP_ASSERT = True
     if local_config['use_auto_regressive']:
-        logging.warn("Note: As `use_auto_regressive` is True we will skip Assertions, please verify the model.")
+        raise ValueError(
+            "Please save  model checkpoint without `use_auto_regressive` and then reload it with `use_auto_regressive`."
+        )
         SKIP_ASSERT = True
 
     import torch
@@ -368,20 +368,20 @@ def convert_bart_tf(model, config, model_name):
 
     # When dropout, use_auto_regressive is enabled assertion won't work
     SKIP_ASSERT = False
-    # LegacyLayer
-    if isinstance(model, tf.keras.layers.Layer):
-        local_config = model._config_dict
-    # LegacyModel
-    elif isinstance(model, tf.keras.Model):
-        local_config = model.model_config
-    else:
-        raise ValueError("Unknown model type {}".format(type(model)))
+    try:
+        # LegacyLayer
+        local_config = model._config_dict['decoder']
+    except Exception as e:
+        # LegacyModel
+        local_config = model.model_config['decoder']
 
     if local_config['use_dropout']:
         logging.warn("Note: As `use_dropout` is True we will skip Assertions, please verify the model.")
         SKIP_ASSERT = True
     if local_config['use_auto_regressive']:
-        logging.warn("Note: As `use_auto_regressive` is True we will skip Assertions, please verify the model.")
+        raise ValueError(
+            "Please save  model checkpoint without `use_auto_regressive` and then reload it with `use_auto_regressive`."
+        )
         SKIP_ASSERT = True
 
     import transformers

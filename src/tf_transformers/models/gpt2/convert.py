@@ -33,20 +33,20 @@ def convert_gpt2_pt(model, config, model_name):
 
     # When dropout, use_auto_regressive is enabled assertion won't work
     SKIP_ASSERT = False
-    # LegacyLayer
-    if isinstance(model, tf.keras.layers.Layer):
+    try:
+        # LegacyLayer
         local_config = model._config_dict
-    # LegacyModel
-    elif isinstance(model, tf.keras.Model):
+    except Exception as e:
+        # LegacyModel
         local_config = model.model_config
-    else:
-        raise ValueError("Unknown model type {}".format(type(model)))
 
     if local_config['use_dropout']:
         logging.warn("Note: As `use_dropout` is True we will skip Assertions, please verify the model.")
         SKIP_ASSERT = True
     if local_config['use_auto_regressive']:
-        logging.warn("Note: As `use_auto_regressive` is True we will skip Assertions, please verify the model.")
+        raise ValueError(
+            "Please save  model checkpoint without `use_auto_regressive` and then reload it with `use_auto_regressive`."
+        )
         SKIP_ASSERT = True
 
     import torch
@@ -163,20 +163,20 @@ def convert_gpt2_tf(model, config, model_name):
 
     # When dropout, use_auto_regressive is enabled assertion won't work
     SKIP_ASSERT = False
-    # LegacyLayer
-    if isinstance(model, tf.keras.layers.Layer):
+    try:
+        # LegacyLayer
         local_config = model._config_dict
-    # LegacyModel
-    elif isinstance(model, tf.keras.Model):
+    except Exception as e:
+        # LegacyModel
         local_config = model.model_config
-    else:
-        raise ValueError("Unknown model type {}".format(type(model)))
 
     if local_config['use_dropout']:
         logging.warn("Note: As `use_dropout` is True we will skip Assertions, please verify the model.")
         SKIP_ASSERT = True
     if local_config['use_auto_regressive']:
-        logging.warn("Note: As `use_auto_regressive` is True we will skip Assertions, please verify the model.")
+        raise ValueError(
+            "Please save  model checkpoint without `use_auto_regressive` and then reload it with `use_auto_regressive`."
+        )
         SKIP_ASSERT = True
 
     import transformers
