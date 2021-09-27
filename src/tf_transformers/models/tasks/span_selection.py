@@ -48,7 +48,7 @@ class Span_Selection_Model(LegacyLayer):
                 "end_logits": end_logits,
             }
 
-    def get_model(self, initialize_only):
+    def get_model(self, initialize_only=False):
         inputs = self.model.input
         layer_outputs = self(inputs)
         if initialize_only:

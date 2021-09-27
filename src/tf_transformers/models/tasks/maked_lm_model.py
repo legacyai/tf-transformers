@@ -80,7 +80,7 @@ class MaskedLMModel(LegacyLayer):
             result = {"token_embeddings": token_embeddings, "token_logits": token_logits}
             return result
 
-    def get_model(self, initialize_only):
+    def get_model(self, initialize_only=False):
         inputs = self.model.input
         masked_lm_positions = tf.keras.layers.Input(
             shape=(None,),

@@ -245,7 +245,11 @@ def convert_albert_pt(model, config, model_name):
             assigned_map.append((original_var, legacy_var))
             continue
 
-        if "intermediate/kernel:0" in legacy_var or "output/kernel:0" in legacy_var:
+        if (
+            "intermediate/kernel:0" in legacy_var
+            or "output/kernel:0" in legacy_var
+            or 'pooler_transform/kernel:0' in legacy_var
+        ):
             # huggingface (torch transpose
             model.variables[index].assign(np.transpose(from_to_variable_dict.get(original_var)))
 

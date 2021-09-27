@@ -44,7 +44,7 @@ class Classification_Model(LegacyLayer):
             outputs = {"class_logits": self.logits_layer(token_embeddings)}
             return outputs
 
-    def get_model(self, initialize_only):
+    def get_model(self, initialize_only=False):
         inputs = self.model.input
         layer_outputs = self(inputs)
         if initialize_only:

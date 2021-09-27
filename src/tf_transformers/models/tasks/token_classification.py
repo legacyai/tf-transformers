@@ -13,6 +13,8 @@ class Token_Classification_Model(LegacyLayer):
             self.model_config = model._config_dict
         self.use_all_layers = use_all_layers
         self.logits_layer = tf.keras.layers.Dense(token_vocab_size, activation=activation)
+        # Initialize model
+        self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
 
     def call(self, inputs):
         result = self.model(inputs)
@@ -30,8 +32,11 @@ class Token_Classification_Model(LegacyLayer):
             outputs = self.logits_layer(token_embeddings)
             return {"token_logits": outputs}
 
-    def get_model(self):
-        layer_output = self(self.model.input)
-        model = LegacyModel(inputs=self.model.input, outputs=layer_output, name="token_classification")
+    def get_model(self, initialize_only=False):
+        inputs = self.model.input
+        layer_outputs = self(inputs)
+        if initialize_only:
+            return inputs, layer_outputs
+        model = LegacyModel(inputs=inputs, outputs=layer_outputs, name="token_classification")
         model.model_config = self.model_config
         return model
