@@ -63,11 +63,13 @@ class RobertaModel(ModelWrapper):
             hf_config: Dict of HF configuration.
         """
         tft_config["vocab_size"] = hf_config["vocab_size"]
-        tft_config["embedding_size"] = hf_config["embedding_size"]
+        tft_config["embedding_size"] = hf_config["hidden_size"]
         tft_config["intermediate_size"] = hf_config["intermediate_size"]
         tft_config["type_vocab_size"] = hf_config["type_vocab_size"]
-        tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]
-
+        if hf_config["max_position_embeddings"]==514:
+            tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]-2
+        else:
+            tft_config["max_position_embeddings"] = hf_config["max_position_embeddings"]
         tft_config["num_attention_heads"] = hf_config["num_attention_heads"]
         tft_config["num_hidden_layers"] = hf_config["num_hidden_layers"]
 
