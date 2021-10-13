@@ -7,8 +7,7 @@ from tf_transformers.core import keras_utils
 
 def assert_model_results(model):
     def get_expected_text(model_name):
-        print("Model name", model_name)
-        if model_name == "bert_base_uncased":
+=        if model_name == "bert_base_uncased":
             expected_text = ". i want to buy the car because it is cheap.."
         if model_name == "bert_base_cased" or model_name == "bert_large_cased":
             expected_text = ".. want to buy the car because it is cheap.."
@@ -389,9 +388,7 @@ def convert_bert_tf(model, config, model_name):
 
     # BertModel
     from transformers import TFBertModel
-
     model_hf = TFBertModel.from_pretrained(model_name)
-
     # HF model variable name to variable values, for fast retrieval
     from_to_variable_dict = {var.name: var for var in model_hf.variables}
 
@@ -406,7 +403,6 @@ def convert_bert_tf(model, config, model_name):
             mapping_dict[
                 "tf_bert_model/bert/embeddings/position_embeddings/embeddings:0"
             ] = "tf_transformers/bert/cond/positional_embeddings/embeddings:0"
-
     # Start assigning HF values to tf_transformers
     # assigned_map and assigned_map_values are used for sanity check if needed
     assigned_map = []
@@ -457,12 +453,20 @@ def convert_bert_tf(model, config, model_name):
 
         if "self_attention_output/bias:0" in legacy_var:
             # huggingface (3D) to tf_transformers (2D)
+            # if tf.rank(from_to_variable_dict.get(original_var)).numpy() == 2:
+            #     model.variables[index].assign(
+            #         tf.reshape(
+            #             from_to_variable_dict.get(original_var),
+            #             (-1),
+            #         )
+            #     )
+            # else:
+            #     model.variables[index].assign(
+            #             from_to_variable_dict.get(original_var),
+            #     )
             model.variables[index].assign(
-                tf.reshape(
-                    from_to_variable_dict.get(original_var),
-                    (-1),
-                )
-            )
+                                from_to_variable_dict.get(original_var),
+                        )
             assigned_map.append((original_var, legacy_var))
             continue
 

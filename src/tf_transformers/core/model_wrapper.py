@@ -115,6 +115,8 @@ class ModelWrapper(ABC):
                 convert_success = True
                 logging.info("Successful ✅: Converted model using TF HF")
             except Exception as e:
+                import traceback
+                print(traceback.format_exc())
                 logging.error(e)
                 logging.info("Failed ❌: Converted model using TF HF")
 
@@ -124,6 +126,8 @@ class ModelWrapper(ABC):
                 logging.info("Successful ✅: Converted model using PT HF")
                 convert_success = True
             except Exception as e:
+                import traceback
+                print(traceback.format_exc())
                 logging.error(e)
                 logging.info("Failed ❌: Converted model using PT HF")
 
