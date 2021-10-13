@@ -7,7 +7,7 @@ from tf_transformers.core import keras_utils
 
 def assert_model_results(model):
     def get_expected_text(model_name):
-=        if model_name == "bert_base_uncased":
+        if model_name == "bert_base_uncased":
             expected_text = ". i want to buy the car because it is cheap.."
         if model_name == "bert_base_cased" or model_name == "bert_large_cased":
             expected_text = ".. want to buy the car because it is cheap.."
