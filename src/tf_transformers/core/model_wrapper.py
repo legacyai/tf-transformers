@@ -16,6 +16,7 @@
 # ==============================================================================
 """ModelWrapper setup"""
 import tempfile
+import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Callable, Dict, Union
@@ -134,8 +135,11 @@ class ModelWrapper(ABC):
         if self.save_checkpoint_cache:
             if convert_success:
                 model.save_checkpoint(str(self.model_path), overwrite=True)
+                with open(Path(str(self.model_path), "config.json"), "w") as f:
+                    json.dump(config, f, indent=2)
+                    
                 logging.info(
-                    "Successful ✅: Asserted and Converted `{}` from HF and saved it in cache folder {}".format(
+                    "Successful ✅: Asserted and Converted `{}` from HF and saved model, config in cache folder {}".format(
                         hf_model_name, str(self.model_path)
                     )
                 )

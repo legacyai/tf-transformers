@@ -19,6 +19,7 @@ from typing import Dict, Optional, Union
 from absl import logging
 
 from tf_transformers.core import ModelWrapper
+from tf_transformers.core.read_from_hub import load_pretrained_model, get_config_cache
 from tf_transformers.models.albert import AlbertEncoder as Encoder
 from tf_transformers.models.albert.configuration_albert import (
     AlbertConfig as ModelConfig,
@@ -30,6 +31,10 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_MODEL_CONFIG_DOCSTRING,
     ENCODER_PRETRAINED_DOCSTRING,
 )
+
+MODEL_TO_HF_URL = {}
+MODEL_TO_HF_URL = {"albert-base-v2": "tftransformers/albert-base-v2"}
+
 
 code_example = r'''
 
@@ -124,6 +129,23 @@ class AlbertModel(ModelWrapper):
     ):
         # Load a base config and then overwrite it
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
+        # Check if model is in out Huggingface cache
+        if model_name in MODEL_TO_HF_URL:
+            URL = MODEL_TO_HF_URL[model_name]
+            config_dict, local_cache = get_config_cache(URL)
+            kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
+            model_layer = Encoder(config_dict, **kwargs_copy)
+            model = model_layer.get_model()            
+            # Load Model
+            load_pretrained_model(model,local_cache,URL)
+            if return_layer:
+                if return_config:
+                    return model_layer, config_dict
+                return model_layer
+            if return_config:
+                return model, config_dict
+            return model
+        
         config = ModelConfig()
         config_dict = config.to_dict()
 

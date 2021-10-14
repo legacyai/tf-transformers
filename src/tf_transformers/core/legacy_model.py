@@ -144,7 +144,7 @@ class LegacyModel(tf.keras.Model):
 
             self.loss = loss or {}  # Backwards compat.
 
-    def load_checkpoint(self, checkpoint_dir=None, checkpoint_path=None, **kwargs):
+    def load_checkpoint(self, checkpoint_dir=None, checkpoint_path=None, options=None, **kwargs):
         """[summary]
 
         Args:
@@ -160,7 +160,10 @@ class LegacyModel(tf.keras.Model):
                 logging.info("No checkpoint found")
             return None
         else:
-            status = checkpoint.restore(checkpoint_path)
+            if options:
+                status = checkpoint.restore(checkpoint_path, options=options)
+            else:
+                status = checkpoint.restore(checkpoint_path)
             # Important
             if status.assert_existing_objects_matched():
                 logging.info("Successful: Model checkpoints matched and loaded from {}".format(checkpoint_path))
