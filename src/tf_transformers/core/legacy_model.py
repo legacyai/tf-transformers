@@ -172,7 +172,7 @@ class LegacyModel(tf.keras.Model):
                 logging.info("Failed to load the checkpoint. Status Assertion Failed.")
         return None
 
-    def save_checkpoint(self, checkpoint_dir, overwrite=False, **kwargs):
+    def save_checkpoint(self, checkpoint_dir, overwrite=False, options=None, **kwargs):
         """Save checkpoint
 
         Args:
@@ -189,7 +189,7 @@ class LegacyModel(tf.keras.Model):
         # If you want to save the model as checkpoints
         checkpoint = tf.train.Checkpoint(model=self, **kwargs)
         checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
-        checkpoint.save(file_prefix=checkpoint_prefix)
+        checkpoint.save(file_prefix=checkpoint_prefix, options=options)
         checkpoint_written = tf.train.latest_checkpoint(checkpoint_dir)
         logging.info("Successful: Saved model at {}".format(checkpoint_written))
 
