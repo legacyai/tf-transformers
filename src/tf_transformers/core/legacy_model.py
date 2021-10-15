@@ -150,6 +150,11 @@ class LegacyModel(tf.keras.Model):
         Args:
             checkpoint_dir ([str]): [Location of the model]
         """
+        try:
+            options = tf.train.CheckpointOptions(experimental_io_device="/job:localhost")
+        except:
+            options = tf.CheckpointOptions(experimental_io_device="/job:localhost")
+            
         checkpoint = tf.train.Checkpoint(model=self, **kwargs)
         if checkpoint_path is None and checkpoint_dir:
             checkpoint_path = tf.train.latest_checkpoint(checkpoint_dir)
@@ -182,6 +187,11 @@ class LegacyModel(tf.keras.Model):
         Returns:
             None
         """
+        try:
+            options = tf.train.CheckpointOptions(experimental_io_device="/job:localhost")
+        except:
+            options = tf.CheckpointOptions(experimental_io_device="/job:localhost")
+            
         if not overwrite:
             if os.path.exists(checkpoint_dir):
                 raise FileExistsError()
