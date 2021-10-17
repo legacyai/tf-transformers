@@ -175,10 +175,10 @@ def get_classification_model(num_classes: int, return_all_layer_outputs: bool, i
 @hydra.main(config_path="config")
 def run_cola(cfg: DictConfig):
     logging.info("Run COLA")
-    cfg = compose(config_name="config", overrides=["+glue=cola"])
-    task_name = cfg.glue.task.name
-    data_name = cfg.glue.data.name
-    max_seq_length = cfg.glue.data.max_seq_length
+    cfg_task = compose(config_name="config", overrides=["+glue=cola"])
+    task_name = cfg_task.glue.task.name
+    data_name = cfg_task.glue.data.name
+    max_seq_length = cfg_task.glue.data.max_seq_length
     take_sample = cfg.data.take_sample
     train_batch_size = cfg.data.train_batch_size
 
@@ -234,7 +234,7 @@ def run_cola(cfg: DictConfig):
 
     # Load Model
     model_fn = get_classification_model(
-        cfg.glue.data.num_classes, return_all_layer_outputs, cfg.model.is_training, cfg.model.use_dropout
+        cfg_task.glue.data.num_classes, return_all_layer_outputs, cfg.model.is_training, cfg.model.use_dropout
     )
 
     # Load loss fn
