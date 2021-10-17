@@ -1,19 +1,31 @@
 import tensorflow as tf
 import tensorflow_text as tf_text
 
-
 def dynamic_masking_from_features(
-    max_seq_len, max_predictions_per_batch, vocab_size, cls_id, sep_id, unk_id, pad_id, mask_id
+    max_seq_len: int, max_predictions_per_batch: int, vocab_size: int, cls_id:int, sep_id: int, unk_id: int, pad_id, mask_id: int
 ):
+    """Dynamic Masking from input_ids (saved as tfrecord)
 
-    """Dynamic Masking from input_ids (saved as tfrecord)"""
+    Args:
+        max_seq_len (:obj:`int`): Maximum Sequence Length
+        max_predictions_per_batch (:obj:`int`): Maximum predictions per batch
+        vocab_size (:obj:`int`): Vocabulary size
+        cls_id (:obj:`int`): CLS token
+        sep_id (:obj:`int`): SEP token
+        unk_id (:obj:`int`): UNK token
+        pad_id (:obj:`int`): PAD token
+        mask_id (:obj:`int`): MASK token
+
+    Returns:
+        Function which return Tuple (inputs, labels)
+    """
     # Truncate inputs to a maximum length.
-    trimmer = tf_text.RoundRobinTrimmer(max_seq_length=max_seq_len)
+    trimmer = tf_text.RoundRobinTrimmer(max_seq_length=max_seq_len-2)
 
     # Random Selector
     random_selector = tf_text.RandomItemSelector(
         max_selections_per_batch=max_predictions_per_batch,
-        selection_rate=0.2,
+        selection_rate=0.1,
         unselectable_ids=[cls_id, sep_id, unk_id, pad_id],
     )
 
@@ -69,7 +81,8 @@ def dynamic_masking_from_features(
 
 def dynamic_prefix_lm_from_features(max_seq_len, cls_id, sep_id):
     """Prefix Causal LM"""
-
+    import warnings
+    warnings.warn("This function `dynamic_prefix_lm_from_features` will be deprecated soon.")
     def dynamic_map_prefix(item):
         input_ids = item['input_ids']
         input_ids = input_ids[: max_seq_len - 1]  # we need -2 for cls and sep, but in causal LM we shift one pos

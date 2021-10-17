@@ -15,7 +15,7 @@ def get_config_cache(url: str):
     config_dict = json.load(open(config_path))
     return config_dict, local_cache
 
-def load_pretrained_model(model, local_cache, url):
+def load_pretrained_model(model: tf.keras.Model, local_cache: str, url: str):
     """Load model from cache"""
     try:
         local_device_option = tf.train.CheckpointOptions(experimental_io_device="/job:localhost")

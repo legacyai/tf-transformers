@@ -66,6 +66,7 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
         decoder_start_token_id=None,
         unk_token_id=None,
         pad_token_id=None,
+        mask_token_id=None,
         max_length=512,
         add_special_tokens=False,
         pack_model_inputs=False,
@@ -143,6 +144,7 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
         self.decoder_start_token_id = decoder_start_token_id
         self.unk_token_id = unk_token_id
         self.pad_token_id = pad_token_id
+        self.mask_token_id = mask_token_id
 
         self.max_length = max_length
 
@@ -426,6 +428,7 @@ class AlbertTokenizerTFText:
             decoder_start_token_id=None,
             unk_token_id=tokenizer.unk_token_id,
             pad_token_id=tokenizer.pad_token_id,
+            mask_token_id=tokenizer.mask_token_id,
             max_length=max_length,
             pack_model_inputs=pack_model_inputs
         )

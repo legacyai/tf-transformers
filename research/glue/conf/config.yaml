@@ -12,7 +12,7 @@ trainer:
   strategy: mirrored
 optimizer:
   learning_rate: 2e-5
-  loss_type: 'joint'
+  loss_type:
 model:
   is_training: true
   use_dropout: true
