@@ -19,7 +19,6 @@
 import os
 import datasets
 import pandas as pd
-from mnli import get_classification_model
 
 from tf_transformers.callbacks.metrics import SklearnMetricCallback
 from tf_transformers.models import Classification_Model

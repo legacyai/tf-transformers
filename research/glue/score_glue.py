@@ -83,48 +83,48 @@ def score_glue(eval_folder):
     # MRPC
     mrpc_scores = []
     df = pd.read_csv(os.path.join(eval_folder, "mrpc_eval.csv"))
-    score = df['accuracy_score'].max() + df['f1_score'].max()
-    mrpc_scores.append(score/2.0)
+    score = ((df['accuracy_score'] + df['f1_score'])/2.0).max()
+    mrpc_scores.append(score)
     
     # MNLI
     df = pd.read_csv(os.path.join(eval_folder, "mnli_eval.csv"))
     df_mismatched = pd.read_csv(os.path.join(eval_folder, "mnli_eval_mismatched.csv"))
 
     mnli_scores = []
-    score = df['accuracy_score'].max() + df_mismatched['accuracy_score'].max()
-    mnli_scores.append(score/2.0)
+    score = ((df['accuracy_score'] + df_mismatched['accuracy_score'])/2.0).max()
+    mnli_scores.append(score)
         
     # QQP
     df = pd.read_csv(os.path.join(eval_folder, "qqp_eval.csv"))
     qqp_scores = []
-    score = df['accuracy_score'].max() + df_mismatched['accuracy_score'].max()
-    qqp_scores.append(score/2.0)
+    score =score = ((df['accuracy_score'] + df['f1_score'])/2.0).max()
+    qqp_scores.append(score)
             
     # STSB
     df = pd.read_csv(os.path.join(eval_folder, "stsb_eval.csv"))
     stsb_scores = []
-    score = (df['pearsonr'] + df['spearmanr'])
-    stsb_scores.append(score/2.0)
+    score = ((df['pearsonr'] + df['spearmanr'])/2.0).max()
+    stsb_scores.append(score)
         
     # COLA
     df = pd.read_csv(os.path.join(eval_folder, "cola_eval.csv"))
     cola_scores = []
-    cola_scores.append(df['matthews_corrcoef'])
+    cola_scores.append(df['matthews_corrcoef'].max())
 
     # QNLI 
     df = pd.read_csv(os.path.join(eval_folder, "qnli_eval.csv"))
     qnli_scores = []
-    qnli_scores.append(df['accuracy_score'])
+    qnli_scores.append(df['accuracy_score'].max())
 
     # RTE 
     df = pd.read_csv(os.path.join(eval_folder, "rte_eval.csv"))
     rte_scores = []
-    rte_scores.append(df['accuracy_score'])
+    rte_scores.append(df['accuracy_score'].max())
             
     # SST2
     df = pd.read_csv(os.path.join(eval_folder, "sst2_eval.csv"))
     sst2_scores = []
-    sst2_scores.append(df['accuracy_score'])
+    sst2_scores.append(df['accuracy_score'].max())
         
     # Average
     df_results = pd.DataFrame([cola_scores, mnli_scores, mrpc_scores, qnli_scores, qqp_scores, rte_scores, sst2_scores, stsb_scores])

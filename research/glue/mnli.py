@@ -305,7 +305,7 @@ def run_mnli(cfg: DictConfig):
     
     # Run MNLI mismatched evaluation. This is required only for MNLI as it has 2 validation sets
     results_mnli_mismatched = run_mnli_mismatched_evaluation(model, 
-                                                             model_checkpoint_dir,
+                                                             os.path.join(os.getcwd(), model_checkpoint_dir),
                                                              write_tfrecord,
                                                              read_tfrecord,
                                                              metric_callback,

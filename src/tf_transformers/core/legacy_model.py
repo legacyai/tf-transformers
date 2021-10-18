@@ -160,7 +160,7 @@ class LegacyModel(tf.keras.Model):
             checkpoint_path = tf.train.latest_checkpoint(checkpoint_dir)
         if checkpoint_path is None:
             if checkpoint_dir:
-                logging.info("No checkpoint found in {}".format(checkpoint_dir))
+                logging.info("No ❌❌ checkpoint found in {}".format(checkpoint_dir))
             else:
                 logging.info("No checkpoint found")
             return None
@@ -171,7 +171,7 @@ class LegacyModel(tf.keras.Model):
                 status = checkpoint.restore(checkpoint_path)
             # Important
             if status.assert_existing_objects_matched():
-                logging.info("Successful: Model checkpoints matched and loaded from {}".format(checkpoint_path))
+                logging.info("Successful ✅✅: Model checkpoints matched and loaded from {}".format(checkpoint_path))
                 return checkpoint
             else:
                 logging.info("Failed to load the checkpoint. Status Assertion Failed.")
@@ -201,7 +201,7 @@ class LegacyModel(tf.keras.Model):
         checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
         checkpoint.save(file_prefix=checkpoint_prefix, options=options)
         checkpoint_written = tf.train.latest_checkpoint(checkpoint_dir)
-        logging.info("Successful: Saved model at {}".format(checkpoint_written))
+        logging.info("Successful ✅: Saved model at {}".format(checkpoint_written))
 
     def save_as_serialize_module(self, directory, overwrite=False):
         """Save as tf.saved_model.save (.pb)

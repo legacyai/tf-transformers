@@ -28,6 +28,8 @@ from rte import run_rte
 from sst2 import run_sst2
 from stsb import run_stsb
 from score_glue import score
+from absl import logging
+logging.set_verbosity("INFO")
 
 
 def flat_callbacks_to_df(history):
@@ -110,6 +112,10 @@ def run(cfg: DictConfig) -> None:
         if loss_type and loss_type == 'joint':
             return_all_layer_outputs = True
         score(eval_folder, return_all_layer_outputs)
+        
+        logging.info("GLUE evaluation is Succesful")
+        logging.info("Models and evaluation results saved in {}".format(os.getcwd()))
+        
     else:
         # Run mrpc
         if "mrpc" in cfg_dict["glue"]["task"]["name"]:
