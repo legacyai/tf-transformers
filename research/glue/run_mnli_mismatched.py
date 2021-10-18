@@ -23,19 +23,11 @@ from mnli import get_classification_model
 
 from tf_transformers.callbacks.metrics import SklearnMetricCallback
 from tf_transformers.models import Classification_Model
-from mnli import write_tfrecord, read_tfrecord
 from model import get_tokenizer
-from absl import logging
-logging.set_verbosity("INFO")
 
-def run_mnli_mismatched_evaluation(model_dir, number_of_checkpoints, return_all_layer_outputs, max_seq_length):
+def run_mnli_mismatched_evaluation(model, model_dir, write_tfrecord, read_tfrecord, metric_callback,\
+    number_of_checkpoints, max_seq_length):
     """MNLI Mismatched evaluation"""
-    logging.info("MNLI mismatched evaluation in progres ................")
-    num_classes = 2
-    is_training = False
-    use_dropout = False
-    model = get_classification_model(num_classes, return_all_layer_outputs, is_training, use_dropout)()
-    metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score',))
     
     data = datasets.load_dataset("glue", 'mnli')
 

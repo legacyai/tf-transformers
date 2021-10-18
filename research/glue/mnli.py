@@ -296,8 +296,21 @@ def run_mnli(cfg: DictConfig):
         latest_checkpoint=None,
     )
     
+    logging.info("MNLI mismatched evaluation in progres ................")
+    num_classes = 2
+    is_training = False
+    use_dropout = False
+    model = get_classification_model(num_classes, return_all_layer_outputs, is_training, use_dropout)()
+    metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score',))
+    
     # Run MNLI mismatched evaluation. This is required only for MNLI as it has 2 validation sets
-    results_mnli_mismatched = run_mnli_mismatched_evaluation(model_checkpoint_dir, cfg.trainer.epochs, return_all_layer_outputs, max_seq_length)
+    results_mnli_mismatched = run_mnli_mismatched_evaluation(model, 
+                                                             model_checkpoint_dir,
+                                                             write_tfrecord,
+                                                             read_tfrecord,
+                                                             metric_callback,
+                                                             cfg.trainer.epochs,
+                                                             max_seq_length)
     
     pd.DataFrame(results_mnli_mismatched).to_csv("mnli_eval_mismatched.csv")
     return history
