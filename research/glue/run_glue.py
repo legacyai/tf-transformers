@@ -16,6 +16,7 @@
 # ==============================================================================
 """This is the main script to run GLUE benchmark"""
 import hydra
+import os
 import pandas as pd
 from cola import run_cola
 from mnli import run_mnli
@@ -26,6 +27,7 @@ from qqp import run_qqp
 from rte import run_rte
 from sst2 import run_sst2
 from stsb import run_stsb
+from score_glue import score
 
 
 def flat_callbacks_to_df(history):
@@ -102,6 +104,12 @@ def run(cfg: DictConfig) -> None:
     # If not we will run the whole process
     if "glue" not in cfg_dict:
         run_glue(cfg)
+        eval_folder = os.getcwd()
+        loss_type = cfg.optimizer.loss_type
+        return_all_layer_outputs = False
+        if loss_type and loss_type == 'joint':
+            return_all_layer_outputs = True
+        score(eval_folder, return_all_layer_outputs)
     else:
         # Run mrpc
         if "mrpc" in cfg_dict["glue"]["task"]["name"]:

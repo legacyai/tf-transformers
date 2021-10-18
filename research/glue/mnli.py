@@ -28,6 +28,7 @@ Task: 3 class Softmax Classification.
 import glob
 import json
 import os
+import pandas as pd
 import tempfile
 
 import datasets
@@ -41,6 +42,7 @@ from tf_transformers.callbacks.metrics import SklearnMetricCallback
 from tf_transformers.data import TFReader, TFWriter
 from tf_transformers.losses.loss_wrapper import get_1d_classification_loss
 from tf_transformers.models import Classification_Model
+from run_mnli_mismatched import run_mnli_mismatched_evaluation
 
 logging.set_verbosity("INFO")
 
@@ -206,7 +208,7 @@ def run_mnli(cfg: DictConfig):
     data = datasets.load_dataset("glue", data_name)
 
     # Write TFRecords
-    temp_dir = tempfile.gettempdir()
+    temp_dir = "GLUE_MODELS"
     tfrecord_dir = os.path.join(temp_dir, "glue", "tfrecord", task_name)
 
     # Train
@@ -293,5 +295,9 @@ def run_mnli(cfg: DictConfig):
         repeat_dataset=True,
         latest_checkpoint=None,
     )
-
+    
+    # Run MNLI mismatched evaluation. This is required only for MNLI as it has 2 validation sets
+    results_mnli_mismatched = run_mnli_mismatched_evaluation(model_checkpoint_dir, cfg.trainer.epochs, return_all_layer_outputs, max_seq_length)
+    
+    pd.DataFrame(results_mnli_mismatched).to_csv("mnli_eval_mismatched.csv")
     return history

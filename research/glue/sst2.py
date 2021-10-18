@@ -196,7 +196,7 @@ def run_sst2(cfg: DictConfig):
     data = datasets.load_dataset("glue", data_name)
 
     # Write TFRecords
-    temp_dir = tempfile.gettempdir()
+    temp_dir = "GLUE_MODELS"
     tfrecord_dir = os.path.join(temp_dir, "glue", "tfrecord", task_name)
 
     # Train
