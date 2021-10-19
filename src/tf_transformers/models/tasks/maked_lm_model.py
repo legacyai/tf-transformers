@@ -20,8 +20,7 @@ class MaskedLMModel(LegacyLayer):
         super(MaskedLMModel, self).__init__(is_training=is_training, use_dropout=use_dropout, name=model.name, **kwargs)
 
         self.model = model
-        # if isinstance(model, LegacyModel):
-        #     self.model_config = model.model_config
+        # We need keras layer to access embedding table
         if not isinstance(model, tf.keras.layers.Layer):
             raise TypeError(
                 "We expect model to be a tf.keras.layers.Layer/LegacyLayer. \
@@ -89,9 +88,10 @@ class MaskedLMModel(LegacyLayer):
             name="masked_lm_positions",
         )
         inputs['masked_lm_positions'] = masked_lm_positions
+        inputs_copy = inputs.copy() # We keep a copy to pass, otherwise checkpoint save will throw error
         layer_outputs = self(inputs)
         if initialize_only:
-            return inputs, layer_outputs
+            return inputs_copy, layer_outputs
 
         model = LegacyModel(inputs=inputs, outputs=layer_outputs, name="mlm")
         model.model_config = self.model_config
