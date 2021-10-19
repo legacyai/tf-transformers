@@ -25,13 +25,13 @@ from tf_transformers.core.read_from_hub import (
     get_config_only,
     load_pretrained_model,
 )
-from tf_transformers.models import MaskedLMModel
 from tf_transformers.models.roberta import RobertaEncoder as Encoder
 from tf_transformers.models.roberta.configuration_roberta import (
     RobertaConfig as ModelConfig,
 )
 from tf_transformers.models.roberta.convert import convert_roberta_pt as convert_pt
 from tf_transformers.models.roberta.convert import convert_roberta_tf as convert_tf
+from tf_transformers.models.tasks.maked_lm_model import MaskedLMModel
 from tf_transformers.utils.docstring_file_utils import add_start_docstrings
 from tf_transformers.utils.docstring_utils import (
     ENCODER_MODEL_CONFIG_DOCSTRING,
