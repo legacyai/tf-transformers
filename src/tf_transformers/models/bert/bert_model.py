@@ -113,8 +113,10 @@ class BertModel(ModelWrapper):
         ),
     )
     def from_config(cls, config: ModelConfig, return_layer: bool = False, use_mlm_layer=False, **kwargs):
-        config_dict = config.to_dict()
-        # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
+        if isinstance(config, ModelConfig):
+            config_dict = config.to_dict()
+        else:
+            config_dict = config        # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
         cls_ref = cls()
         # if we allow names other than whats in the class, we might not be able
         # to convert from hf properly.

@@ -84,9 +84,10 @@ class MT5Model(ModelWrapper):
         ENCODER_MODEL_CONFIG_DOCSTRING.format("transformers.models.MT5Encoder", "tf_transformers.models.mt5.MT5Config"),
     )
     def from_config(cls, config, return_layer=False, encoder_kwargs=None, decoder_kwargs=None, **kwargs):
-
-        config_dict = config.to_dict()
-        # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
+        if isinstance(config, ModelConfig):
+            config_dict = config.to_dict()
+        else:
+            config_dict = config        # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
         cls_ref = cls()
         # if we allow names other than
         # whats in the class, we might not be able
