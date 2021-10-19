@@ -24,7 +24,6 @@ Task: Binary Classification.
 import glob
 import json
 import os
-import tempfile
 
 import datasets
 import hydra

@@ -14,11 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""The main wrapper around BERT"""
 from typing import Dict, Optional, Union
 
 from absl import logging
 
 from tf_transformers.core import ModelWrapper
+from tf_transformers.core.read_from_hub import (
+    get_config_cache,
+    get_config_only,
+    load_pretrained_model,
+)
+from tf_transformers.models import MaskedLMModel
 from tf_transformers.models.bert import BertEncoder as Encoder
 from tf_transformers.models.bert.configuration_bert import BertConfig as ModelConfig
 from tf_transformers.models.bert.convert import convert_bert_pt as convert_pt
@@ -28,6 +35,8 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_MODEL_CONFIG_DOCSTRING,
     ENCODER_PRETRAINED_DOCSTRING,
 )
+
+MODEL_TO_HF_URL = {}
 
 code_example = r'''
 
@@ -72,13 +81,38 @@ class BertModel(ModelWrapper):
         return tft_config
 
     @classmethod
+    def get_config(cls, model_name: str):
+        """Get a config from Huggingface hub if present"""
+
+        # Check if it is under tf_transformers
+        if model_name in MODEL_TO_HF_URL:
+            URL = MODEL_TO_HF_URL[model_name]
+            config_dict = get_config_only(URL)
+            return config_dict
+        else:
+            # Check inside huggingface
+            config = ModelConfig()
+            config_dict = config.to_dict()
+            cls_ref = cls()
+            try:
+                from transformers import PretrainedConfig
+
+                hf_config = PretrainedConfig.from_pretrained(model_name)
+                hf_config = hf_config.to_dict()
+                config_dict = cls_ref.update_config(config_dict, hf_config)
+                return config_dict
+            except Exception as e:
+                logging.info("Error: {}".format(e))
+                logging.info("Failed loading config from HuggingFace")
+
+    @classmethod
     @add_start_docstrings(
         "Bert Model from config :",
         ENCODER_MODEL_CONFIG_DOCSTRING.format(
             "transformers.models.BertEncoder", "tf_transformers.models.bert.BertConfig"
         ),
     )
-    def from_config(cls, config: ModelConfig, return_layer: bool = False, **kwargs):
+    def from_config(cls, config: ModelConfig, return_layer: bool = False, use_mlm_layer=False, **kwargs):
         config_dict = config.to_dict()
         # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
         cls_ref = cls()
@@ -93,6 +127,8 @@ class BertModel(ModelWrapper):
         # Just create a model and return it with random_weights
         # (Distribute strategy fails)
         model_layer = Encoder(config_dict, **kwargs_copy)
+        if use_mlm_layer:
+            model_layer = MaskedLMModel(model_layer, config_dict["embedding_size"], config_dict["layer_norm_epsilon"])
         model = model_layer.get_model()
         logging.info("Create model from config")
         if return_layer:
@@ -117,10 +153,32 @@ class BertModel(ModelWrapper):
         convert_fn_type: Optional[str] = "both",
         save_checkpoint_cache: bool = True,
         load_from_cache: bool = True,
+        use_mlm_layer=False,
         **kwargs,
     ):
         # Load a base config and then overwrite it
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
+        # Check if model is in out Huggingface cache
+        if model_name in MODEL_TO_HF_URL:
+            URL = MODEL_TO_HF_URL[model_name]
+            config_dict, local_cache = get_config_cache(URL)
+            kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
+            model_layer = Encoder(config_dict, **kwargs_copy)
+            if use_mlm_layer:
+                model_layer = MaskedLMModel(
+                    model_layer, config_dict["embedding_size"], config_dict["layer_norm_epsilon"]
+                )
+            model = model_layer.get_model()
+            # Load Model
+            load_pretrained_model(model, local_cache, URL)
+            if return_layer:
+                if return_config:
+                    return model_layer, config_dict
+                return model_layer
+            if return_config:
+                return model, config_dict
+            return model
+
         config = ModelConfig()
         config_dict = config.to_dict()
 
@@ -142,6 +200,8 @@ class BertModel(ModelWrapper):
 
         kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
         model_layer = Encoder(config_dict, **kwargs_copy)
+        if use_mlm_layer:
+            model_layer = MaskedLMModel(model_layer, config_dict["embedding_size"], config_dict["layer_norm_epsilon"])
         model = model_layer.get_model()
 
         # Give preference to model_checkpoint_dir

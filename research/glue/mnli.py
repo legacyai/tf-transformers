@@ -28,21 +28,20 @@ Task: 3 class Softmax Classification.
 import glob
 import json
 import os
-import pandas as pd
-import tempfile
 
 import datasets
 import hydra
+import pandas as pd
 from absl import logging
 from hydra import compose
 from model import get_model, get_optimizer, get_tokenizer, get_trainer
 from omegaconf import DictConfig
+from run_mnli_mismatched import run_mnli_mismatched_evaluation
 
 from tf_transformers.callbacks.metrics import SklearnMetricCallback
 from tf_transformers.data import TFReader, TFWriter
 from tf_transformers.losses.loss_wrapper import get_1d_classification_loss
 from tf_transformers.models import Classification_Model
-from run_mnli_mismatched import run_mnli_mismatched_evaluation
 
 logging.set_verbosity("INFO")
 
@@ -295,22 +294,25 @@ def run_mnli(cfg: DictConfig):
         repeat_dataset=True,
         latest_checkpoint=None,
     )
-    
-    logging.info("MNLI mismatched evaluation in progres ................")
-    num_classes = 2
+
+    logging.info("MNLI mismatched evaluation in progress ................")
     is_training = False
     use_dropout = False
-    model = get_classification_model(num_classes, return_all_layer_outputs, is_training, use_dropout)()
+    model = get_classification_model(
+        cfg_task.glue.data.num_classes, return_all_layer_outputs, is_training, use_dropout
+    )()
     metric_callback = SklearnMetricCallback(metric_name_list=('accuracy_score',))
-    
+
     # Run MNLI mismatched evaluation. This is required only for MNLI as it has 2 validation sets
-    results_mnli_mismatched = run_mnli_mismatched_evaluation(model, 
-                                                             os.path.join(os.getcwd(), model_checkpoint_dir),
-                                                             write_tfrecord,
-                                                             read_tfrecord,
-                                                             metric_callback,
-                                                             cfg.trainer.epochs,
-                                                             max_seq_length)
-    
+    results_mnli_mismatched = run_mnli_mismatched_evaluation(
+        model,
+        os.path.join(os.getcwd(), model_checkpoint_dir),
+        write_tfrecord,
+        read_tfrecord,
+        metric_callback,
+        cfg.trainer.epochs,
+        max_seq_length,
+    )
+
     pd.DataFrame(results_mnli_mismatched).to_csv("mnli_eval_mismatched.csv")
     return history
