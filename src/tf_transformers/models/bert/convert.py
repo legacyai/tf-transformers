@@ -29,6 +29,8 @@ def assert_model_results(model):
         inputs["input_ids"] = input_ids
         inputs["input_mask"] = tf.ones_like(input_ids)
         inputs["input_type_ids"] = tf.zeros_like(input_ids)
+        if "masked_lm_positions" in model.input:
+            inputs["masked_lm_positions"] = tf.expand_dims(tf.range(inputs["input_ids"].shape[1]), axis=0)
 
         results = model(inputs)
         expected_text = get_expected_text(model_name)
@@ -283,6 +285,8 @@ def convert_bert_pt(model, config, model_name):
         inputs_tf["input_ids"] = inputs["input_ids"]
         inputs_tf["input_type_ids"] = inputs["token_type_ids"]
         inputs_tf["input_mask"] = inputs["attention_mask"]
+        if "masked_lm_positions" in model.input:
+            inputs_tf["masked_lm_positions"] = tf.expand_dims(tf.range(inputs_tf["input_ids"].shape[1]), axis=0)
         outputs_tf = model(inputs_tf)
         text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
 
@@ -393,7 +397,6 @@ def convert_bert_tf(model, config, model_name):
 
     # BertModel
     from transformers import TFBertModel
-
     model_hf = TFBertModel.from_pretrained(model_name)
     # HF model variable name to variable values, for fast retrieval
     from_to_variable_dict = {var.name: var for var in model_hf.variables}
@@ -471,8 +474,8 @@ def convert_bert_tf(model, config, model_name):
             #             from_to_variable_dict.get(original_var),
             #     )
             model.variables[index].assign(
-                from_to_variable_dict.get(original_var),
-            )
+                                from_to_variable_dict.get(original_var),
+                        )
             assigned_map.append((original_var, legacy_var))
             continue
 
@@ -498,7 +501,7 @@ def convert_bert_tf(model, config, model_name):
             break
     if mlm_model is False:
         return True
-
+    
     # BertMLM
     from transformers import TFBertForMaskedLM
 
@@ -536,8 +539,11 @@ def convert_bert_tf(model, config, model_name):
         inputs_tf["input_ids"] = inputs["input_ids"]
         inputs_tf["input_type_ids"] = inputs["token_type_ids"]
         inputs_tf["input_mask"] = inputs["attention_mask"]
+        if "masked_lm_positions" in model.input:
+            inputs_tf["masked_lm_positions"] = tf.expand_dims(tf.range(inputs_tf["input_ids"].shape[1]), axis=0)
         outputs_tf = model(inputs_tf)
         text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
+        print(text_tf, text_hf)
         assert text_hf == text_tf
         outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
         if keras_utils.get_policy_name() == 'float32':
