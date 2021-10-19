@@ -32,6 +32,8 @@ def assert_model_results(model):
         inputs["input_type_ids"] = tf.zeros_like(input_ids)
 
         results = model(inputs)
+        if "masked_lm_positions" in model.input:
+            inputs["masked_lm_positions"] = tf.expand_dims(tf.range(inputs["input_ids"].shape[1]), axis=0)
         expected_text = get_expected_text(model_name)
         decoded_text = tokenizer.decode(tf.argmax(results["token_logits"], axis=2)[0].numpy())
         assert expected_text == decoded_text
@@ -241,7 +243,12 @@ def convert_roberta_pt(model, config, model_name):
     # Do the following only if model is MaskedLMModel
     from tf_transformers.models import MaskedLMModel
 
-    if not isinstance(model, MaskedLMModel):
+    mlm_model = False
+    for var in model.variables:
+        if '/mlm/' in var.name:
+            mlm_model = True
+            break
+    if mlm_model is False:
         return True
 
     from transformers import RobertaForMaskedLM
@@ -286,8 +293,9 @@ def convert_roberta_pt(model, config, model_name):
         inputs_tf["input_type_ids"] = tf.zeros_like(inputs_tf["input_ids"])
         inputs_tf["input_mask"] = inputs["attention_mask"]
         outputs_tf = model(inputs_tf)
+        if "masked_lm_positions" in model.input:
+            inputs_tf["masked_lm_positions"] = tf.expand_dims(tf.range(inputs_tf["input_ids"].shape[1]), axis=0)
         text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
-
         assert text_pt == text_tf
         outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
         tf.debugging.assert_equal(outputs_pt, outputs_tf)
@@ -494,7 +502,12 @@ def convert_roberta_tf(model, config, model_name):
     # Do the following only if model is MaskedLMModel
     from tf_transformers.models import MaskedLMModel
 
-    if not isinstance(model, MaskedLMModel):
+    mlm_model = False
+    for var in model.variables:
+        if '/mlm/' in var.name:
+            mlm_model = True
+            break
+    if mlm_model is False:
         return True
 
     # BertMLM
@@ -534,6 +547,8 @@ def convert_roberta_tf(model, config, model_name):
         inputs_tf["input_ids"] = inputs["input_ids"]
         inputs_tf["input_type_ids"] = tf.zeros_like(inputs_tf["input_ids"])
         inputs_tf["input_mask"] = inputs["attention_mask"]
+        if "masked_lm_positions" in model.input:
+            inputs_tf["masked_lm_positions"] = tf.expand_dims(tf.range(inputs_tf["input_ids"].shape[1]), axis=0)
         outputs_tf = model(inputs_tf)
         text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
 

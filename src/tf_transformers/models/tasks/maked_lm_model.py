@@ -43,11 +43,9 @@ class MaskedLMModel(LegacyLayer):
 
     def call(self, inputs):
         # Encoder outputs
-        encoder_inputs = inputs.copy()
-        del encoder_inputs['masked_lm_positions']
-        result = self.model(inputs)
-
         masked_lm_positions = inputs['masked_lm_positions']
+        del inputs['masked_lm_positions']
+        result = self.model(inputs)
 
         if self.use_all_layers:
             all_token_logits = []
@@ -88,7 +86,7 @@ class MaskedLMModel(LegacyLayer):
             name="masked_lm_positions",
         )
         inputs['masked_lm_positions'] = masked_lm_positions
-        inputs_copy = inputs.copy() # We keep a copy to pass, otherwise checkpoint save will throw error
+        inputs_copy = inputs.copy()  # We keep a copy to pass, otherwise checkpoint save will throw error
         layer_outputs = self(inputs)
         if initialize_only:
             return inputs_copy, layer_outputs

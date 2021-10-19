@@ -234,7 +234,12 @@ def convert_bert_pt(model, config, model_name):
     # Do the following only if model is MaskedLMModel
     from tf_transformers.models import MaskedLMModel
 
-    if not isinstance(model, MaskedLMModel):
+    mlm_model = False
+    for var in model.variables:
+        if '/mlm/' in var.name:
+            mlm_model = True
+            break
+    if mlm_model is False:
         return True
 
     from transformers import BertForMaskedLM
@@ -388,6 +393,7 @@ def convert_bert_tf(model, config, model_name):
 
     # BertModel
     from transformers import TFBertModel
+
     model_hf = TFBertModel.from_pretrained(model_name)
     # HF model variable name to variable values, for fast retrieval
     from_to_variable_dict = {var.name: var for var in model_hf.variables}
@@ -465,8 +471,8 @@ def convert_bert_tf(model, config, model_name):
             #             from_to_variable_dict.get(original_var),
             #     )
             model.variables[index].assign(
-                                from_to_variable_dict.get(original_var),
-                        )
+                from_to_variable_dict.get(original_var),
+            )
             assigned_map.append((original_var, legacy_var))
             continue
 
@@ -485,7 +491,12 @@ def convert_bert_tf(model, config, model_name):
     # Do the following only if model is MaskedLMModel
     from tf_transformers.models import MaskedLMModel
 
-    if not isinstance(model, MaskedLMModel):
+    mlm_model = False
+    for var in model.variables:
+        if '/mlm/' in var.name:
+            mlm_model = True
+            break
+    if mlm_model is False:
         return True
 
     # BertMLM
@@ -527,7 +538,6 @@ def convert_bert_tf(model, config, model_name):
         inputs_tf["input_mask"] = inputs["attention_mask"]
         outputs_tf = model(inputs_tf)
         text_tf = tokenizer.decode(tf.argmax(outputs_tf["token_logits"], axis=2)[0])
-
         assert text_hf == text_tf
         outputs_tf = tf.argmax(outputs_tf["token_embeddings"], axis=2)[0].numpy()
         if keras_utils.get_policy_name() == 'float32':
