@@ -42,7 +42,7 @@ class TextDecoderSeq2Seq(object):
         Returns:
             [type]: [description]
         """
-        self.decode_start_token_id = decoder_start_token_id
+        self.decoder_start_token_id = decoder_start_token_id
         self.decoder_input_type_ids = input_type_ids
         self.decoder_input_mask_ids = input_mask_ids
 
@@ -111,8 +111,8 @@ class TextDecoderSeq2Seq(object):
         if "decoder_input_type_ids" in inputs:
             if self.decoder_input_type_ids < 0:
                 raise ValueError(
-                    "Seems like you model has `decoder_input_type_ids`, \
-                        but it hasn't set yet. Please provide a valid positive index for `decoder_input_type_ids`"
+                    "Seems like you model has `input_type_ids` for decoder, \
+                        but it hasn't set yet. Please provide a valid positive index for `input_type_ids`."
                 )
 
     def auto_infer_config(self, config, saved_model=False):
@@ -201,7 +201,7 @@ class TextDecoderSeq2Seq(object):
         )
 
         # Inputs ready
-        inputs["decoder_input_ids"] = tf.cast(tf.ones(shape=(batch_size, 1)) * self.decode_start_token_id, tf.int32)
+        inputs["decoder_input_ids"] = tf.cast(tf.ones(shape=(batch_size, 1)) * self.decoder_start_token_id, tf.int32)
 
         if self.decoder_input_type_ids > -1:
             inputs["decoder_input_type_ids"] = tf.ones_like(inputs["decoder_input_ids"]) * self.decoder_input_type_ids
@@ -350,7 +350,7 @@ class TextDecoderSeq2Seq(object):
 
         # Inputs ready
         inputs_repeated["decoder_input_ids"] = tf.cast(
-            tf.ones(shape=(batch_size_updated, 1)) * self.decode_start_token_id,
+            tf.ones(shape=(batch_size_updated, 1)) * self.decoder_start_token_id,
             tf.int32,
         )
         inputs_repeated["decoder_all_cache_key"] = all_cache_key
@@ -500,12 +500,20 @@ class TextDecoderSeq2Seq(object):
         eos_pos_mask = tf.cast(tf.equal(matched_positions, 0), tf.int32) * -1
         matched_positions = tf.cast(matched_positions, tf.int32) + eos_pos_mask
 
+        # We have to return matched_positions for all beams
+        matched_positions = tf.gather(
+            matched_positions,
+            tf.stack([tf.range(0, batch_size * num_beams, delta=num_beams)] * num_beams)
+            + tf.expand_dims(tf.range(num_beams), 1),
+            axis=-1,
+        )
+
         # TODO : Add prediction_probs
         return {
             "iterations": i + 1,  # scalar
             "input_ids": inputs,  # 2D batch_size x seq_length
             "predicted_ids": topk_alive_seq[:, :, 1:],  # to avoid initial 0,  # 3D batch_size x 1 x decoded_length
-            "matched_eos_pos": matched_positions,  # 1D (batch_size,)
+            "matched_eos_pos": matched_positions,  # 2D (num_beams, batch_size)
         }
 
     def top_k_top_p(
@@ -565,7 +573,7 @@ class TextDecoderSeq2Seq(object):
 
         # Inputs ready
         inputs_repeated["decoder_input_ids"] = tf.cast(
-            tf.ones(shape=(batch_size_updated, 1)) * self.decode_start_token_id,
+            tf.ones(shape=(batch_size_updated, 1)) * self.decoder_start_token_id,
             tf.int32,
         )
         inputs_repeated["decoder_all_cache_key"] = all_cache_key
@@ -655,6 +663,16 @@ class TextDecoderSeq2Seq(object):
         # no eos matched positions will be 0, replace with -1
         eos_pos_mask = tf.cast(tf.equal(matched_positions, 0), tf.int32) * -1
         matched_positions = tf.cast(matched_positions, tf.int32) + eos_pos_mask
+
+        # We have to return matched_positions for all beams
+        matched_positions = tf.gather(
+            matched_positions,
+            tf.stack(
+                [tf.range(0, batch_size * num_return_sequences, delta=num_return_sequences)] * num_return_sequences
+            )
+            + tf.expand_dims(tf.range(num_return_sequences), 1),
+            axis=-1,
+        )
 
         all_predictions = tf.reshape(tf.concat(all_predictions, axis=1), (batch_size, num_return_sequences, -1))
         all_prediction_probs = tf.transpose(all_prediction_probs)

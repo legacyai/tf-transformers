@@ -156,10 +156,11 @@ class LegacyModel(tf.keras.Model):
             options = tf.CheckpointOptions(experimental_io_device="/job:localhost")
 
         if checkpoint_dir:
-            if tf.io.gfile.isdir(checkpoint_dir) is False:
-                raise ValueError("checkpoint_dir expects a directory not a file {}.".format(checkpoint_dir))
+            if tf.io.gfile.exists(checkpoint_dir):
+                if tf.io.gfile.isdir(checkpoint_dir) is False:
+                    raise ValueError("checkpoint_dir expects a directory not a file {}.".format(checkpoint_dir))
         if checkpoint_path:
-            if tf.io.gfile.isdir(checkpoint_dir) is True:
+            if tf.io.gfile.isdir(checkpoint_path) is True:
                 raise ValueError(
                     "checkpoint_path expects a checkpoint-file not a directory {}.".format(checkpoint_path)
                 )
@@ -211,7 +212,7 @@ class LegacyModel(tf.keras.Model):
         checkpoint_written = tf.train.latest_checkpoint(checkpoint_dir)
         logging.info("Successful ✅: Saved model at {}".format(checkpoint_written))
 
-    def save_as_serialize_module(self, directory, overwrite=False):
+    def save_as_serialize_module(self, directory, options=None, overwrite=False):
         """Save as tf.saved_model.save (.pb)
 
         Args:
@@ -230,9 +231,9 @@ class LegacyModel(tf.keras.Model):
                 raise FileExistsError()
 
         module = LegacyModuleCustom(self)
-        module.save(directory)
+        module.save(directory, options=options)
 
-    def save_transformers_serialized(self, directory, overwrite=False):
+    def save_transformers_serialized(self, directory, options=None, overwrite=False):
         """Save as tf.saved_model.save (.pb)
 
         Args:
@@ -248,7 +249,7 @@ class LegacyModel(tf.keras.Model):
                 raise FileExistsError()
 
         module = LegacyModuleCustom(self)
-        module.save(directory)
+        module.save(directory, options=options)
 
     def save_serialized(self, directory, overwrite=False):
         """Save as tf.saved_model.save (.pb)

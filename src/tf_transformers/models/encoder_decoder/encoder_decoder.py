@@ -114,6 +114,7 @@ class EncoderDecoder(LegacyLayer):
         is_training=False,
         use_dropout=False,
         encoder_sequence_length=None,
+        decoder_start_token_id=None,
         **kwargs,
     ):
         """
@@ -218,6 +219,26 @@ class EncoderDecoder(LegacyLayer):
         # Add config
         config = {}
         config["encoder"] = self._encoder._config_dict
+        # Check for decoder start token id in decoder
+        if "decoder_start_token_id" not in self._decoder._config_dict:
+            if self.decoder_start_token_id is None:
+                raise ValueError(
+                    "In EncoderDecoder setting, `decoder_start_token_id` has to set either from config or\
+                    constructor. Assuming we are in Auto Regressive setting"
+                )
+            else:
+                logging.info("Setting decoder_start_token_id = {}".format(self.decoder_start_token_id))
+                self._decoder._config_dict["decoder_start_token_id"] = self.decoder_start_token_id
+        else:
+            if self._decoder._config_dict["decoder_start_token_id"] is None:
+                raise ValueError(
+                    "In EncoderDecoder setting, `decoder_start_token_id` has to set either from config or\
+                    constructor. Assuming we are in Auto Regressive setting"
+                )
+            else:
+                logging.info("Setting decoder_start_token_id = {}".format(self.decoder_start_token_id))
+                self._decoder._config_dict["decoder_start_token_id"] = self.decoder_start_token_id
+
         config["decoder"] = self._decoder._config_dict
         model.model_config = config
         return model
