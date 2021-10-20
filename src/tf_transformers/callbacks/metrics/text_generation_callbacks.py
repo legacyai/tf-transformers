@@ -43,6 +43,13 @@ class TextGenerationMetricCallback:
         """
 
         Args:
+            model: tf.keras.Model
+            tokenizer: Huggingface tokenizer
+            decoder_kwargs: Dict of kwargs
+            decoder_start_token_id: int
+            input_mask_ids: int
+            input_type_ids: int
+            metric_name_list: tuple
             validation_dataset (tf.data.Dataset, optional): Validation dataset
         """
         for metric_name in metric_name_list:
@@ -81,11 +88,11 @@ class TextGenerationMetricCallback:
         self.model.load_checkpoint(model_checkpoint_dir)
         dirpath = tempfile.mkdtemp()
 
-        save_options = tf.saved_model.SaveOptions(experimental_io_device='/job:localhost')
-        self.model.save_transformers_serialized(dirpath, options=save_options, overwrite=True)
+        # save_options = tf.saved_model.SaveOptions(experimental_io_device='/job:localhost')
+        self.model.save_transformers_serialized(dirpath, overwrite=True)
 
-        load_options = tf.saved_model.LoadOptions(experimental_io_device='/job:localhost')
-        loaded = tf.saved_model.load(dirpath, options=load_options)
+        # load_options = tf.saved_model.LoadOptions(experimental_io_device='/job:localhost')
+        loaded = tf.saved_model.load(dirpath)
 
         decoder = TextDecoder(
             model=loaded,
@@ -117,10 +124,10 @@ class TextGenerationMetricCallback:
             predicted_summaries.extend(predicted_summaries_text)
 
             if batch_labels['text'].ndim == 2:
-                original_labels = [text.decode() for text in tf.squeeze(batch_labels['text'], axis=1)]
+                original_labels = [text.numpy().decode() for text in tf.squeeze(batch_labels['text'], axis=1)]
                 original_summaries.extend(original_labels)
             else:
-                original_labels = [text.decode() for text in batch_labels['text']]
+                original_labels = [text.numpy().decode() for text in batch_labels['text']]
                 original_summaries.extend(original_labels)
 
         assert len(original_summaries) == len(predicted_summaries)
@@ -131,6 +138,6 @@ class TextGenerationMetricCallback:
         result = {}
         result['rouge2_f1score_mid'] = aggregator.aggregate()['rouge2'].mid.fmeasure
         result['rouge1_f1score_mid'] = aggregator.aggregate()['rouge1'].mid.fmeasure
-        result['rougel_f1score_mid'] = aggregator.aggregate()['rougeL'].mid.fmeasure
+        result['rougel_f1score_mid'] = aggregator.aggregate()['rougeLsum'].mid.fmeasure
 
         return result

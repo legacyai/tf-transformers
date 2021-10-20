@@ -367,7 +367,7 @@ def train_and_eval(
         time.sleep(0.1)  # Sleep for 1 second, to make print neater
 
         validation_result = None
-        if validation_dataset_distributed:
+        if validation_dataset_distributed and validation_loss_fn:
             validation_result = do_validation(validation_dataset_distributed)
             validation_history[global_step] = validation_result
         print()

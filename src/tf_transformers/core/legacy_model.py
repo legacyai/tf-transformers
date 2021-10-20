@@ -212,7 +212,7 @@ class LegacyModel(tf.keras.Model):
         checkpoint_written = tf.train.latest_checkpoint(checkpoint_dir)
         logging.info("Successful ✅: Saved model at {}".format(checkpoint_written))
 
-    def save_as_serialize_module(self, directory, options=None, overwrite=False):
+    def save_as_serialize_module(self, directory, overwrite=False):
         """Save as tf.saved_model.save (.pb)
 
         Args:
@@ -231,9 +231,9 @@ class LegacyModel(tf.keras.Model):
                 raise FileExistsError()
 
         module = LegacyModuleCustom(self)
-        module.save(directory, options=options)
+        module.save(directory)
 
-    def save_transformers_serialized(self, directory, options=None, overwrite=False):
+    def save_transformers_serialized(self, directory, overwrite=False):
         """Save as tf.saved_model.save (.pb)
 
         Args:
@@ -249,7 +249,7 @@ class LegacyModel(tf.keras.Model):
                 raise FileExistsError()
 
         module = LegacyModuleCustom(self)
-        module.save(directory, options=options)
+        module.save(directory)
 
     def save_serialized(self, directory, overwrite=False):
         """Save as tf.saved_model.save (.pb)

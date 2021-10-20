@@ -135,6 +135,7 @@ class EncoderDecoder(LegacyLayer):
         self._is_training = is_training
         self._use_dropout = use_dropout
         self._encoder_sequence_length = encoder_sequence_length
+        self.decoder_start_token_id = decoder_start_token_id
 
         self._encoder_config_dict = self._encoder._config_dict
         self._decoder_config_dict = self._decoder._config_dict
@@ -230,7 +231,7 @@ class EncoderDecoder(LegacyLayer):
                 logging.info("Setting decoder_start_token_id = {}".format(self.decoder_start_token_id))
                 self._decoder._config_dict["decoder_start_token_id"] = self.decoder_start_token_id
         else:
-            if self._decoder._config_dict["decoder_start_token_id"] is None:
+            if self._decoder._config_dict["decoder_start_token_id"] is None and self.decoder_start_token_id is None:
                 raise ValueError(
                     "In EncoderDecoder setting, `decoder_start_token_id` has to set either from config or\
                     constructor. Assuming we are in Auto Regressive setting"
