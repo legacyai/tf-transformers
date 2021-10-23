@@ -37,6 +37,12 @@ from tf_transformers.utils.docstring_utils import (
 )
 
 MODEL_TO_HF_URL = {}
+MODEL_TO_HF_URL = {
+    "bert-base-cased": "tftransformers/bert-base-cased",
+    "bert-base-uncased": "tftransformers/bert-base-uncased",
+    "bert-large-cased": "tftransformers/bert-large-cased",
+    "bert-large-uncased": "tftransformers/bert-large-uncased",
+}
 
 code_example = r'''
 
@@ -59,6 +65,11 @@ class BertModel(ModelWrapper):
     def __init__(
         self, model_name: str = 'bert', cache_dir: Union[str, None] = None, save_checkpoint_cache: bool = True
     ):
+        """
+        Args:
+            model_name (str): Model name
+            cache_dir (str): cache dir to save the mode checkpoints
+        """
         super(BertModel, self).__init__(
             model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=save_checkpoint_cache
         )
@@ -116,9 +127,10 @@ class BertModel(ModelWrapper):
         if isinstance(config, ModelConfig):
             config_dict = config.to_dict()
         else:
-            config_dict = config        # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
+            config_dict = config  # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
         cls_ref = cls()
-        # if we allow names other than whats in the class, we might not be able
+        # if we allow names other than
+        # whats in the class, we might not be able
         # to convert from hf properly.
         if "name" in kwargs:
             del kwargs["name"]

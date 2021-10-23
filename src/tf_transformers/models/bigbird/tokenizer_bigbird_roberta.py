@@ -17,7 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Albert Tokenizer based on TFText"""
+"""BigBird Tokenizer based on TFText"""
 import tempfile
 from pathlib import Path
 from typing import Dict, List, Union
@@ -38,7 +38,7 @@ def get_vocab(model_proto):
     return vocab
 
 
-class AlbertTokenizerLayer(tf.keras.layers.Layer):
+class BigBirdRobertaTokenizerLayer(tf.keras.layers.Layer):
     """Wraps `tf_text.SentencepieceTokenizer` as a Keras Layer.
     Attributes:
     tokenize_with_offsets: If true, calls
@@ -397,7 +397,7 @@ def create_cache_dir(cache_path: Path):
         cache_path.mkdir()
 
 
-class AlbertTokenizerTFText:
+class BigBirdRobertaTokenizerTFText:
     def __init__(self) -> None:
         pass
 
@@ -412,9 +412,9 @@ class AlbertTokenizerTFText:
 
         cache_path = Path(cache_dir, model_name)
 
-        from transformers import AlbertTokenizer
+        from transformers import BigBirdTokenizer
 
-        tokenizer = AlbertTokenizer.from_pretrained(model_name)
+        tokenizer = BigBirdTokenizer.from_pretrained(model_name)
         if not cache_path.exists():
             tokenizer.save_pretrained(str(cache_path))
             logging.info("Saving {} tokenizer to {}".format(model_name, cache_path))
@@ -423,8 +423,8 @@ class AlbertTokenizerTFText:
             max_length = tokenizer.max_len_single_sentence
         spiece_model = str(Path(cache_path, 'spiece.model'))
         logging.info("Loading {} tokenizer to {}".format(model_name, spiece_model))
-        tokenizer_layer = AlbertTokenizerLayer(
-            lower_case=True,
+        tokenizer_layer = BigBirdRobertaTokenizerLayer(
+            lower_case=False,
             model_file_path=spiece_model,
             out_type=out_type,
             strip_diacritics=True,

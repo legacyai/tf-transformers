@@ -156,10 +156,11 @@ class LegacyModel(tf.keras.Model):
             options = tf.CheckpointOptions(experimental_io_device="/job:localhost")
 
         if checkpoint_dir:
-            if tf.io.gfile.isdir(checkpoint_dir) is False:
-                raise ValueError("checkpoint_dir expects a directory not a file {}.".format(checkpoint_dir))
+            if tf.io.gfile.exists(checkpoint_dir):
+                if tf.io.gfile.isdir(checkpoint_dir) is False:
+                    raise ValueError("checkpoint_dir expects a directory not a file {}.".format(checkpoint_dir))
         if checkpoint_path:
-            if tf.io.gfile.isdir(checkpoint_dir) is True:
+            if tf.io.gfile.isdir(checkpoint_path) is True:
                 raise ValueError(
                     "checkpoint_path expects a checkpoint-file not a directory {}.".format(checkpoint_path)
                 )

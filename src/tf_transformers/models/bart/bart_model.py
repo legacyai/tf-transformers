@@ -19,6 +19,11 @@ from typing import Dict, Optional, Union
 from absl import logging
 
 from tf_transformers.core import ModelWrapper
+from tf_transformers.core.read_from_hub import (
+    get_config_cache,
+    get_config_only,
+    load_pretrained_model,
+)
 from tf_transformers.models.bart import BartEncoder as Encoder
 from tf_transformers.models.bart.configuration_bart import BartConfig as ModelConfig
 from tf_transformers.models.bart.convert import convert_bart_pt as convert_pt
@@ -30,6 +35,7 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
+MODEL_TO_HF_URL = {}
 code_example = r'''
 
         >>> from tf_transformers.models import  BartModel
@@ -50,7 +56,10 @@ code_example = r'''
 class BartModel(ModelWrapper):
     """Bart Encoder Wrapper"""
 
-    def __init__(self, model_name='bart', cache_dir=None, save_checkpoint_cache=True):
+    def __init__(
+        self, model_name: str = 'bart', cache_dir: Union[str, None] = None, save_checkpoint_cache: bool = True
+    ):
+
         """
         Args:
             model_name (str): Model name
@@ -84,6 +93,31 @@ class BartModel(ModelWrapper):
         return tft_config
 
     @classmethod
+    def get_config(cls, model_name: str):
+        """Get a config from Huggingface hub if present"""
+
+        # Check if it is under tf_transformers
+        if model_name in MODEL_TO_HF_URL:
+            URL = MODEL_TO_HF_URL[model_name]
+            config_dict = get_config_only(URL)
+            return config_dict
+        else:
+            # Check inside huggingface
+            config = ModelConfig()
+            config_dict = config.to_dict()
+            cls_ref = cls()
+            try:
+                from transformers import PretrainedConfig
+
+                hf_config = PretrainedConfig.from_pretrained(model_name)
+                hf_config = hf_config.to_dict()
+                config_dict = cls_ref.update_config(config_dict, hf_config)
+                return config_dict
+            except Exception as e:
+                logging.info("Error: {}".format(e))
+                logging.info("Failed loading config from HuggingFace")
+
+    @classmethod
     @add_start_docstrings(
         "Bart Model from config :",
         ENCODER_MODEL_CONFIG_DOCSTRING.format(
@@ -94,7 +128,7 @@ class BartModel(ModelWrapper):
         if isinstance(config, ModelConfig):
             config_dict = config.to_dict()
         else:
-            config_dict = config        # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
+            config_dict = config  # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
         cls_ref = cls()
         # if we allow names other than
         # whats in the class, we might not be able
@@ -157,6 +191,23 @@ class BartModel(ModelWrapper):
     ):
         # Load a base config and then overwrite it
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
+        # Check if model is in out Huggingface cache
+        if model_name in MODEL_TO_HF_URL:
+            URL = MODEL_TO_HF_URL[model_name]
+            config_dict, local_cache = get_config_cache(URL)
+            kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
+            model_layer = Encoder(config_dict, **kwargs_copy)
+            model = model_layer.get_model()
+            # Load Model
+            load_pretrained_model(model, local_cache, URL)
+            if return_layer:
+                if return_config:
+                    return model_layer, config_dict
+                return model_layer
+            if return_config:
+                return model, config_dict
+            return model
+
         config = ModelConfig()
         config_dict = config.to_dict()
 
