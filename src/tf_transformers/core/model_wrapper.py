@@ -144,6 +144,8 @@ class ModelWrapper(ABC):
                     )
                 )
             else:
+                with open(Path(str(self.model_path), "config.json"), "w") as f:
+                    json.dump(config, f, indent=2)
                 model.save_checkpoint(str(self.model_path), overwrite=True)
                 logging.info(
                     "Saved model in cache folder with randomly ❌ initialized values  {}".format(str(self.model_path))
