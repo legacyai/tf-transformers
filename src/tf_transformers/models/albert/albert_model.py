@@ -81,6 +81,8 @@ class AlbertModel(ModelWrapper):
 
         tft_config["num_attention_heads"] = hf_config["num_attention_heads"]
         tft_config["num_hidden_layers"] = hf_config["num_hidden_layers"]
+        
+        tft_config["attention_head_size"] = hf_config["hidden_size"]//hf_config["num_attention_heads"]
 
         return tft_config
 
