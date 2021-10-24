@@ -50,16 +50,17 @@ class ModelWrapper(ABC):
             if len(model_name_split) > 2:
                 raise ValueError("We expect model name to `organization/model_name`.\
                       eg: `google/mt5-small`. But got {}".format(model_name))
-            self.organization_name, self.model_name = model_name_split
+            self.organization_name, self.model_name_without_organization = model_name_split
         else:
-            self.model_name = model_name
+            self.model_name_without_organization = model_name
+        self.model_name = model_name
         self.save_checkpoint_cache = save_checkpoint_cache
         if cache_dir is None:
             cache_dir = tempfile.gettempdir()
 
         self.cache_dir = Path(cache_dir, _PREFIX_DIR)
         self.create_cache_dir(self.cache_dir)
-        self.model_path = Path(self.cache_dir, self.model_name)
+        self.model_path = Path(self.cache_dir, self.model_name_without_organization)
         self.hf_version = HF_VERSION
 
     @abstractmethod
