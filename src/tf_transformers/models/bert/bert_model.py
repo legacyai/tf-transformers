@@ -42,6 +42,8 @@ MODEL_TO_HF_URL = {
     "bert-base-uncased": "tftransformers/bert-base-uncased",
     "bert-large-cased": "tftransformers/bert-large-cased",
     "bert-large-uncased": "tftransformers/bert-large-uncased",
+    "bert-large-cased-whole-word-masking": "tftransformers/bert-large-cased-whole-word-masking",
+    "bert-large-uncased-whole-word-masking": "tftransformers/bert-large-uncased-whole-word-masking"
 }
 
 code_example = r'''

@@ -35,7 +35,13 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {}
+MODEL_TO_HF_URL = {
+    "gpt2": "tftransformers/gpt2",
+    "gpt2-medium": "tftransformers/gpt2-medium",
+    "gpt2-large": "tftransformers/gpt2-large",
+
+}
+
 code_example = r'''
 
         >>> from tf_transformers.models import  GPT2Model

@@ -41,6 +41,16 @@ class ModelWrapper(ABC):
             cache_dir_path : Path to cache directory . Default is :obj:`/tmp/tf_transformers/cache`
             save_checkpoint_cache: :obj:`bool`. Whether to save the converted model in cache directory.
         """
+        
+        # If organization name is also a part of model_name eg: goole/mt5-small
+        # we split it into orgnization_name and model_name
+        self.organization_name = None
+        if "/" in model_name:
+            model_name_split = model_name.split("/")
+            if len(model_name_split) > 2:
+                raise ValueError{"We expect model name to `organization/model_name`.\
+                    e:  eg: `google/mt5-small`. But got {}".format(model_name)}
+            self.organization_name, self.model_name = model_name_split
         self.model_name = model_name
         self.save_checkpoint_cache = save_checkpoint_cache
         if cache_dir is None:

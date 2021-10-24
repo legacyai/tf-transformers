@@ -35,7 +35,12 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {}
+MODEL_TO_HF_URL = {
+    "t5-small": "tftransformers/t5-small",
+    "t5-base": "tftransformers/t5-base",
+    "t5-large": "tftransformers/t5-large"
+    
+}
 code_example = r'''
 
         >>> from tf_transformers.models import  T5Model

@@ -38,7 +38,10 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {}
+MODEL_TO_HF_URL = {   
+                   "roberta-base": "tftransformers/roberta-base",
+                   "roberta-large": "tftransformers/roberta-large"
+}
 
 code_example = r'''
 

@@ -38,7 +38,12 @@ from tf_transformers.utils.docstring_utils import (
 )
 
 MODEL_TO_HF_URL = {}
-MODEL_TO_HF_URL = {"albert-base-v2": "tftransformers/albert-base-v2", "albert-base-v1": "tftransformers/albert-base-v1"}
+MODEL_TO_HF_URL = {"albert-base-v2": "tftransformers/albert-base-v2",
+                   "albert-base-v1": "tftransformers/albert-base-v1",
+                   "albert-xlarge-v2": "tftransformers/albert-xlarge-v2",
+                   "albert-xlarge-v1": "tftransformers/albert-xlarge-v1",
+                   "albert-xxlarge-v2": "tftransformers/albert-xxlarge-v2",
+                   "albert-xxlarge-v1": "tftransformers/albert-xxlarge-v1"}
 
 
 code_example = r'''
