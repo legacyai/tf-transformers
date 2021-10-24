@@ -51,7 +51,8 @@ class ModelWrapper(ABC):
                 raise ValueError("We expect model name to `organization/model_name`.\
                       eg: `google/mt5-small`. But got {}".format(model_name))
             self.organization_name, self.model_name = model_name_split
-        self.model_name = model_name
+        else:
+            self.model_name = model_name
         self.save_checkpoint_cache = save_checkpoint_cache
         if cache_dir is None:
             cache_dir = tempfile.gettempdir()
