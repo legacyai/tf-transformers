@@ -48,8 +48,8 @@ class ModelWrapper(ABC):
         if "/" in model_name:
             model_name_split = model_name.split("/")
             if len(model_name_split) > 2:
-                raise ValueError{"We expect model name to `organization/model_name`.\
-                    e:  eg: `google/mt5-small`. But got {}".format(model_name)}
+                raise ValueError("We expect model name to `organization/model_name`.\
+                      eg: `google/mt5-small`. But got {}".format(model_name))
             self.organization_name, self.model_name = model_name_split
         self.model_name = model_name
         self.save_checkpoint_cache = save_checkpoint_cache
