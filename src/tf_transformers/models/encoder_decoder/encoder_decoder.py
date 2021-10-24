@@ -231,14 +231,17 @@ class EncoderDecoder(LegacyLayer):
                 logging.info("Setting decoder_start_token_id = {}".format(self.decoder_start_token_id))
                 self._decoder._config_dict["decoder_start_token_id"] = self.decoder_start_token_id
         else:
-            if self._decoder._config_dict["decoder_start_token_id"] is None and self.decoder_start_token_id is None:
-                raise ValueError(
-                    "In EncoderDecoder setting, `decoder_start_token_id` has to set either from config or\
-                    constructor. Assuming we are in Auto Regressive setting"
-                )
-            else:
-                logging.info("Setting decoder_start_token_id = {}".format(self.decoder_start_token_id))
-                self._decoder._config_dict["decoder_start_token_id"] = self.decoder_start_token_id
+            # If it is None in config
+            if self._decoder._config_dict["decoder_start_token_id"] is None:
+                if self.decoder_start_token_id is None:
+                    raise ValueError(
+                        "In EncoderDecoder setting, `decoder_start_token_id` has to set either from config or\
+                        constructor. Assuming we are in Auto Regressive setting"
+                    )
+                else:
+                    # If it is set in encoder-decoder constructor use it
+                    logging.info("Setting decoder_start_token_id = {}".format(self.decoder_start_token_id))
+                    self._decoder._config_dict["decoder_start_token_id"] = self.decoder_start_token_id
 
         config["decoder"] = self._decoder._config_dict
         model.model_config = config
