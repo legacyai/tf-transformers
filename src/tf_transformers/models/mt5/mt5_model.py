@@ -191,9 +191,39 @@ class MT5Model(ModelWrapper):
         if model_name in MODEL_TO_HF_URL and skip_hub is False:
             URL = MODEL_TO_HF_URL[model_name]
             config_dict, local_cache = get_config_cache(URL)
-            kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
-            model_layer = Encoder(config_dict, **kwargs_copy)
+
+            encoder_kwargs_copy = {}
+            if encoder_kwargs:
+                if not isinstance(encoder_kwargs, dict):
+                    raise ValueError("encoder kwargs should be dict")
+                encoder_kwargs_copy = cls_ref._update_kwargs_and_config(encoder_kwargs, config_dict)
+
+            # if a config is provided, we wont be doing any extra .
+            # Just create a model and return it with random_weights
+            #  (Distribute strategy fails)
+            config_dict["bidirectional"] = True
+            encoder_layer = Encoder(config=config_dict, name="mt5_encoder", **encoder_kwargs_copy)
+
+            decoder_kwargs_copy = {}
+            if decoder_kwargs:
+                if not isinstance(decoder_kwargs, dict):
+                    raise ValueError("decoder kwargs should be dict")
+                decoder_kwargs_copy = cls_ref._update_kwargs_and_config(decoder_kwargs, config_dict)
+
+            config_dict["bidirectional"] = False
+            if "use_auto_regressive" in decoder_kwargs_copy:
+                del decoder_kwargs_copy["use_auto_regressive"]
+            decoder_layer = Encoder(
+                config=config_dict,
+                name="mt5_decoder",
+                use_decoder=True,
+                mask_mode="causal",
+                use_auto_regressive=use_auto_regressive,
+                **decoder_kwargs_copy,
+            )
+            model_layer = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True)
             model = model_layer.get_model()
+        
             # Load Model
             load_pretrained_model(model, local_cache, URL)
             if return_layer:

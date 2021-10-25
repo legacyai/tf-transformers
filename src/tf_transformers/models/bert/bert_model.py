@@ -42,7 +42,7 @@ MODEL_TO_HF_URL = {
     "bert-large-cased": "tftransformers/bert-large-cased",
     "bert-large-uncased": "tftransformers/bert-large-uncased",
     "bert-large-cased-whole-word-masking": "tftransformers/bert-large-cased-whole-word-masking",
-    "bert-large-uncased-whole-word-masking": "tftransformers/bert-large-uncased-whole-word-masking",
+    "bert-large-uncased-whole-word-masking": "tftransformers/bert-large-uncased-whole-word-masking"
 }
 
 code_example = r'''
@@ -169,13 +169,12 @@ class BertModel(ModelWrapper):
         save_checkpoint_cache: bool = True,
         load_from_cache: bool = True,
         use_mlm_layer=False,
-        skip_hub=False,
         **kwargs,
     ):
         # Load a base config and then overwrite it
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
         # Check if model is in out Huggingface cache
-        if model_name in MODEL_TO_HF_URL and skip_hub is False:
+        if model_name in MODEL_TO_HF_URL:
             URL = MODEL_TO_HF_URL[model_name]
             config_dict, local_cache = get_config_cache(URL)
             kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
