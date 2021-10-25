@@ -370,6 +370,12 @@ def train_and_eval(
         if validation_dataset_distributed and validation_loss_fn:
             validation_result = do_validation(validation_dataset_distributed)
             validation_history[global_step] = validation_result
+            logging.info(
+                "Validation result at epcoh {} and \
+                global step {} is {}".format(
+                    epoch, global_step, validation_result
+                )
+            )
         print()
         time.sleep(0.1)  # Sleep for 1 second, to make print neater
         callback_scores = do_callbacks(callbacks)

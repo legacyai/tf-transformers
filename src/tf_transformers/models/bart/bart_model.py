@@ -35,7 +35,12 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {}
+MODEL_TO_HF_URL = {
+    "bart-base": "tftransformers/bart-base",
+    "bart-large": "tftransformers/bart-large",
+    "facebook/bart-base": "tftransformers/bart-base",
+    "facebook/bart-large": "tftransformers/bart-large",
+}
 code_example = r'''
 
         >>> from tf_transformers.models import  BartModel

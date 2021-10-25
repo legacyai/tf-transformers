@@ -37,13 +37,14 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {}
-MODEL_TO_HF_URL = {"albert-base-v2": "tftransformers/albert-base-v2",
-                   "albert-base-v1": "tftransformers/albert-base-v1",
-                   "albert-xlarge-v2": "tftransformers/albert-xlarge-v2",
-                   "albert-xlarge-v1": "tftransformers/albert-xlarge-v1",
-                   "albert-xxlarge-v2": "tftransformers/albert-xxlarge-v2",
-                   "albert-xxlarge-v1": "tftransformers/albert-xxlarge-v1"}
+MODEL_TO_HF_URL = {
+    "albert-base-v2": "tftransformers/albert-base-v2",
+    "albert-base-v1": "tftransformers/albert-base-v1",
+    "albert-xlarge-v2": "tftransformers/albert-xlarge-v2",
+    "albert-xlarge-v1": "tftransformers/albert-xlarge-v1",
+    "albert-xxlarge-v2": "tftransformers/albert-xxlarge-v2",
+    "albert-xxlarge-v1": "tftransformers/albert-xxlarge-v1",
+}
 
 
 code_example = r'''
@@ -86,8 +87,8 @@ class AlbertModel(ModelWrapper):
 
         tft_config["num_attention_heads"] = hf_config["num_attention_heads"]
         tft_config["num_hidden_layers"] = hf_config["num_hidden_layers"]
-        
-        tft_config["attention_head_size"] = hf_config["hidden_size"]//hf_config["num_attention_heads"]
+
+        tft_config["attention_head_size"] = hf_config["hidden_size"] // hf_config["num_attention_heads"]
 
         return tft_config
 

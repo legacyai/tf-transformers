@@ -35,7 +35,12 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {}
+MODEL_TO_HF_URL = {
+    "mt5-small": "tftransformers/mt5-small",
+    "mt5-base": "tftransformers/mt5-base",
+    "google/mt5-small": "tftransformers/mt5-small",
+    "google/mt5-small": "tftransformers/mt5-small",
+}
 
 code_example = r'''
 
