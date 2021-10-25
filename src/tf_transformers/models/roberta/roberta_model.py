@@ -38,10 +38,7 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {   
-                   "roberta-base": "tftransformers/roberta-base",
-                   "roberta-large": "tftransformers/roberta-large"
-}
+MODEL_TO_HF_URL = {"roberta-base": "tftransformers/roberta-base", "roberta-large": "tftransformers/roberta-large"}
 
 code_example = r'''
 
@@ -123,7 +120,7 @@ class RobertaModel(ModelWrapper):
         if isinstance(config, ModelConfig):
             config_dict = config.to_dict()
         else:
-            config_dict = config        # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
+            config_dict = config  # Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.
         cls_ref = cls()
         # if we allow names other than whats in the class, we might not be able
         # to convert from hf properly.
@@ -163,12 +160,13 @@ class RobertaModel(ModelWrapper):
         save_checkpoint_cache: bool = True,
         load_from_cache: bool = True,
         use_mlm_layer=False,
+        skip_hub=False,
         **kwargs,
     ):
         # Load a base config and then overwrite it
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
         # Check if model is in out Huggingface cache
-        if model_name in MODEL_TO_HF_URL:
+        if model_name in MODEL_TO_HF_URL and skip_hub is False:
             URL = MODEL_TO_HF_URL[model_name]
             config_dict, local_cache = get_config_cache(URL)
             kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)

@@ -182,12 +182,13 @@ class MT5Model(ModelWrapper):
         save_checkpoint_cache: bool = True,
         load_from_cache: bool = True,
         use_auto_regressive: bool = False,
+        skip_hub=False,
         **kwargs,
     ):
         # Load a base config and then overwrite it
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
         # Check if model is in out Huggingface cache
-        if model_name in MODEL_TO_HF_URL:
+        if model_name in MODEL_TO_HF_URL and skip_hub is False:
             URL = MODEL_TO_HF_URL[model_name]
             config_dict, local_cache = get_config_cache(URL)
             kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
