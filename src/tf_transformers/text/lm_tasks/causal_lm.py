@@ -14,13 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""The main wrapper around Prefix Language Model Tasks"""
+"""The main wrapper around Causal Language Model Tasks"""
 import tensorflow as tf
 import tensorflow_text as tf_text
 
 
-def prefix_lm_fn(tokenizer_layer, max_seq_len, add_cls_sep=False):
-    """The main function for PLM.
+def causal_lm_fn(tokenizer_layer, max_seq_len, add_cls_sep=False):
+    """The main function for CLM.
 
     Args:
         tokenizer_layer : A tokenizer layer from tf_transformers. eg: AlbertTokenizerTFText
@@ -37,38 +37,25 @@ def prefix_lm_fn(tokenizer_layer, max_seq_len, add_cls_sep=False):
     mask_token_id = tokenizer_layer.mask_token_id  # noqa
     vocab_size = tokenizer_layer.vocab_size  # noqa
 
-    def prefix_map_fn(item):
-        input_ids = tokenizer_layer({'text': item['sentences']})
-        # We take random position between 1 and len(sentences)//2
-        mid_index = tf.shape(input_ids.flat_values)[0] // 2
-        prefix_mask_index = tf.random.uniform(minval=1, maxval=mid_index + 1, shape=(), dtype=tf.int32)
-        # We split it to 2 parts left and right
-        # left we mask by 1 and right we mask by 0
-        # right side portions are our targets
-        input_ids_first_portion = input_ids[:prefix_mask_index]
-        input_ids_second_portion = input_ids[prefix_mask_index:]
+    def causal_map_fn(item):
+        # We expect item to be dict of {'text': ['sentence1']}
+        input_ids = tokenizer_layer(item)
+        # Trim inputs (+1 is because for Causal LM we shift inputs and labels)
+        if add_cls_sep:
+            input_ids_ragged = input_ids[:, : max_seq_len + 1 - 2]
+        else:
+            input_ids_ragged = input_ids[:, : max_seq_len + 1]
 
-        # Split and join
-        input_mask_first_portion = tf.ones_like(input_ids_first_portion)
-        input_mask_second_portion = tf.zeros_like(input_ids_second_portion)
-        input_mask = tf.concat([input_mask_first_portion, input_mask_second_portion], axis=0)
-        # Pad inputs
-        input_ids_ragged = tf.RaggedTensor.from_tensor(tf.expand_dims(input_ids.merge_dims(-2, 1), 0))
-        input_mask_ragged = tf.RaggedTensor.from_tensor(tf.expand_dims(input_mask.merge_dims(-2, 1), 0))
         # Trim inputs (+1 is because for Causal LM we shift inputs and labels)
         if add_cls_sep:
             input_ids_ragged = input_ids_ragged[:, : max_seq_len + 1 - 2]
-            input_mask_ragged = input_mask_ragged[:, : max_seq_len + 1 - 2]
-
             input_ids_ragged = tf.concat([[[cls_token_id]], input_ids_ragged, [[sep_token_id]]], axis=1)
-            input_mask_ragged = tf.concat([[[1]], input_mask_ragged, [[1]]], axis=1)
-
         else:
             input_ids_ragged = input_ids_ragged[:, : max_seq_len + 1]
-            input_mask_ragged = input_mask_ragged[:, : max_seq_len + 1]
 
+        input_mask = tf.ones_like(input_ids_ragged)
         input_word_ids, _ = tf_text.pad_model_inputs(input_ids_ragged, max_seq_length=max_seq_len + 1)
-        input_mask, _ = tf_text.pad_model_inputs(input_mask_ragged, max_seq_length=max_seq_len + 1)
+        input_mask, _ = tf_text.pad_model_inputs(input_mask, max_seq_length=max_seq_len + 1)
 
         # Squeeze here will help to retain 2D when we batch outside map fn
         input_word_ids = tf.squeeze(input_word_ids, axis=0)
@@ -89,8 +76,7 @@ def prefix_lm_fn(tokenizer_layer, max_seq_len, add_cls_sep=False):
         labels = {}
         labels['lm_labels'] = lm_labels
         labels['lm_weights'] = lm_label_weights
-        labels['prefix_mask_index'] = prefix_mask_index
 
         return (inputs, labels)
 
-    return prefix_map_fn
+    return causal_map_fn

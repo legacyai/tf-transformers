@@ -69,6 +69,7 @@ class BigBirdRobertaTokenizerLayer(tf.keras.layers.Layer):
         max_length=512,
         add_special_tokens=False,
         pack_model_inputs=False,
+        dynamic_padding=False,
         **kwargs,
     ):
         """Initializes a SentencepieceTokenizer layer.
@@ -149,6 +150,10 @@ class BigBirdRobertaTokenizerLayer(tf.keras.layers.Layer):
 
         self.add_special_tokens = add_special_tokens
         self.pack_model_inputs = pack_model_inputs
+        self.dynamic_padding = dynamic_padding
+
+        if self.dynamic_padding and self.pack_model_inputs:
+            raise ValueError("Either dynamic_padding is True, or pack_model_inputs is True. Don't set them together")
 
     def _create_tokenizer(self):
         """Return sentencepiece tokenizer."""
@@ -339,6 +344,28 @@ class BigBirdRobertaTokenizerLayer(tf.keras.layers.Layer):
             # If add special_tokens
             if self.add_special_tokens:
                 tokens = self._add_special_tokens(tokens)
+            if self.dynamic_padding:
+                input_mask = tf.ones_like(tokens)
+                input_word_ids = tokens.to_tensor(default_value=self.pad_token_id)
+                input_mask = input_mask.to_tensor(default_value=0)
+                input_type_ids = tf.zeros_like(input_mask)
+                seq_length = tf.shape(input_word_ids)[1]
+
+                # Work around broken shape inference.
+                output_shape = tf.stack(
+                    [tokens.nrows(out_type=tf.int32), tf.cast(seq_length, dtype=tf.int32)]
+                )  # batch_size
+
+                def _reshape(t):
+                    return tf.reshape(t, output_shape)
+
+                # Assemble nest of input tensors as expected by BERT TransformerEncoder.
+                return dict(
+                    input_ids=_reshape(input_word_ids),
+                    input_mask=_reshape(input_mask),
+                    input_type_ids=_reshape(input_type_ids),
+                )
+
             if self.pack_model_inputs:
                 tokens_dict = self.bert_pack_inputs(
                     tokens,
@@ -357,6 +384,7 @@ class BigBirdRobertaTokenizerLayer(tf.keras.layers.Layer):
         return decoded_tokens
 
     def call(self, inputs):
+        """Call"""
         results = self.call_encode(inputs)
         return results
 

@@ -37,12 +37,18 @@ from tf_transformers.utils.docstring_utils import (
 )
 
 MODEL_TO_HF_URL = {
-    "bert-base-cased": "tftransformers/bert-base-cased",
-    "bert-base-uncased": "tftransformers/bert-base-uncased",
-    "bert-large-cased": "tftransformers/bert-large-cased",
-    "bert-large-uncased": "tftransformers/bert-large-uncased",
-    "bert-large-cased-whole-word-masking": "tftransformers/bert-large-cased-whole-word-masking",
-    "bert-large-uncased-whole-word-masking": "tftransformers/bert-large-uncased-whole-word-masking",
+    "bert-base-cased-mlm": "tftransformers/bert-base-cased",
+    "bert-base-uncased-mlm": "tftransformers/bert-base-uncased",
+    "bert-large-cased-mlm": "tftransformers/bert-large-cased",
+    "bert-large-uncased-mlm": "tftransformers/bert-large-uncased",
+    "bert-large-cased-whole-word-masking-mlm": "tftransformers/bert-large-cased-whole-word-masking",
+    "bert-large-uncased-whole-word-masking-mlm": "tftransformers/bert-large-uncased-whole-word-masking",
+    "bert-base-cased": "tftransformers/bert-base-cased-no-mlm",
+    "bert-base-uncased": "tftransformers/bert-base-uncased-no-mlm",
+    "bert-large-cased": "tftransformers/bert-large-cased-no-mlm",
+    "bert-large-uncased": "tftransformers/bert-large-uncased-no-mlm",
+    "bert-large-cased-whole-word-masking": "tftransformers/bert-large-cased-whole-word-masking-no-mlm",
+    "bert-large-uncased-whole-word-masking": "tftransformers/bert-large-uncased-whole-word-masking-no-mlm",
 }
 
 code_example = r'''
@@ -176,6 +182,8 @@ class BertModel(ModelWrapper):
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
         # Check if model is in out Huggingface cache
         if model_name in MODEL_TO_HF_URL and skip_hub is False:
+            if use_mlm_layer:
+                model_name = model_name + '-mlm'
             URL = MODEL_TO_HF_URL[model_name]
             config_dict, local_cache = get_config_cache(URL)
             kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)

@@ -38,7 +38,12 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {"roberta-base": "tftransformers/roberta-base", "roberta-large": "tftransformers/roberta-large"}
+MODEL_TO_HF_URL = {
+    "roberta-base-mlm": "tftransformers/roberta-base",
+    "roberta-large-mlm": "tftransformers/roberta-large",
+    "roberta-base": "tftransformers/roberta-base-no-mlm",
+    "roberta-large": "tftransformers/roberta-large-no-mlm",
+}
 
 code_example = r'''
 
@@ -167,6 +172,8 @@ class RobertaModel(ModelWrapper):
         cls_ref = cls(model_name, cache_dir, save_checkpoint_cache)
         # Check if model is in out Huggingface cache
         if model_name in MODEL_TO_HF_URL and skip_hub is False:
+            if use_mlm_layer:
+                model_name = model_name + '-mlm'
             URL = MODEL_TO_HF_URL[model_name]
             config_dict, local_cache = get_config_cache(URL)
             kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
