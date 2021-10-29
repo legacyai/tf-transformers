@@ -19,7 +19,7 @@ def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size):
         config = GPT2Model.get_config(MODEL_NAME)
         # We update the vocab_size for that reason
         config['vocab_size'] = vocab_size
-        model = GPT2Model.from_config(config, return_layer=True)
+        model = GPT2Model.from_config(config, mask_mode='user_defined', return_layer=True)
         model = MaskedLMModel(
             model, hidden_size=config['embedding_size'], layer_norm_epsilon=config['layer_norm_epsilon']
         )
@@ -59,9 +59,12 @@ def get_loss(loss_type):
     return get_lm_loss(loss_type=loss_type)
 
 
-def get_trainer(distribution_strategy, num_gpus=0, tpu_address=None):
+def get_trainer(distribution_strategy, dtype, num_gpus=0, tpu_address=None):
     """Get Trainer"""
-    trainer = Trainer(distribution_strategy, num_gpus=num_gpus, tpu_address=tpu_address)
+    trainer = Trainer(distribution_strategy,
+                      num_gpus=num_gpus,
+                      tpu_address=tpu_address,
+                      dtype=dtype)
     return trainer
 
 

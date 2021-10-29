@@ -63,7 +63,8 @@ def run_train(cfg, wandb):
     train_batch_size = cfg.data.train_batch_size
     max_seq_len = cfg.task.max_seq_len  # Maximum length per sequence
     max_predictions_per_seq = cfg.task.max_predictions_per_seq  # Maximum predictions (Mask) per sequence
-
+    dtype = cfg.trainer.dtype
+    
     is_training = cfg.model.is_training
     use_dropout = cfg.model.use_dropout
     loss_type = cfg.optimizer.loss_type
@@ -101,7 +102,10 @@ def run_train(cfg, wandb):
     loss_fn = get_loss(loss_type)
 
     # Get trainer
-    trainer = get_trainer(distribution_strategy=distribution_strategy, num_gpus=num_gpus, tpu_address=tpu_address)
+    trainer = get_trainer(distribution_strategy=distribution_strategy,
+                          num_gpus=num_gpus,
+                          tpu_address=tpu_address, 
+                          dtype=dtype)
 
     # Define Callback
     tokenizer = get_hf_tokenizer()
