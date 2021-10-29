@@ -39,7 +39,7 @@ def run(cfg: DictConfig) -> None:
     print("Config", cfg)
     config_dict = dict(cfg)
     wandb.init(project=WANDB_PROJECT, config=config_dict, sync_tensorboard=True)
-    history = run_train(cfg)
+    history = run_train(cfg, wandb)
     return history
 
 
