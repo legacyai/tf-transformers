@@ -126,6 +126,7 @@ def train_and_eval(
     model_checkpoint_dir,
     model_save_interval_steps,
     max_number_of_models,
+    wandb
 ):
     def save_model(checkpoint_manager, epoch_end=False):
         """Save model"""
@@ -160,7 +161,26 @@ def train_and_eval(
 
         _write(step)
         writer.flush()
-
+        
+    def write_metrics_to_wandb(metric_dict, wandb_writer, step):
+        """Write metrics here"""
+        # Write if wandb is not None
+        if wandb:
+            wandb_writer.log(metric_dict, step=step)
+            
+    def write_validation_metrics_to_wandb(metric_dict, wandb_writer, step):
+        """Write metrics here"""
+        # Write if wandb is not None
+        metric_dict_copy = {}
+        for k,v in metric_dict.items():
+            if k.startswith("val"):
+                metric_dict_copy[k] = v
+            else:
+                metric_dict_copy['val_'+k] = v
+            
+        if wandb:
+            wandb_writer.log(metric_dict_copy, step=step)
+        
     def compute_loss(batch_labels, model_outputs):
         """Loss computation which takes care of loss reduction based on GLOBAL_BATCH_SIZE"""
         per_example_loss = train_loss_fn(batch_labels, model_outputs)
@@ -211,9 +231,12 @@ def train_and_eval(
                     logging.info("Callback score {} at epoch {}".format(score, epoch))
                     # Try to write a callback scores (only on epoch end)
                     # If we are returning a dict like {'exact_match': 81} or
-                    # {'rougue-1': 30} etc . . . .
+                    # {'rogue-1': 30} etc . . . .
                     if score and isinstance(score, dict):
+                        # Write to tensorboard
                         write_metrics(score, val_summary_writer, epoch)
+                        # Write to Wandb
+                        write_metrics_to_wandb(score, wandb, epoch)
             return callback_scores
 
     # Validation Functions
@@ -244,16 +267,15 @@ def train_and_eval(
                 for name, loss_value in loss.items()
             }
             for name, loss_value in loss.items():
-                validation_loss = validation_loss_dict_metric[name]
-                validation_loss.update_state(loss_value)
+                # get loss metric object based on loss names ('loss', 'loss1' etc . . . .)
+                validation_loss_metric = validation_loss_dict_metric[name]
+                validation_loss_metric.update_state(loss_value)
 
     def do_validation(validation_dataset_distributed):
         """Batch validation"""
         with tqdm.trange(validation_steps, unit=" Validation batch ") as val_bar:
             step_counter = 0
             _do_validation(validation_dataset_distributed)
-            # for _ in val_bar:
-            #     step_counter += 1
             val_bar.set_description(
                 "Epoch {}/{} --- Val Step {}/{} ".format(epoch, epochs, step_counter, validation_steps)
             )
@@ -339,9 +361,15 @@ def train_and_eval(
                         and validation_loss_fn
                         and validation_interval_steps
                         and (global_step % validation_interval_steps == 0)
-                    ):
+                    ):  
+                        # Do validation and get result
                         validation_result = do_validation(validation_dataset_distributed)
+                        # Add to history
                         validation_history[global_step] = validation_result
+                        # Write to tensorboard
+                        write_metrics(validation_result, val_summary_writer, global_step)
+                        # Write to Wandb
+                        write_validation_metrics_to_wandb(validation_result, wandb, global_step)
 
                 # Call Callbacks
                 callback_scores = do_callbacks(callbacks)
@@ -349,10 +377,14 @@ def train_and_eval(
                     all_callback_scores.append(callback_scores)
 
                 # Train Metrics
+                # Do training and get result
                 training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
+                # Add to history
                 training_history[global_step] = training_result
-
+                # Write to tensorboard
                 write_metrics(training_result, train_summary_writer, global_step)
+                # Write to Wandb
+                write_metrics_to_wandb(training_result, wandb, global_step)
                 # training_result["learning_rate"] = learning_rate_holder.result().numpy()
                 # learning_rate_holder.reset_states()
                 tepoch.set_postfix(**training_result)
@@ -368,8 +400,14 @@ def train_and_eval(
 
         validation_result = None
         if validation_dataset_distributed and validation_loss_fn:
+            # Do validation and get result
             validation_result = do_validation(validation_dataset_distributed)
+            # Add to history
             validation_history[global_step] = validation_result
+            # Write to tensorboard
+            write_metrics(validation_result, val_summary_writer, global_step)
+            # Write to Wandb
+            write_validation_metrics_to_wandb(validation_result, wandb, global_step)
             logging.info(
                 "Validation result at epcoh {} and \
                 global step {} is {}".format(
@@ -484,6 +522,7 @@ class Trainer:
         model_save_interval_steps: bool = None,
         repeat_dataset: bool = True,
         latest_checkpoint: str = None,
+        wandb = None,
     ):
 
         if steps_per_epoch:
@@ -601,9 +640,10 @@ class Trainer:
             model_checkpoint_dir,
             model_save_interval_steps,
             max_number_of_models,
+            wandb,
         )
         history['training_history'] = training_history
-        history['validation_hsitory'] = validation_history
+        history['validation_history'] = validation_history
         history['callbacks'] = callback_scores
 
         # Save json

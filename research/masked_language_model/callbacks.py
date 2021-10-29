@@ -86,7 +86,7 @@ class MLMCallback:
         global_step = trainer_params['global_step']
         # Log to wandb as a table
         if wandb:
-            wandb.log({"mlm_tcallback_able": wandb.Table(dataframe=df
+            wandb.log({"mlm_table_step_{}".format(global_step): wandb.Table(dataframe=df
                                                          )}, step=global_step)
         else:
             print(df)
