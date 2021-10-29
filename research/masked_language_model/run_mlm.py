@@ -18,6 +18,7 @@
 import os
 
 import hydra
+from tf_transformers.core.performance_utils import is_float16
 import wandb
 from absl import logging
 from omegaconf import DictConfig
@@ -38,6 +39,20 @@ if WANDB_PROJECT is None:
 def run(cfg: DictConfig) -> None:
     print("Config", cfg)
     config_dict = dict(cfg)
+    
+    # For TPU, we need to initialize it before tf text dataset
+    # starts triggering. Hack
+    if cfg.trainer.strategy=='tpu':
+        from model import get_trainer
+        distribution_strategy = 'tpu'
+        num_gpus = 0
+        tpu_address = cfg.trainer.tpu_address
+        trainer = get_trainer(distribution_strategy=distribution_strategy, 
+                              num_gpus=num_gpus, 
+                              tpu_address=tpu_address) # noqa
+
+        
+    
     wandb.init(project=WANDB_PROJECT, config=config_dict, sync_tensorboard=True)
     history = run_train(cfg, wandb)
     return history
