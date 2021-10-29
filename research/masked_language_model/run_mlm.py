@@ -16,16 +16,28 @@
 # ==============================================================================
 """This is the main script to run GLUE benchmark"""
 import hydra
+import os
+import wandb
 from absl import logging
 from omegaconf import DictConfig
 from train_mlm import run_train
 
 logging.set_verbosity("INFO")
-
+WANDB_PROJECT = os.getenv('WANDB_PROJECT', None)
+if WANDB_PROJECT is None:
+    raise ValueError("For wandb-project should not be None.\
+        Set export WANDB_PROJECT=<project_name>")
+    
 
 @hydra.main(config_path="conf", config_name="config")
 def run(cfg: DictConfig) -> None:
     print("Config", cfg)
+    config_dict = cfg.to_dict()
+    wandb.init(
+            project=WANDB_PROJECT,
+            config=config_dict,
+            sync_tensorboard=True
+            )
     history = run_train(cfg)
     return history
 

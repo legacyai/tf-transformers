@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+import pandas as pd
 
 # Callbacks
 class MLMCallback:
@@ -49,7 +49,12 @@ class MLMCallback:
             _use_masked_lm_positions = False
         inputs_tf = self.get_inputs(_use_masked_lm_positions)
         outputs_tf = model(inputs_tf)
+        
+        # Create a pandas dataframe
+        df = pd.DataFrame(self.validation_sentences)
+        df.columns = ['text']
 
+        predicted_words = []
         if "all_layer_token_logits" in model.output:
             # Get masked positions from each sentence
             masked_positions = tf.argmax(tf.equal(inputs_tf["input_ids"], self.tokenizer.mask_token_id), axis=1)
@@ -60,9 +65,10 @@ class MLMCallback:
                     mask_token_logits = logits[masked_positions[i]]
                     # 0 for probs and 1 for indexes from tf.nn.top_k
                     top_words = self.tokenizer.decode(tf.nn.top_k(mask_token_logits, k=self.top_k)[1].numpy())
-                    print("Input ----> {}".format(self.validation_sentences[i]))
-                    print("Predicted words ----> {}".format(top_words.split()))
-                    print()
+                    predicted_words.append(top_words)
+                    # print("Input ----> {}".format(self.validation_sentences[i]))
+                    # print("Predicted words ----> {}".format(top_words.split()))
+                    # print()
         else:
             # Get masked positions from each sentence
             masked_positions = tf.argmax(tf.equal(inputs_tf["input_ids"], self.tokenizer.mask_token_id), axis=1)
@@ -70,6 +76,18 @@ class MLMCallback:
                 mask_token_logits = logits[masked_positions[i]]
                 # 0 for probs and 1 for indexes from tf.nn.top_k
                 top_words = self.tokenizer.decode(tf.nn.top_k(mask_token_logits, k=self.top_k)[1].numpy())
-                print("Input ----> {}".format(self.validation_sentences[i]))
-                print("Predicted words ----> {}".format(top_words.split()))
-                print()
+                predicted_words.append(top_words)
+                # print("Input ----> {}".format(self.validation_sentences[i]))
+                # print("Predicted words ----> {}".format(top_words.split()))
+                # print()
+                
+        df['predicted_words'] = predicted_words
+        wandb = trainer_params['wandb']
+        global_step = trainer_params['global_step']
+        # Log to wandb as a table
+        if wandb:
+            wandb.log({"mlm_tcallback_able": wandb.Table(dataframe=df
+                                                         )}, step=global_step)
+        else:
+            print(df)
+

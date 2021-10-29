@@ -143,7 +143,7 @@ def get_distribution_strategy(
     """
     _is_gpu_available, _num_gpus_present = tf_utils.is_gpu_available()
     del kwargs
-    if num_gpus < 0:
+    if num_gpus and num_gpus < 0:
         raise ValueError("`num_gpus` can not be negative.")
 
     if not isinstance(distribution_strategy, str):

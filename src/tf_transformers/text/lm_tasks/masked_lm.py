@@ -58,6 +58,7 @@ def mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq, delimiter=' ')
         segments = tokenizer_layer(inputs)
         # Find the index where max_seq_len is valid
         max_seq_index = tf.where(segments.row_splits < max_seq_len - 2)[-1][0]
+        # Trim based on max_seq_len, As its a ragged tensor, we find max_seq_index
         segments = segments[:max_seq_index]
 
         # Randomize slice inorder to avoid bias
