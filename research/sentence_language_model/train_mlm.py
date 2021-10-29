@@ -89,7 +89,7 @@ def run_train(cfg, wandb):
     train_dataset = get_dataset(data_directory, masked_lm_map_fn, train_batch_size)
 
     # Get Model
-    model_fn = get_model(return_all_layer_outputs, is_training, use_dropout, tokenizer_layer.vocab_size)
+    model_fn = get_model(return_all_layer_outputs, is_training, use_dropout, tokenizer_layer.vocab_size.numpy())
 
     # Get Optimizer
     examples = epochs * steps_per_epoch  # Assume steps_per_epoch = 100000, and epochs = 5, examples = 500000
