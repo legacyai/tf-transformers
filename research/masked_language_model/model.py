@@ -23,6 +23,7 @@ def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size):
         model = MaskedLMModel(
             model, hidden_size=config['embedding_size'], layer_norm_epsilon=config['layer_norm_epsilon']
         )
+        model = model.get_model()
         return model
 
     return model_fn
