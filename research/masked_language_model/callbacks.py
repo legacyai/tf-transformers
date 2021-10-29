@@ -16,7 +16,7 @@ class MLMCallback:
                 'The investment risk of each target date strategy changes over time as \
                     the fund’s asset [MASK] changes.',
                 'The [MASK] equity scatter plot slide is only available for plans with 100 or more DIY participants.',
-                'How are you? [MASK] [MASK] [MASK]. Thanks.',
+                '[MASK] is the capital of U.S.A.',
                 '[MASK] is the capital of France.',
                 'Machine Learning requires [MASK]',
                 'He is working as a [MASK]',
