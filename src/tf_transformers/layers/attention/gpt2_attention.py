@@ -265,9 +265,6 @@ class GPT2Attention(LegacyLayer):
         # qkv from input (to_tensor)
         qkv_to = self._project_qkv(to_tensor)
         query_tensor_to, key_tensor_to, value_tensor_to = map(self.split_heads, tf.split(qkv_to, 3, axis=2))
-        # print("query", query_tensor.shape, tf.reduce_sum(query_tensor, axis=-1))
-        # rint("key", key_tensor_to.shape, tf.reduce_sum(key_tensor_to, axis=-1))
-        # print("value", value_tensor.shape, tf.reduce_sum(value_tensor, axis=-1))
         # Scalar dimensions referenced here:
         #   B = batch size (number of sequences)
         #   F = `from_tensor` sequence length
@@ -283,6 +280,7 @@ class GPT2Attention(LegacyLayer):
         # 'key_tensor'   = [B, N, T, H]
         # `value_tensor` = [B, N, T, H]
         attention_scores = tf.einsum("BNFH,BNTH->BNFT", query_tensor, key_tensor_to)
+        # attention_scores = tf.matmul(query_tensor, key_tensor_to, transpose_b=True)
         attention_scores = tf.multiply(attention_scores, 1.0 / math.sqrt(float(self._head_size)))
         attention_probs = self._masked_softmax([attention_scores, attention_mask])
         # This is actually dropping out entire tokens to attend to, which might
