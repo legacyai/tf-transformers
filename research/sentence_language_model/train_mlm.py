@@ -80,6 +80,7 @@ def run_train(cfg, wandb):
     num_gpus = cfg.trainer.num_gpus
     tpu_address = cfg.trainer.tpu_address
     model_checkpoint_dir = cfg.trainer.model_checkpoint_dir
+    callback_steps = cfg.trainer.callback_steps
 
     # Get dataset and tokenizer
     tokenizer_layer = get_tokenizer()
@@ -103,7 +104,6 @@ def run_train(cfg, wandb):
     # Define Callback
     tokenizer = get_hf_tokenizer()
     callback = MLMCallback(tokenizer)
-    callback_steps = 10000
 
     # Train
     history = trainer.run(
