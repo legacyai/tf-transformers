@@ -83,7 +83,7 @@ def get_lm_loss(
             """Joint loss over all layers"""
             loss_dict = {}
             loss_holder = []
-            for layer_count, per_layer_output in enumerate(y_pred_dict['all_layer_{}'.format(prediction_column)]):
+            for layer_count, per_layer_output in enumerate(y_pred_dict[prediction_column]):
 
                 loss = cross_entropy_loss(
                     labels=y_true_dict[label_column],

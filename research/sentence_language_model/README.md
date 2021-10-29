@@ -1,7 +1,8 @@
 
-### Masked Language Modeling using TFText
+### Sentence Masked Language Modeling using TFText
 
-This folder has all necessary scripts to run the MLM using tensorflow text.
+This folder has all necessary scripts to run the Sentence MLM using tensorflow text.
+Instead of masking words, we mask sentences (sequence of words)
 
 ### Advantage
 

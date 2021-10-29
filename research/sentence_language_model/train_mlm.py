@@ -27,11 +27,6 @@ def get_dataset(data_directory, masked_lm_map_fn, batch_size):
     """
     all_text_files = tf.io.gfile.glob(os.path.join(data_directory, '*.txt'))
     ds = tf.data.TextLineDataset(all_text_files)
-    # Our data has sentences joined by '__||__'. So, for word based MLM
-    # we need to replace '__||__', by ''. and club it as a single sentence
-    # tf.strings.regex_replace not working as expected
-    ds = ds.map(lambda x: tf.strings.split(x, '__||__'), num_parallel_calls=tf.data.AUTOTUNE)
-    ds = ds.map(lambda x: tf.strings.reduce_join([x], separator=' '), num_parallel_calls=tf.data.AUTOTUNE)
 
     # We need to add the text as dict
     ds = ds.map(lambda x: {'text': x}, num_parallel_calls=tf.data.AUTOTUNE)
@@ -58,6 +53,8 @@ def run_train(cfg, wandb):
     Args:
         cfg (obj `DictConfig`): This is the config from hydra.
     """
+    # We use this delimiter to split text into list of sentences
+    delimiter = '__||__'
 
     data_directory = cfg.data.data_directory
     train_batch_size = cfg.data.train_batch_size
@@ -87,7 +84,7 @@ def run_train(cfg, wandb):
     # Get dataset and tokenizer
     tokenizer_layer = get_tokenizer()
     # We split text by words (whitespace), inside MLM function.
-    masked_lm_map_fn = mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq)
+    masked_lm_map_fn = mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq, delimiter)
     train_dataset = get_dataset(data_directory, masked_lm_map_fn, train_batch_size)
 
     # Get Model

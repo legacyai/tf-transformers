@@ -1,22 +1,22 @@
 data:
     data_directory:
-    train_batch_size: 32
+    train_batch_size: 128
 task:
-  max_seq_len: 128
-  max_predictions_per_seq: 20
+  max_seq_len: 1024
+  max_predictions_per_seq: 200
 trainer:
-  dtype: fp32
-  num_gpus: 2
+  dtype: bf16
+  num_gpus: 0
   tpu_address:
-  epochs: 3
+  epochs: 20
   strategy: mirrored
-  steps_per_epoch: 10000
+  steps_per_epoch: 50000
   model_checkpoint_dir:
 optimizer:
-  learning_rate: 3e-5
+  learning_rate: 1e-4
   loss_type:
   use_constant_lr: false
 model:
   is_training: true
   use_dropout: true
-  num_layers: 24
+  num_layers: 12

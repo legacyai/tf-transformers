@@ -22,6 +22,7 @@ from tf_transformers.models.albert import (
 )
 from tf_transformers.models.bart import BartConfig, BartEncoder, BartModel
 from tf_transformers.models.bert import BertConfig, BertEncoder, BertModel
+from tf_transformers.models.bigbird import BigBirdRobertaTokenizerTFText
 from tf_transformers.models.encoder_decoder import EncoderDecoder
 from tf_transformers.models.gpt2 import GPT2Config, GPT2Encoder, GPT2Model
 from tf_transformers.models.mt5 import MT5Config, MT5Encoder, MT5Model
