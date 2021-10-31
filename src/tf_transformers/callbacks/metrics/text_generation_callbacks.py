@@ -124,12 +124,9 @@ class TextGenerationMetricCallback:
             predicted_summaries_text = self.tokenizer.batch_decode(predicted_ids_sliced, skip_special_tokens=True)
             predicted_summaries.extend(predicted_summaries_text)
 
-            if batch_labels['text'].ndim == 2:
-                original_labels = [text.numpy().decode() for text in tf.squeeze(batch_labels['text'], axis=1)]
-                original_summaries.extend(original_labels)
-            else:
-                original_labels = [text.numpy().decode() for text in batch_labels['text']]
-                original_summaries.extend(original_labels)
+            original_decoded = self.tokenizer.batch_decode(batch_labels['labels'].numpy())
+            print("original_decoded", original_decoded)
+            original_summaries.extend(original_decoded)
 
         assert len(original_summaries) == len(predicted_summaries)
         df = pd.DataFrame()

@@ -3,6 +3,7 @@ data:
     train_batch_size: 32
 task:
   max_seq_len: 4096
+  decoder_seq_len: 256
   num_splits:
   use_gru_layer:
   projection_dimension:
@@ -24,4 +25,4 @@ model:
   is_training: true
   use_dropout: true
   num_layers: 12
-  name:
+  model_name:

@@ -476,7 +476,7 @@ class T5Attention(LegacyLayer):
             )
             position_bias += positon_mask
 
-        attention_scores += position_bias
+        attention_scores += tf.cast(position_bias, dtype=tf_utils.get_dtype())
 
         attention_probs = self._masked_softmax([attention_scores, attention_mask])
         # This is actually dropping out entire tokens to attend to, which might

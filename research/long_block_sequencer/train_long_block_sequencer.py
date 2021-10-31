@@ -1,7 +1,15 @@
-from model import get_loss, get_model, get_optimizer, get_tokenizer, get_trainer
+import os
+
+from model import (
+    get_loss,
+    get_model,
+    get_model_inference,
+    get_optimizer,
+    get_tokenizer,
+    get_trainer,
+)
 from prepare_tfrecords import read_tfrecord
 
-from research.long_block_sequencer.model import get_model_inference
 from tf_transformers.callbacks.metrics import TextGenerationMetricCallback
 
 
@@ -41,8 +49,23 @@ def run_train(cfg, wandb):
     projection_dimension = cfg.task.projection_dimension
 
     max_seq_len = cfg.task.max_seq_len
-    train_dataset = read_tfrecord(data_directory, max_seq_len, train_batch_size, shuffle=True, drop_remainder=True)
-    eval_dataset = read_tfrecord(data_directory, max_seq_len, train_batch_size, shuffle=False, drop_remainder=True)
+    decoder_seq_len = cfg.task.decoder_seq_len
+    train_dataset, total_examples = read_tfrecord(
+        os.path.join(data_directory, "train"),
+        max_seq_len,
+        decoder_seq_len,
+        train_batch_size,
+        shuffle=True,
+        drop_remainder=True,
+    )
+    eval_dataset, _ = read_tfrecord(
+        os.path.join(data_directory, "eval"),
+        max_seq_len,
+        decoder_seq_len,
+        train_batch_size,
+        shuffle=False,
+        drop_remainder=True,
+    )
     eval_dataset = eval_dataset.take(20)  # We take only 20 after batching for callbacks
 
     # Get Model
@@ -51,7 +74,7 @@ def run_train(cfg, wandb):
     model_inference = get_model_inference(model_name, num_splits, use_gru_layer, projection_dimension)
 
     # Get Optimizer
-    examples = epochs * steps_per_epoch  # Assume steps_per_epoch = 100000, and epochs = 5, examples = 500000
+    examples = total_examples  # Assume steps_per_epoch = 100000, and epochs = 5, examples = 500000
     optimizer_fn = get_optimizer(learning_rate, examples, train_batch_size, epochs, use_constant_lr)
 
     # Get loss

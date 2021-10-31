@@ -109,7 +109,7 @@ def write_tfrecord_t5(
         tfwriter.process(parse_fn=get_tfrecord_example(data_eval))
 
 
-def read_tfrecord(tfrecord_dir, max_seq_length, batch_size, shuffle=False, drop_remainder=False):
+def read_tfrecord(tfrecord_dir, max_seq_length, decoder_seq_length, batch_size, shuffle=False, drop_remainder=False):
     """Read TFRecords"""
     padded_shapes = {
         'encoder_input_ids': [
@@ -119,7 +119,7 @@ def read_tfrecord(tfrecord_dir, max_seq_length, batch_size, shuffle=False, drop_
             max_seq_length,
         ],
         'decoder_input_ids': [
-            None,
+            decoder_seq_length,
         ],
         'labels': [
             None,
@@ -135,7 +135,7 @@ def read_tfrecord(tfrecord_dir, max_seq_length, batch_size, shuffle=False, drop_
     tf_reader = TFReader(schema=schema, tfrecord_files=all_files)
 
     x_keys = ['encoder_input_ids', 'encoder_input_mask', 'decoder_input_ids']
-    y_keys = ['labels', 'labels_mask', 'text']
+    y_keys = ['labels', 'labels_mask']
     dataset = tf_reader.read_record(
         auto_batch=True,
         keys=x_keys,
