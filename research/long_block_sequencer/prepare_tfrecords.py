@@ -267,9 +267,9 @@ def main():
     take_sample = False
     
     tokenizer = get_tokenizer(model_name)
-    if model_name.startwith('bart') or model_name.startswith('facebook/bart'):
+    if model_name.startswith('bart') or model_name.startswith('facebook/bart'):
         write_tfrecord = write_tfrecord_bart
-    elif model_name.startwith('t5'):
+    elif model_name.startswith('t5'):
         write_tfrecord = write_tfrecord_t5
     else:
         raise ValueError("Unsupported model name {}".format(model_name))
@@ -295,5 +295,8 @@ def main():
                 tfrecord_dir, 
                 take_sample, 
                 verbose=1000)
+    
+if __name__=="__main__":
+    main()
     
 
