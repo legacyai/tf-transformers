@@ -1,25 +1,72 @@
+from long_block_encoder import Long_Block_Encoder
+from transformers import BartTokenizerFast, T5TokenizerFast
+
 from tf_transformers.core import Trainer
 from tf_transformers.losses.loss_wrapper import get_lm_loss
+from tf_transformers.models import BartModel, EncoderDecoder, T5Model
 from tf_transformers.optimization import create_optimizer
-from transformers import T5TokenizerFast, BartTokenizerFast
 
 
-# def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size):
-#     """Get the model from model function"""
+def get_model(model_name, num_splits, use_gru_layer, projection_dimension, return_all_layer_outputs):
+    def model_fn():
+        if model_name.startswith('bart') or model_name.startswith('facebook/bart'):
+            model = BartModel.from_pretrained(
+                model_name, return_layer=True, decoder_kwargs={'return_all_layer_outputs': return_all_layer_outputs}
+            )
+        elif model_name.startswith('t5'):
+            model = T5Model.from_pretrained(
+                model_name, return_layer=True, decoder_kwargs={'return_all_layer_outputs': return_all_layer_outputs}
+            )
+        else:
+            raise ValueError("Unsupported model name {}".format(model_name))
 
-#     def model_fn():
-#         # We use GPT2 Style model, but we use BigBird Roberta Tokenizer
-#         config = GPT2Model.get_config(MODEL_NAME)
-#         # We update the vocab_size for that reason
-#         config['vocab_size'] = vocab_size
-#         model = GPT2Model.from_config(config, mask_mode='user_defined', return_layer=True)
-#         model = MaskedLMModel(
-#             model, use_extra_mlm_layer=False, hidden_size=config['embedding_size'], layer_norm_epsilon=config['layer_norm_epsilon']
-#         )
-#         model = model.get_model()
-#         return model
+        # Get encoder and decoder
+        encoder = model._encoder
+        decoder = model._decoder
+        del model
+        if use_gru_layer:
+            long_model = Long_Block_Encoder(
+                encoder, num_splits=num_splits, use_gru_layer=use_gru_layer, gru_units=projection_dimension
+            )
+        else:
+            long_model = Long_Block_Encoder(
+                encoder, num_splits=num_splits, use_gru_layer=use_gru_layer, dense_dimension=projection_dimension
+            )
 
-#     return model_fn
+        decoder._embedding_layer = long_model.model_layer._embedding_layer
+        model_encoder = EncoderDecoder(encoder=encoder, decoder=decoder)
+        model_encoder = model_encoder.get_model()
+        return model_encoder
+
+    return model_fn
+
+
+def get_model_inference(model_name, num_splits, use_gru_layer, projection_dimension):
+
+    if model_name.startswith('bart') or model_name.startswith('facebook/bart'):
+        model = BartModel.from_pretrained(model_name, return_layer=True, decoder_kwargs={'use_auto_regressive': True})
+    elif model_name.startswith('t5'):
+        model = T5Model.from_pretrained(model_name, return_layer=True, decoder_kwargs={'use_auto_regressive': True})
+    else:
+        raise ValueError("Unsupported model name {}".format(model_name))
+
+    # Get encoder and decoder
+    encoder = model._encoder
+    decoder = model._decoder
+    del model
+    if use_gru_layer:
+        long_model = Long_Block_Encoder(
+            encoder, num_splits=num_splits, use_gru_layer=use_gru_layer, gru_units=projection_dimension
+        )
+    else:
+        long_model = Long_Block_Encoder(
+            encoder, num_splits=num_splits, use_gru_layer=use_gru_layer, dense_dimension=projection_dimension
+        )
+
+    decoder._embedding_layer = long_model.model_layer._embedding_layer
+    model_encoder = EncoderDecoder(encoder=encoder, decoder=decoder)
+    model_encoder = model_encoder.get_model()
+    return model_encoder
 
 
 def get_tokenizer(model_name):
@@ -31,8 +78,6 @@ def get_tokenizer(model_name):
         raise ValueError("Unsupported model name {}".format(model_name))
 
     return tokenizer
-
-    
 
 
 def get_optimizer(learning_rate, examples, batch_size, epochs, use_constant_lr=False):
@@ -57,14 +102,19 @@ def get_optimizer(learning_rate, examples, batch_size, epochs, use_constant_lr=F
 
 def get_loss(loss_type):
     """Get MLM Loss"""
-    return get_lm_loss(loss_type=loss_type)
+    if loss_type and loss_type == "joint":
+        return get_lm_loss(
+            label_column='labels',
+            label_weights_column='labels_mask',
+            prediction_column='all_layer_token_logits',
+            loss_type=loss_type,
+        )
+    return get_lm_loss(
+        label_column='labels', label_weights_column='labels_mask', prediction_column='token_logits', loss_type=loss_type
+    )
 
 
 def get_trainer(distribution_strategy, dtype, num_gpus=0, tpu_address=None):
     """Get Trainer"""
-    trainer = Trainer(distribution_strategy,
-                      num_gpus=num_gpus,
-                      tpu_address=tpu_address,
-                      dtype=dtype)
+    trainer = Trainer(distribution_strategy, num_gpus=num_gpus, tpu_address=tpu_address, dtype=dtype)
     return trainer
-

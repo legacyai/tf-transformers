@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""This is the main script to run GLUE benchmark"""
+"""This is the main script to run Long Block Sequencer Model"""
 import os
 
 import hydra
 import wandb
 from absl import logging
 from omegaconf import DictConfig
-from train_mlm import run_train
+from train_long_block_sequencer import run_train
 
 logging.set_verbosity("INFO")
 
@@ -40,16 +40,19 @@ def run(cfg: DictConfig) -> None:
     config_dict = dict(cfg)
     # For TPU, we need to initialize it before tf text dataset
     # starts triggering. Hack
-    if cfg.trainer.strategy=='tpu':
+    if cfg.trainer.strategy == 'tpu':
         from model import get_trainer
+
         distribution_strategy = 'tpu'
         num_gpus = 0
         tpu_address = cfg.trainer.tpu_address
-        trainer = get_trainer(distribution_strategy=distribution_strategy, 
-                              num_gpus=num_gpus, 
-                              tpu_address=tpu_address,
-                              dtype=cfg.trainer.dtype) # noqa
-        
+        trainer = get_trainer(
+            distribution_strategy=distribution_strategy,
+            num_gpus=num_gpus,
+            tpu_address=tpu_address,
+            dtype=cfg.trainer.dtype,
+        )  # noqa
+
     wandb.init(project=WANDB_PROJECT, config=config_dict, sync_tensorboard=True)
     history = run_train(cfg, wandb)
     return history

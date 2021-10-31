@@ -17,6 +17,7 @@
 """A simple metric callback for some Text Generation metrics in Tensorflow 2.0"""
 
 import tempfile
+
 import pandas as pd
 import tensorflow as tf
 import tqdm
@@ -134,7 +135,7 @@ class TextGenerationMetricCallback:
         df = pd.DataFrame()
         df['original_summaries'] = original_summaries
         df['predicted_summaries'] = predicted_summaries
-        
+
         for i in range(len(original_summaries)):
             score = scorer.score(original_summaries[i], predicted_summaries[i])
             aggregator.add_scores(score)
@@ -143,12 +144,10 @@ class TextGenerationMetricCallback:
         result['rouge2_f1score_mid'] = aggregator.aggregate()['rouge2'].mid.fmeasure
         result['rouge1_f1score_mid'] = aggregator.aggregate()['rouge1'].mid.fmeasure
         result['rougel_f1score_mid'] = aggregator.aggregate()['rougeLsum'].mid.fmeasure
-        
+
         global_step = traininer_kwargs['global_step']
         wandb = traininer_kwargs['wandb']
         if wandb:
             wandb.log(result, step=global_step)
-            wandb.log({"predictions_{}".format(global_step): wandb.Table(dataframe=df)}, step=global_step)
-
 
         return result

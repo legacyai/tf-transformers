@@ -168,4 +168,4 @@ debug.env
 tags
 
 # pre-commit
-.pre-commit*
+#.pre-commit*

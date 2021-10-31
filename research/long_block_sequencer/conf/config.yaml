@@ -1,9 +1,12 @@
 data:
     data_directory:
-    train_batch_size: 128
+    train_batch_size: 32
 task:
-  max_seq_len: 1024
-  max_predictions_per_seq: 200
+  max_seq_len: 4096
+  num_splits:
+  use_gru_layer:
+  projection_dimension:
+
 trainer:
   dtype: bf16
   num_gpus: 0
@@ -21,4 +24,4 @@ model:
   is_training: true
   use_dropout: true
   num_layers: 12
-  name: 
+  name:
