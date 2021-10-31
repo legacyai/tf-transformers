@@ -212,8 +212,10 @@ def train_and_eval(
                 # each callback can have separate interval steps
                 callback_scores = []
                 for callback, callback_steps in zip(callbacks, callbacks_interval_steps):
-                    if callback_steps and (global_step % callback_steps == 0):
+                    if callback_steps and global_step !=0 and (global_step % callback_steps == 0):
                         logging.info("Callbacks in progress at step {} . . . .".format(global_step))
+                        current_trainer_kwargs = locals()
+                        trainer_kwargs.update(current_trainer_kwargs)
                         score = callback(trainer_kwargs)
                         logging.info("Callback score {} at step {}".format(score, global_step))
                         callback_scores.append(score)
@@ -226,6 +228,8 @@ def train_and_eval(
                 logging.info("Callbacks in progress at epoch end {} . . . .".format(epoch))
                 callback_scores = []
                 for callback in callbacks:
+                    current_trainer_kwargs = locals()
+                    trainer_kwargs.update(current_trainer_kwargs)
                     score = callback(trainer_kwargs)
                     callback_scores.append(score)
                     logging.info("Callback score {} at epoch {}".format(score, epoch))

@@ -75,7 +75,7 @@ class MLMCallback:
         # Log to wandb as a table
         print("Global step", global_step)
         if wandb:
-            wandb.log({"mlm_table_step_{}".format(global_step): wandb.Table(dataframe=df)}, step=global_step)
+            wandb.log({"mlm_table_step_{}".format(global_step): wandb.Table(dataframe=df)}, step-global_step)
             print(df)
         else:
             print(df)
