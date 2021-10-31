@@ -49,7 +49,8 @@ def run(cfg: DictConfig) -> None:
         tpu_address = cfg.trainer.tpu_address
         trainer = get_trainer(distribution_strategy=distribution_strategy, 
                               num_gpus=num_gpus, 
-                              tpu_address=tpu_address) # noqa
+                              tpu_address=tpu_address, 
+                              cfg.trainer.dtype) # noqa
 
         
     

@@ -47,7 +47,8 @@ def run(cfg: DictConfig) -> None:
         tpu_address = cfg.trainer.tpu_address
         trainer = get_trainer(distribution_strategy=distribution_strategy, 
                               num_gpus=num_gpus, 
-                              tpu_address=tpu_address) # noqa
+                              tpu_address=tpu_address,
+                              dtype=cfg.trainer.dtype) # noqa
         
     wandb.init(project=WANDB_PROJECT, config=config_dict, sync_tensorboard=True)
     history = run_train(cfg, wandb)
