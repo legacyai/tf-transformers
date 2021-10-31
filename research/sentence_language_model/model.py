@@ -21,7 +21,7 @@ def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size):
         config['vocab_size'] = vocab_size
         model = GPT2Model.from_config(config, mask_mode='user_defined', return_layer=True)
         model = MaskedLMModel(
-            model, hidden_size=config['embedding_size'], layer_norm_epsilon=config['layer_norm_epsilon']
+            model, use_extra_mlm_layer=False, hidden_size=config['embedding_size'], layer_norm_epsilon=config['layer_norm_epsilon']
         )
         model = model.get_model()
         return model
