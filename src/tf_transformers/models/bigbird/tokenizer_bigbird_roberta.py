@@ -473,7 +473,7 @@ def create_cache_dir(cache_path: Path):
         cache_path.mkdir()
 
 
-class BigBirdTokenizerTFText:
+class BigBirdRobertaTokenizerTFText:
     def __init__(self) -> None:
         pass
 
