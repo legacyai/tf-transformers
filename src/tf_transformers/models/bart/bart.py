@@ -317,7 +317,7 @@ class BartEncoder(LegacyLayer):
 
         # Token logits
         token_logits = tf.matmul(
-            token_embeddings,
+            tf.cast(token_embeddings, dtype=tf_utils.get_dtype()),
             tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
             transpose_b=True,
         )

@@ -14,6 +14,7 @@ trainer:
   model_checkpoint_dir:
 optimizer:
   learning_rate: 3e-5
+  warmup_rate: 0.2
   loss_type:
   use_constant_lr: false
 model:

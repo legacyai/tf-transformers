@@ -18,6 +18,7 @@ from tf_transformers.models.albert import (
     AlbertConfig,
     AlbertEncoder,
     AlbertModel,
+    AlbertTokenizerLayer,
     AlbertTokenizerTFText,
 )
 from tf_transformers.models.bart import BartConfig, BartEncoder, BartModel

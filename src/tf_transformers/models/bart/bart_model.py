@@ -35,7 +35,12 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {}
+MODEL_TO_HF_URL = {
+    "bart-base": "tftransformers/bart-base",
+    "bart-medium": "tftransformers/bart-medium",
+    "facebook/bart-base": "tftransformers/bart-base",
+    "facebook/bart-medium": "tftransformers/bart-medium",
+}
 code_example = r'''
 
         >>> from tf_transformers.models import  BartModel
@@ -229,7 +234,7 @@ class BartModel(ModelWrapper):
 
             model_layer = EncoderDecoder(encoder_layer, decoder_layer)
             model = model_layer.get_model()
-        
+
             # Load Model
             load_pretrained_model(model, local_cache, URL)
             if return_layer:

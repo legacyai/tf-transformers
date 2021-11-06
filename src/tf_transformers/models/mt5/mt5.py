@@ -307,12 +307,11 @@ class MT5Encoder(LegacyLayer):
             embeddings, position_bias, k, v = layer([embeddings, attention_mask], position_bias=position_bias)
             encoder_outputs.append(embeddings)
 
-        encoder_outputs[-1] = self._last_layer_norm(encoder_outputs[-1])
-        encoder_outputs[-1] = self._last_layer_dropout(encoder_outputs[-1])
+        token_embeddings = self._last_layer_norm(encoder_outputs[-1])
+        token_embeddings = self._last_layer_dropout(token_embeddings)
         # First word of last layer outputs [CLS]
         # batch_size x embedding_size
         # batch_size x sequence_length x embedding_size
-        token_embeddings = encoder_outputs[-1]
         token_logits = tf.matmul(
             token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
         )
@@ -327,6 +326,8 @@ class MT5Encoder(LegacyLayer):
         if self._return_all_layer_outputs:
             all_token_logits = []
             for per_layer_token_embeddings in encoder_outputs:
+                per_layer_token_embeddings = self._last_layer_norm(per_layer_token_embeddings)
+                per_layer_token_embeddings = self._last_layer_dropout(per_layer_token_embeddings)
                 layer_token_logits = tf.matmul(
                     per_layer_token_embeddings,
                     tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
@@ -397,9 +398,9 @@ class MT5Encoder(LegacyLayer):
             )
             decoder_outputs.append(embeddings)
 
-        decoder_outputs[-1] = self._last_layer_norm(decoder_outputs[-1])
+        token_embeddings = self._last_layer_norm(decoder_outputs[-1])
         # batch_size x sequence_length x embedding_size
-        token_embeddings = self._last_layer_dropout(decoder_outputs[-1])
+        token_embeddings = self._last_layer_dropout(token_embeddings)
 
         token_logits = tf.matmul(
             token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
@@ -415,6 +416,8 @@ class MT5Encoder(LegacyLayer):
         if self._return_all_layer_outputs:
             all_token_logits = []
             for per_layer_token_embeddings in decoder_outputs:
+                per_layer_token_embeddings = self._last_layer_norm(per_layer_token_embeddings)
+                per_layer_token_embeddings = self._last_layer_dropout(per_layer_token_embeddings)
                 layer_token_logits = tf.matmul(
                     per_layer_token_embeddings,
                     tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),

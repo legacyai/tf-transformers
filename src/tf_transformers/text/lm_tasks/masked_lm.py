@@ -51,6 +51,7 @@ def mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq, delimiter=' ')
     def dynamic_mlm(example):
         # We expect a dict example
         text = example['text']
+        # TODO : This might not be required .
         if tokenizer_layer._lower_case:
             text = tf_text.case_fold_utf8(text)
 

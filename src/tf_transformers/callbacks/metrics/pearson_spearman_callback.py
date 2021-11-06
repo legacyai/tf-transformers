@@ -49,11 +49,11 @@ class PearsonSpearmanCallback:
         self.label_column = label_column
         self.prediction_column = prediction_column
 
-    def __call__(self, traininer_kwargs):
+    def __call__(self, trainer_kwargs):
         """This is getting called inside the trainer class"""
         logging.info("Callback for {} is in progress . . . . . . . . . .".format(self.metric_name_list))
         # This is non distribute
-        validation_dataset = traininer_kwargs['validation_dataset']
+        validation_dataset = trainer_kwargs['validation_dataset']
         # No validation dataset has been provided
         if validation_dataset is None:
             if self.validation_dataset is None:
@@ -120,9 +120,9 @@ class PearsonSpearmanCallback:
             return result
 
         # Model from trainer
-        model = traininer_kwargs['model']
+        model = trainer_kwargs['model']
         # Strategy
-        # strategy = traininer_kwargs['self'].distribution_strategy
+        # strategy = trainer_kwargs['self'].distribution_strategy
 
         # Determine whether we need to provide metrics for all layers or single layer
         if isinstance(model.output[self.prediction_column], list):

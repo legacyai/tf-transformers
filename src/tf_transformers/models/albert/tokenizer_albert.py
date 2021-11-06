@@ -29,6 +29,37 @@ from absl import logging
 
 _PREFIX_DIR = 'tftransformers_tokenizer_cache'
 
+code_example = r'''
+
+        >>> from tf_transformers.models import  AlbertTokenizerTFText
+        >>> tokenizer = AlbertTokenizerTFText.from_pretrained("albert-base-v2")
+        >>> text = ['The following statements are true about sentences in English:',
+                    '',
+                    'A new sentence begins with a capital letter.']
+        >>> inputs = {'text': text}
+        >>> outputs = tokenizer(inputs) # Ragged Tensor Output
+
+        # Dynamic Padding
+        >>> tokenizer = AlbertTokenizerTFText.from_pretrained("albert-base-v2", dynamic_padding=True)
+        >>> text = ['The following statements are true about sentences in English:',
+                    '',
+                    'A new sentence begins with a capital letter.']
+        >>> inputs = {'text': text}
+        >>> outputs = tokenizer(inputs) # Dict of tf.Tensor
+
+        # Static Padding
+        >>> tokenizer = AlbertTokenizerTFText.from_pretrained("albert-base-v2", pack_model_inputs=True)
+        >>> text = ['The following statements are true about sentences in English:',
+                    '',
+                    'A new sentence begins with a capital letter.']
+        >>> inputs = {'text': text}
+        >>> outputs = tokenizer(inputs) # Dict of tf.Tensor
+
+        # To Add Special Tokens
+        >>> tokenizer = AlbertTokenizerTFText.from_pretrained("albert-base-v2", add_special_tokens=True)
+
+'''
+
 
 def get_vocab(model_proto):
     """Get vocab from sentencpiece model"""
@@ -109,9 +140,20 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
             into custom normalization rules for the Sentencepiece model itself to
             avoid this extra step and the limitation regarding offsets.
           **kwargs: standard arguments to `Layer()`.
+          add_special_tokens: If True: Add special tokens CLS and SEP.
+          pack_model_inputs: Static Padding to max_length
+          dynamic_padding: Dynamic Padding to max_length of the batch
+
         Raises:
           ImportError: if importing tensorflow_text failed.
+
+        Returns:
+            Default: RaggedTensor
+            if dynamic_padding or bert_pack_inputs: dict of tf.Tensor
+
+
         """
+
         super().__init__(**kwargs)
         if bool(model_file_path) == bool(model_serialized_proto):
             raise ValueError("Exact one of `model_file_path` and " "`model_serialized_proto` can be specified.")
@@ -178,13 +220,13 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
     ):
         """Calls `text.SentencepieceTokenizer` on inputs.
         Args:
-          inputs: A string Tensor of shape `(batch_size,)`.
+            inputs: A string Tensor of shape `(batch_size,)`.
         Returns:
-          One or three of RaggedTensors if tokenize_with_offsets is False or True,
-          respectively. These are
-          tokens: A RaggedTensor of shape `[batch_size, (pieces)]` and type `int32`.
+            One or three of RaggedTensors if tokenize_with_offsets is False or True,
+            respectively. These are
+            tokens: A RaggedTensor of shape `[batch_size, (pieces)]` and type `int32`.
             `tokens[i,j]` contains the j-th piece in the i-th input.
-          start_offsets, limit_offsets: If `tokenize_with_offsets` is True,
+            start_offsets, limit_offsets: If `tokenize_with_offsets` is True,
             RaggedTensors of type `int64` with the same indices as tokens.
             Element `[i,j]` contains the byte offset at the start, or past the
             end, resp., for the j-th piece in the i-th input.
@@ -289,6 +331,10 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
         segments_combined, segment_ids = tf_text.combine_segments(
             trimmed_segments, start_of_sequence_id=start_of_sequence_id, end_of_segment_id=end_of_segment_id
         )
+        if self.add_special_tokens is False:
+            # Ignore cls token
+            segments_combined = segments_combined[:, 1:-1]
+            segment_ids = segment_ids[:, 1:-1]
         # Pad to dense Tensors.
         input_word_ids, _ = tf_text.pad_model_inputs(segments_combined, seq_length, pad_value=padding_id)
         input_type_ids, input_mask = tf_text.pad_model_inputs(segment_ids, seq_length, pad_value=0)
@@ -320,7 +366,6 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
 
     def call_encode(self, inputs: Dict[str, tf.Tensor]):
         """Encode function used for serialization"""
-        # inputs = tf.squeeze(inputs['text'], axis=0)
 
         inputs = inputs['text']  # Get from dictionary
         inputs = self.preprocess(inputs)
@@ -431,9 +476,15 @@ class AlbertTokenizerTFText:
 
     @classmethod
     def from_pretrained(
-        cls, model_name: str, out_type=tf.int32, max_length=None, add_special_tokens=False, pack_model_inputs=False
+        cls,
+        model_name: str,
+        out_type=tf.int32,
+        max_length=None,
+        add_special_tokens=False,
+        pack_model_inputs=False,
+        dynamic_padding=False,
     ):
-        """We load tokenizer from HuggingFace and pass to TFtext"""
+        """Load HuggingFace tokenizer and pass to TFtext"""
         cache_dir = tempfile.gettempdir()
         cache_dir = Path(cache_dir, _PREFIX_DIR)
         create_cache_dir(cache_dir)
@@ -467,5 +518,6 @@ class AlbertTokenizerTFText:
             max_length=max_length,
             add_special_tokens=add_special_tokens,
             pack_model_inputs=pack_model_inputs,
+            dynamic_padding=dynamic_padding,
         )
         return tokenizer_layer

@@ -44,11 +44,11 @@ class MetricCallback:
 
         self.metric_obj, self.metric_name = get_callback(metric_name)
 
-    def __call__(self, traininer_kwargs):
+    def __call__(self, trainer_kwargs):
         """This is getting called inside the trainer class"""
         logging.info("Callback for {} is in progress . . . . . . . . . .".format(self.metric_name))
         # This is strategy.experimemtal_distribute_dataset
-        validation_dataset_distributed = traininer_kwargs['validation_dataset_distributed']
+        validation_dataset_distributed = trainer_kwargs['validation_dataset_distributed']
         # No validation dataset has been provided
         if validation_dataset_distributed is None:
             if self.validation_dataset is None:
@@ -122,9 +122,9 @@ class MetricCallback:
                 validate_step(dist_inputs)
 
         # Model from trainer
-        model = traininer_kwargs['model']
+        model = trainer_kwargs['model']
         # Strategy
-        strategy = traininer_kwargs['self'].distribution_strategy
+        strategy = trainer_kwargs['self'].distribution_strategy
         # Determine whether we need to provide metrics for all layers or single layer
         if isinstance(model.output[self.prediction_column], list):
             num_layers = len(model.output[self.prediction_column])

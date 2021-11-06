@@ -14,8 +14,8 @@ All or most configurations can be managed using ```conf/config.yaml```. You can 
 
 Eg: For TPU , we need a data in GCS and model_checkpoint_dir to be in GCS too.
 
-```python3 run_mlm.py \ data.data_directory=$GCP_BUCKET/data/ \ trainer.model_checkpoint_dir=$GCP_BUCKET/model```
+```python3 run_mlm.py data.data_directory=<GCP_DATA_DIR> data.train_batch_size=128 trainer.dtype=bf16 trainer.model_checkpoint_dir=<GCP_MODEL_DIR> trainer.steps_per_epoch=50000 trainer.callback_steps=10000 trainer.epochs=20 trainer.strategy=tpu trainer.tpu_address=<TPU_NAME> optimizer.learning_rate=5e-4```
 
 ### WandB
 
-By default we are using Wandb. Check ```run_mlm.py``` to disable it.
+By default we are using Wandb. if enviornment variable ```WANDB_PROJECT=None```, wandb will be disabled.

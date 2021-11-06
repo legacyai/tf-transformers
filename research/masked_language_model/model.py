@@ -21,7 +21,10 @@ def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size):
         config['vocab_size'] = vocab_size
         model = GPT2Model.from_config(config, mask_mode='user_defined', return_layer=True)
         model = MaskedLMModel(
-            model, use_extra_mlm_layer=False, hidden_size=config['embedding_size'], layer_norm_epsilon=config['layer_norm_epsilon']
+            model,
+            use_extra_mlm_layer=False,
+            hidden_size=config['embedding_size'],
+            layer_norm_epsilon=config['layer_norm_epsilon'],
         )
         model = model.get_model()
         return model
@@ -34,12 +37,12 @@ def get_tokenizer():
     return tokenizer_layer
 
 
-def get_optimizer(learning_rate, examples, batch_size, epochs, use_constant_lr=False):
+def get_optimizer(learning_rate, steps_per_epoch, epochs, warmup_rate, use_constant_lr=False):
     """Get AdamW optimizer"""
 
-    steps_per_epoch = int(examples / batch_size)
+    # Total steps over all epochs
     num_train_steps = steps_per_epoch * epochs
-    warmup_steps = int(0.1 * num_train_steps)
+    warmup_steps = int(warmup_rate * num_train_steps)
 
     def optimizer_fn():
         if use_constant_lr:
@@ -61,10 +64,7 @@ def get_loss(loss_type):
 
 def get_trainer(distribution_strategy, dtype, num_gpus=0, tpu_address=None):
     """Get Trainer"""
-    trainer = Trainer(distribution_strategy, 
-                      dtype=dtype,
-                      num_gpus=num_gpus,
-                      tpu_address=tpu_address)
+    trainer = Trainer(distribution_strategy, dtype=dtype, num_gpus=num_gpus, tpu_address=tpu_address)
     return trainer
 
 

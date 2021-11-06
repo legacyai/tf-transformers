@@ -34,7 +34,7 @@ class TextGenerationMetricCallback:
         self,
         model,
         tokenizer,
-        decoder_kwargs={"mode": "greedy", "max_iterations": 64, "eos_id": -100},
+        decoder_kwargs=None,
         decoder_start_token_id=None,
         input_mask_ids=-1,
         input_type_ids=-1,
@@ -46,7 +46,7 @@ class TextGenerationMetricCallback:
         Args:
             model: tf.keras.Model
             tokenizer: Huggingface tokenizer
-            decoder_kwargs: Dict of kwargs
+            decoder_kwargs: Dict of kwargs (Deafult None -> Greedy)
             decoder_start_token_id: int
             input_mask_ids: int
             input_type_ids: int
@@ -60,21 +60,24 @@ class TextGenerationMetricCallback:
                 )
         self.model = model
         self.tokenizer = tokenizer
+        if decoder_kwargs is None:
+            decoder_kwargs = {"mode": "greedy", "max_iterations": 64, "eos_id": -100}
         self.decoder_kwargs = decoder_kwargs
         self.metric_name_list = metric_name_list
         self.decoder_start_token_id = decoder_start_token_id
         self.input_mask_ids = input_mask_ids
         self.input_type_ids = input_type_ids
         self.validation_dataset = validation_dataset
+        self.dirpath = tempfile.mkdtemp()
 
-    def __call__(self, traininer_kwargs):
+    def __call__(self, trainer_kwargs):
         """This is getting called inside the trainer class"""
         logging.info("Callback for {} is in progress . . . . . . . . . .".format(self.metric_name_list))
         scorer = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeLsum"], use_stemmer=True)
         aggregator = scoring.BootstrapAggregator()
         # This is non distribute
-        validation_dataset = traininer_kwargs['validation_dataset']
-        model_checkpoint_dir = traininer_kwargs['model_checkpoint_dir']
+        validation_dataset = trainer_kwargs['validation_dataset']
+        model_checkpoint_dir = trainer_kwargs['model_checkpoint_dir']
         # No validation dataset has been provided
         if validation_dataset is None:
             if self.validation_dataset is None:
@@ -87,7 +90,7 @@ class TextGenerationMetricCallback:
 
         # Model from trainer
         self.model.load_checkpoint(model_checkpoint_dir)
-        dirpath = tempfile.mkdtemp()
+        dirpath = self.dirpath
 
         # save_options = tf.saved_model.SaveOptions(experimental_io_device='/job:localhost')
         self.model.save_transformers_serialized(dirpath, overwrite=True)
@@ -125,7 +128,6 @@ class TextGenerationMetricCallback:
             predicted_summaries.extend(predicted_summaries_text)
 
             original_decoded = self.tokenizer.batch_decode(batch_labels['labels'].numpy())
-            print("original_decoded", original_decoded)
             original_summaries.extend(original_decoded)
 
         assert len(original_summaries) == len(predicted_summaries)
@@ -142,9 +144,10 @@ class TextGenerationMetricCallback:
         result['rouge1_f1score_mid'] = aggregator.aggregate()['rouge1'].mid.fmeasure
         result['rougel_f1score_mid'] = aggregator.aggregate()['rougeLsum'].mid.fmeasure
 
-        global_step = traininer_kwargs['global_step']
-        wandb = traininer_kwargs['wandb']
+        global_step = trainer_kwargs['global_step']
+        wandb = trainer_kwargs['wandb']
         if wandb:
+            wandb.log({"predicted_table_{}".format(global_step): wandb.Table(dataframe=df)}, step=global_step)
             wandb.log(result, step=global_step)
 
         return result

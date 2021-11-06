@@ -464,3 +464,11 @@ Flax), PyTorch, and/or TensorFlow.
     model_doc/mt5.rst
     model_doc/roberta.rst
     model_doc/parallelism
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Tokenizers
+
+    model_doc/albert_tokenizer
+    model_doc/bigbird_tokenizer
+    model_doc/t5_tokenizer

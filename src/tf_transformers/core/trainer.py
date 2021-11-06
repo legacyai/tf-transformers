@@ -126,7 +126,8 @@ def train_and_eval(
     model_checkpoint_dir,
     model_save_interval_steps,
     max_number_of_models,
-    wandb
+    clip_norm,
+    wandb,
 ):
     def save_model(checkpoint_manager, epoch_end=False):
         """Save model"""
@@ -161,26 +162,26 @@ def train_and_eval(
 
         _write(step)
         writer.flush()
-        
+
     def write_metrics_to_wandb(metric_dict, wandb_writer, step):
         """Write metrics here"""
         # Write if wandb is not None
         if wandb:
             wandb_writer.log(metric_dict, step=step)
-            
+
     def write_validation_metrics_to_wandb(metric_dict, wandb_writer, step):
         """Write metrics here"""
         # Write if wandb is not None
         metric_dict_copy = {}
-        for k,v in metric_dict.items():
+        for k, v in metric_dict.items():
             if k.startswith("val"):
                 metric_dict_copy[k] = v
             else:
-                metric_dict_copy['val_'+k] = v
-            
+                metric_dict_copy['val_' + k] = v
+
         if wandb:
             wandb_writer.log(metric_dict_copy, step=step)
-        
+
     def compute_loss(batch_labels, model_outputs):
         """Loss computation which takes care of loss reduction based on GLOBAL_BATCH_SIZE"""
         per_example_loss = train_loss_fn(batch_labels, model_outputs)
@@ -212,7 +213,7 @@ def train_and_eval(
                 # each callback can have separate interval steps
                 callback_scores = []
                 for callback, callback_steps in zip(callbacks, callbacks_interval_steps):
-                    if callback_steps and global_step !=0 and (global_step % callback_steps == 0):
+                    if callback_steps and global_step != 0 and (global_step % callback_steps == 0):
                         logging.info("Callbacks in progress at step {} . . . .".format(global_step))
                         current_trainer_kwargs = locals()
                         trainer_kwargs.update(current_trainer_kwargs)
@@ -305,8 +306,14 @@ def train_and_eval(
                     loss_scaled = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
                     scaled_gradients = tape.gradient(loss_scaled["loss"], model.trainable_variables)
                     grads = optimizer.get_unscaled_gradients(scaled_gradients)
+                    if clip_norm:
+                        # Apply some clipping
+                        grads, _ = tf.clip_by_global_norm(grads, clip_norm)
                 else:
                     grads = tape.gradient(loss["loss"], model.trainable_variables)
+                    if clip_norm:
+                        # Apply some clipping
+                        grads, _ = tf.clip_by_global_norm(grads, clip_norm)
                 # TODO
                 # Scales down the loss for gradients to be invariant from replicas.
                 # loss = loss / strategy.num_replicas_in_sync
@@ -365,7 +372,7 @@ def train_and_eval(
                         and validation_loss_fn
                         and validation_interval_steps
                         and (global_step % validation_interval_steps == 0)
-                    ):  
+                    ):
                         # Do validation and get result
                         validation_result = do_validation(validation_dataset_distributed)
                         # Add to history
@@ -526,7 +533,8 @@ class Trainer:
         model_save_interval_steps: bool = None,
         repeat_dataset: bool = True,
         latest_checkpoint: str = None,
-        wandb = None,
+        clip_norm=None,
+        wandb=None,
     ):
 
         if steps_per_epoch:
@@ -644,6 +652,7 @@ class Trainer:
             model_checkpoint_dir,
             model_save_interval_steps,
             max_number_of_models,
+            clip_norm,
             wandb,
         )
         history['training_history'] = training_history

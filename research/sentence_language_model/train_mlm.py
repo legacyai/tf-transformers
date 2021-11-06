@@ -61,7 +61,7 @@ def run_train(cfg, wandb):
     max_seq_len = cfg.task.max_seq_len  # Maximum length per sequence
     max_predictions_per_seq = cfg.task.max_predictions_per_seq  # Maximum predictions (Mask) per sequence
     dtype = cfg.trainer.dtype
-    
+
     is_training = cfg.model.is_training
     use_dropout = cfg.model.use_dropout
     loss_type = cfg.optimizer.loss_type
@@ -74,6 +74,8 @@ def run_train(cfg, wandb):
         training_loss_names = {'loss_{}'.format(i + 1) for i in range(num_layers)}
 
     learning_rate = cfg.optimizer.learning_rate
+    warmup_rate = cfg.optimizer.warmup_rate
+
     steps_per_epoch = cfg.trainer.steps_per_epoch
     epochs = cfg.trainer.epochs
 
@@ -93,16 +95,18 @@ def run_train(cfg, wandb):
     model_fn = get_model(return_all_layer_outputs, is_training, use_dropout, tokenizer_layer.vocab_size.numpy())
 
     # Get Optimizer
+    # steps_per_epoch is number of examples seen during one epoch (with batch size)
+    # total examples per epoch = steps_per_epoch * batch_size
     examples = epochs * steps_per_epoch  # Assume steps_per_epoch = 100000, and epochs = 5, examples = 500000
-    optimizer_fn = get_optimizer(learning_rate, examples, train_batch_size, epochs, use_constant_lr)
+    optimizer_fn = get_optimizer(learning_rate, examples, epochs, warmup_rate, use_constant_lr)
 
     # Get loss
     loss_fn = get_loss(loss_type)
 
     # Get trainer
-    trainer = get_trainer(distribution_strategy=distribution_strategy,
-                          num_gpus=num_gpus,
-                          tpu_address=tpu_address, dtype=dtype)
+    trainer = get_trainer(
+        distribution_strategy=distribution_strategy, num_gpus=num_gpus, tpu_address=tpu_address, dtype=dtype
+    )
 
     # Define Callback
     tokenizer = get_hf_tokenizer()

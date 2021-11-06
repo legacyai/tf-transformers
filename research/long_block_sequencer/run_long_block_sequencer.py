@@ -16,9 +16,9 @@
 # ==============================================================================
 """This is the main script to run Long Block Sequencer Model"""
 import os
+import warnings
 
 import hydra
-import wandb
 from absl import logging
 from omegaconf import DictConfig
 from train_long_block_sequencer import run_train
@@ -27,11 +27,13 @@ logging.set_verbosity("INFO")
 
 # We set PROJECT_NAME from ENVIORNMENT VARIABLE
 WANDB_PROJECT = os.getenv('WANDB_PROJECT', None)
+use_wandb = True
 if WANDB_PROJECT is None:
-    raise ValueError(
+    warnings.warn(
         "For wandb-project should not be None.\
         Set export WANDB_PROJECT=<project_name>"
     )
+    use_wandb = False
 
 
 @hydra.main(config_path="conf", config_name="config")
@@ -46,15 +48,21 @@ def run(cfg: DictConfig) -> None:
         distribution_strategy = 'tpu'
         num_gpus = 0
         tpu_address = cfg.trainer.tpu_address
-        trainer = get_trainer(
+        get_trainer(
             distribution_strategy=distribution_strategy,
             num_gpus=num_gpus,
             tpu_address=tpu_address,
             dtype=cfg.trainer.dtype,
         )  # noqa
 
-    wandb.init(project=WANDB_PROJECT, config=config_dict, sync_tensorboard=True)
-    history = run_train(cfg, wandb)
+    if use_wandb:
+        import wandb
+
+        wandb.init(project=WANDB_PROJECT, config=config_dict, sync_tensorboard=True)
+        history = run_train(cfg, wandb)
+    else:
+        # Set wandb = None
+        history = run_train(cfg, None)
     return history
 
 

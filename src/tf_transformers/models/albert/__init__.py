@@ -17,4 +17,7 @@
 from tf_transformers.models.albert.albert import AlbertEncoder
 from tf_transformers.models.albert.albert_model import AlbertModel
 from tf_transformers.models.albert.configuration_albert import AlbertConfig
-from tf_transformers.models.albert.tokenizer_albert import AlbertTokenizerTFText
+from tf_transformers.models.albert.tokenizer_albert import (
+    AlbertTokenizerLayer,
+    AlbertTokenizerTFText,
+)

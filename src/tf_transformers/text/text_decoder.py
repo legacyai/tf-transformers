@@ -40,6 +40,9 @@ def TextDecoder(
                 return TextDecoderEncoderOnly(model, input_mask_ids, input_type_ids)
             else:
                 # Seq2Seq (EncoderDecoder Model)
+                # Get it from saved_model config
+                if "decoder_start_token_id" in model.config:
+                    decoder_start_token_id = model.config["decoder_start_token_id"].numpy()
                 if decoder_start_token_id is None:
                     raise ValueError(
                         "You are passing a Seq2Seq model like T5. \
