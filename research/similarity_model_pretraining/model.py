@@ -47,7 +47,7 @@ def get_optimizer(learning_rate, steps_per_epoch, epochs, warmup_rate, learning_
     """Get AdamW optimizer"""
 
     # Total steps over all epochs
-    num_train_steps = steps_per_epoch * epochs
+    num_train_steps = steps_per_epoch * epochs  # with batch_size
     warmup_steps = int(warmup_rate * num_train_steps)
     if learning_rate_type is None:
         learning_rate_type = 'linear'
