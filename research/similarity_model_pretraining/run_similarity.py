@@ -21,7 +21,7 @@ import warnings
 import hydra
 from absl import logging
 from omegaconf import DictConfig
-from train_mlm import run_train
+from train_similairity import run_train
 
 logging.set_verbosity("INFO")
 
