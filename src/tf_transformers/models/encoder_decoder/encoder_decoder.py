@@ -1,3 +1,20 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""The main wrapper to wrap Encoder Decoder models"""
 import tensorflow as tf
 from absl import logging
 
@@ -113,20 +130,51 @@ class EncoderDecoder(LegacyLayer):
         share_encoder=False,
         is_training=False,
         use_dropout=False,
-        encoder_sequence_length=None,
         decoder_start_token_id=None,
         **kwargs,
     ):
-        """
+        r"""
+        EncoderDecoder is a wrapper to wrap and connect all Models.
+        .. note::
+
+            EncoderDecoder Models required an encoder and decoder layer.
+            This encoder and decoder should be from :class:`tf_transformers.core.LegacyLayer`.
+
         Args:
-            encoder ([tf.keras.layers.Layer]): [Encoder]
-            decoder ([tf.keras.layers.Layer]): [Decoder]
-            share_embeddings (bool, optional): [To share embeddings from encoder to decoder]. Defaults to False.
-            share_encoder (bool, optional): [To share most layer from encoder to decoder.
-            But not cross attention layers]  Defaults to False.
-            is_training (bool, optional): [description]. Defaults to False.
-            use_dropout (bool, optional): [description]. Defaults to False.
-            encoder_sequence_length ([type], optional): [Max length of encoder]. Defaults to None.
+            encoder (:obj:`str`): Encoder ( :class:`tf_transformers.core.LegacyLayer` )
+            decoder (:obj:`str`): Decoder ( :class:`tf_transformers.core.LegacyLayer` )
+            share_embeddings (:obj:`bool`): Whether to share embeddings. But recommended it oustide the
+            class. Check following example with :class:`tf_transformers.model.BartEncoder```.
+            share_encoder (:obj:`bool`): Whether to share whole encoder with decoder. Its little
+            buggy and experimental.
+            is_training (:obj:`bool`): To enable dropout we have to enable this.
+            use_dropout (:obj:`bool`): Whether to use dropout.
+            decoder_start_token_id (:obj:`int`): This should be set, if not provide from decoder config.
+
+        Returns:
+            LegacyModel/LegacyLayer with or without config.
+
+        Examples::
+
+            >>> from tf_transformers.models import  BartEncoder, EncodeDecoder
+            >>> encoder_layer = Encoder(config=config_dict, name="bart_encoder")
+            >>> decoder_layer = Encoder(config=config_dict, name="bart_encoder",
+                                    use_decoder=True,
+                                    mask_mode="causal",
+            )
+            >>> decoder_layer._embedding_layer = encoder_layer._embedding_layer # Share embeddings
+            >>> model_layer = EncoderDecoder(encoder_layer, decoder_layer)
+            >>> model = model_layer.get_model()
+            >>> batch_size = 5
+            >>> encoder_sequence_length = 64 # Encoder
+            >>> decoder_sequence_length = 37 # Decoder
+            >>> encoder_input_ids = tf.random.uniform(shape=(batch_size, encoder_sequence_length), dtype=tf.int32)
+            >>> decoder_input_ids = tf.random.uniform(shape=(batch_size, decoder_sequence_length), dtype=tf.int32)
+            >>> encoder_input_mask = tf.ones_like(encoder_input_ids)
+            >>> inputs = {{'encoder_input_ids': input_ids, 'encoder_input_mask': encoder_input_mask, \
+                "decoder_input_ids": decoder_input_ids}
+            >>> outputs = model(inputs)
+
         """
         self._encoder = encoder
         self._decoder = decoder
@@ -134,7 +182,6 @@ class EncoderDecoder(LegacyLayer):
         self._share_encoder = share_encoder
         self._is_training = is_training
         self._use_dropout = use_dropout
-        self._encoder_sequence_length = encoder_sequence_length
         self.decoder_start_token_id = decoder_start_token_id
 
         self._encoder_config_dict = self._encoder._config_dict

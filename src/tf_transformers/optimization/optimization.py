@@ -18,6 +18,7 @@ def get_learning_rate_fn(init_lr, num_train_steps, num_warmup_steps, learning_ra
         [type]: [description]
     """
     if learning_rate_type == "linear":
+        logging.info("Using linear optimization warmup")
         learning_rate_fn = WarmUp_Linear(
             initial_learning_rate=init_lr, num_training_steps=num_train_steps, warmup_steps=num_warmup_steps
         )
@@ -28,10 +29,19 @@ def get_learning_rate_fn(init_lr, num_train_steps, num_warmup_steps, learning_ra
             initial_learning_rate=init_lr, decay_steps=num_train_steps, end_learning_rate=0.0
         )
         if num_warmup_steps > 0.0:
+            logging.info("Using linear optimization warmup")
             learning_rate_fn = WarmUp(
                 initial_learning_rate=init_lr, decay_schedule_fn=learning_rate_fn, warmup_steps=num_warmup_steps
             )
         return learning_rate_fn
+
+    if learning_rate_type == "cosine":
+        logging.info("Using Cosine decay optimization")
+        learning_rate_fn = tf.keras.optimizers.schedules.CosineDecay(
+            initial_learning_rate=init_lr, decay_steps=num_warmup_steps, alpha=0.0, name="cosine_lr"
+        )
+        return learning_rate_fn
+
     logging.info("Not using learning rate fn : Using initial learning rate {}".format(init_lr))
     return init_lr
 

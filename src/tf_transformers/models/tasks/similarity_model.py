@@ -4,9 +4,19 @@ from tf_transformers.core import LegacyLayer, LegacyModel
 
 
 class Similarity_Model(LegacyLayer):
-    def __init__(self, encoder, decoder=None, is_training=True, initializer="glorot_uniform", siamese=False, **kwargs):
-        kwargs["is_training"] = is_training
-        super(Similarity_Model, self).__init__(**kwargs)
+    def __init__(
+        self,
+        encoder,
+        decoder=None,
+        is_training=True,
+        use_dropout=False,
+        initializer="glorot_uniform",
+        siamese=False,
+        **kwargs,
+    ):
+        super(Similarity_Model, self).__init__(
+            is_training=is_training, use_dropout=use_dropout, name=encoder.name, **kwargs
+        )
         self.is_training = is_training
         if siamese:
             self.encoder = encoder
