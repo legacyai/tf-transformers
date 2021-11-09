@@ -2,11 +2,7 @@ import tensorflow as tf
 from similarity_model import Similarity_Model_Pretraining
 
 from tf_transformers.core import Trainer
-from tf_transformers.models import (
-    BigBirdRobertaTokenizerTFText,
-    GPT2Model,
-    MaskedLMModel,
-)
+from tf_transformers.models import BigBirdRobertaTokenizerTFText, GPT2Model
 from tf_transformers.optimization import create_optimizer
 
 MODEL_NAME = 'gpt2'
@@ -29,12 +25,12 @@ def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size):
             return_all_layer_outputs=return_all_layer_outputs,
             return_layer=True,
         )
-        model = MaskedLMModel(
-            model,
-            use_extra_mlm_layer=False,
-            hidden_size=config['embedding_size'],
-            layer_norm_epsilon=config['layer_norm_epsilon'],
-        )
+        # model = MaskedLMModel(
+        #     model,
+        #     use_extra_mlm_layer=False,
+        #     hidden_size=config['embedding_size'],
+        #     layer_norm_epsilon=config['layer_norm_epsilon'],
+        # )
         model = Similarity_Model_Pretraining(encoder=model, projection_dimension=768)
         model = model.get_model()
         return model
