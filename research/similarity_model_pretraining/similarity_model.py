@@ -72,13 +72,17 @@ class Similarity_Model_Pretraining(LegacyLayer):
             )
 
             # Clamp logits to a max of tf.math.log(100) = 4.6051702 as per CLIP model
-            self.logits_scale = tf.math.exp(self.logits_scale)
-            self.logits_scale = tf.clip_by_value(
-                self.logits_scale, clip_value_min=tf.math.log(1 / 0.07), clip_value_max=4.6051752
+            logits_scale = tf.math.exp(self.logits_scale)
+            logits_scale = tf.clip_by_value(
+                logits_scale, clip_value_min=tf.math.log(1 / 0.07), clip_value_max=4.6051752
             )
-            logits = self.logits_scale * logits
+            logits = tf.cast(logits_scale, dtype=tf_utils.get_dtype()) * logits
 
             corrupted_outputs['logits'] = logits
+            corrupted_outputs['original_sentence_embedding_normalized'] = original_sentence_embedding_normalized
+            corrupted_outputs['corrupted_sentence_embedding_normalized'] = corrupted_sentence_embedding_normalized
+
+            return corrupted_outputs
         else:
             first_inputs = {k.replace("first_", ""): v for k, v in inputs.items() if k.startswith("first_")}
             second_inputs = {k.replace("second_", ""): v for k, v in inputs.items() if k.startswith("second_")}
@@ -110,11 +114,10 @@ class Similarity_Model_Pretraining(LegacyLayer):
             )
 
             # Clamp logits to a max of tf.math.log(100) = 4.6051702 as per CLIP model
-            self.logits_scale = tf.math.exp(self.logits_scale)
+            logits_scale = tf.math.exp(self.logits_scale)
             # no need to clamp at testing
-            # self.logits_scale = tf.clip_by_value(self.logits_scale,
-            # clip_value_min=tf.math.log(1/0.07), clip_value_max=4.6051752)
-            logits = tf.cast(self.logits_scale, dtype=tf_utils.get_dtype()) * logits
+            # self.logits_scale = tf.clip_by_value(self.logits_scale, clip_value_min=tf.math.log(1/0.07), clip_value_max=4.6051752)
+            logits = tf.cast(logits_scale, dtype=tf_utils.get_dtype()) * logits
 
             outputs = {}
             outputs['first_sentence_embedding_normalized'] = first_sentence_embedding_normalized
