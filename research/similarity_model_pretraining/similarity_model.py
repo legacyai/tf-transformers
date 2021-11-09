@@ -1,6 +1,7 @@
 import tensorflow as tf
 
 from tf_transformers.core import LegacyLayer, LegacyModel
+from tf_transformers.utils import tf_utils
 
 
 class Similarity_Model_Pretraining(LegacyLayer):
@@ -111,8 +112,9 @@ class Similarity_Model_Pretraining(LegacyLayer):
             # Clamp logits to a max of tf.math.log(100) = 4.6051702 as per CLIP model
             self.logits_scale = tf.math.exp(self.logits_scale)
             # no need to clamp at testing
-            # self.logits_scale = tf.clip_by_value(self.logits_scale, clip_value_min=tf.math.log(1/0.07), clip_value_max=4.6051752)
-            logits = self.logits_scale * logits
+            # self.logits_scale = tf.clip_by_value(self.logits_scale,
+            # clip_value_min=tf.math.log(1/0.07), clip_value_max=4.6051752)
+            logits = tf.cast(self.logits_scale, dtype=tf_utils.get_dtype()) * logits
 
             outputs = {}
             outputs['first_sentence_embedding_normalized'] = first_sentence_embedding_normalized
