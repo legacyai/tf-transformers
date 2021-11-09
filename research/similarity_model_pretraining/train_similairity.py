@@ -65,7 +65,7 @@ def run_train(cfg, wandb):
 
     # Define Callback
     callback = SimilarityCallback()
-    callback_steps = 10000
+    callback_steps = cfg.trainer.callback_steps
 
     # Train
     history = trainer.run(
