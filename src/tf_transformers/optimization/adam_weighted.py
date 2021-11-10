@@ -29,6 +29,8 @@ class AdamWeightDecay(tf.keras.optimizers.Adam):
         **kwargs,
     ):
         super(AdamWeightDecay, self).__init__(learning_rate, beta_1, beta_2, epsilon, amsgrad, name, **kwargs)
+        if exclude_from_weight_decay is None:
+            exclude_from_weight_decay = ["LayerNorm", "layer_norm", "bias"]
         self.weight_decay_rate = weight_decay_rate
         self._include_in_weight_decay = include_in_weight_decay
         self._exclude_from_weight_decay = exclude_from_weight_decay

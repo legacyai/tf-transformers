@@ -28,7 +28,7 @@ def run_train(cfg, wandb):
 
     learning_rate = cfg.optimizer.learning_rate
     warmup_rate = cfg.optimizer.warmup_rate
-    learning_rate_type = cfg.optimizer.learning_rate_type
+    decay_function = cfg.optimizer.decay_function
 
     steps_per_epoch = cfg.trainer.steps_per_epoch
     epochs = cfg.trainer.epochs
@@ -53,7 +53,7 @@ def run_train(cfg, wandb):
     # total examples per epoch = steps_per_epoch * batch_size
     examples_per_epoch = steps_per_epoch  # Assume steps_per_epoch = 100000, and epochs = 5, examples = 500000
     optimizer_fn = get_optimizer(
-        learning_rate, examples_per_epoch, epochs, warmup_rate, learning_rate_type, use_constant_lr
+        learning_rate, examples_per_epoch, epochs, warmup_rate, decay_function, use_constant_lr
     )
     # Get loss
     loss_fn = get_loss(loss_type)

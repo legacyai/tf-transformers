@@ -17,7 +17,7 @@ trainer:
 optimizer:
   learning_rate: 5e-4
   warmup_rate: 0.1
-  learning_rate_type: cosine
+  decay_function: cosine
   loss_type:
   use_constant_lr: false
 model:

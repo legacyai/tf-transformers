@@ -43,14 +43,14 @@ def get_tokenizer():
     return tokenizer_layer
 
 
-def get_optimizer(learning_rate, steps_per_epoch, epochs, warmup_rate, learning_rate_type, use_constant_lr=False):
+def get_optimizer(learning_rate, steps_per_epoch, epochs, warmup_rate, decay_function, use_constant_lr=False):
     """Get AdamW optimizer"""
 
     # Total steps over all epochs
     num_train_steps = steps_per_epoch * epochs  # with batch_size
     warmup_steps = int(warmup_rate * num_train_steps)
-    if learning_rate_type is None:
-        learning_rate_type = 'linear'
+    if decay_function is None:
+        decay_function = 'linear'
 
     def optimizer_fn():
         if use_constant_lr:
@@ -59,7 +59,7 @@ def get_optimizer(learning_rate, steps_per_epoch, epochs, warmup_rate, learning_
             optimizer = AdamWeightDecay(learning_rate=learning_rate)
             return optimizer
 
-        optimizer, learning_rate_fn = create_optimizer(learning_rate, num_train_steps, warmup_steps, learning_rate_type)
+        optimizer, learning_rate_fn = create_optimizer(learning_rate, num_train_steps, warmup_steps, decay_function)
         return optimizer
 
     return optimizer_fn

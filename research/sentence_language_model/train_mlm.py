@@ -1,7 +1,5 @@
-import os
-
-import tensorflow as tf
 from callbacks import MLMCallback
+from dataset_loader import get_dataset
 from model import (
     get_hf_tokenizer,
     get_loss,
@@ -12,39 +10,6 @@ from model import (
 )
 
 from tf_transformers.text.lm_tasks import mlm_fn
-
-
-def get_dataset(data_directory, masked_lm_map_fn, batch_size):
-    """Convert text to tf.data.Dataset after map fn
-
-    Args:
-        data_directory ([type]): [description]
-        masked_lm_map_fn ([type]): [description]
-        batch_size ([type]): [description]
-
-    Returns:
-        [type]: [description]
-    """
-    all_text_files = tf.io.gfile.glob(os.path.join(data_directory, '*.txt'))
-    ds = tf.data.TextLineDataset(all_text_files)
-
-    # We need to add the text as dict
-    ds = ds.map(lambda x: {'text': x}, num_parallel_calls=tf.data.AUTOTUNE)
-
-    # Do MLM
-    ds = ds.map(masked_lm_map_fn, num_parallel_calls=tf.data.AUTOTUNE)
-    # Batch
-    ds = ds.batch(batch_size, drop_remainder=True)
-
-    # Shuffle and Prefetch
-    ds = ds.shuffle(100, reshuffle_each_iteration=True).prefetch(100)
-
-    # Auto SHARD
-    options = tf.data.Options()
-    options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.AUTO
-    ds = ds.with_options(options)
-
-    return ds
 
 
 def run_train(cfg, wandb):
