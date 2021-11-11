@@ -18,6 +18,8 @@ def run_train(cfg, wandb):
     Args:
         cfg (obj `DictConfig`): This is the config from hydra.
     """
+    # We use this delimiter to split text into list of sentences
+    delimiter = '__||__'
 
     data_directory = cfg.data.data_directory
     train_batch_size = cfg.data.train_batch_size
@@ -38,6 +40,7 @@ def run_train(cfg, wandb):
 
     learning_rate = cfg.optimizer.learning_rate
     warmup_rate = cfg.optimizer.warmup_rate
+
     steps_per_epoch = cfg.trainer.steps_per_epoch
     epochs = cfg.trainer.epochs
 
@@ -45,11 +48,12 @@ def run_train(cfg, wandb):
     num_gpus = cfg.trainer.num_gpus
     tpu_address = cfg.trainer.tpu_address
     model_checkpoint_dir = cfg.trainer.model_checkpoint_dir
+    callback_steps = cfg.trainer.callback_steps
 
     # Get dataset and tokenizer
     tokenizer_layer = get_tokenizer()
     # We split text by words (whitespace), inside MLM function.
-    masked_lm_map_fn = mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq)
+    masked_lm_map_fn = mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq, delimiter)
     train_dataset = get_dataset(data_directory, masked_lm_map_fn, train_batch_size)
 
     # Get Model
@@ -60,6 +64,7 @@ def run_train(cfg, wandb):
     # total examples per epoch = steps_per_epoch * batch_size
     examples = epochs * steps_per_epoch  # Assume steps_per_epoch = 100000, and epochs = 5, examples = 500000
     optimizer_fn = get_optimizer(learning_rate, examples, epochs, warmup_rate, use_constant_lr)
+
     # Get loss
     loss_fn = get_loss(loss_type)
 
@@ -71,7 +76,6 @@ def run_train(cfg, wandb):
     # Define Callback
     tokenizer = get_hf_tokenizer()
     callback = MLMCallback(tokenizer)
-    callback_steps = 10000
 
     # Train
     history = trainer.run(

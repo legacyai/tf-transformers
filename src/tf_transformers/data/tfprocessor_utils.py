@@ -40,7 +40,7 @@ class TFProcessor(object):
         shuffle=False,
         drop_remainder=False,
         shuffle_buffer_size=100,
-        prefetch_buffer_size=100,
+        prefetch_buffer_size=tf.data.AUTOTUNE,
     ):
         """Auto Batching
 
@@ -100,7 +100,7 @@ class TFProcessor(object):
         # fmt: on
         if shuffle:
             dataset = dataset.shuffle(shuffle_buffer_size, seed=None, reshuffle_each_iteration=True)
-        dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
+        dataset = dataset.prefetch(tf.data.AUTOTUNE)
         return dataset
 
     def process(self, parse_fn, verbose=10000):

@@ -81,7 +81,7 @@ def get_dataset(
     train_dataset = train_dataset.map(dynamic_mlm_fn, num_parallel_calls=tf.data.AUTOTUNE)
     train_dataset = train_dataset.filter(lambda x, y: filter_by_batch(x, y, batch_size))
     train_dataset = train_dataset.shuffle(100)
-    train_dataset = train_dataset.prefetch(100)
+    train_dataset = train_dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
 
     return train_dataset
 

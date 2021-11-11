@@ -1,18 +1,21 @@
 
-# Prepare Data
+### Sentence Masked Language Modeling using TFText
 
-python3 1_data_to_text.py data.name=wikipedia  data.version= data.output_text_file=/home/Sidhu/datasets/wikipedia.txt
-python3 1_data_to_text.py data.name=bookcorpus  data.output_text_file=/home/Sidhu/datasets/bookcorpus.txt
+This folder has all necessary scripts to run the Sentence MLM using tensorflow text.
+Instead of masking words, we mask sentences (sequence of words)
 
-# Prepare tfrecords
+### Advantage
 
-nohup python3 2_text_to_features.py tokenizer.model_file_path=/home/sidhu/Datasets/vocab/new_spiece.model     tokenizer.do_lower_case=false     data.tfrecord_output_dir=/home/sidhu/Datasets/wiki_tfrecords     data.tfrecord_filename=wiki     data.tfrecord_nfiles=25     data.input_text_files=[/home/sidhu/Datasets/wikipedia.txt]     data.batch_size=1024 > wiki_tfrecord.log &
+No need to prepare features in TFRecord format. We make use of dynamic mlm. All we need is a text file or folder of text files with text files, which each line corrsponding to text.
 
+### Configuration (Hydra)
 
-Bookcorpus
+All or most configurations can be managed using ```conf/config.yaml```. You can override it by command line also.
 
-nohup python3 2_text_to_features.py tokenizer.model_file_path=/home/sidhu/Datasets/vocab/new_spiece.model     tokenizer.do_lower_case=false     data.tfrecord_output_dir=/home/sidhu/Datasets/bookcorpus_tfrecords     data.tfrecord_filename=bookcorpus     data.tfrecord_nfiles=10     data.input_text_files=[/home/sidhu/Datasets/bookcorpus.txt]     data.batch_size=1024 > bookcorpus_tfrecord.log &
+Eg: For TPU , we need a data in GCS and model_checkpoint_dir to be in GCS too.
 
+```python3 run_mlm.py data.data_directory=<GCP_DATA_DIR> data.train_batch_size=128 trainer.dtype=bf16 trainer.model_checkpoint_dir=<GCP_MODEL_DIR> trainer.steps_per_epoch=50000 trainer.callback_steps=10000 trainer.epochs=20 trainer.strategy=tpu trainer.tpu_address=<TPU_NAME> optimizer.learning_rate=5e-4```
 
-python3 train_mix_mlm.py   tokenizer.model_file_path=/home/sidhu/Datasets/vocab/new_spiece.model \
-                       model.model_save_dir=/home/sidhu/Projects/joint_bert
+### WandB
+
+By default we are using Wandb. if enviornment variable ```WANDB_PROJECT=None```, wandb will be disabled.

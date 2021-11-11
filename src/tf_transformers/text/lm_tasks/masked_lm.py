@@ -19,13 +19,14 @@ import tensorflow as tf
 import tensorflow_text as tf_text
 
 
-def mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq, delimiter=' '):
+def mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq, selection_rate=0.15, delimiter=' '):
     """The main function for MLM.
 
     Args:
         tokenizer_layer : A tokenizer layer from tf_transformers. eg: AlbertTokenizerTFText
         max_seq_len (:obj:`int`): Max sequence length of input
         max_predictions_per_seq (:obj:`int`): Maximum predictions (Masked tokens) per sequence
+        selection_rate (:obj:`float`): Probability of inputs to mask in a sequence.
         delimiter (:obj:`str`): A delimiter with which we split. Default is whitespace.
 
     Returns:
@@ -41,7 +42,7 @@ def mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq, delimiter=' ')
     # Random Selector (10 per)
     random_selector = tf_text.RandomItemSelector(
         max_selections_per_batch=max_predictions_per_seq,
-        selection_rate=0.1,
+        selection_rate=selection_rate,
         unselectable_ids=[cls_token_id, sep_token_id, unk_token_id, pad_token_id],
     )
 

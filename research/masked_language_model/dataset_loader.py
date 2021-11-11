@@ -26,6 +26,11 @@ def get_dataset(data_directory, masked_lm_map_fn, batch_size):
     all_text_files = tf.io.gfile.glob(os.path.join(data_directory, '*.txt'))
     shuffle(all_text_files)
     ds = tf.data.TextLineDataset(all_text_files)
+    # Our data has sentences joined by '__||__'. So, for word based MLM
+    # we need to replace '__||__', by ''. and club it as a single sentence
+    # tf.strings.regex_replace not working as expected
+    ds = ds.map(lambda x: tf.strings.split(x, '__||__'), num_parallel_calls=tf.data.AUTOTUNE)
+    ds = ds.map(lambda x: tf.strings.reduce_join([x], separator=' '), num_parallel_calls=tf.data.AUTOTUNE)
 
     # We need to add the text as dict
     ds = ds.map(lambda x: {'text': x}, num_parallel_calls=tf.data.AUTOTUNE)

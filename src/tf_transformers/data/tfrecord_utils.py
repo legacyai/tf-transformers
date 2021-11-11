@@ -447,7 +447,7 @@ class TFReader(object):
         # fmt: on
         if shuffle:
             dataset = dataset.shuffle(shuffle_buffer_size, seed=None, reshuffle_each_iteration=True)
-        dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
+        dataset = dataset.prefetch(tf.data.AUTOTUNE)
         return dataset
 
     def read_record(self, keys=[], auto_batch=False, **kwargs):  # noqa

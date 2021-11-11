@@ -19,7 +19,7 @@ import tensorflow as tf
 import tensorflow_text as tf_text
 
 
-def prefix_lm_fn(tokenizer_layer, max_seq_len, add_cls_sep=False):
+def prefix_lm_fn(tokenizer_layer, max_seq_len):
     """The main function for PLM.
 
     Args:
@@ -39,47 +39,69 @@ def prefix_lm_fn(tokenizer_layer, max_seq_len, add_cls_sep=False):
 
     def prefix_map_fn(item):
         input_ids = tokenizer_layer({'text': item['sentences']})
+        # Find the sentence boundary which is less than or equal to max_seq_len (-3 for CLS, EOS, SEP)
+        max_seq_index = tf.where(input_ids.row_splits < max_seq_len - 3)[-1][0]
+        # Trim the inputs
+        input_ids = input_ids[:max_seq_index]
         # We take random position between 1 and len(sentences)//2
-        mid_index = tf.shape(input_ids.flat_values)[0] // 2
-        prefix_mask_index = tf.random.uniform(minval=1, maxval=mid_index + 1, shape=(), dtype=tf.int32)
-        # We split it to 2 parts left and right
-        # left we mask by 1 and right we mask by 0
-        # right side portions are our targets
-        input_ids_first_portion = input_ids[:prefix_mask_index]
-        input_ids_second_portion = input_ids[prefix_mask_index:]
+        mid_index = (tf.shape(input_ids.row_splits)[0] - 1) // 2
+
+        # Sometime, 2nd sentence might go beyond max_seq_len
+        # Then we will have only 1, None shape for input_ids
+        # Then 1//2 == 0 for mid_index fails. In those case, we randomly chunk the sentence
+        # without looking for a proper sentence end.
+        # This will result in lesser sequences for some examples
+        if tf.equal(mid_index, 0):
+            max_seq_index = input_ids.row_splits[-1]
+            mid_index = tf.cast(max_seq_index // 2, tf.int32)
+            prefix_mask_index = tf.random.uniform(minval=0, maxval=mid_index + 1, shape=(), dtype=tf.int32)
+            input_ids_first_portion = input_ids[:, :prefix_mask_index]
+            input_ids_second_portion = input_ids[:, prefix_mask_index:]
+        else:
+            prefix_mask_index = tf.random.uniform(minval=1, maxval=mid_index + 1, shape=(), dtype=tf.int32)
+            # We split it to 2 parts left and right
+            # left we mask by 1 and right we mask by 0
+            # right side portions are our targets
+            input_ids_first_portion = input_ids[:prefix_mask_index]
+            input_ids_second_portion = input_ids[prefix_mask_index:]
+        # We use CLS token id as EOS for prefix models. The reason is, otherwise
+        # model might not predict next sentence, as it encounter . or delimiter much frequently during end of
+        # example.
+        input_ids_first_portion = tf.concat([input_ids_first_portion, [[cls_token_id]]], axis=0)
+        # Shift 1 position right to account for EOS token (CLS here)
+        prefix_mask_index = prefix_mask_index + 1
 
         # Split and join
         input_mask_first_portion = tf.ones_like(input_ids_first_portion)
         input_mask_second_portion = tf.zeros_like(input_ids_second_portion)
         input_mask = tf.concat([input_mask_first_portion, input_mask_second_portion], axis=0)
+        input_ids = tf.concat([input_ids_first_portion, input_ids_second_portion], axis=0)
+
         # Pad inputs
         input_ids_ragged = tf.RaggedTensor.from_tensor(tf.expand_dims(input_ids.merge_dims(-2, 1), 0))
         input_mask_ragged = tf.RaggedTensor.from_tensor(tf.expand_dims(input_mask.merge_dims(-2, 1), 0))
-        # Trim inputs (+1 is because for Causal LM we shift inputs and labels)
-        if add_cls_sep:
-            input_ids_ragged = input_ids_ragged[:, : max_seq_len + 1 - 2]
-            input_mask_ragged = input_mask_ragged[:, : max_seq_len + 1 - 2]
 
-            input_ids_ragged = tf.concat([[[cls_token_id]], input_ids_ragged, [[sep_token_id]]], axis=1)
-            input_mask_ragged = tf.concat([[[1]], input_mask_ragged, [[1]]], axis=1)
+        # Add CLS and SEP
+        input_ids_ragged = tf.concat([[[cls_token_id]], input_ids_ragged, [[sep_token_id]]], axis=1)
+        # 0 here is for extra SEP which has to be predicted as EOS token while generation
+        input_mask_ragged = tf.concat([[[1]], input_mask_ragged, [[0]]], axis=1)
 
-        else:
-            input_ids_ragged = input_ids_ragged[:, : max_seq_len + 1]
-            input_mask_ragged = input_mask_ragged[:, : max_seq_len + 1]
-
+        # Opposite of input_mask (Do it before input_mask padding)
+        lm_label_weights = tf.cast(tf.not_equal(input_mask_ragged, 1), tf.int32)
         input_word_ids, _ = tf_text.pad_model_inputs(input_ids_ragged, max_seq_length=max_seq_len + 1)
         input_mask, _ = tf_text.pad_model_inputs(input_mask_ragged, max_seq_length=max_seq_len + 1)
+        lm_label_weights, _ = tf_text.pad_model_inputs(lm_label_weights, max_seq_length=max_seq_len + 1)
 
         # Squeeze here will help to retain 2D when we batch outside map fn
         input_word_ids = tf.squeeze(input_word_ids, axis=0)
         input_mask = tf.squeeze(input_mask, axis=0)
+        lm_label_weights = tf.squeeze(lm_label_weights, axis=0)
 
         # Shift positions
         lm_labels = input_word_ids[1:]
         input_word_ids = input_word_ids[:-1]
         input_mask = input_mask[:-1]
-        # Opposite of input_mask
-        lm_label_weights = tf.cast(tf.not_equal(input_mask, 1), tf.int32)
+        lm_label_weights = lm_label_weights[1:]
 
         inputs = {}
         inputs['input_ids'] = input_word_ids
