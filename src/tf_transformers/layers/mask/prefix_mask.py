@@ -80,7 +80,7 @@ def prefix_mask(mask):
     n_output_words = tf.reduce_sum(tf.cast(tf.equal(mask, 0), dtype))  # total number of zeros
 
     # input_to_input and output_to_input_words_mask
-    input_ones_mask = tf.ones((n_input_words + n_output_words, n_input_words), dtype - dtype)
+    input_ones_mask = tf.ones((n_input_words + n_output_words, n_input_words), dtype=dtype)
     # input_to_output_words
     input_to_output_zero_mask = tf.zeros((n_input_words, n_output_words), dtype=dtype)
     # Upper triangular mask , output_words should never peek into future
