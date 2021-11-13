@@ -121,7 +121,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
 
             # Add 3d mask for the model, because its difficult to choose the mask
             # on the fly inside the model
-            inputs['input_mask_3d'] = prefix_mask(inputs['input_mask'])
+            inputs['input_mask_3d'] = tf.cast(prefix_mask(inputs['input_mask']), tf.float32)
 
             del inputs['input_mask']
             del inputs['input_type_ids']
@@ -142,7 +142,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
             inputs, labels = rename_labels_dict(inputs, labels)
             inputs, labels = add_masked_lm_positions(inputs, labels)
 
-            inputs['input_mask_3d'] = prefix_mask(inputs['input_mask'])
+            inputs['input_mask_3d'] = tf.cast(prefix_mask(inputs['input_mask']), tf.float32)
 
             del inputs['input_mask']
             del inputs['input_type_ids']

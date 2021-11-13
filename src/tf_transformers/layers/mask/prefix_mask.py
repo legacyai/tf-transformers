@@ -26,8 +26,8 @@ def attention_mask_square(nd):
     """
     dtype = tf_utils.get_dtype()
     ns = nd
-    i = tf.range(nd)[:, None]
-    j = tf.range(ns)
+    i = tf.range(nd, delta=tf.cast(1, dtype), dtype=dtype)[:, None]
+    j = tf.range(ns, delta=tf.cast(1, dtype), dtype=dtype)
     m = i >= j - ns + nd
     return tf.cast(m, dtype)
 
@@ -80,9 +80,9 @@ def prefix_mask(mask):
     n_output_words = tf.reduce_sum(tf.cast(tf.equal(mask, 0), dtype))  # total number of zeros
 
     # input_to_input and output_to_input_words_mask
-    input_ones_mask = tf.ones((n_input_words + n_output_words, n_input_words))
+    input_ones_mask = tf.ones((n_input_words + n_output_words, n_input_words), dtype - dtype)
     # input_to_output_words
-    input_to_output_zero_mask = tf.zeros((n_input_words, n_output_words))
+    input_to_output_zero_mask = tf.zeros((n_input_words, n_output_words), dtype=dtype)
     # Upper triangular mask , output_words should never peek into future
     output_upper_triangular_mask = attention_mask_square(n_output_words)
 
