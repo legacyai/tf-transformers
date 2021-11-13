@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""This is the main script to run MLM"""
+"""This is the main script to run Mix Language Model"""
 import os
 import warnings
 
 import hydra
 from absl import logging
 from omegaconf import DictConfig
-from train_mlm import run_train
+from train_mix_lm import run_train
 
 logging.set_verbosity("INFO")
 

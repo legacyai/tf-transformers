@@ -41,11 +41,11 @@ def get_dataset(data_directory, masked_lm_map_fn, batch_size):
     # Filter examples if there is not atleast single MASK sentence
     ds = ds.filter(filter_out_empty_mask)
 
+    # # Shuffle and Prefetch
+    ds = ds.shuffle(100, reshuffle_each_iteration=True).prefetch(buffer_size=tf.data.AUTOTUNE)
+
     # Batch
     ds = ds.batch(batch_size, drop_remainder=True)
-
-    # Shuffle and Prefetch
-    ds = ds.shuffle(100, reshuffle_each_iteration=True).prefetch(buffer_size=tf.data.AUTOTUNE)
 
     # Auto SHARD
     options = tf.data.Options()

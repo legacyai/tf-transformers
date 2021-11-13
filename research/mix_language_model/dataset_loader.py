@@ -1,3 +1,19 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 import os
 from random import shuffle
 
@@ -11,12 +27,14 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
     """Convert text to tf.data.Dataset after map fn
 
     Args:
-        data_directory ([type]): [description]
-        masked_lm_map_fn ([type]): [description]
-        batch_size ([type]): [description]
+        data_directory (:obj:`str`): Text data directory. For TPU, it will be in GCP bucket.
+        tokenizer_layer (:obj:`tf_transformers.core.LegacyLayer`): Tokenizer layer based on tf text.
+        max_seq_len (:obj:`int`): Maximum sequence length for each example.
+        batch_size (:obj:`int`): Batch size for tf.data.Dataset
+        minimum_prefix_length (:obj:`int`): Minimum length required for prefix LM.
 
     Returns:
-        [type]: [description]
+        A function to be used in tf.data.Dataset.map
     """
 
     prefix_map_fn = prefix_lm_fn(tokenizer_layer, max_seq_len)
@@ -66,10 +84,14 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
         min_sequence_length = minimum_prefix_length
         # Check sequence length by count padding tokens
         non_padded_count = tf.reduce_sum(tf.cast(tf.not_equal(x['input_ids'], 0), tf.int32))
-        if tf.equal(y['type'], b'prefix') and tf.greater_equal(non_padded_count, min_sequence_length):
-            return tf.constant(True)
+        if tf.equal(y['type'], b'prefix'):
+            if tf.greater_equal(non_padded_count, min_sequence_length):
+                return tf.constant(True)
+            else:
+                return tf.constant(False)
+        # If not prefix let it pass
         else:
-            return tf.constant(False)
+            return tf.constant(True)
 
     def rename_labels_dict(x, y):
         """Rename "lm_labels" to "masked_lm_labels" and "lm_weights" to "masked_lm_weights" """
@@ -154,6 +176,9 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
     shuffle(all_text_files)
     ds = tf.data.TextLineDataset(all_text_files)
 
+    # Remove duplicates if any
+    ds = ds.unique()
+
     # We need to add the text as dict
     ds = ds.map(lambda x: {'text': x}, num_parallel_calls=tf.data.AUTOTUNE)
 
@@ -166,11 +191,11 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
     # Filter examples for prefix where minimum_length doesnt meet
     ds = ds.filter(filter_prefix_with_minimum_length)
 
+    # Shuffle and Prefetch
+    ds = ds.shuffle(1024, reshuffle_each_iteration=True).prefetch(buffer_size=tf.data.AUTOTUNE)
+
     # Batch
     ds = ds.batch(batch_size, drop_remainder=True)
-
-    # Shuffle and Prefetch
-    ds = ds.shuffle(100, reshuffle_each_iteration=True).prefetch(buffer_size=tf.data.AUTOTUNE)
 
     # Auto SHARD
     options = tf.data.Options()

@@ -24,28 +24,43 @@ def get_learning_rate_fn(init_lr, num_train_steps, num_warmup_steps, decay_funct
     #     )
     #     return learning_rate_fn
 
+    # WarmUp Linear + Linear Decay
     if decay_function == "linear":
-        learning_rate_fn = tf.keras.optimizers.schedules.PolynomialDecay(
+        decay_schedule_fn = tf.keras.optimizers.schedules.PolynomialDecay(
             initial_learning_rate=init_lr,
             decay_steps=num_train_steps,
             end_learning_rate=end_learning_rate,
             name='linear_lr',
         )
+        if num_warmup_steps > 0.0:
+            logging.info("Using linear optimization warmup")
+            learning_rate_fn = WarmUp(
+                initial_learning_rate=init_lr,
+                decay_schedule_fn=decay_schedule_fn,
+                warmup_steps=num_warmup_steps,
+                name="warmup",
+            )
+            return learning_rate_fn
+        return decay_schedule_fn
+
+    # WarmUp Linear + Cosine Decay
     if decay_function == "cosine":
         logging.info("Using Cosine decay optimization")
-        learning_rate_fn = tf.keras.optimizers.schedules.CosineDecay(
+        decay_schedule_fn = tf.keras.optimizers.schedules.CosineDecay(
             initial_learning_rate=init_lr, decay_steps=num_warmup_steps, alpha=0.1, name="cosine_lr"
         )
         if num_warmup_steps > 0.0:
             logging.info("Using linear optimization warmup")
             learning_rate_fn = WarmUp(
                 initial_learning_rate=init_lr,
-                decay_schedule_fn=learning_rate_fn,
+                decay_schedule_fn=decay_schedule_fn,
                 warmup_steps=num_warmup_steps,
                 name="warmup",
             )
-        return learning_rate_fn
-    logging.info("Not using learning rate fn : Using initial learning rate {}".format(init_lr))
+            return learning_rate_fn
+        return decay_schedule_fn
+
+    logging.info("Not using WarmUp or Decay learning rate {}".format(init_lr))
     return init_lr
 
 
@@ -60,6 +75,7 @@ def create_optimizer(
     weight_decay_rate=0.0,
     end_learning_rate=0.0,
     optimizer_type="adamw",
+    use_constant_lr=False,
 ):
     r"""
     All optimization functions has to be start from here.
@@ -68,7 +84,7 @@ def create_optimizer(
         init_lr (:obj:`int`): Intial Learning rate.
         num_train_steps  (:obj:`int`): Total number of training steps (including batch size).
         num_warmup_steps (:obj:`int`): If num_warmup_steps > 0, warmup will be enabled.
-        decay_function (:obj:`str`): decay function.
+        decay_function (:obj:`str`): decay function. If decay_function is None, no decay.
         adam_beta_1 (:obj:`float`):
         adam_beta_2 (:obj:`float`):
         adam_epsilon (:obj:`float`):
@@ -77,20 +93,23 @@ def create_optimizer(
         optimizer_type (:obj:`str`):
 
     """
+    if use_constant_lr is False:
+        if decay_function and decay_function not in ["linear", "cosine"]:
+            raise ValueError("Invalid decay function {}".format(decay_function))
 
-    if decay_function not in ["linear", "cosine"]:
-        raise ValueError("Invalid decay function {}".format(decay_function))
+        if optimizer_type not in ["adamw", "lamb", "adafactor"]:
+            raise ValueError("Invalid optimizer type {}".format(optimizer_type))
 
-    if optimizer_type not in ["adamw", "lamb", "adafactor"]:
-        raise ValueError("Invalid optimizer type {}".format(optimizer_type))
+        learning_rate_fn = get_learning_rate_fn(
+            init_lr, num_train_steps, num_warmup_steps, decay_function, end_learning_rate
+        )
+
+    else:
+        learning_rate_fn = init_lr
 
     if optimizer_type == "adafactor":
         logging.info("Using AdaFactor optimizer")
-        return AdafactorOptimizer(learning_rate=init_lr)
-
-    learning_rate_fn = get_learning_rate_fn(
-        init_lr, num_train_steps, num_warmup_steps, decay_function, end_learning_rate
-    )
+        return AdafactorOptimizer(learning_rate=init_lr), learning_rate_fn
 
     if optimizer_type == "adamw":
         logging.info("Using Adamw optimizer")

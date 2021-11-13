@@ -2,8 +2,7 @@
 gcloud config set compute/zone us-central1-f
 
 
-export PROJECT_ID=tft-tpu
-
+export PROJECT_ID=stalwart-bliss-329805
 gcloud config set project ${PROJECT_ID}
 
 gcloud beta services identity create --service tpu.googleapis.com --project $PROJECT_ID

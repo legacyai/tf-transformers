@@ -529,7 +529,7 @@ class Trainer:
         enable_xla: bool = False,
         callbacks: List = None,
         callbacks_interval_steps: List = None,
-        max_number_of_models: int = 10,
+        max_number_of_models: int = 100,
         model_save_interval_steps: bool = None,
         repeat_dataset: bool = True,
         latest_checkpoint: str = None,
