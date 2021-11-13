@@ -15,7 +15,7 @@ class MaskedLMModel(LegacyLayer):
         use_all_layers=False,
         is_training=False,
         use_dropout=False,
-        use_extra_mlm_layer=True, # BERT has
+        use_extra_mlm_layer=True,  # BERT has
         **kwargs,
     ):
         super(MaskedLMModel, self).__init__(is_training=is_training, use_dropout=use_dropout, name=model.name, **kwargs)
@@ -42,7 +42,7 @@ class MaskedLMModel(LegacyLayer):
 
         # Initialize model
         self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
-        
+
     def _gather_indexes(self, sequence_tensor, positions):
         """Gathers the vectors at the specific positions, for performance.
         Args:
@@ -79,6 +79,7 @@ class MaskedLMModel(LegacyLayer):
             all_token_logits = []
             encoder_outputs = result["all_layer_token_embeddings"]
             for per_layer_token_embeddings in encoder_outputs:
+                per_layer_token_embeddings = tf.cast(per_layer_token_embeddings, dtype=tf_utils.get_dtype())
                 # token logits per layer
                 if self.use_extra_mlm_layer:
                     layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
@@ -102,7 +103,7 @@ class MaskedLMModel(LegacyLayer):
                 token_embeddings_mlm = self._gather_indexes(token_embeddings, masked_lm_positions)
             # MaskedLM layer only project it and normalize (b x s x h)
             token_logits = tf.matmul(
-                token_embeddings_mlm,
+                tf.cast(token_embeddings_mlm, dtype=tf_utils.get_dtype()),
                 tf.cast(self.model.get_embedding_table(), dtype=tf_utils.get_dtype()),
                 transpose_b=True,
             )
