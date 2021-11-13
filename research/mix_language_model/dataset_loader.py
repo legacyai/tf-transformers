@@ -123,8 +123,8 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
             # on the fly inside the model
             inputs['input_mask_3d'] = prefix_mask(inputs['input_mask'])
 
-            # del inputs['input_mask']
-            # del inputs['input_type_ids']
+            del inputs['input_mask']
+            del inputs['input_type_ids']
 
             labels['type'] = 'prefix'
             return inputs, labels
@@ -144,8 +144,8 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
 
             inputs['input_mask_3d'] = prefix_mask(inputs['input_mask'])
 
-            # del inputs['input_mask']
-            # del inputs['input_type_ids']
+            del inputs['input_mask']
+            del inputs['input_type_ids']
 
             labels['type'] = 'causal'
             return inputs, labels
@@ -161,8 +161,9 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
             inputs, labels = masked_lm_map_fn(item_dict)
 
             inputs['input_mask_3d'] = prepare_3d_input_mask_mlm(tf.expand_dims(inputs['input_mask'], axis=0))
-            # del inputs['input_mask']
-            # del inputs['input_type_ids']
+
+            del inputs['input_mask']
+            del inputs['input_type_ids']
 
             # Cast tf.int64 back to tf.int32, otherwise tf will throw error
             # different types in different branch

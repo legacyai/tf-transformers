@@ -12,7 +12,6 @@ trainer:
   strategy: mirrored
   steps_per_epoch: 50000
   model_checkpoint_dir:
-  callback_steps: 10000
   global_norm: 1.0
 optimizer:
   learning_rate:  0.006
@@ -29,16 +28,3 @@ model:
   is_training: false
   use_dropout: false
   num_layers: 12
-
-
-
-init_lr,
-    num_train_steps,
-    num_warmup_steps=0,
-    decay_function="linear",
-    adam_beta_1=0.9,
-    adam_beta_2=0.999,
-    adam_epsilon=1e-06,
-    weight_decay_rate=0.0,
-    end_learning_rate=0.0,
-    optimizer_type="adamw",

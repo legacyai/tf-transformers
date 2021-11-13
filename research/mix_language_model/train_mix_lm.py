@@ -9,16 +9,16 @@ def run_train(cfg, wandb):
         cfg (obj `DictConfig`): This is the config from hydra.
     """
     # Read Optimizer configs
-    learning_rate = cfg.learning_rate
-    num_warmup_steps = cfg.num_warmup_steps
-    decay_function = cfg.decay_function
-    adam_beta_1 = cfg.adam_beta_1
-    adam_beta_2 = cfg.adam_beta_2
-    adam_epsilon = cfg.adam_epsilon
-    weight_decay_rate = cfg.weight_decay_rate
-    optimizer_type = cfg.optimizer_type
-    loss_type = cfg.loss_type
-    use_constant_lr = cfg.use_constant_lr
+    learning_rate = cfg.optimizer.learning_rate
+    num_warmup_steps = cfg.optimizer.num_warmup_steps
+    decay_function = cfg.optimizer.decay_function
+    adam_beta_1 = cfg.optimizer.adam_beta_1
+    adam_beta_2 = cfg.optimizer.adam_beta_2
+    adam_epsilon = cfg.optimizer.adam_epsilon
+    weight_decay_rate = cfg.optimizer.weight_decay_rate
+    optimizer_type = cfg.optimizer.optimizer_type
+    loss_type = cfg.optimizer.loss_type
+    use_constant_lr = cfg.optimizer.use_constant_lr
 
     # Read trainer configs
     dtype = cfg.trainer.dtype
