@@ -123,7 +123,9 @@ class MixEncoder(RobertaEncoder):
         token_embeddings = encoder_outputs[-1]
 
         token_logits = tf.matmul(
-            token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
+            tf.cast(token_embeddings, dtype=tf_utils.get_dtype()),
+            tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
+            transpose_b=True,
         )
 
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
@@ -139,6 +141,7 @@ class MixEncoder(RobertaEncoder):
             all_cls_output = []
             all_token_logits = []
             for per_layer_token_embeddings in encoder_outputs:
+                per_layer_token_embeddings = tf.cast(per_layer_token_embeddings, dtype=tf_utils.get_dtype())
                 per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
                     per_layer_token_embeddings
                 )

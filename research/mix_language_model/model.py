@@ -19,11 +19,7 @@ def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size):
         config['vocab_size'] = vocab_size
         config['type_vocab_size'] = -1  # We do not need type embeddings
         model = MixEncoder(
-            config,
-            return_all_layer_outputs=return_all_layer_outputs,
-            is_training=is_training,
-            use_dropout=use_dropout,
-            vocab_size=vocab_size,
+            config, return_all_layer_outputs=return_all_layer_outputs, is_training=is_training, use_dropout=use_dropout
         )
         model = model.get_model()
         return model
