@@ -105,32 +105,37 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
         x["masked_lm_positions"] = tf.cast(tf.range(tf.shape(x['input_ids'])[0]), tf.int32)
         return x, y
 
+    def remove_type(x, y):
+        """Remove type from labels"""
+        del y['type']
+        return x, y
+
     def lm_based_on_probability(example):
         """Choode MLM, CLM, PLM based on probability"""
 
         item = example['text']
         prob = tf.random.uniform(shape=())
 
-        # # 30 percent of time, do prefix language modeling
-        # if prob <= 0.34:
-        #     item_dict = split_text(item)
-        #     item_dict = filter_empty_string(item_dict)
-        #     inputs, labels = prefix_map_fn(item_dict)
-        #     inputs, labels = rename_labels_dict(inputs, labels)
-        #     inputs, labels = add_masked_lm_positions(inputs, labels)
+        # 30 percent of time, do prefix language modeling
+        if prob <= 0.34:
+            item_dict = split_text(item)
+            item_dict = filter_empty_string(item_dict)
+            inputs, labels = prefix_map_fn(item_dict)
+            inputs, labels = rename_labels_dict(inputs, labels)
+            inputs, labels = add_masked_lm_positions(inputs, labels)
 
-        #     # Add 3d mask for the model, because its difficult to choose the mask
-        #     # on the fly inside the model
-        #     inputs['input_mask_3d'] = tf.cast(prefix_mask(inputs['input_mask']), tf.float32)
+            # Add 3d mask for the model, because its difficult to choose the mask
+            # on the fly inside the model
+            inputs['input_mask_3d'] = tf.cast(prefix_mask(inputs['input_mask']), tf.float32)
 
-        #     del inputs['input_mask']
-        #     del inputs['input_type_ids']
+            del inputs['input_mask']
+            del inputs['input_type_ids']
 
-        #     labels['type'] = 'prefix'
-        #     return inputs, labels
+            labels['type'] = 'prefix'
+            return inputs, labels
 
         # Causal LM (34-68 percent)
-        if prob < 0.68:
+        elif prob < 0.68:
             # Our data has sentences joined by '__||__'. So, for word based MLM
             # we need to replace '__||__', by ''. and club it as a single sentence
             # tf.strings.regex_replace not working as expected
@@ -192,11 +197,21 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
     # Filter examples for prefix where minimum_length doesnt meet
     ds = ds.filter(filter_prefix_with_minimum_length)
 
+    # Remove type from labels, as TPU wont support string
+    ds = ds.map(remove_type, num_parallel_calls=tf.data.AUTOTUNE)
+
     # Shuffle and Prefetch
     ds = ds.shuffle(1024, reshuffle_each_iteration=True).prefetch(buffer_size=tf.data.AUTOTUNE)
 
-    # Batch
-    ds = ds.batch(batch_size, drop_remainder=True)
+    # Batch to fixed shapes, TPU requires that
+    _padded_shapes = (
+        {'input_ids': [max_seq_len], 'input_mask_3d': [max_seq_len, max_seq_len], 'masked_lm_positions': [max_seq_len]},
+        {
+            'masked_lm_labels': [max_seq_len],
+            'masked_lm_weights': [max_seq_len],
+        },
+    )
+    ds = ds.padded_batch(batch_size, padded_shapes=_padded_shapes, drop_remainder=True)
 
     # Auto SHARD
     options = tf.data.Options()

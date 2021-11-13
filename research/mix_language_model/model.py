@@ -2,7 +2,11 @@ from mix_lm_model import MixEncoder
 
 from tf_transformers.core import Trainer
 from tf_transformers.losses.loss_wrapper import get_lm_loss
-from tf_transformers.models import BigBirdRobertaTokenizerTFText, RobertaModel
+from tf_transformers.models import (
+    BigBirdRobertaTokenizerTFText,
+    MaskedLMModel,
+    RobertaModel,
+)
 from tf_transformers.optimization import create_optimizer
 
 MODEL_NAME = 'roberta-base'
@@ -21,6 +25,7 @@ def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size):
         model = MixEncoder(
             config, return_all_layer_outputs=return_all_layer_outputs, is_training=is_training, use_dropout=use_dropout
         )
+        model = MaskedLMModel(model, config['embedding_size'], config['layer_norm_epsilon'], use_extra_mlm_layer=False)
         model = model.get_model()
         return model
 
