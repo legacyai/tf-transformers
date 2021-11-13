@@ -61,7 +61,7 @@ def run_train(cfg, wandb):
         training_loss_names = {'loss_{}'.format(i + 1) for i in range(num_layers)}
 
     # Get model fn
-    model_fn = get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size)
+    model_fn = get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size, max_seq_len)
 
     # Get optimizer fn
     optimizer_fn = get_optimizer(

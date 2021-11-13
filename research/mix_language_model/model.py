@@ -13,7 +13,7 @@ MODEL_NAME = 'roberta-base'
 TOKENIZER_NAME = "google/bigbird-roberta-large"
 
 
-def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size):
+def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size, max_seq_len):
     """Get the model from model function"""
 
     def model_fn():
@@ -21,6 +21,7 @@ def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size):
         config = RobertaModel.get_config(MODEL_NAME)
         # We update the vocab_size for that reason
         config['vocab_size'] = vocab_size
+        config['max_position_embeddings'] = max_seq_len
         config['type_vocab_size'] = -1  # We do not need type embeddings
         model = MixEncoder(
             config, return_all_layer_outputs=return_all_layer_outputs, is_training=is_training, use_dropout=use_dropout
