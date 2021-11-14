@@ -102,7 +102,7 @@ class MixEncoder(GPT2Encoder):
             embeddings = embeddings + positional_embeddings
 
         # 2. Norm + dropout
-        embeddings = self._embedding_norm(embeddings)
+        # embeddings = self._embedding_norm(embeddings)
         embeddings = self._embedding_dropout(embeddings, training=self._use_dropout)
 
         # 3. Attention  Mask
@@ -114,6 +114,8 @@ class MixEncoder(GPT2Encoder):
             layer = self._transformer_layers[i]
             embeddings, _, _ = layer([embeddings, attention_mask])
             encoder_outputs.append(embeddings)
+
+        encoder_outputs[-1] = self._last_layer_norm(encoder_outputs[-1])
 
         # First word of last layer outputs [CLS]
         cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(encoder_outputs[-1])
