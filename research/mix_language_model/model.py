@@ -9,7 +9,7 @@ from tf_transformers.models import (
 )
 from tf_transformers.optimization import create_optimizer
 
-MODEL_NAME = 'roberta-base'
+MODEL_NAME = 'gpt2'
 TOKENIZER_NAME = "google/bigbird-roberta-large"
 
 
