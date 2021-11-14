@@ -118,9 +118,9 @@ class MixEncoder(GPT2Encoder):
         encoder_outputs[-1] = self._last_layer_norm(encoder_outputs[-1])
 
         # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(encoder_outputs[-1])
+        # cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(encoder_outputs[-1])
         # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
+        # cls_output = self._pooler_layer(cls_token_tensor)
         # batch_size x sequence_length x embedding_size
         token_embeddings = encoder_outputs[-1]
 
@@ -133,7 +133,6 @@ class MixEncoder(GPT2Encoder):
         last_token_logits = tf.keras.layers.Lambda(lambda x: x[:, -1, :])(token_logits)
 
         result = {
-            "cls_output": cls_output,
             "token_embeddings": token_embeddings,
             "token_logits": token_logits,
             "last_token_logits": last_token_logits,
@@ -144,10 +143,10 @@ class MixEncoder(GPT2Encoder):
             all_token_logits = []
             for per_layer_token_embeddings in encoder_outputs:
                 per_layer_token_embeddings = tf.cast(per_layer_token_embeddings, dtype=tf_utils.get_dtype())
-                per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
-                    per_layer_token_embeddings
-                )
-                all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
+                # per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
+                #     per_layer_token_embeddings
+                # )
+                # all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
 
                 layer_token_logits = tf.matmul(
                     per_layer_token_embeddings,
@@ -157,7 +156,7 @@ class MixEncoder(GPT2Encoder):
                 all_token_logits.append(layer_token_logits)
 
             result["all_layer_token_embeddings"] = encoder_outputs
-            result["all_layer_cls_output"] = all_cls_output
+            # result["all_layer_cls_output"] = all_cls_output
             result["all_layer_token_logits"] = all_token_logits
 
         return result
