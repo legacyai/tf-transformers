@@ -111,16 +111,14 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
         del y['type']
         return x, y
 
-    dtype = tf_utils.get_dtype()
-
     def lm_based_on_probability(example):
         """Choode MLM, CLM, PLM based on probability"""
 
         item = example['text']
-        prob = tf.random.uniform(shape=(), dtype=dtype)
+        prob = tf.random.uniform(shape=())
 
         # 30 percent of time, do prefix language modeling
-        if prob <= tf.cast(0.34, dtype):
+        if prob <= 0.34:
             item_dict = split_text(item)
             item_dict = filter_empty_string(item_dict)
             inputs, labels = prefix_map_fn(item_dict)
@@ -138,7 +136,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
             return inputs, labels
 
         # Causal LM (34-68 percent)
-        elif prob < tf.cast(0.68, dtype):
+        elif prob < 0.68:
             # Our data has sentences joined by '__||__'. So, for word based MLM
             # we need to replace '__||__', by ''. and club it as a single sentence
             # tf.strings.regex_replace not working as expected

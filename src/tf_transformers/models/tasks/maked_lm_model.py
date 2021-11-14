@@ -83,15 +83,20 @@ class MaskedLMModel(LegacyLayer):
                 # token logits per layer
                 if self.use_extra_mlm_layer:
                     layer_token_embeddings_mlm = self._masked_lm_layer(per_layer_token_embeddings, masked_lm_positions)
+                    layer_token_logits = tf.matmul(
+                        layer_token_embeddings_mlm,
+                        tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
+                        transpose_b=True,
+                    )
+                    layer_token_logits = self._masked_lm_bias(layer_token_logits)
                 else:
                     layer_token_embeddings_mlm = self._gather_indexes(per_layer_token_embeddings, masked_lm_positions)
-                layer_token_logits = tf.matmul(
-                    layer_token_embeddings_mlm,
-                    tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
-                    transpose_b=True,
-                )
-                layer_token_logits = self._masked_lm_bias(layer_token_logits)
-                all_token_logits.append(layer_token_logits)
+                    layer_token_logits = tf.matmul(
+                        layer_token_embeddings_mlm,
+                        tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()),
+                        transpose_b=True,
+                    )
+                    all_token_logits.append(layer_token_logits)
 
             result = {"token_embeddings": encoder_outputs, "token_logits": all_token_logits}
 
@@ -99,15 +104,21 @@ class MaskedLMModel(LegacyLayer):
             token_embeddings = result['token_embeddings']
             if self.use_extra_mlm_layer:
                 token_embeddings_mlm = self._masked_lm_layer(token_embeddings, masked_lm_positions)
+                # MaskedLM layer only project it and normalize (b x s x h)
+                token_logits = tf.matmul(
+                    tf.cast(token_embeddings_mlm, dtype=tf_utils.get_dtype()),
+                    tf.cast(self.model.get_embedding_table(), dtype=tf_utils.get_dtype()),
+                    transpose_b=True,
+                )
+                token_logits = self._masked_lm_bias(token_logits)
             else:
                 token_embeddings_mlm = self._gather_indexes(token_embeddings, masked_lm_positions)
-            # MaskedLM layer only project it and normalize (b x s x h)
-            token_logits = tf.matmul(
-                tf.cast(token_embeddings_mlm, dtype=tf_utils.get_dtype()),
-                tf.cast(self.model.get_embedding_table(), dtype=tf_utils.get_dtype()),
-                transpose_b=True,
-            )
-            token_logits = self._masked_lm_bias(token_logits)
+                # MaskedLM layer only project it and normalize (b x s x h)
+                token_logits = tf.matmul(
+                    tf.cast(token_embeddings_mlm, dtype=tf_utils.get_dtype()),
+                    tf.cast(self.model.get_embedding_table(), dtype=tf_utils.get_dtype()),
+                    transpose_b=True,
+                )
 
             result = {"token_embeddings": token_embeddings, "token_logits": token_logits}
             return result
