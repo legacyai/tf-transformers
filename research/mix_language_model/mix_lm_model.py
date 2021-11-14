@@ -18,11 +18,11 @@
 import tensorflow as tf
 
 from tf_transformers.core import LegacyModel
-from tf_transformers.models import RobertaEncoder
+from tf_transformers.models import GPT2Encoder
 from tf_transformers.utils import tf_utils
 
 
-class MixEncoder(RobertaEncoder):
+class MixEncoder(GPT2Encoder):
     def __init__(self, config, **kwargs):
         super(MixEncoder, self).__init__(config, **kwargs)
 

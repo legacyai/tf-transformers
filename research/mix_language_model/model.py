@@ -4,8 +4,8 @@ from tf_transformers.core import Trainer
 from tf_transformers.losses.loss_wrapper import get_lm_loss
 from tf_transformers.models import (
     BigBirdRobertaTokenizerTFText,
+    GPT2Model,
     MaskedLMModel,
-    RobertaModel,
 )
 from tf_transformers.optimization import create_optimizer
 
@@ -18,7 +18,7 @@ def get_model(return_all_layer_outputs, is_training, use_dropout, vocab_size, ma
 
     def model_fn():
         # We use Roberta Style model, but we use BigBird Roberta Tokenizer
-        config = RobertaModel.get_config(MODEL_NAME)
+        config = GPT2Model.get_config(MODEL_NAME)
         # We update the vocab_size for that reason
         config['vocab_size'] = vocab_size
         config['max_position_embeddings'] = max_seq_len
