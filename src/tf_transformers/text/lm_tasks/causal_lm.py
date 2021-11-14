@@ -44,26 +44,25 @@ def causal_lm_fn(tokenizer_layer, max_seq_len):
         input_ids_ragged = input_ids[:, : max_seq_len + 1 - 2]
         input_ids_ragged = tf.concat([[[cls_token_id]], input_ids_ragged, [[sep_token_id]]], axis=1)
 
-        input_mask = tf.ones_like(input_ids_ragged)
+        # input_mask = tf.ones_like(input_ids_ragged)
         lm_label_weights = tf.ones_like(input_ids_ragged)
         input_word_ids, _ = tf_text.pad_model_inputs(input_ids_ragged, max_seq_length=max_seq_len + 1)
-        input_mask, _ = tf_text.pad_model_inputs(input_mask, max_seq_length=max_seq_len + 1)
+        # input_mask, _ = tf_text.pad_model_inputs(input_mask, max_seq_length=max_seq_len + 1)
         lm_label_weights, _ = tf_text.pad_model_inputs(lm_label_weights, max_seq_length=max_seq_len + 1)
 
         # Squeeze here will help to retain 2D when we batch outside map fn
         input_word_ids = tf.squeeze(input_word_ids, axis=0)
-        input_mask = tf.squeeze(input_mask, axis=0)
+        # input_mask = tf.squeeze(input_mask, axis=0)
         lm_label_weights = tf.squeeze(lm_label_weights, axis=0)
 
         # Shift positions
         lm_labels = input_word_ids[1:]
         input_word_ids = input_word_ids[:-1]
-        input_mask = input_mask[:-1]
+        # input_mask = input_mask[:-1]
         lm_label_weights = lm_label_weights[1:]  # We attend all labels, as we are Causal LM
 
         inputs = {}
         inputs['input_ids'] = input_word_ids
-        inputs['input_mask'] = input_mask
         inputs['input_type_ids'] = tf.zeros_like(input_word_ids)
 
         labels = {}

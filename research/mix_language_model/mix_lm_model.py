@@ -139,7 +139,7 @@ class MixEncoder(GPT2Encoder):
         }
 
         if self._return_all_layer_outputs:
-            all_cls_output = []
+            # all_cls_output = []
             all_token_logits = []
             for per_layer_token_embeddings in encoder_outputs:
                 per_layer_token_embeddings = tf.cast(per_layer_token_embeddings, dtype=tf_utils.get_dtype())

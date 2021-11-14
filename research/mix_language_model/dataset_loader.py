@@ -20,8 +20,8 @@ from random import shuffle
 import tensorflow as tf
 
 from tf_transformers.layers.mask import prefix_mask
+from tf_transformers.layers.mask.causal_mask import attention_mask_square
 from tf_transformers.text.lm_tasks import causal_lm_fn, mlm_fn, prefix_lm_fn
-from tf_transformers.utils import tf_utils
 
 
 def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimum_prefix_length=900):
@@ -148,9 +148,9 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
             inputs, labels = rename_labels_dict(inputs, labels)
             inputs, labels = add_masked_lm_positions(inputs, labels)
 
-            inputs['input_mask_3d'] = tf.cast(prefix_mask(inputs['input_mask']), tf.float32)
+            inputs['input_mask_3d'] = attention_mask_square(max_seq_len)
 
-            del inputs['input_mask']
+            # del inputs['input_mask']
             del inputs['input_type_ids']
 
             labels['type'] = 'causal'
