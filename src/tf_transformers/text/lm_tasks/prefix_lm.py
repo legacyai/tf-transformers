@@ -19,7 +19,7 @@ import tensorflow as tf
 import tensorflow_text as tf_text
 
 
-def prefix_lm_fn(tokenizer_layer, max_seq_len):
+def prefix_lm_fn(tokenizer_layer, max_seq_len, add_eos_after_prefix=True):
     """The main function for PLM.
 
     Args:
@@ -40,7 +40,11 @@ def prefix_lm_fn(tokenizer_layer, max_seq_len):
     def prefix_map_fn(item):
         input_ids = tokenizer_layer({'text': item['sentences']})
         # Find the sentence boundary which is less than or equal to max_seq_len (-3 for CLS, EOS, SEP)
-        max_seq_index = tf.where(input_ids.row_splits < max_seq_len - 3)[-1][0]
+        if add_eos_after_prefix:
+            buffer_length = 3
+        else:
+            buffer_length = 2
+        max_seq_index = tf.where(input_ids.row_splits < max_seq_len - buffer_length)[-1][0]
         # Trim the inputs
         input_ids = input_ids[:max_seq_index]
         # We take random position between 1 and len(sentences)//2
@@ -67,7 +71,8 @@ def prefix_lm_fn(tokenizer_layer, max_seq_len):
         # We use CLS token id as EOS for prefix models. The reason is, otherwise
         # model might not predict next sentence, as it encounter . or delimiter much frequently during end of
         # example.
-        input_ids_first_portion = tf.concat([input_ids_first_portion, [[cls_token_id]]], axis=0)
+        if add_eos_after_prefix:
+            input_ids_first_portion = tf.concat([input_ids_first_portion, [[cls_token_id]]], axis=0)
         # Shift 1 position right to account for EOS token (CLS here)
         prefix_mask_index = prefix_mask_index + 1
 
