@@ -255,7 +255,7 @@ class GPT2Attention(LegacyLayer):
         # Here we dont have to use `to_tensor`. Because GPT2 only has self attention
         # To not break the API, we still pass inputs = [batch_data, batch_data, attention_mask]
         # where `batch_data` = [B x F x E]
-        to_tensor = inputs[1]
+        to_tensor = inputs[1]  # noqa
         attention_mask = inputs[2] if len(inputs) == 3 else None
 
         # qkv from input (from_tensor)
@@ -263,8 +263,8 @@ class GPT2Attention(LegacyLayer):
         query_tensor, key_tensor, value_tensor = map(self.split_heads, tf.split(qkv, 3, axis=2))
 
         # qkv from input (to_tensor)
-        qkv_to = self._project_qkv(to_tensor)
-        query_tensor_to, key_tensor_to, value_tensor_to = map(self.split_heads, tf.split(qkv_to, 3, axis=2))
+        # qkv_to = self._project_qkv(to_tensor)
+        # query_tensor_to, key_tensor_to, value_tensor_to = map(self.split_heads, tf.split(qkv_to, 3, axis=2))
         # Scalar dimensions referenced here:
         #   B = batch size (number of sequences)
         #   F = `from_tensor` sequence length
@@ -279,7 +279,7 @@ class GPT2Attention(LegacyLayer):
         # `query_tensor` = [B, N, F, H]
         # 'key_tensor'   = [B, N, T, H]
         # `value_tensor` = [B, N, T, H]
-        attention_scores = tf.einsum("BNFH,BNTH->BNFT", query_tensor, key_tensor_to)
+        attention_scores = tf.einsum("BNFH,BNTH->BNFT", query_tensor, key_tensor)
         # attention_scores = tf.matmul(query_tensor, key_tensor_to, transpose_b=True)
         attention_scores = tf.multiply(attention_scores, 1.0 / math.sqrt(float(self._head_size)))
         attention_probs = self._masked_softmax([attention_scores, attention_mask])
@@ -289,9 +289,9 @@ class GPT2Attention(LegacyLayer):
         # `context_layer` = [B, N, F, H]
         # print("attention_scores", attention_scores.shape, tf.reduce_sum(attention_scores, axis=[2, 3]))
         # print("attention_probs", attention_probs.shape, tf.reduce_sum(attention_probs, axis=[2, 3]))
-        context_layer = tf.einsum("BNFT,BNTH->BNFH", attention_probs, value_tensor_to)
+        context_layer = tf.einsum("BNFT,BNTH->BNFH", attention_probs, value_tensor)
         # print("context_layer", context_layer.shape, tf.reduce_sum(context_layer, axis=[2, 3]))
-        return self.merge_attention_heads(context_layer), key_tensor_to, value_tensor_to
+        return self.merge_attention_heads(context_layer), key_tensor, value_tensor
 
     def call(self, inputs, cache_key=None, cache_value=None):
         # For decoder this function is used for training and inference
