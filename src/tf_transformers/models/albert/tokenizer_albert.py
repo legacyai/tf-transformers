@@ -101,6 +101,7 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
         add_special_tokens=False,
         pack_model_inputs=False,
         dynamic_padding=False,
+        truncate=False,
         **kwargs,
     ):
         """Initializes a SentencepieceTokenizer layer.
@@ -193,6 +194,7 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
         self.add_special_tokens = add_special_tokens
         self.pack_model_inputs = pack_model_inputs
         self.dynamic_padding = dynamic_padding
+        self.truncate = truncate
 
         if self.dynamic_padding and self.pack_model_inputs:
             raise ValueError("Either dynamic_padding is True, or pack_model_inputs is True. Don't set them together")
@@ -258,7 +260,7 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
         # If Truncation is True
         if truncation:
             if max_length:
-                tokens = tokens[:, : max_length - 2]
+                tokens = tokens[:, : self.max_length]
             else:
                 if add_special_tokens:
                     tokens = tokens[:, : self.max_length - 2]  # For cls and sep
@@ -388,7 +390,13 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
             tokens = _reshape(tokens)
             # If add special_tokens
             if self.add_special_tokens:
+                if self.truncate:
+                    tokens = tokens[:, : self.max_length - 2]
                 tokens = self._add_special_tokens(tokens)
+            else:
+                if self.truncate:
+                    tokens = tokens[:, : self.max_length]
+
             if self.dynamic_padding:
                 input_mask = tf.ones_like(tokens)
                 input_word_ids = tokens.to_tensor(default_value=self.pad_token_id)
@@ -436,7 +444,7 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
     def get_config(self):
         # Skip in tf.saved_model.save(); fail if called direcly.
         # raise NotImplementedError("TODO(b/170480226): implement")
-        pass
+        return {}
 
     def _add_special_tokens(self, tokens):
         return tf_text.combine_segments(
@@ -483,6 +491,7 @@ class AlbertTokenizerTFText:
         add_special_tokens=False,
         pack_model_inputs=False,
         dynamic_padding=False,
+        truncate=False,
     ):
         """Load HuggingFace tokenizer and pass to TFtext"""
         cache_dir = tempfile.gettempdir()
@@ -519,5 +528,6 @@ class AlbertTokenizerTFText:
             add_special_tokens=add_special_tokens,
             pack_model_inputs=pack_model_inputs,
             dynamic_padding=dynamic_padding,
+            truncate=truncate,
         )
         return tokenizer_layer
