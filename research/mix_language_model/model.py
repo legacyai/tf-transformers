@@ -1,3 +1,4 @@
+import tensorflow as tf
 from mix_lm_model import MixEncoder
 
 from tf_transformers.core import Trainer
@@ -98,7 +99,19 @@ def get_optimizer(
 
 def get_loss(loss_type):
     """Get MLM Loss"""
-    return get_lm_loss(loss_type=loss_type)
+    loss_fn = get_lm_loss(loss_type=loss_type)
+
+    def custom_loss(batch_labels, model_outputs):
+        loss_dict = loss_fn(batch_labels, model_outputs)
+        prefix_loss = tf.gather(loss_dict['loss'], tf.squeeze(tf.where(tf.equal(batch_labels['type_id'], 0))))
+        causal_loss = tf.gather(loss_dict['loss'], tf.squeeze(tf.where(tf.equal(batch_labels['type_id'], 1))))
+        mlm_loss = tf.gather(loss_dict['loss'], tf.squeeze(tf.where(tf.equal(batch_labels['type_id'], 2))))
+        loss_dict['prefix_loss'] = prefix_loss
+        loss_dict['causal_loss'] = causal_loss
+        loss_dict['mlm_loss'] = mlm_loss
+        return loss_dict
+
+    return custom_loss
 
 
 def get_trainer(distribution_strategy, dtype, num_gpus=0, tpu_address=None):

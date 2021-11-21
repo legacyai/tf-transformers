@@ -54,7 +54,7 @@ def run_train(cfg, wandb):
     )
 
     # Get loss type
-    training_loss_names = None
+    training_loss_names = ['prefix_loss', 'causal_loss', 'mlm_loss']
     return_all_layer_outputs = False
     if loss_type and loss_type == 'joint':
         return_all_layer_outputs = True
