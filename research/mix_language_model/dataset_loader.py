@@ -118,6 +118,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
 
         # 30 percent of time, do prefix language modeling
         if prob <= 0.34:
+
             # Our data has sentences joined by '__||__'. So, for word based MLM
             # we need to replace '__||__', by ''. and club it as a single sentence
             # tf.strings.regex_replace not working as expected
@@ -212,10 +213,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
     # Batch to fixed shapes, TPU requires that
     _padded_shapes = (
         {'input_ids': [max_seq_len], 'input_mask_3d': [max_seq_len, max_seq_len], 'masked_lm_positions': [max_seq_len]},
-        {
-            'masked_lm_labels': [max_seq_len],
-            'masked_lm_weights': [max_seq_len],
-        },
+        {'masked_lm_labels': [max_seq_len], 'masked_lm_weights': [max_seq_len], 'type_id': []},
     )
     ds = ds.padded_batch(batch_size, padded_shapes=_padded_shapes, drop_remainder=True)
 
