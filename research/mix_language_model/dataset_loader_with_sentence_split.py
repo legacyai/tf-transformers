@@ -15,12 +15,13 @@
 # limitations under the License.
 # ==============================================================================
 import os
+from random import shuffle
 
 import tensorflow as tf
 
 from tf_transformers.layers.mask import prefix_mask
 from tf_transformers.layers.mask.causal_mask import attention_mask_square
-from tf_transformers.text.lm_tasks import causal_lm_fn, mlm_fn, prefix_lm_fn_v2
+from tf_transformers.text.lm_tasks import causal_lm_fn, mlm_fn, prefix_lm_fn
 
 
 def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimum_prefix_length=900):
@@ -37,23 +38,23 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
         A function to be used in tf.data.Dataset.map
     """
 
-    prefix_map_fn = prefix_lm_fn_v2(tokenizer_layer, max_seq_len)
+    prefix_map_fn = prefix_lm_fn(tokenizer_layer, max_seq_len)
     masked_lm_map_fn = mlm_fn(tokenizer_layer, max_seq_len, max_seq_len)
     causal_lm_map_fn = causal_lm_fn(tokenizer_layer, max_seq_len)
 
-    # def split_text(item):
-    #     """Split text into list of sentences"""
-    #     sentences = tf.strings.split(item, '__||__')
-    #     return {'sentences': sentences}
+    def split_text(item):
+        """Split text into list of sentences"""
+        sentences = tf.strings.split(item, '__||__')
+        return {'sentences': sentences}
 
-    # def filter_empty_string(item):
-    #     """This will ensure, if any of the sentence in list of sentences is '' or' ', empty string,
-    #     that will be filtered out"""
-    #     sentences = item['sentences']
-    #     valid_string_indexes = tf.squeeze(tf.where(tf.not_equal(tf.strings.length(item['sentences']), 0)), axis=1)
-    #     sentences = tf.gather(sentences, valid_string_indexes)
-    #     item['sentences'] = sentences
-    #     return item
+    def filter_empty_string(item):
+        """This will ensure, if any of the sentence in list of sentences is '' or' ', empty string,
+        that will be filtered out"""
+        sentences = item['sentences']
+        valid_string_indexes = tf.squeeze(tf.where(tf.not_equal(tf.strings.length(item['sentences']), 0)), axis=1)
+        sentences = tf.gather(sentences, valid_string_indexes)
+        item['sentences'] = sentences
+        return item
 
     # def filter_single_sentence(item):
     #     """If number of sentences after split is 1, ignore, because nothing to prefix, as we have only one sentence"""
@@ -79,19 +80,19 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
 
         return tf.squeeze(tf.cast(mask, tf.float32), axis=0)
 
-    # def filter_prefix_with_minimum_length(x, y):
-    #     """Sometime prefix mask have smaller sequences, ignore that"""
-    #     min_sequence_length = minimum_prefix_length
-    #     # Check sequence length by count padding tokens
-    #     non_padded_count = tf.reduce_sum(tf.cast(tf.not_equal(x['input_ids'], 0), tf.int32))
-    #     if tf.equal(y['type'], b'prefix'):
-    #         if tf.greater_equal(non_padded_count, min_sequence_length):
-    #             return tf.constant(True)
-    #         else:
-    #             return tf.constant(False)
-    #     # If not prefix let it pass
-    #     else:
-    #         return tf.constant(True)
+    def filter_prefix_with_minimum_length(x, y):
+        """Sometime prefix mask have smaller sequences, ignore that"""
+        min_sequence_length = minimum_prefix_length
+        # Check sequence length by count padding tokens
+        non_padded_count = tf.reduce_sum(tf.cast(tf.not_equal(x['input_ids'], 0), tf.int32))
+        if tf.equal(y['type'], b'prefix'):
+            if tf.greater_equal(non_padded_count, min_sequence_length):
+                return tf.constant(True)
+            else:
+                return tf.constant(False)
+        # If not prefix let it pass
+        else:
+            return tf.constant(True)
 
     def rename_labels_dict(x, y):
         """Rename "lm_labels" to "masked_lm_labels" and "lm_weights" to "masked_lm_weights" """
@@ -118,13 +119,8 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
 
         # 30 percent of time, do prefix language modeling
         if prob <= 0.34:
-            # Our data has sentences joined by '__||__'. So, for word based MLM
-            # we need to replace '__||__', by ''. and club it as a single sentence
-            # tf.strings.regex_replace not working as expected
-            item = tf.strings.split(item, '__||__')
-            item = tf.strings.reduce_join([item], separator=' ')
-            # Note about [item], because we need atleast a 1d tensor inside dict
-            item_dict = {'text': [item]}
+            item_dict = split_text(item)
+            item_dict = filter_empty_string(item_dict)
             inputs, labels = prefix_map_fn(item_dict)
             inputs, labels = rename_labels_dict(inputs, labels)
             inputs, labels = add_masked_lm_positions(inputs, labels)
@@ -155,6 +151,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
 
             inputs['input_mask_3d'] = attention_mask_square(max_seq_len)
 
+            # del inputs['input_mask']
             del inputs['input_type_ids']
 
             labels['type'] = 'causal'
@@ -185,11 +182,12 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
             labels['type_id'] = 2  # Unique id to identify the type of task
             return inputs, labels
 
-    dataset = tf.data.Dataset.list_files(os.path.join(data_directory, '*.txt')).shuffle(25)  # num_shards = 25
-    dataset = dataset.interleave(lambda filename: tf.data.TextLineDataset(filename), cycle_length=25)
+    all_text_files = tf.io.gfile.glob(os.path.join(data_directory, '*.txt'))
+    shuffle(all_text_files)
+    ds = tf.data.TextLineDataset(all_text_files)
 
     # Remove duplicates if any
-    ds = dataset.unique()
+    ds = ds.unique()
 
     # We need to add the text as dict
     ds = ds.map(lambda x: {'text': x}, num_parallel_calls=tf.data.AUTOTUNE)
@@ -201,7 +199,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size, minimu
     ds = ds.filter(filter_out_empty_mask)
 
     # Filter examples for prefix where minimum_length doesnt meet
-    # ds = ds.filter(filter_prefix_with_minimum_length) # when sentence based split we need it
+    ds = ds.filter(filter_prefix_with_minimum_length)
 
     # Remove type from labels, as TPU wont support string
     ds = ds.map(remove_type, num_parallel_calls=tf.data.AUTOTUNE)

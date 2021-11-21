@@ -19,6 +19,94 @@ import tensorflow as tf
 import tensorflow_text as tf_text
 
 
+def prefix_lm_fn_v2(tokenizer_layer, max_seq_len, add_cls_token=False, add_eos_after_prefix=False):
+    """The main function for PLM.
+    This has one difference from `prefix_lm_fn` . Instead of splitting based on
+    sentence end, we randomly pick from 0 - max_seq_len
+
+    Args:
+        tokenizer_layer : A tokenizer layer from tf_transformers. eg: AlbertTokenizerTFText
+        max_seq_len (:obj:`int`): Max sequence length of input
+        add_cls_token (:obj:`bool`): Whether to add CLS token
+
+    Returns:
+        A function, which can be used with tf.data.Dataset.map
+    """
+    cls_token_id = tokenizer_layer.cls_token_id
+    sep_token_id = tokenizer_layer.sep_token_id
+    unk_token_id = tokenizer_layer.unk_token_id  # noqa
+    pad_token_id = tokenizer_layer.pad_token_id  # noqa
+    mask_token_id = tokenizer_layer.mask_token_id  # noqa
+    vocab_size = tokenizer_layer.vocab_size  # noqa
+
+    def prefix_map_fn(item):
+        # We expect item to be dict of {'text': ['sentence1']}
+        input_ids = tokenizer_layer(item)
+        if add_cls_token:
+            # Trim inputs (+1 is because for Causal LM we shift inputs and labels)
+            input_ids_ragged = input_ids[:, : max_seq_len + 1 - 2]
+            input_ids_ragged = tf.concat([[[cls_token_id]], input_ids_ragged, [[sep_token_id]]], axis=1)
+        else:
+            # Trim inputs (+1 is because for Causal LM we shift inputs and labels)
+            input_ids_ragged = input_ids[:, : max_seq_len + 1 - 1]
+            input_ids_ragged = tf.concat([input_ids_ragged, [[sep_token_id]]], axis=1)
+
+        prefix_mask_index = tf.random.uniform(minval=1, maxval=max_seq_len, shape=(), dtype=tf.int32)
+        # We split it to 2 parts left and right
+        # left we mask by 1 and right we mask by 0
+        # right side portions are our targets
+        input_ids_first_portion = input_ids[:, :prefix_mask_index]
+        input_ids_second_portion = input_ids[:, prefix_mask_index:]
+        # We use CLS token id as EOS for prefix models. The reason is, otherwise
+        # model might not predict next sentence, as it encounter . or delimiter much frequently during end of
+        # example.
+        if add_eos_after_prefix:
+            input_ids_first_portion = tf.concat([input_ids_first_portion, [[cls_token_id]]], axis=0)
+        # Shift 1 position right to account for EOS token (CLS here)
+        prefix_mask_index = prefix_mask_index + 1
+
+        # Split and join
+        input_mask_first_portion = tf.ones_like(input_ids_first_portion)
+        input_mask_second_portion = tf.zeros_like(input_ids_second_portion)
+        input_mask = tf.concat([input_mask_first_portion, input_mask_second_portion], axis=0)
+        input_ids = tf.concat([input_ids_first_portion, input_ids_second_portion], axis=0)
+
+        # Pad inputs
+        input_ids_ragged = tf.RaggedTensor.from_tensor(tf.expand_dims(input_ids.merge_dims(-2, 1), 0))
+        input_mask_ragged = tf.RaggedTensor.from_tensor(tf.expand_dims(input_mask.merge_dims(-2, 1), 0))
+
+        # Opposite of input_mask (Do it before input_mask padding)
+        lm_label_weights = tf.cast(tf.not_equal(input_mask_ragged, 1), tf.int32)
+        input_word_ids, _ = tf_text.pad_model_inputs(input_ids_ragged, max_seq_length=max_seq_len + 1)
+        input_mask, _ = tf_text.pad_model_inputs(input_mask_ragged, max_seq_length=max_seq_len + 1)
+        lm_label_weights, _ = tf_text.pad_model_inputs(lm_label_weights, max_seq_length=max_seq_len + 1)
+
+        # Squeeze here will help to retain 2D when we batch outside map fn
+        input_word_ids = tf.squeeze(input_word_ids, axis=0)
+        input_mask = tf.squeeze(input_mask, axis=0)
+        lm_label_weights = tf.squeeze(lm_label_weights, axis=0)
+
+        # Shift positions
+        lm_labels = input_word_ids[1:]
+        input_word_ids = input_word_ids[:-1]
+        input_mask = input_mask[:-1]
+        lm_label_weights = lm_label_weights[1:]
+
+        inputs = {}
+        inputs['input_ids'] = input_word_ids
+        inputs['input_mask'] = input_mask
+        inputs['input_type_ids'] = tf.zeros_like(input_word_ids)
+
+        labels = {}
+        labels['lm_labels'] = lm_labels
+        labels['lm_weights'] = lm_label_weights
+        labels['prefix_mask_index'] = prefix_mask_index
+
+        return (inputs, labels)
+
+    return prefix_map_fn
+
+
 def prefix_lm_fn(tokenizer_layer, max_seq_len, add_eos_after_prefix=True):
     """The main function for PLM.
 
