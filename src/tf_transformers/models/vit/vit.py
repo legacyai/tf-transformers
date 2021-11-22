@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+"""TF 2.0 ViT Model"""
+
+from typing import Dict, Union
+
 import tensorflow as tf
 from absl import logging
 
@@ -21,31 +25,32 @@ from tf_transformers.activations import get_activation
 from tf_transformers.core import LegacyLayer, LegacyModel
 from tf_transformers.layers import PatchEmbeddings, PositionEmbeddingImage
 from tf_transformers.layers.transformer import TransformerVIT
+from tf_transformers.utils.docstring_file_utils import add_start_docstrings
+from tf_transformers.utils.docstring_utils import (
+    CALL_ENCODER_DOCSTRING,
+    ENCODER_CLASS_DOCSTRING,
+)
 
 logging.set_verbosity("INFO")
 
 
+@add_start_docstrings(
+    "ViT Model :",
+    ENCODER_CLASS_DOCSTRING.format("tf_transformers.models.vit.ViTConfig"),
+)
 class ViTEncoder(LegacyLayer):
-    """Vit based encoder / Decoder .
-    TODO: Add details
-
-
-    """
-
     def __init__(
         self,
-        config,
-        mask_mode="user_defined",
-        name="vit",
-        use_dropout=False,
-        is_training=False,
-        use_auto_regressive=False,
-        use_decoder=False,
-        batch_size=None,
-        sequence_length=None,
-        use_mlm_layer=True,
-        use_masked_lm_positions=False,
-        return_all_layer_outputs=False,
+        config: Dict,
+        mask_mode: str = "user_defined",
+        name: str = "bert",
+        use_dropout: bool = False,
+        is_training: bool = False,
+        use_auto_regressive: bool = False,
+        use_decoder: bool = False,
+        batch_size: bool = None,
+        sequence_length: bool = None,
+        return_all_layer_outputs: bool = False,
         **kwargs,
     ):
 
@@ -67,12 +72,16 @@ class ViTEncoder(LegacyLayer):
         self._use_decoder = use_decoder
         self._batch_size = batch_size
         self._sequence_length = sequence_length
-        self._use_masked_lm_positions = use_masked_lm_positions
-        self._use_mlm_layer = use_mlm_layer
         self._return_all_layer_outputs = return_all_layer_outputs
 
         if "num_labels" not in config:
             config["num_labels"] = None
+            self._num_labels = config['num_labels']
+
+        self._patch_size = config['patch_size']
+        self._image_size = config['image_size']
+        self._num_channels = config['num_channels']
+
         one_side_patch = config['image_size'] // config['patch_size']
         self._num_patches = (one_side_patch * one_side_patch) + 1  # 1 for CLS token
 
@@ -93,10 +102,11 @@ class ViTEncoder(LegacyLayer):
             "use_dropout": self._use_dropout,
             "batch_size": self._batch_size,
             "sequence_length": self._sequence_length,
-            "use_mlm_layer": self._use_mlm_layer,
-            "use_masked_lm_positions": self._use_masked_lm_positions,
             "return_all_layer_outputs": self._return_all_layer_outputs,
             "num_patches": self._num_patches,
+            "patch_size": self._patch_size,
+            "image_size": self._image_size,
+            "num_channels": self._num_channels,
         }
         # Update config dict with passed config
         self._config_dict.update(config)
@@ -164,6 +174,8 @@ class ViTEncoder(LegacyLayer):
         """Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
         Args:
             self: model (tf.keras.Layer) instance
+            initialize_only: If False, model (LegacyModel) wont be returned.
+
         """
 
         input_ids = tf.keras.layers.Input(
@@ -172,94 +184,8 @@ class ViTEncoder(LegacyLayer):
             dtype=tf.float32,
             name="input_ids",
         )
-        # input_mask = tf.keras.layers.Input(
-        #     shape=(self._sequence_length,),
-        #     batch_size=self._batch_size,
-        #     dtype=tf.int32,
-        #     name="input_mask",
-        # )
-        # input_type_ids = tf.keras.layers.Input(
-        #     shape=(self._sequence_length,),
-        #     batch_size=self._batch_size,
-        #     dtype=tf.int32,
-        #     name="input_type_ids",
-        # )
-        # masked_lm_positions = tf.keras.layers.Input(
-        #     shape=(None,),
-        #     batch_size=self._batch_size,
-        #     dtype=tf.int32,
-        #     name="masked_lm_positions",
-        # )
         inputs = {}
         inputs["input_ids"] = input_ids  # Default
-        # # if mask_mode != 'causal', user has to provde mask
-        # if self._mask_mode != "causal":
-        #     inputs["input_mask"] = input_mask
-        # # If type mebddings required
-        # if self._type_embeddings_layer:
-        #     inputs["input_type_ids"] = input_type_ids
-        # # if masked_lm_positions
-        # if self._use_masked_lm_positions:
-        #     inputs["masked_lm_positions"] = masked_lm_positions
-
-        # # Auto Regressive is activated only when is_training=False
-        # if self._is_training is False and self._use_auto_regressive:
-        #     all_cache_key = tf.keras.layers.Input(
-        #         shape=(
-        #             None,
-        #             self._config_dict["num_attention_heads"],
-        #             None,
-        #             self._config_dict["attention_head_size"],
-        #         ),
-        #         dtype=tf.float32,
-        #         name="all_cache_key",
-        #     )
-        #     all_cache_value = tf.keras.layers.Input(
-        #         shape=(
-        #             None,
-        #             self._config_dict["num_attention_heads"],
-        #             None,
-        #             self._config_dict["attention_head_size"],
-        #         ),
-        #         dtype=tf.float32,
-        #         name="all_cache_value",
-        #     )
-        #     # Here batch_size = 1 , means we are dealing with vector for past_length
-        #     past_length = tf.keras.layers.Input(shape=(None,), batch_size=1, dtype=tf.int32, name="past_length")
-        #     inputs["all_cache_key"] = all_cache_key
-        #     inputs["all_cache_value"] = all_cache_value
-        #     inputs["past_length"] = past_length
-
-        # if self._use_decoder:
-        #     # Encoder and Decoder shouldn't have same input name
-        #     # when creating models
-        #     for input_name in ["input_ids", "input_mask", "input_type_ids"]:
-        #         if input_name in inputs:
-        #             inputs[input_name] = tf.keras.layers.Input(
-        #                 shape=(self._sequence_length,),
-        #                 batch_size=self._batch_size,
-        #                 dtype=tf.int32,
-        #                 name="decoder_{}".format(input_name),
-        #             )
-        #     encoder_hidden_states = tf.keras.layers.Input(
-        #         shape=(self._sequence_length, self._config_dict["embedding_size"]),
-        #         batch_size=self._batch_size,
-        #         dtype=tf.float32,
-        #         name="encoder_hidden_states",
-        #     )
-        #     # batch_size x decoder_input_length x encoder_input_length
-        #     decoder_encoder_mask = tf.keras.layers.Input(
-        #         shape=(self._sequence_length, None),
-        #         batch_size=self._batch_size,
-        #         dtype=tf.float32,
-        #         name="decoder_encoder_mask",
-        #     )
-
-        #     inputs["encoder_hidden_states"] = encoder_hidden_states
-        #     inputs["decoder_encoder_mask"] = decoder_encoder_mask
-
-        #     if "past_length" in inputs:
-        #         del inputs["past_length"]
 
         layer_outputs = self(inputs)
         if initialize_only:
@@ -270,26 +196,11 @@ class ViTEncoder(LegacyLayer):
         model.model_config = self._config_dict
         return model
 
-    def call_encoder(self, inputs):
-        """Forward pass of an Encoder
-
-        Args:
-            inputs ([dict of tf.Tensor]): This is the input to the model.
-
-            'input_ids'         --> tf.int32 (b x image_size x image_size x num_channels)
-            'input_mask'        --> tf.int32 (b x s) # optional
-            'input_type_ids'    --> tf.int32 (b x s) # optional
-
-        Returns:
-            [dict of tf.Tensor]: Output from the model
-
-            'cls_output'        --> tf.float32 (b x s) # optional
-            'token_embeddings'  --> tf.float32 (b x s x h)
-            'all_layer_token_embeddings' --> tf.float32 (List of (b x s x h)
-                                              from all layers)
-            'all_layer_cls_output'       --> tf.float32 (List of (b x s)
-                                              from all layers)
-        """
+    @add_start_docstrings(
+        "Forward pass of Vit :",
+        CALL_ENCODER_DOCSTRING,
+    )
+    def call_encoder(self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]) -> Dict[str, tf.Tensor]:
 
         # 1. Collect Patch Embeddings
         input_ids = inputs["input_ids"]
@@ -314,16 +225,6 @@ class ViTEncoder(LegacyLayer):
             embeddings = self._positional_embedding_layer(embeddings)
 
         # 3. Attention  Mask
-        attention_mask = []
-        #         if self._mask_mode == "user_defined":
-        #             input_mask = inputs["input_mask"]
-        #             attention_mask = SelfAttentionMask()([embeddings, input_mask])
-        #         if self._mask_mode == "prefix":
-        #             input_mask = inputs["input_mask"]
-        #             attention_mask = tf.map_fn(prefix_mask, input_mask, dtype=tf.float32)
-        #         if self._mask_mode == "causal":
-        #             attention_mask = CausalMask()(embeddings)
-
         attention_mask = tf.ones((batch_size, self._num_patches, self._num_patches))
         # 4. Transformer Outputs
         encoder_outputs = []
@@ -332,16 +233,14 @@ class ViTEncoder(LegacyLayer):
             embeddings, _, _ = layer([embeddings, attention_mask])
             encoder_outputs.append(embeddings)
 
-        encoder_outputs[-1] = self._last_layer_norm(encoder_outputs[-1])
         # First word of last layer outputs [CLS]
         cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(encoder_outputs[-1])
         # batch_size x embedding_size
         cls_output = self._pooler_layer(cls_token_tensor)
         # batch_size x sequence_length x embedding_size
-        token_embeddings = encoder_outputs[-1]
+        token_embeddings = self._last_layer_norm(encoder_outputs[-1])
 
         result = {"token_embeddings": token_embeddings, "cls_output": cls_output, "cls_token_tensor": cls_token_tensor}
-
         if self._config_dict['num_labels']:
             classifier_predictions = self._classifier_layer(cls_token_tensor)
             result['classifier_predictions'] = classifier_predictions
@@ -351,6 +250,7 @@ class ViTEncoder(LegacyLayer):
             all_cls_output = []
             all_layer_classifier_predictions = []
             for per_layer_token_embeddings in encoder_outputs:
+                per_layer_token_embeddings = self._last_layer_norm(per_layer_token_embeddings)
                 per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
                     per_layer_token_embeddings
                 )
@@ -368,6 +268,15 @@ class ViTEncoder(LegacyLayer):
                 result["all_layer_classifier_predictions"] = all_layer_classifier_predictions
 
         return result
+
+    def call_encoder_auto_regressive(self, inputs):
+        raise NotImplementedError("ViT as of now not supports decoding")
+
+    def call_decoder(self, inputs):
+        raise NotImplementedError("As of now Vit doesn't support Decoder")
+
+    def call_decoder_auto_regressive(self, inputs):
+        raise NotImplementedError("As of now ViT doesn't support Seq2Seq decoding")
 
     def call(self, inputs):
         """Call method"""

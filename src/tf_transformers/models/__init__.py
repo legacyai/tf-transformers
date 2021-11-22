@@ -36,4 +36,4 @@ from tf_transformers.models.tasks import (
     Span_Selection_Model,
     Token_Classification_Model,
 )
-from tf_transformers.models.vit import ViTEncoder, ViTModel
+from tf_transformers.models.vit import ViTConfig, ViTEncoder, ViTModel

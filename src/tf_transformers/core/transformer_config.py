@@ -80,7 +80,15 @@ class TransformerConfig:
         bidirectional (:obj:`bool`, `optional`, defaults to True):
             For relative positional embeddings, Encoder has :obj:`bidirectional=True`, while Decoder has
             :obj:`bidirectional=False`.
-        positional_buckets (:obj:`int`, `optional`, defaults to 32):
+        positional_buckets (:obj:`int`, `optional`, defaults to 32): For T5 style relative position embedding.
+        image_size (:obj:`int`, `optional`, defaults to :obj:`224`):
+            The size (resolution) of each image.
+        patch_size (:obj:`int`, `optional`, defaults to :obj:`16`):
+            The size (resolution) of each patch.
+        num_channels (:obj:`int`, `optional`, defaults to :obj:`3`):
+            The number of input channels.
+        num_labels (:obj:`int`, `optional`, defaults to :obj:`1000`):
+            Total number of labels by which model has been pre-trained
 
 
     """
@@ -112,6 +120,10 @@ class TransformerConfig:
         pad_token_id=None,
         bos_token_id=None,
         eos_token_id=None,
+        image_size=None,
+        patch_size=None,
+        num_channels=None,
+        num_labels=None,
     ):
         self.vocab_size = vocab_size
         self.embedding_size = embedding_size
@@ -132,6 +144,10 @@ class TransformerConfig:
         self.bidirectional = bidirectional
         self.positional_buckets = positional_buckets
         self.decoder_start_token_id = decoder_start_token_id
+        self.image_size = image_size
+        self.patch_size = patch_size
+        self.num_channels = num_channels
+        self.num_labels = num_labels
 
         # Convert attributes to dict and del "self" from that
         self._inputs = locals()

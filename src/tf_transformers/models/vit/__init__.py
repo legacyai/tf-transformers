@@ -14,5 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+from tf_transformers.models.vit.configuration_vit import ViTConfig
 from tf_transformers.models.vit.vit import ViTEncoder
 from tf_transformers.models.vit.vit_model import ViTModel
