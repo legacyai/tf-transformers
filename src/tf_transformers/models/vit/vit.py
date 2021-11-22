@@ -43,7 +43,7 @@ class ViTEncoder(LegacyLayer):
         self,
         config: Dict,
         mask_mode: str = "user_defined",
-        name: str = "bert",
+        name: str = "vit",
         use_dropout: bool = False,
         is_training: bool = False,
         use_auto_regressive: bool = False,
