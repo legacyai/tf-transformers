@@ -233,12 +233,13 @@ class ViTEncoder(LegacyLayer):
             embeddings, _, _ = layer([embeddings, attention_mask])
             encoder_outputs.append(embeddings)
 
-        # First word of last layer outputs [CLS]
-        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(encoder_outputs[-1])
-        # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
         # batch_size x sequence_length x embedding_size
         token_embeddings = self._last_layer_norm(encoder_outputs[-1])
+
+        # First word of last layer outputs [CLS]
+        cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(token_embeddings)
+        # batch_size x embedding_size
+        cls_output = self._pooler_layer(cls_token_tensor)
 
         result = {"token_embeddings": token_embeddings, "cls_output": cls_output, "cls_token_tensor": cls_token_tensor}
         if self._config_dict['num_labels']:
