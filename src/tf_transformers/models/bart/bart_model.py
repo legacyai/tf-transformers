@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+# flake8: noqa
 from typing import Dict, Optional, Union
 
 from absl import logging
@@ -51,8 +52,7 @@ code_example = r'''
         >>> encoder_input_ids = tf.random.uniform(shape=(batch_size, encoder_sequence_length), dtype=tf.int32)
         >>> decoder_input_ids = tf.random.uniform(shape=(batch_size, decoder_sequence_length), dtype=tf.int32)
         >>> encoder_input_mask = tf.ones_like(encoder_input_ids)
-        >>> inputs = {{'encoder_input_ids': input_ids, 'encoder_input_mask': encoder_input_mask, \
-            "decoder_input_ids": decoder_input_ids}
+        >>> inputs = {{'encoder_input_ids': input_ids, 'encoder_input_mask': encoder_input_mask, "decoder_input_ids": decoder_input_ids}
         >>> outputs = model(inputs)
 
 '''

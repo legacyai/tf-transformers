@@ -21,7 +21,7 @@ from tf_transformers.core import TransformerConfig
 class BertConfig(TransformerConfig):
     r"""
     This is the configuration class to store the configuration of a :class:`~tf_transformers.models.BertModel`.
-    It is used to instantiate an ALBERT model according to the specified arguments, defining the model architecture.
+    It is used to instantiate an BERT model according to the specified arguments, defining the model architecture.
     Instantiating a configuration with the defaults will yield a similar configuration to that of the
     ALBERT `base <https://huggingface.co/bert-base-uncased>`__ architecture.
 

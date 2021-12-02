@@ -1,16 +1,4 @@
 ..
-    Copyright 2020 The HuggingFace Team and TFT Team. All rights reserved.
-
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
-    the License. You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-    specific language governing permissions and limitations under the License.
-
-..
     Copyright 2020 The HuggingFace Team. All rights reserved.
 
     Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
@@ -24,10 +12,6 @@
 
 BART
 -----------------------------------------------------------------------------------------------------------------------
-
-**DISCLAIMER:** If you see something strange, file a `Github Issue
-<https://github.com/huggingface/transformers/issues/new?assignees=&labels=&template=bug-report.md&title>`__ and assign
-@patrickvonplaten
 
 Overview
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,10 +30,6 @@ According to the abstract,
   matches the performance of RoBERTa with comparable training resources on GLUE and SQuAD, achieves new
   state-of-the-art results on a range of abstractive dialogue, question answering, and summarization tasks, with gains
   of up to 6 ROUGE.
-
-This model was contributed by `sshleifer <https://huggingface.co/sshleifer>`__. The Authors' code can be found `here
-<https://github.com/pytorch/fairseq/tree/master/examples/bart>`__.
-
 
 Examples
 _______________________________________________________________________________________________________________________

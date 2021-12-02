@@ -38,15 +38,17 @@ MODEL_TO_HF_URL = {}
 
 code_example = r'''
 
+        >>> from tf_transformers.models import  ViTFeatureExtractorTF
         >>> from tf_transformers.models import  VitModel
-        >>> model = VitModel.from_pretrained("bert-base-uncased")
-        >>> batch_size = 5
-        >>> sequence_length = 64
-        >>> input_ids = tf.random.uniform(shape=(batch_size, sequence_length), dtype=tf.int32)
-        >>> input_type_ids = tf.zeros_like(input_ids)
-        >>> input_mask = tf.ones_like(input_ids)
-        >>> inputs = {{'input_ids': input_ids, 'input_type_ids':input_type_ids, 'input_mask': input_mask}
-        >>> outputs = model(inputs)
+        >>> image_path_list = # List fo image paths
+        >>> model_name = 'google/vit-base-patch16-224'
+        >>> vit_feature_extractor_tf = ViTFeatureExtractorTF(img_height=224, img_width=224)
+        >>> feature_extractor = ViTFeatureExtractorTF(img_height=224, img_width=224)
+        >>> model = ViTModel.from_pretrained(model_name, classification_labels=1000)
+        >>> input_features = feature_extractor({'image': tf.constant(image_path_list)})
+        >>> model_outputs = model(input_features)
+        >>> predicted_class = tf.argmax(model_outputs['class_logits'], axis=-1)
+
 
 '''
 
@@ -151,6 +153,7 @@ class ViTModel(ModelWrapper):
     def from_pretrained(
         cls,
         model_name: str,
+        classification_labels: int = None,
         cache_dir: Union[str, None] = None,
         model_checkpoint_dir: Optional[str] = None,
         convert_from_hf: bool = True,
@@ -169,7 +172,9 @@ class ViTModel(ModelWrapper):
             URL = MODEL_TO_HF_URL[model_name]
             config_dict, local_cache = get_config_cache(URL)
             kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
-            model_layer = Encoder(config_dict, **kwargs_copy)
+            if classification_labels:
+                logging.info("Using pretrained classifier layer with num_class={}".format(classification_labels))
+            model_layer = Encoder(config_dict, classification_labels=classification_labels, **kwargs_copy)
 
             model = model_layer.get_model()
             # Load Model
@@ -202,7 +207,9 @@ class ViTModel(ModelWrapper):
             del kwargs["name"]
 
         kwargs_copy = cls_ref._update_kwargs_and_config(kwargs, config_dict)
-        model_layer = Encoder(config_dict, **kwargs_copy)
+        if classification_labels:
+            logging.info("Using pretrained classifier layer with num_class={}".format(classification_labels))
+        model_layer = Encoder(config_dict, classification_labels=classification_labels, **kwargs_copy)
         model = model_layer.get_model()
 
         # Give preference to model_checkpoint_dir

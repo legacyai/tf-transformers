@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+# flake8: noqa
 from typing import Dict, Optional, Union
 
 from absl import logging
@@ -50,8 +51,7 @@ code_example = r'''
         >>> encoder_input_ids = tf.random.uniform(shape=(batch_size, encoder_sequence_length), dtype=tf.int32)
         >>> decoder_input_ids = tf.random.uniform(shape=(batch_size, decoder_sequence_length), dtype=tf.int32)
         >>> encoder_input_mask = tf.ones_like(encoder_input_ids)
-        >>> inputs = {{'encoder_input_ids': input_ids, 'encoder_input_mask': encoder_input_mask,
-            "decoder_input_ids": decoder_input_ids}
+        >>> inputs = {{'encoder_input_ids': input_ids, 'encoder_input_mask': encoder_input_mask, "decoder_input_ids": decoder_input_ids}
         >>> outputs = model(inputs)
 
 '''
@@ -189,7 +189,7 @@ class T5Model(ModelWrapper):
         if model_name in MODEL_TO_HF_URL and skip_hub is False:
             URL = MODEL_TO_HF_URL[model_name]
             config_dict, local_cache = get_config_cache(URL)
-            
+
             encoder_kwargs_copy = {}
             if encoder_kwargs:
                 if not isinstance(encoder_kwargs, dict):
@@ -221,7 +221,7 @@ class T5Model(ModelWrapper):
             )
             model_layer = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True)
             model = model_layer.get_model()
-            
+
             # Load Model
             load_pretrained_model(model, local_cache, URL)
             if return_layer:

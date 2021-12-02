@@ -17,6 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+# flake8: noqa
 """Albert Tokenizer based on TFText"""
 import tempfile
 from pathlib import Path
@@ -106,47 +107,48 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
     ):
         """Initializes a SentencepieceTokenizer layer.
         Args:
-          lower_case: A Python boolean indicating whether to lowercase the string
-            before tokenization. NOTE: New models are encouraged to build `*_cf`
-            (case folding) normalization into the Sentencepiece model itself and
-            avoid this extra step.
-          special_tokens: A list of special tokens , must present in model. If not pass None.
-          model_file_path: A Python string with the path of the sentencepiece model.
-            Exactly one of `model_file_path` and `model_serialized_proto` can be
-            specified. In either case, the Keras model config for this layer will
-            store the actual proto (not a filename passed here).
-          model_serialized_proto: The sentencepiece model serialized proto string.
-          add_cls_sep: To add [CLS] and [SEP] with the tokenized text
-          cls_token: cls token string
-          sep_token: sep token string
-          tokenize_with_offsets: A Python boolean. If true, this layer calls
-            `SentencepieceTokenizer.tokenize_with_offsets()` instead of
-            plain `.tokenize()` and outputs a triple of
-            `(tokens, start_offsets, limit_offsets)` insead of just tokens.
-            Note that when following `strip_diacritics` is set to True, returning
-            offsets is not supported now.
-          nbest_size: A scalar for sampling:
+            lower_case: A Python boolean indicating whether to lowercase the string
+                    before tokenization. NOTE: New models are encouraged to build `*_cf`
+                    (case folding) normalization into the Sentencepiece model itself and
+                    avoid this extra step.
+            special_tokens: A list of special tokens , must present in model. If not pass None.
+                    model_file_path: A Python string with the path of the sentencepiece model.
+                    Exactly one of `model_file_path` and `model_serialized_proto` can be
+                    specified. In either case, the Keras model config for this layer will
+                    store the actual proto (not a filename passed here).
+                    model_serialized_proto: The sentencepiece model serialized proto string.
+            add_cls_sep: To add [CLS] and [SEP] with the tokenized text
+            cls_token: cls token string
+            sep_token: sep token string
+            tokenize_with_offsets: A Python boolean. If true, this layer calls
+                    `SentencepieceTokenizer.tokenize_with_offsets()` instead of
+                    plain `.tokenize()` and outputs a triple of
+                    `(tokens, start_offsets, limit_offsets)` insead of just tokens.
+                    Note that when following `strip_diacritics` is set to True, returning
+                    offsets is not supported now.
+            nbest_size: A scalar for sampling:
             nbest_size = {0,1}: No sampling is performed. (default)
             nbest_size > 1: samples from the nbest_size results.
             nbest_size < 0: assuming that nbest_size is infinite and samples
-               from the all hypothesis (lattice) using
-               forward-filtering-and-backward-sampling algorithm.
-          alpha: A scalar for a smoothing parameter. Inverse temperature for
-            probability rescaling.
-          strip_diacritics: Whether to strip diacritics or not. Note that stripping
-            diacritics requires additional text normalization and dropping bytes,
-            which makes it impossible to keep track of the offsets now. Hence
-            when `strip_diacritics` is set to True, we don't yet support
-            `tokenize_with_offsets`. NOTE: New models are encouraged to put this
-            into custom normalization rules for the Sentencepiece model itself to
-            avoid this extra step and the limitation regarding offsets.
-          **kwargs: standard arguments to `Layer()`.
-          add_special_tokens: If True: Add special tokens CLS and SEP.
-          pack_model_inputs: Static Padding to max_length
-          dynamic_padding: Dynamic Padding to max_length of the batch
+                    from the all hypothesis (lattice) using
+                    forward-filtering-and-backward-sampling algorithm.
+            alpha: A scalar for a smoothing parameter. Inverse temperature for
+                    probability rescaling.
+            strip_diacritics: Whether to strip diacritics or not. Note that stripping
+                    diacritics requires additional text normalization and dropping bytes,
+                    which makes it impossible to keep track of the offsets now. Hence
+                    when `strip_diacritics` is set to True, we don't yet support
+                    `tokenize_with_offsets`. NOTE: New models are encouraged to put this
+                    into custom normalization rules for the Sentencepiece model itself to
+                    avoid this extra step and the limitation regarding offsets.
+            **kwargs: standard arguments to `Layer()`.
+            add_special_tokens: If True: Add special tokens CLS and SEP.
+            pack_model_inputs: Static Padding to max_length
+            dynamic_padding: Dynamic Padding to max_length of the batch
+            truncate: To enable truncate
 
         Raises:
-          ImportError: if importing tensorflow_text failed.
+            ImportError: if importing tensorflow_text failed.
 
         Returns:
             Default: RaggedTensor

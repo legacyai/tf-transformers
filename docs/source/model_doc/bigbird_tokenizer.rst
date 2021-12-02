@@ -17,7 +17,7 @@ Overview
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This page includes information about how to use AlbertTokenizer with tensorflow-text.
-This tokenizer works in sync with `tf.data.Dataset` and so is useful for on the fly tokenization.
+This tokenizer works in sync with :class:`~tf.data.Dataset` and so is useful for on the fly tokenization.
 This tokenizer is more of like `GPT2` vocab extension in sentencepiece with 100 extra reserved IDS.
 
 .. code-block::
@@ -52,10 +52,10 @@ This tokenizer is more of like `GPT2` vocab extension in sentencepiece with 100 
         >>> tokenizer = BigBirdTokenizerTFText.from_pretrained("google/bigbird-roberta-large",
         add_special_tokens=True)
 
-BigBirdTokenizerTFText
+BigBirdRobertaTokenizerTFText
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: tf_transformers.models.BigBirdTokenizerTFText
+.. autoclass:: tf_transformers.models.BigBirdRobertaTokenizerTFText
     :members:
 
 BigBirdRobertaTokenizerLayer

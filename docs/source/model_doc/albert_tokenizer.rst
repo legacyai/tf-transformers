@@ -17,7 +17,7 @@ Overview
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This page includes information about how to use AlbertTokenizer with tensorflow-text.
-This tokenizer works in sync with `tf.data.Dataset` and so is useful for on the fly tokenization.
+This tokenizer works in sync with :class:`~tf.data.Dataset` and so is useful for on the fly tokenization.
 
 .. code-block::
 

@@ -314,9 +314,10 @@ class EncoderDecoder(LegacyLayer):
             'cls_output'        --> tf.float32 (b x s) # optional
             'token_embeddings'  --> tf.float32 (b x s x h)
             'all_layer_token_embeddings' --> tf.float32 (List of (b x s x h)
-                                              from all layers)
+                                            from all layers)
             'all_layer_cls_output'       --> tf.float32 (List of (b x s)
-                                              from all layers)
+                                            from all layers)
+
         """
         # Replace 'encoder_input_ids'      to 'input_ids'
         # Replace 'encoder_input_mask'     to 'input_mask'
@@ -368,25 +369,26 @@ class EncoderDecoder(LegacyLayer):
             'decoder_input_type_ids'    --> tf.int32 (b x s) # optional
 
             'decoder_all_cache_key'     --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
+                                    batch_size ,
+                                    num_attention_heads ,
+                                    sequence_length,
+                                    attention_head_size)
 
             'decoder_all_cache_value'    --> tf.float32 (num_hidden_layers ,
-                                     batch_size ,
-                                     num_attention_heads ,
-                                     sequence_length,
-                                     attention_head_size)
+                                    batch_size ,
+                                    num_attention_heads ,
+                                    sequence_length,
+                                    attention_head_size)
         Returns:
             [dict of tf.Tensor]: Output from the model
 
             'cls_output'        --> tf.float32 (b x s) # optional
             'token_embeddings'  --> tf.float32 (b x s x h)
             'all_layer_token_embeddings' --> tf.float32 (List of (b x s x h)
-                                              from all layers)
+                                            from all layers)
             'all_layer_cls_output'       --> tf.float32 (List of (b x s)
-                                              from all layers)
+                                            from all layers)
+
         """
         encoder_inputs = {
             k.replace("encoder_", ""): v

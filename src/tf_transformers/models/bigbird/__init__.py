@@ -15,5 +15,6 @@
 # limitations under the License.
 # ==============================================================================
 from tf_transformers.models.bigbird.tokenizer_bigbird_roberta import (
+    BigBirdRobertaTokenizerLayer,
     BigBirdRobertaTokenizerTFText,
 )

@@ -177,7 +177,7 @@ execution_excludepatterns = [
 # These are responsible for creating nice shareable social images https://ahrefs.com/blog/open-graph-meta-tags/
 # https://ogp.me/#type_website
 ogp_image = "png location"
-ogp_description = "State-of-the-art Faster Natural Language Processing in Tensorflow 2.0"
+ogp_description = "State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0"
 ogp_description_length = 160
 
 ogp_custom_meta_tags = [
@@ -205,7 +205,6 @@ html_static_path = ["_static"]
 # the icon for tabs, windows and bookmarks. It should be a Windows-style
 # icon file (.ico).
 html_favicon = "favicon.ico"
-
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -252,10 +251,10 @@ man_pages = [(master_doc, "transformers", "transformers Documentation", [author]
 texinfo_documents = [
     (
         master_doc,
-        "transformers",
-        "transformers Documentation",
+        "tftransformers",
+        "tftransformers Documentation",
         author,
-        "transformers",
+        "tftransformers",
         "One line description of project.",
         "Miscellaneous",
     ),
@@ -285,7 +284,7 @@ gettext_compact = False
 
 
 def setup(app):
-    app.add_css_file("css/huggingface.css")
+    app.add_css_file("css/custom_from_huggingface.css")
     # app.add_css_file("css/code-snippets.css")
     # app.add_js_file("js/custom.js")
 

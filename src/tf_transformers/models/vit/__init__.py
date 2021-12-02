@@ -16,4 +16,5 @@
 # ==============================================================================
 from tf_transformers.models.vit.configuration_vit import ViTConfig
 from tf_transformers.models.vit.vit import ViTEncoder
+from tf_transformers.models.vit.vit_feature_extractor import ViTFeatureExtractorTF
 from tf_transformers.models.vit.vit_model import ViTModel

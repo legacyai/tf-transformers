@@ -23,12 +23,21 @@ from tf_transformers.models.albert import (
 )
 from tf_transformers.models.bart import BartConfig, BartEncoder, BartModel
 from tf_transformers.models.bert import BertConfig, BertEncoder, BertModel
-from tf_transformers.models.bigbird import BigBirdRobertaTokenizerTFText
+from tf_transformers.models.bigbird import (
+    BigBirdRobertaTokenizerLayer,
+    BigBirdRobertaTokenizerTFText,
+)
 from tf_transformers.models.encoder_decoder import EncoderDecoder
 from tf_transformers.models.gpt2 import GPT2Config, GPT2Encoder, GPT2Model
 from tf_transformers.models.mt5 import MT5Config, MT5Encoder, MT5Model
 from tf_transformers.models.roberta import RobertaConfig, RobertaEncoder, RobertaModel
-from tf_transformers.models.t5 import T5Config, T5Encoder, T5Model, T5TokenizerTFText
+from tf_transformers.models.t5 import (
+    T5Config,
+    T5Encoder,
+    T5Model,
+    T5TokenizerLayer,
+    T5TokenizerTFText,
+)
 from tf_transformers.models.tasks import (
     Classification_Model,
     MaskedLMModel,
@@ -36,4 +45,9 @@ from tf_transformers.models.tasks import (
     Span_Selection_Model,
     Token_Classification_Model,
 )
-from tf_transformers.models.vit import ViTConfig, ViTEncoder, ViTModel
+from tf_transformers.models.vit import (
+    ViTConfig,
+    ViTEncoder,
+    ViTFeatureExtractorTF,
+    ViTModel,
+)

@@ -27,8 +27,9 @@ from tf_transformers.layers import PatchEmbeddings, PositionEmbeddingImage
 from tf_transformers.layers.transformer import TransformerVIT
 from tf_transformers.utils.docstring_file_utils import add_start_docstrings
 from tf_transformers.utils.docstring_utils import (
-    CALL_ENCODER_DOCSTRING,
+    CALL_ENCODER_DOCSTRING_IMAGE,
     ENCODER_CLASS_DOCSTRING,
+    MAIN_CALL_DOCSTRING,
 )
 
 logging.set_verbosity("INFO")
@@ -50,6 +51,7 @@ class ViTEncoder(LegacyLayer):
         use_decoder: bool = False,
         batch_size: bool = None,
         sequence_length: bool = None,
+        classification_labels: int = None,
         return_all_layer_outputs: bool = False,
         **kwargs,
     ):
@@ -74,9 +76,7 @@ class ViTEncoder(LegacyLayer):
         self._sequence_length = sequence_length
         self._return_all_layer_outputs = return_all_layer_outputs
 
-        if "num_labels" not in config:
-            config["num_labels"] = None
-            self._num_labels = config['num_labels']
+        self._classification_labels = classification_labels
 
         self._patch_size = config['patch_size']
         self._image_size = config['image_size']
@@ -148,11 +148,11 @@ class ViTEncoder(LegacyLayer):
             )
             self._transformer_layers.append(layer)
 
-        # Add Classifier layer (by default VIT traines on 1000 labels)
-        if config['num_labels']:
+        # Add Pre-trained Classifier layer (by default VIT traines on 1000 labels)
+        if self._classification_labels:
 
             self._classifier_layer = tf.keras.layers.Dense(
-                units=config["num_labels"],
+                units=self._classification_labels,
                 activation=None,
                 kernel_initializer=self._initializer,
                 name="classifier_layer",
@@ -178,14 +178,14 @@ class ViTEncoder(LegacyLayer):
 
         """
 
-        input_ids = tf.keras.layers.Input(
+        input_pixels = tf.keras.layers.Input(
             shape=(self._config_dict['image_size'], self._config_dict['image_size'], self._config_dict['num_channels']),
             batch_size=self._batch_size,
             dtype=tf.float32,
-            name="input_ids",
+            name="input_pixels",
         )
         inputs = {}
-        inputs["input_ids"] = input_ids  # Default
+        inputs["input_pixels"] = input_pixels  # Default
 
         layer_outputs = self(inputs)
         if initialize_only:
@@ -198,12 +198,12 @@ class ViTEncoder(LegacyLayer):
 
     @add_start_docstrings(
         "Forward pass of Vit :",
-        CALL_ENCODER_DOCSTRING,
+        CALL_ENCODER_DOCSTRING_IMAGE,
     )
     def call_encoder(self, inputs: Dict[str, Union[tf.keras.layers.Input, tf.Tensor]]) -> Dict[str, tf.Tensor]:
 
         # 1. Collect Patch Embeddings
-        input_ids = inputs["input_ids"]
+        input_ids = inputs["input_pixels"]
         batch_size = tf.shape(input_ids)[0]
         # b x one_side_patch x one_side_patch x embedding_size (b x 14 x 14 x 768)
         embeddings = self._embedding_layer(input_ids)
@@ -239,15 +239,15 @@ class ViTEncoder(LegacyLayer):
         # First word of last layer outputs [CLS]
         cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(token_embeddings)
         # batch_size x embedding_size
-        cls_output = self._pooler_layer(cls_token_tensor)
+        # cls_output = self._pooler_layer(cls_token_tensor)
 
-        result = {"token_embeddings": token_embeddings, "cls_output": cls_output, "cls_token_tensor": cls_token_tensor}
-        if self._config_dict['num_labels']:
+        result = {"token_embeddings": token_embeddings, "cls_output": cls_token_tensor}
+        if self._classification_labels:
             classifier_predictions = self._classifier_layer(cls_token_tensor)
-            result['classifier_predictions'] = classifier_predictions
+            result['class_logits'] = classifier_predictions
 
         if self._return_all_layer_outputs:
-            all_cls_token_tensors = []
+            # all_cls_token_tensors = []
             all_cls_output = []
             all_layer_classifier_predictions = []
             for per_layer_token_embeddings in encoder_outputs:
@@ -255,17 +255,18 @@ class ViTEncoder(LegacyLayer):
                 per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
                     per_layer_token_embeddings
                 )
-                all_cls_token_tensors.append(per_cls_token_tensor)
-                all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
+                # all_cls_token_tensors.append(per_cls_token_tensor)
+                # all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
+                all_cls_output.append(per_cls_token_tensor)
 
-                if self._config_dict['num_labels']:
+                if self._classification_labels:
                     classifier_predictions = self._classifier_layer(cls_token_tensor)
                     all_layer_classifier_predictions.append(classifier_predictions)
 
             result["all_layer_token_embeddings"] = encoder_outputs
             result["all_layer_cls_output"] = all_cls_output
-            result["all_layer_cls_token_tensor"] = all_cls_token_tensors
-            if self._config_dict['num_labels']:
+            # result["all_layer_cls_token_tensor"] = all_cls_token_tensors
+            if self._classification_labels:
                 result["all_layer_classifier_predictions"] = all_layer_classifier_predictions
 
         return result
@@ -274,12 +275,16 @@ class ViTEncoder(LegacyLayer):
         raise NotImplementedError("ViT as of now not supports decoding")
 
     def call_decoder(self, inputs):
-        raise NotImplementedError("As of now Vit doesn't support Decoder")
+        raise NotImplementedError("ViT as of now not supports Decoder")
 
     def call_decoder_auto_regressive(self, inputs):
-        raise NotImplementedError("As of now ViT doesn't support Seq2Seq decoding")
+        raise NotImplementedError("ViT as of now not supports Seq2Seq decoding")
 
-    def call(self, inputs):
+    @add_start_docstrings(
+        "Bert Call method :",
+        MAIN_CALL_DOCSTRING,
+    )
+    def call(self, inputs: Dict[str, tf.Tensor]):
         """Call method"""
         outputs = self.call_fn(inputs)
         return outputs
