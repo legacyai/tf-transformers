@@ -83,22 +83,26 @@ class ViTConfig(TransformerConfig):
 
     Examples::
 
-        >>> from tf_transformers.models import BertConfig, BertModel
-        >>> # Initializing an bert-base-uncased style configuration
-        >>> configuration = BertConfig()
+        >>> from tf_transformers.models import ViTConfig, ViTModel
+        >>> # Initializing an 'google/vit-base-patch16-224' style configuration
+        >>> configuration = ViTConfig()
 
-        >>> # Initializing an Bert different style configuration
-        >>> configuration_new = BertConfig(
+        >>> # Initializing an ViT different style configuration
+        >>> configuration_new = ViTConfig(
         ...      embedding_size=768,
         ...      num_attention_heads=12,
         ...      intermediate_size=3072,
         ...  )
 
         >>> # Initializing a model from the original configuration
-        >>> model = BertModel.from_config(configuration)
+        >>> model = ViTModel.from_config(configuration)
 
         >>> # Accessing the model configuration
         >>> configuration = model._config_dict # This has more details than original configuration
+
+        >>> # To get a config
+        >>> model_name = 'google/vit-base-patch16-224'
+        >>> config = ViTModel.get_config(model_name)
     """
 
     def __init__(

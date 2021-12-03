@@ -71,14 +71,6 @@ def get_vocab(model_proto):
 
 
 class AlbertTokenizerLayer(tf.keras.layers.Layer):
-    """Wraps `tf_text.SentencepieceTokenizer` as a Keras Layer.
-    Attributes:
-    tokenize_with_offsets: If true, calls
-      `SentencepieceTokenizer.tokenize_with_offsets()`
-      instead of plain `.tokenize()` and outputs a triple of
-      `(tokens, start_offsets, limit_offsets)`.
-    """
-
     def __init__(
         self,
         *,

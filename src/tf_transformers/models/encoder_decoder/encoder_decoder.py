@@ -32,6 +32,7 @@ def assert_shapes(encoder_embeddings, decoder_embeddings):
 
     Raises:
         ValueError: [description]
+
     """
     encoder_shape = list(encoder_embeddings.shape)
     decoder_shape = list(decoder_embeddings.shape)
@@ -47,6 +48,7 @@ def share_embedding_layers(encoder_layer, decoder_layer):
     Args:
         encoder_layer ([tf.keras.layers.Layer]): Encoder
         decoder_layer ([tf.keras.layers.Layer]): Decoder
+
     """
     assert_shapes(encoder_layer._embedding_layer.embeddings, decoder_layer._embedding_layer.embeddings)
     decoder_layer._embedding_layer = encoder_layer._embedding_layer
@@ -76,6 +78,7 @@ def share_encoder_layers(encoder_layer, decoder_layer):
     Args:
         encoder_layer ([tf.keras.layers.Layer]): Encoder
         decoder_layer ([tf.keras.layers.Layer]): Decoder
+
     """
     for i, enc_layer in enumerate(encoder_layer._transformer_layers):
         dec_layer = decoder_layer._transformer_layers[i]
@@ -218,6 +221,7 @@ class EncoderDecoder(LegacyLayer):
         Args:
             self: model (tf.keras.Layer) instance
             initialize_only: bool
+
         """
         # encoder_sequence_length = self._encoder._sequence_length
         # decoder_sequence_length = self._decoder._sequence_length
@@ -379,6 +383,7 @@ class EncoderDecoder(LegacyLayer):
                                     num_attention_heads ,
                                     sequence_length,
                                     attention_head_size)
+
         Returns:
             [dict of tf.Tensor]: Output from the model
 
