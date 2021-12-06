@@ -19,7 +19,9 @@ import tensorflow as tf
 import tensorflow_text as tf_text
 
 
-def mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq, selection_rate=0.15, delimiter=' '):
+def mlm_fn(
+    tokenizer_layer, max_seq_len, max_predictions_per_seq, selection_rate=0.15, delimiter=' ', add_cls_token=True
+):
     """The main function for MLM.
 
     Args:
@@ -84,9 +86,15 @@ def mlm_fn(tokenizer_layer, max_seq_len, max_predictions_per_seq, selection_rate
 
         # Flatten and add CLS , SEP
         segments_flattened = segments.merge_dims(-2, 1)
-        segments_combined = tf.concat([[cls_token_id], segments_flattened, [sep_token_id]], axis=0)
-        # We have to move original row splits to acoomoadate 2 extra tokens added later, CLS and SEP
-        row_splits = tf.concat([[0], segments.row_splits + 1, [segments.row_splits[-1] + 2]], axis=0)
+        if add_cls_token:
+            segments_combined = tf.concat([[cls_token_id], segments_flattened, [sep_token_id]], axis=0)
+            # We have to move original row splits to acoomoadate 2 extra tokens added later, CLS and SEP
+            row_splits = tf.concat([[0], segments.row_splits + 1, [segments.row_splits[-1] + 2]], axis=0)
+        else:
+            # We have to move original row splits to acoomoadate extra SEP token
+            segments_combined = tf.concat([segments_flattened, [sep_token_id]], axis=0)
+            row_splits = tf.concat([segments.row_splits, [segments.row_splits[-1] + 1]], axis=0)
+
         segments_combined = tf.RaggedTensor.from_row_splits(segments_combined, row_splits)
         # Apply dynamic masking, with expand_dims on the input batch
         # If expand_dims is not there, whole word masking fails

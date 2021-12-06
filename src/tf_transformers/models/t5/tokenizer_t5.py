@@ -438,7 +438,7 @@ class T5TokenizerLayer(tf.keras.layers.Layer):
     def _add_special_tokens(self, tokens):
         """Add special tokens"""
         batch_size = tokens.shape[0]
-        eos_tokens_batch = tf.cast(tf.ones(shape=(batch_size, 1)), self._out_type) * self.eos_token_id
+        eos_tokens_batch = tf.cast(tf.ones(shape=(batch_size, 1)), self.out_type) * self.eos_token_id
         tokens = tf.concat([tokens, eos_tokens_batch], axis=1)
         return tokens
 

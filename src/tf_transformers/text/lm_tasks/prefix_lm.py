@@ -19,7 +19,7 @@ import tensorflow as tf
 import tensorflow_text as tf_text
 
 
-def prefix_lm_fn_v2(tokenizer_layer, max_seq_len, add_cls_token=False, add_eos_after_prefix=False):
+def prefix_lm_fn_v2(tokenizer_layer, max_seq_len, add_cls_token=False, add_eos_after_prefix=True):
     """The main function for PLM.
     This has one difference from `prefix_lm_fn` . Instead of splitting based on
     sentence end, we randomly pick from 0 - max_seq_len

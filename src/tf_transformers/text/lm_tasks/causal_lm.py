@@ -19,7 +19,7 @@ import tensorflow as tf
 import tensorflow_text as tf_text
 
 
-def causal_lm_fn(tokenizer_layer, max_seq_len):
+def causal_lm_fn(tokenizer_layer, max_seq_len, add_cls_token=True):
     """The main function for CLM.
 
     Args:
@@ -40,9 +40,14 @@ def causal_lm_fn(tokenizer_layer, max_seq_len):
     def causal_map_fn(item):
         # We expect item to be dict of {'text': ['sentence1']}
         input_ids = tokenizer_layer(item)
-        # Trim inputs (+1 is because for Causal LM we shift inputs and labels)
-        input_ids_ragged = input_ids[:, : max_seq_len + 1 - 2]
-        input_ids_ragged = tf.concat([[[cls_token_id]], input_ids_ragged, [[sep_token_id]]], axis=1)
+        if add_cls_token:
+            # Trim inputs (+1 is because for Causal LM we shift inputs and labels)
+            input_ids_ragged = input_ids[:, : max_seq_len + 1 - 2]
+            input_ids_ragged = tf.concat([[[cls_token_id]], input_ids_ragged, [[sep_token_id]]], axis=1)
+        else:
+            # Trim inputs (+1 is because for Causal LM we shift inputs and labels)
+            input_ids_ragged = input_ids[:, : max_seq_len + 1 - 1]
+            input_ids_ragged = tf.concat([input_ids_ragged, [[sep_token_id]]], axis=1)
 
         # input_mask = tf.ones_like(input_ids_ragged)
         lm_label_weights = tf.ones_like(input_ids_ragged)
