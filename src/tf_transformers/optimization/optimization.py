@@ -105,6 +105,7 @@ def create_optimizer(
         )
 
     else:
+        logging.info("Using Constant learning rate")
         learning_rate_fn = init_lr
 
     if optimizer_type == "adafactor":

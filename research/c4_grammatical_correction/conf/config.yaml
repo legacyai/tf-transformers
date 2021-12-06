@@ -1,6 +1,6 @@
 task:
   data_directory:
-  max_seq_len: 1024
+  max_seq_len: 64
   train_batch_size: 512
 trainer:
   dtype: bf16
