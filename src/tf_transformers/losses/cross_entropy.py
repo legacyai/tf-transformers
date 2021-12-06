@@ -83,8 +83,8 @@ def cross_entropy_loss_label_smoothing(labels, logits, smoothing=0.1, label_weig
     normalizing_constant = -(
         confidence * tf.math.log(confidence) + vocab_float * low_confidence * tf.math.log(low_confidence + 1e-20)
     )
-    xentropy -= normalizing_constant
-    xentropy = tf.cast(xentropy, tf.float32)
+    xentropy = xentropy - tf.cast(normalizing_constant, xentropy.dtype)
+    # xentropy = tf.cast(xentropy, tf.float32)
     if label_weights is None:
         label_weights = tf.ones_like(labels)
     label_weights = tf.cast(label_weights, tf.float32)
