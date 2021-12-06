@@ -23,7 +23,10 @@ def TextDecoder(
 
     # Seq2Seq model
     if isinstance(model, tf.keras.Model):
+        decoder_start_token_id = None
         if "decoder" in model.model_config:
+            if decoder_start_token_id in model.model_config['decoder']:
+                decoder_start_token_id = model.model_config['decoder']['decoder_start_token_id']
             if decoder_start_token_id is None:
                 raise ValueError(
                     "You are passing a Seq2Seq model like T5. \

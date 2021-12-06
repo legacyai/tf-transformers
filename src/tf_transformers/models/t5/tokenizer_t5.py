@@ -406,7 +406,7 @@ class T5TokenizerLayer(tf.keras.layers.Layer):
                     return tf.reshape(t, output_shape)
 
                 # Assemble nest of input tensors as expected by BERT TransformerEncoder.
-                return dict(input_ids=_reshape(input_word_ids), input_mask=_reshape(input_mask))
+                return dict(encoder_input_ids=_reshape(input_word_ids), encoder_input_mask=_reshape(input_mask))
 
             if self.pack_model_inputs:
                 tokens_dict = self.bert_pack_inputs(
