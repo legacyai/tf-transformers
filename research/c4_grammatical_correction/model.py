@@ -81,7 +81,9 @@ def get_optimizer(
 
 def get_loss(loss_type):
     """Get Language Model Loss"""
-    loss_fn = get_lm_loss_label_smoothing(loss_type=loss_type)
+    loss_fn = get_lm_loss_label_smoothing(
+            label_column='labels',
+            label_weights_column='labels_mask')
     return loss_fn
 
 
