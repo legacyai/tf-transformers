@@ -314,3 +314,10 @@ Flax), PyTorch, and/or TensorFlow.
     model_doc/albert_tokenizer
     model_doc/bigbird_tokenizer
     model_doc/t5_tokenizer
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Research
+
+    research/glue

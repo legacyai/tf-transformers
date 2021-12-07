@@ -10,6 +10,7 @@ from datasets import load_dataset
 from transformers import GPT2TokenizerFast
 
 from tf_transformers.models import GPT2Model as Model
+from tf_transformers.text import TextDecoder, TextDecoderSerializable
 
 _ALLOWED_DECODER_TYPES = [
     "textdecoder_keras_model",
@@ -23,6 +24,14 @@ _ALLOWED_DECODER_TYPES = [
 
 class TftBenchmark:
     def __init__(self, cfg):
+        """
+
+        Args:
+            cfg model_name (:obj:`OmegaCong`): Config objext
+
+        Raises:
+            ValueError: If evaluation mode is not in allowed lists
+        """
 
         self.cfg = cfg
 
@@ -80,14 +89,9 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
         model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
-
-        from tf_transformers.text import TextDecoder
-
         decoder = TextDecoder(model=model)
-
         text_generation_kwargs = self.cfg.benchmark.text_generation
         return decoder_fn(text_generation_kwargs)
 
@@ -101,8 +105,6 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)
-        # Load Auto Regressive Version
         model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
 
         # Save as saved_model
@@ -111,9 +113,6 @@ class TftBenchmark:
         # Load as saved_model
         del model
         loaded = tf.saved_model.load(self.temp_dir)
-
-        from tf_transformers.text import TextDecoder
-
         decoder = TextDecoder(model=loaded)
 
         text_generation_kwargs = self.cfg.benchmark.text_generation
@@ -131,12 +130,8 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)
-        # Load Auto Regressive Version
         model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
         # Make decoder model
-        from tf_transformers.text import TextDecoderSerializable
-
         text_generation_kwargs = self.cfg.benchmark.text_generation
         decoder = TextDecoderSerializable(model=model, **text_generation_kwargs)
         decoder = decoder.get_model()
@@ -187,12 +182,9 @@ class TftBenchmark:
                 return _decoder_fn
 
             model_name = self.cfg.benchmark.model.name
-            model = Model.from_pretrained(model_name=model_name)
             # Load Auto Regressive Version
             model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
             # Make decoder model
-            from tf_transformers.text import TextDecoderSerializable
-
             text_generation_kwargs = self.cfg.benchmark.text_generation
             decoder = TextDecoderSerializable(model=model, **text_generation_kwargs)
             decoder = decoder.get_model()
@@ -220,7 +212,6 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
         model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
         # Make decoder model
@@ -252,7 +243,6 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
         model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
         # Make decoder model

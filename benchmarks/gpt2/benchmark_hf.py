@@ -16,6 +16,14 @@ _ALLOWED_DECODER_TYPES = [
 
 class HFBenchmark:
     def __init__(self, cfg):
+        """
+
+        Args:
+            cfg model_name (:obj:`OmegaCong`): Config objext
+
+        Raises:
+            ValueError: If evaluation mode is not in allowed lists
+        """
 
         self.cfg = cfg
 
@@ -162,14 +170,11 @@ class HFBenchmark:
 
             return _decoder_fn
 
-        from transformers import GPT2Config as Config
         from transformers import TFGPT2LMHeadModel as Model
 
-        # model_name = self.cfg.benchmark.model.name
-        # model = Model.from_pretrained(model_name=model_name) # somehow link is broken
+        model_name = self.cfg.benchmark.model.name
+        model = Model.from_pretrained(model_name=model_name)  # somehow link is broken
 
-        configuration = Config()
-        model = Model(configuration)
         # Dummy initialize
         dummy = model(input_ids=tf.constant([[1, 2]]))  # noqa
 
@@ -189,17 +194,14 @@ class HFBenchmark:
             return _decoder_fn
 
         import torch
-        from transformers import GPT2Config as Config
         from transformers import GPT2LMHeadModel as Model
 
         device = self.cfg.benchmark.task.device
         device = torch.device(device)
 
-        # model_name = self.cfg.benchmark.model.name
-        # model = Model.from_pretrained(model_name=model_name) # somehow link is broken
+        model_name = self.cfg.benchmark.model.name
+        model = Model.from_pretrained(model_name=model_name)  # somehow link is broken
 
-        configuration = Config()
-        model = Model(configuration)
         model.to(device)
         model.eval()
 
@@ -212,8 +214,6 @@ class HFBenchmark:
         import jax.numpy as jnp
         import numpy as np
         from flax.jax_utils import replicate
-
-        # from flax.training.common_utils import shard
 
         def my_shard(xs, device_count=1):
             return jax.tree_map(lambda x: x.reshape((device_count, -1) + x.shape[1:]), xs)

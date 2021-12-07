@@ -71,6 +71,11 @@ Note:
 ## How to run Evaluation using Tensorflow Transformers.
 
 Evaluation GLUE using Tensorflow Transformers is fairly easy. The default code is written for ```AlbertModel```.
+All the configuration are managed using [Hydra](https://github.com/facebookresearch/hydra).
+
+
+- [GLUE Evaluation](https://github.com/legacyai/tf-transformers/tree/main/research/glue)
+
 
 #### Evaluate using Joint Loss
 

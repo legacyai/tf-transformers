@@ -128,6 +128,7 @@ def train_and_eval(
     max_number_of_models,
     clip_norm,
     wandb,
+    ckpt_number,
 ):
     def save_model(checkpoint_manager, epoch_end=False):
         """Save model"""
@@ -143,7 +144,7 @@ def train_and_eval(
         if not epoch_end:
             if model_save_interval_steps:
                 if global_step % model_save_interval_steps == 0:
-                    checkpoint_manager.save(checkpoint_number=global_step)
+                    checkpoint_manager.save(checkpoint_number=epoch)
                     logging.info(
                         "Model saved at step {} at {}".format(global_step, checkpoint_manager.latest_checkpoint)
                     )
@@ -350,7 +351,8 @@ def train_and_eval(
     total_examples_processed = 0
     checkpoint_manager = None  # Define it to be None here . Check save_model.
     STEPS = steps_per_epoch // steps_per_call
-    for epoch in range(1, epochs + 1):
+    epochs = epochs + ckpt_number
+    for epoch in range(ckpt_number, epochs):
         # start_epoch_time = time.time()
         with tqdm.trange(STEPS, unit="batch ") as tepoch:
             for step in tepoch:
@@ -600,10 +602,19 @@ class Trainer:
 
         # If checkpoint is not None, means its succesful
         global_step = 0
+        ckpt_number = 1
         if ckpt:
             global_step = ckpt.step.numpy()
             optimizer = ckpt.opt
             logging.info("Succesfully restored existing checkpoints from step {}".format(global_step))
+            # Extract number from latest checkpoint
+            if latest_checkpoint:
+                ckpt_number = int(latest_checkpoint.split("/")[-1].replace("ckpt-", "").strip())
+                ckpt_number += 1
+            else:
+                latest_checkpoint = tf.train.latest_checkpoint(model_checkpoint_dir)
+                ckpt_number = int(latest_checkpoint.split("/")[-1].replace("ckpt-", "").strip())
+                ckpt_number += 1
 
         # Distribute dataset
         if not repeat_dataset:
@@ -654,6 +665,7 @@ class Trainer:
             max_number_of_models,
             clip_norm,
             wandb,
+            ckpt_number,
         )
         history['training_history'] = training_history
         history['validation_history'] = validation_history
