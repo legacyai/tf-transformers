@@ -118,7 +118,15 @@ class T5Model(ModelWrapper):
         "T5 Model from config :",
         ENCODER_MODEL_CONFIG_DOCSTRING.format("transformers.models.T5Encoder", "tf_transformers.models.t5.T5Config"),
     )
-    def from_config(cls, config, return_layer=False, encoder_kwargs=None, decoder_kwargs=None, **kwargs):
+    def from_config(
+        cls,
+        config,
+        return_layer=False,
+        encoder_kwargs=None,
+        decoder_kwargs=None,
+        use_auto_regressive: bool = False,
+        **kwargs,
+    ):
         if isinstance(config, ModelConfig):
             config_dict = config.to_dict()
         else:
@@ -150,7 +158,12 @@ class T5Model(ModelWrapper):
 
         config_dict["bidirectional"] = False
         decoder_layer = Encoder(
-            config=config_dict, name="t5_decoder", use_decoder=True, mask_mode="causal", **decoder_kwargs_copy
+            config=config_dict,
+            name="t5_decoder",
+            use_decoder=True,
+            mask_mode="causal",
+            use_auto_regressive=use_auto_regressive,
+            **decoder_kwargs_copy,
         )
         model_layer = EncoderDecoder(encoder_layer, decoder_layer, share_embeddings=True)
         model = model_layer.get_model()

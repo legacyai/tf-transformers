@@ -23,8 +23,11 @@ def TextDecoder(
 
     # Seq2Seq model
     if isinstance(model, tf.keras.Model):
-        decoder_start_token_id = None
+        # Seq2Seq Model (EncoderDecoder Model)
         if "decoder" in model.model_config:
+            # If provided use it directly
+            if decoder_start_token_id:
+                return TextDecoderSeq2Seq(model, decoder_start_token_id, input_mask_ids, input_type_ids)
             if decoder_start_token_id in model.model_config['decoder']:
                 decoder_start_token_id = model.model_config['decoder']['decoder_start_token_id']
             if decoder_start_token_id is None:
