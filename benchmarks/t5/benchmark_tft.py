@@ -307,6 +307,9 @@ class TftBenchmark:
         if self.model_type == "textdecoder_serializable":
             decoder_fn = self._load_textdecoder_serializable()
 
+        if self.model_type == "textdecoder_model_serializable_tftext":
+            decoder_fn = self._load_textdecoder_model_serializable_tftext()
+
         if self.model_type == "textdecoder_model":
             decoder_fn = self._load_textdecoder_model()
 
