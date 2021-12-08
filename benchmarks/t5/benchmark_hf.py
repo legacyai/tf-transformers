@@ -44,20 +44,13 @@ class HFBenchmark:
         batch_size = cfg.benchmark.data.batch_size
         max_length = cfg.benchmark.data.max_length
 
-        try:
-            dataset = load_dataset(dataset_name, "3.0.0", split="test")
-        except:
-            from datasets import load_from_disk
-
-            dataset = load_from_disk("/mnt/home/PRE_MODELS/HuggingFace_models/datasets/{}/".format(dataset_name))[
-                "test"
-            ]
+        dataset = load_dataset(dataset_name, split="test")
 
         if take_sample:
             dataset = dataset.select(range(50))
 
         dataset = dataset.map(
-            lambda e: tokenizer(e["article"], truncation=True, padding=True, max_length=max_length),
+            lambda e: tokenizer(e["document"], truncation=True, padding=True, max_length=max_length),
             batched=True,
         )
         dataset.set_format(type="tensorflow", columns=["input_ids"])
@@ -88,20 +81,13 @@ class HFBenchmark:
         max_length = cfg.benchmark.data.max_length
         device = cfg.benchmark.task.device
 
-        try:
-            dataset = load_dataset(dataset_name, "3.0.0", split="test")
-        except:
-            from datasets import load_from_disk
-
-            dataset = load_from_disk("/mnt/home/PRE_MODELS/HuggingFace_models/datasets/{}/".format(dataset_name))[
-                "test"
-            ]
+        dataset = load_dataset(dataset_name, split="test")
 
         if take_sample:
             dataset = dataset.select(range(50))
 
         dataset = dataset.map(
-            lambda e: tokenizer(e["article"], truncation=True, padding=True, max_length=max_length),
+            lambda e: tokenizer(e["document"], truncation=True, padding=True, max_length=max_length),
             batched=True,
         )
         dataset.set_format(type='torch', columns=['input_ids'], device=device)
@@ -128,20 +114,13 @@ class HFBenchmark:
         batch_size = cfg.benchmark.data.batch_size
         max_length = cfg.benchmark.data.max_length
 
-        try:
-            dataset = load_dataset(dataset_name, "3.0.0", split="test")
-        except:
-            from datasets import load_from_disk
-
-            dataset = load_from_disk("/mnt/home/PRE_MODELS/HuggingFace_models/datasets/{}/".format(dataset_name))[
-                "test"
-            ]
+        dataset = load_dataset(dataset_name, split="test")
 
         if take_sample:
             dataset = dataset.select(range(50))
 
         dataset = dataset.map(
-            lambda e: tokenizer(e["article"], truncation=True, padding=True, max_length=max_length),
+            lambda e: tokenizer(e["document"], truncation=True, padding=True, max_length=max_length),
             batched=True,
         )
         dataset.set_format(type='torch', columns=['input_ids'])
@@ -174,7 +153,6 @@ class HFBenchmark:
 
     def _load_tf(self):
         """Load using KerasModel"""
-        import tensorflow as tf
 
         def decoder_fn(model, text_generation_kwargs):
             text_generation_kwargs = dict(text_generation_kwargs)

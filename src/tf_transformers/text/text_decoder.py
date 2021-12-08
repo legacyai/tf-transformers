@@ -1,12 +1,12 @@
 import tensorflow as tf
 
 from tf_transformers.text.text_decoder_encoder_only import TextDecoderEncoderOnly
+from tf_transformers.text.text_decoder_encoder_only_serializable import (
+    TextDecoderEncoderOnlySerializable,
+)
 from tf_transformers.text.text_decoder_seq2seq import TextDecoderSeq2Seq
 from tf_transformers.text.text_decoder_seq2seq_serializable import (
     TextDecoderSerializableSeq2Seq,
-)
-from tf_transformers.text.text_decoder_serializable_encoder_only import (
-    TextDecoderEncoderOnlySerializable,
 )
 
 
@@ -28,7 +28,7 @@ def TextDecoder(
             # If provided use it directly
             if decoder_start_token_id:
                 return TextDecoderSeq2Seq(model, decoder_start_token_id, input_mask_ids, input_type_ids)
-            if decoder_start_token_id in model.model_config['decoder']:
+            if "decoder_start_token_id" in model.model_config['decoder']:
                 decoder_start_token_id = model.model_config['decoder']['decoder_start_token_id']
             if decoder_start_token_id is None:
                 raise ValueError(
@@ -37,6 +37,7 @@ def TextDecoder(
                 )
             return TextDecoderSeq2Seq(model, decoder_start_token_id, input_mask_ids, input_type_ids)
         else:
+            # Encoder only Model
             return TextDecoderEncoderOnly(model, input_mask_ids, input_type_ids)
     else:
         # Saved model
@@ -83,14 +84,7 @@ def TextDecoderSerializable(
     # Seq2Seq model
     assert isinstance(model, tf.keras.Model)
     if "decoder" in model.model_config:
-        if decoder_start_token_id is None:
-            import warnings
-
-            warnings.warn(
-                "You are passing a Seq2Seq model like T5, BART etc. Provided \
-                `decoder_start_token_id` is None. We will try to infer it automatically from the model."
-            )
-        return TextDecoderSerializableSeq2Seq(
+        decoder_model = TextDecoderSerializableSeq2Seq(
             model=model,
             mode=mode,
             decoder_start_token_id=decoder_start_token_id,
@@ -108,8 +102,10 @@ def TextDecoderSerializable(
             input_type_ids=input_type_ids,
             input_mask_ids=input_mask_ids,
         )
+        decoder_model = decoder_model.get_model()
+        return decoder_model
     else:
-        return TextDecoderEncoderOnlySerializable(
+        decoder_model = TextDecoderEncoderOnlySerializable(
             model=model,
             mode=mode,
             max_iterations=max_iterations,
@@ -126,3 +122,5 @@ def TextDecoderSerializable(
             input_type_ids=input_type_ids,
             input_mask_ids=input_mask_ids,
         )
+        decoder_model = decoder_model.get_model()
+        return decoder_model

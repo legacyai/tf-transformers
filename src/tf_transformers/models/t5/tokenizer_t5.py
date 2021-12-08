@@ -437,10 +437,16 @@ class T5TokenizerLayer(tf.keras.layers.Layer):
 
     def _add_special_tokens(self, tokens):
         """Add special tokens"""
-        batch_size = tokens.shape[0]
-        eos_tokens_batch = tf.cast(tf.ones(shape=(batch_size, 1)), self.out_type) * self.eos_token_id
-        tokens = tf.concat([tokens, eos_tokens_batch], axis=1)
-        return tokens
+        #         batch_size = tokens.shape[0]
+        #         print(batch_size, self.eos_token_id)
+        #         eos_tokens_batch = tf.cast(tf.ones(shape=(batch_size, 1)), self.out_type) * self.eos_token_id
+        #         tokens = tf.concat([tokens, eos_tokens_batch], axis=1)
+        #         return tokens
+
+        # -1 is dummy here not to break the tf_text ops
+        tokens = tf_text.combine_segments([tokens], start_of_sequence_id=-1, end_of_segment_id=self.eos_token_id)[0]
+        # return without -1 (0 th entry)
+        return tokens[:, 1:]
 
     def get_model(self):
         """Convert Keras Layer to Model"""

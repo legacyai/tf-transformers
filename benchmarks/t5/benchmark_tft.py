@@ -9,15 +9,16 @@ import tqdm
 from datasets import load_dataset
 from transformers import T5TokenizerFast
 
+from tf_transformers.core import TextGenerationChainer
 from tf_transformers.models import T5Model as Model
+from tf_transformers.models import T5TokenizerTFText
+from tf_transformers.text import TextDecoder, TextDecoderSerializable
 
 _ALLOWED_DECODER_TYPES = [
     "textdecoder_keras_model",
     "textdecoder_saved_model",
     "textdecoder_serializable",  # This uses tf.while_loop
-    "textdecoder_model",  # This uses while loop (tf.keras.Model)
-    "textdecoder_model_serializable",  # This uses while loop
-    "grappler",  # Graph optimizations
+    "textdecoder_serializable_tftext",  # This uses while loop (tf.keras.Model) + tftext tokenizer
 ]
 
 
@@ -32,8 +33,12 @@ class TftBenchmark:
             raise ValueError("Unknow model type {} defined".format(self.model_type))
 
         self.model_name = cfg.benchmark.model.name
+        max_length = cfg.benchmark.data.max_length
 
         self.tokenizer = T5TokenizerFast.from_pretrained(self.model_name)
+        self.tokenizer_tftext = T5TokenizerTFText.from_pretrained(
+            self.model_name, add_special_tokens=True, max_length=max_length, dynamic_padding=True, truncate=True
+        )
 
         self.temp_dir = tempfile.mkdtemp()
 
@@ -48,20 +53,15 @@ class TftBenchmark:
         batch_size = cfg.benchmark.data.batch_size
         max_length = cfg.benchmark.data.max_length
 
-        try:
-            dataset = load_dataset(dataset_name, "3.0.0", split="test")
-        except:
-            from datasets import load_from_disk
-
-            dataset = load_from_disk("/mnt/home/PRE_MODELS/HuggingFace_models/datasets/{}/".format(dataset_name))[
-                "test"
-            ]
+        dataset = load_dataset(dataset_name, split="test")
 
         if take_sample:
             dataset = dataset.select(range(50))
 
+        self.dataset = dataset
+
         dataset = dataset.map(
-            lambda e: tokenizer(e["article"], truncation=True, padding=True, max_length=max_length),
+            lambda e: tokenizer(e["document"], truncation=True, padding=True, max_length=max_length),
             batched=True,
         )
         dataset = dataset.map(
@@ -89,13 +89,10 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
         model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
 
-        from tf_transformers.text import TextDecoder
-
-        decoder = TextDecoder(model=model, decoder_start_token_id=0)
+        decoder = TextDecoder(model=model)
 
         text_generation_kwargs = self.cfg.benchmark.text_generation
         return decoder_fn(text_generation_kwargs)
@@ -110,7 +107,6 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
         model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
 
@@ -121,9 +117,7 @@ class TftBenchmark:
         del model
         loaded = tf.saved_model.load(self.temp_dir)
 
-        from tf_transformers.text import TextDecoder
-
-        decoder = TextDecoder(model=loaded, decoder_start_token_id=0)
+        decoder = TextDecoder(model=loaded)
 
         text_generation_kwargs = self.cfg.benchmark.text_generation
         return decoder_fn(text_generation_kwargs)
@@ -140,18 +134,45 @@ class TftBenchmark:
             return _decoder_fn
 
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
         model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
         # Make decoder model
-        from tf_transformers.text import TextDecoderSerializable
-
         text_generation_kwargs = self.cfg.benchmark.text_generation
         decoder = TextDecoderSerializable(model=model, **text_generation_kwargs)
-        decoder = decoder.get_model()
 
         # Save as saved_model
         decoder.save_serialized(self.temp_dir, overwrite=True)
+
+        # Load as saved_model
+        del model
+        del decoder
+        # It should be a part of the class (self.loaded)
+        self.loaded = tf.saved_model.load(self.temp_dir)
+
+        return decoder_fn()
+
+    def _load_textdecoder_serializable_tftext(self):
+        """Load using TextDecoder Serializable tf.while_loop + tftext"""
+
+        def decoder_fn():
+            model = self.loaded.signatures['serving_default']
+
+            def _decoder_fn(inputs):
+                return model(**inputs)
+
+            return _decoder_fn
+
+        model_name = self.cfg.benchmark.model.name
+        # Load Auto Regressive Version
+        model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
+        # Make decoder model
+        text_generation_kwargs = self.cfg.benchmark.text_generation
+        decoder = TextDecoderSerializable(model=model, **text_generation_kwargs)
+
+        model_fully_serialized = TextGenerationChainer(self.tokenizer_tftext.get_model(), decoder)
+        model_fully_serialized = model_fully_serialized.get_model()
+        # Save as saved_model
+        model_fully_serialized.save_serialized(self.temp_dir, overwrite=True)
 
         # Load as saved_model
         del model
@@ -200,11 +221,9 @@ class TftBenchmark:
             # Load Auto Regressive Version
             model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
             # Make decoder model
-            from tf_transformers.text import TextDecoderSerializable
 
             text_generation_kwargs = self.cfg.benchmark.text_generation
             decoder = TextDecoderSerializable(model=model, **text_generation_kwargs)
-            decoder = decoder.get_model()
 
             # Save as saved_model
             decoder.save_serialized(self.temp_dir, overwrite=True)
@@ -228,12 +247,12 @@ class TftBenchmark:
 
             return _decoder_fn
 
+        from tf_transformers.text import TextDecoderModel
+
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
         model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
         # Make decoder model
-        from tf_transformers.text import TextDecoderModel
 
         text_generation_kwargs = self.cfg.benchmark.text_generation
         decoder = TextDecoderModel(model=model, **text_generation_kwargs)
@@ -260,12 +279,12 @@ class TftBenchmark:
 
             return _decoder_fn
 
+        from tf_transformers.text import TextDecoderModel
+
         model_name = self.cfg.benchmark.model.name
-        model = Model.from_pretrained(model_name=model_name)
         # Load Auto Regressive Version
         model = Model.from_pretrained(model_name=model_name, use_auto_regressive=True)
         # Make decoder model
-        from tf_transformers.text import TextDecoderModel
 
         text_generation_kwargs = self.cfg.benchmark.text_generation
         decoder = TextDecoderModel(model=model, **text_generation_kwargs)
@@ -315,19 +334,46 @@ class TftBenchmark:
 
         #### Run decoder function
 
-        # Sample batch (to avoid first time compilation time)
-        sample_batch_inputs, _ = batched_datasets[0]
-        outputs = decoder_fn(sample_batch_inputs)
+        # This requires text as tensor slices, not features using T5Tokenizer
+        # from HuggingFace
+        if self.model_type == 'textdecoder_serializable_tftext':
 
-        slines = 0
-        start_time = time.time()
-        for (batch_inputs, batch_size) in tqdm.tqdm(batched_datasets, unit="batch "):
-            outputs = decoder_fn(batch_inputs)  # noqa
-            slines += batch_size
-        end_time = time.time()
-        shutil.rmtree(self.temp_dir)
+            all_documents = []
+            for item in self.dataset:
+                all_documents.append(item['document'])
 
-        time_taken = end_time - start_time
-        samples_per_second = slines / time_taken
+            text_dataset = tf.data.Dataset.from_tensor_slices({'text': all_documents}).batch(
+                self.cfg.benchmark.data.batch_size, drop_remainder=True
+            )
+            # Sample batch (to avoid first time compilation time)
+            sample_batch_inputs, _ = text_dataset.take(1)
+            outputs = decoder_fn(sample_batch_inputs)
+
+            slines = 0
+            start_time = time.time()
+            for batch_inputs in tqdm.tqdm(text_dataset, unit="batch "):
+                outputs = decoder_fn(batch_inputs)  # noqa
+                batch_size = batch_inputs['encoder_input_ids'].shape[0]
+                slines += batch_size
+            end_time = time.time()
+            shutil.rmtree(self.temp_dir)
+
+            time_taken = end_time - start_time
+            samples_per_second = slines / time_taken
+        else:
+            # Sample batch (to avoid first time compilation time)
+            sample_batch_inputs, _ = batched_datasets[0]
+            outputs = decoder_fn(sample_batch_inputs)
+
+            slines = 0
+            start_time = time.time()
+            for (batch_inputs, batch_size) in tqdm.tqdm(batched_datasets, unit="batch "):
+                outputs = decoder_fn(batch_inputs)  # noqa
+                slines += batch_size
+            end_time = time.time()
+            shutil.rmtree(self.temp_dir)
+
+            time_taken = end_time - start_time
+            samples_per_second = slines / time_taken
 
         return {"model_type": self.model_type, "time_taken": time_taken, "samples_per_second": samples_per_second}

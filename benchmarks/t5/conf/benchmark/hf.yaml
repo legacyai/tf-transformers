@@ -3,13 +3,13 @@ task:
   device: cuda
 
 data:
-  name: cnn_dailymail
+  name: xsum
   take_sample: false
   batch_size: 32
   max_length: 512
 
 model:
-  name: gpt2
+  name: t5-small
   type: tf
 
 text_generation:

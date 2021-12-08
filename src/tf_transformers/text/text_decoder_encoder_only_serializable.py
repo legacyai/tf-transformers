@@ -1,3 +1,20 @@
+# coding=utf-8
+# Copyright 2021 TF-Transformers Authors.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Text Auto Regressive Decoder for Tensorflow Model and saved_model. This is Serializable as saved_model"""
 import numpy as np
 import tensorflow as tf
 
@@ -11,24 +28,23 @@ from tf_transformers.text import (
 from tf_transformers.utils import tf_utils
 
 
-class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
-    """TextDecoderSerializable - This class is responsible for saving
-    the model along with decoding
+class TextDecoderEncoderOnlySerializable(tf.keras.layers.Layer):
+    """TextDecoderSerializable - This class is responsible for
+    saving the model along with decoding
     operation as a saved_model, which makes deployment in production easier.
     """
 
     def __init__(
         self,
         model,
-        decoder_start_token_id,
         mode,
         max_iterations=None,
         batch_size=None,
         max_sequence_length=None,
-        num_beams=1,
-        eos_id=-100,
         temperature=1.0,
         alpha=0.0,
+        num_beams=1,
+        eos_id=-100,
         do_sample=False,
         top_k=0,
         top_p=0,
@@ -36,7 +52,7 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
         input_type_ids=-1,
         input_mask_ids=1,
     ):
-        """[Init]
+        """
 
         Args:
             model ([tf.keras.Model / tf.keras.Layer]): [The model with which decoding
@@ -56,61 +72,35 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             top_k (int, optional): [top k]. Defaults to 0.
             top_p (int, optional): [top p Nucleus]. Defaults to 0.
             input_mask_ids (int, optional): [if your model has this, provide it].
-             Defaults to None.
+            Defaults to None.
             input_type_ids (int, optional): [if your model has this, provide it].
-             Defaults to None.
+            Defaults to None.
             num_return_sequences: (int): [No of return sequences for topk top beam].
-             Defaults to 1.
+            Defaults to 1.
         """
 
-        super(TextDecoderSerializableSeq2Seq, self).__init__()
-
-        self.max_iterations = max_iterations
-        self.decoder_start_token_id = decoder_start_token_id
+        super(TextDecoderEncoderOnlySerializable, self).__init__()
 
         self.batch_size = batch_size
         self.sequence_length = max_sequence_length
-
+        self.max_iterations = max_iterations
         self.model = model
 
-        decoder_config = model.model_config["decoder"]
+        model_config = model.model_config
         (
             self.embedding_size,
-            self.decoder_num_attention_heads,
-            self.decoder_num_hidden_layers,
-            self.decoder_attention_state,
-        ) = self.auto_infer_config(decoder_config)
+            self.num_attention_heads,
+            self.num_hidden_layers,
+            self.attention_state,
+        ) = self.auto_infer_config(model_config)
 
-        if self.decoder_start_token_id is None:
-            self.decoder_start_token_id = model.model_config["decoder"]['decoder_start_token_id']
-            if self.decoder_start_token_id is None:
-                raise ValueError(
-                    "Failed to infer `decoder_start_token_id` from model. \
-                    You are passing a Seq2Seq model like T5. \
-                    Please pass a value for `decoder_start_token_id`, normall BOS while generation."
-                )
-            print("Using default `decoder_start_token_id` {} from the model".format(self.decoder_start_token_id))
-
-        self.decoder_input_type_ids = input_type_ids
-        # Input mask for decoder is highly unlikely to happen, as it is "causal" in auto regressive tasks
-        # Still we are keeping it
-        self.decoder_input_mask_ids = input_mask_ids
+        self.input_type_ids = input_type_ids
+        self.input_mask_ids = input_mask_ids
         # Validate decoder type ids are there
         self.validate_decoder_type_ids(model.input)
 
-        (
-            self.decoder_input_name_list,
-            self.input_name_list,
-            self.model_inputs,
-        ) = self.get_inputs()
-
-        (
-            self.decoder_input_name_list,
-            self.input_name_list,
-            self.model_inputs,
-        ) = self.get_inputs()
+        self.input_name_list, self.model_inputs = self.get_inputs()
         self.input_name_map = {i: k for i, k in enumerate(self.input_name_list)}
-        self.decoder_input_name_map = {i: k for i, k in enumerate(self.decoder_input_name_list)}
 
         self.eos_id = eos_id
         self.mode = mode
@@ -131,88 +121,101 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
         elif self.mode == "top_k_top_p":
             self.decoder_fn = self.top_k_top()
 
+    def validate_decoder_type_ids(self, inputs):
+        """Validate all extra IDS for models.
+
+        Args:
+            inputs (dict): Dict of Keras Inputs
+        Raises:
+            ValueError: If present and not provided
+            ValueError: If present and not provided
+        """
+        if "input_type_ids" in inputs:
+            if self.input_type_ids < 0:
+                raise ValueError(
+                    "Seems like you model has `input_type_ids`,\
+                         but it hasn't set yet. Please provide a valid positive index for `input_type_ids`"
+                )
+
+    def auto_infer_config(self, config, saved_model=False):
+        """Automatically Infer size and shape from config
+
+        Args:
+            config (dict): Necessary Model config
+
+        Returns:
+            [embedding_size, num_attention_heads, num_hidden_layers, attention_head_size]: Numbers
+        """
+        if saved_model:
+            embedding_size = config["embedding_size"].numpy()
+            num_attention_heads = config["num_attention_heads"].numpy()
+            num_hidden_layers = config["num_hidden_layers"].numpy()
+            attention_head_size = config["attention_head_size"].numpy()
+            return (embedding_size, num_attention_heads, num_hidden_layers, attention_head_size)
+        else:
+            embedding_size = config["embedding_size"]
+            num_attention_heads = config["num_attention_heads"]
+            num_hidden_layers = config["num_hidden_layers"]
+            attention_head_size = config["attention_head_size"]
+            return (embedding_size, num_attention_heads, num_hidden_layers, attention_head_size)
+
     def get_model(self):
+        """Convert LegacyLayer to Keras/LegacyModel
+
+        Returns:
+            tf.keras.Model/LegacyModel
+        """
         # Call the model in init itself
         layer_outputs = self(self.model_inputs)
         decoder_model = LegacyModel(inputs=self.model_inputs, outputs=layer_outputs, name="decoder_model")
         return decoder_model
 
-    def validate_decoder_type_ids(self, inputs):
-        if "decoder_input_type_ids" in inputs:
-            if self.decoder_input_type_ids < 0:
-                raise ValueError(
-                    "Seems like you model has `decoder_input_type_ids`,\
-                         but it hasn't set yet. Please provide a valid positive index for `input_type_ids`"
-                )
-
-        if "decoder_input_mask" in inputs:
-            if self.decoder_input_mask_ids < 0:
-                raise ValueError(
-                    "Seems like you model has `decoder_input_mask`,\
-                         but it hasn't set yet. Please provide a valid positive index for `input_mask_ids`"
-                )
-
-    def auto_infer_config(self, config):
-        """[summary]
-
-        Args:
-            config ([type]): [description]
+    def get_inputs(self):
+        """Get inputs for the model
 
         Returns:
-            [type]: [description]
+            dict: model inputs (KerasTensor)
         """
-        embedding_size = config["embedding_size"]
-        decoder_num_attention_heads = config["num_attention_heads"]
-        decoder_num_hidden_layers = config["num_hidden_layers"]
-        attention_head_size = config["attention_head_size"]
-        return (embedding_size, decoder_num_attention_heads, decoder_num_hidden_layers, attention_head_size)
-
-    def get_inputs(self):
-
         input_ids = tf.keras.layers.Input(
             shape=(self.sequence_length,),
             batch_size=self.batch_size,
             ragged=False,
             dtype=tf.int32,
-            name="encoder_input_ids",
+            name="input_ids",
         )
         input_mask = tf.keras.layers.Input(
             shape=(self.sequence_length,),
             batch_size=self.batch_size,
             ragged=False,
             dtype=tf.int32,
-            name="encoder_input_mask",
+            name="input_mask",
         )
         input_type_ids = tf.keras.layers.Input(
             shape=(self.sequence_length,),
             batch_size=self.batch_size,
             ragged=False,
             dtype=tf.int32,
-            name="encoder_input_type_ids",
+            name="input_type_ids",
         )
+        # List of input names
         self.input_name_list = []
-        if "encoder_input_ids" in self.model.input:
-            self.input_name_list.append("encoder_input_ids")
-        if "encoder_input_mask" in self.model.input:
-            self.input_name_list.append("encoder_input_mask")
-        if "encoder_input_type_ids" in self.model.input:
-            self.input_name_list.append("encoder_input_type_ids")
+        if "input_ids" in self.model.input:
+            self.input_name_list.append("input_ids")
+        if "input_mask" in self.model.input:
+            self.input_name_list.append("input_mask")
+        if "input_type_ids" in self.model.input:
+            self.input_name_list.append("input_type_ids")
+
+        # Based on names, we make a dict of input Tensor
         inputs = {}
         for name in self.input_name_list:
-            if name == "encoder_input_ids":
-                inputs["encoder_input_ids"] = input_ids
+            if name == "input_ids":
+                inputs["input_ids"] = input_ids
                 continue
-            if name == "encoder_input_mask":
-                inputs["encoder_input_mask"] = input_mask
-            if name == "encoder_input_type_ids":
-                inputs["encoder_input_type_ids"] = input_type_ids
-
-        self.decoder_input_name_list = ["decoder_input_ids"]
-        if "decoder_input_type_ids" in self.model.input:
-            self.decoder_input_name_list.append("decoder_input_type_ids")
-        # In auto regressive models, it is highly unlikely to happen
-        if "decoder_input_mask" in self.model.input:
-            self.decoder_input_name_list.append("decoder_input_mask")
+            if name == "input_mask":
+                inputs["input_mask"] = input_mask
+            if name == "input_type_ids":
+                inputs["input_type_ids"] = input_type_ids
 
         # If iterations has to be passed as input
         if self.max_iterations is None:
@@ -220,7 +223,7 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 shape=(1,), batch_size=1, ragged=False, dtype=tf.int32, name="iterations"
             )
 
-        return self.decoder_input_name_list, self.input_name_list, inputs
+        return self.input_name_list, inputs
 
     def reorder_past_batches(self, all_cache_key, all_cache_value, coordinates, beam_size):
         """[Reorder the input batch based on beam predictions
@@ -255,32 +258,14 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
         """
 
         # EOS check function
-        def cond(
-            i,
-            encoder_inputs_tuple,
-            decoder_inputs_tuple,
-            encoder_hidden_states,
-            all_cache_key,
-            all_cache_value,
-            decoded_ids,
-            prediction_probs,
-        ):
+        def cond(i, input_ids, all_cache_key, all_cache_value, past_length, initial_id, prediction_probs):
             eos_check = tf.greater(
-                tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(decoded_ids, self.eos_id), tf.int32), axis=[1])),
+                tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(initial_id, self.eos_id), tf.int32), axis=[1])),
                 0,
             )
             return tf.not_equal(eos_check, True)
 
-        def body(
-            i,
-            encoder_inputs_tuple,
-            decoder_inputs_tuple,
-            encoder_hidden_states,
-            all_cache_key,
-            all_cache_value,
-            decoded_ids,
-            prediction_probs,
-        ):
+        def body(i, inputs_tuple, all_cache_key, all_cache_value, past_length, initial_id, prediction_probs):
 
             """[This is the body of the beam decoder]
 
@@ -299,17 +284,18 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             """
             inputs = {}
             for k in range(len(self.input_name_list)):
-                inputs[self.input_name_list[k]] = encoder_inputs_tuple[k]
+                inputs[self.input_name_list[k]] = inputs_tuple[k]
 
-            for k in range(len(self.decoder_input_name_list)):
-                inputs[self.decoder_input_name_list[k]] = decoder_inputs_tuple[k]
-
-            inputs["encoder_hidden_states"] = encoder_hidden_states
-            inputs["decoder_all_cache_key"] = all_cache_key
-            inputs["decoder_all_cache_value"] = all_cache_value
+            inputs["all_cache_key"] = all_cache_key
+            inputs["all_cache_value"] = all_cache_value
+            inputs["past_length"] = past_length
 
             model_outputs = self.model(inputs)
-            model_logits = model_outputs["last_token_logits"] / self.temperature
+            model_logits = model_outputs["last_token_logits"]
+
+            all_cache_key = model_outputs["all_cache_key"]
+            all_cache_value = model_outputs["all_cache_value"]
+            past_length = model_outputs["past_length"]
 
             if self.do_sample:
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
@@ -322,104 +308,84 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 p_probs = tf.expand_dims(p_probs, 1)  # 2D
                 input_ids = tf.cast(tf.expand_dims(prediction_ids, axis=1), tf.int32)
 
-            decoder_inputs_tuple = [None] * len(self.decoder_input_name_list)
+            inputs_tuple = [None] * len(self.input_name_list)
 
-            for index, name in self.decoder_input_name_map.items():
-                if name == "decoder_input_ids":
-                    decoder_inputs_tuple[index] = input_ids
+            for index, name in self.input_name_map.items():
+                if name == "input_ids":
+                    inputs_tuple[index] = input_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                if name == "decoder_input_type_ids":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_type_ids
+                if name == "input_type_ids":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_type_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                # Highly unlikely to happen in auto regressive LM
-                if name == "decoder_input_mask":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_mask_ids
+                if name == "input_mask":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_mask_ids
+                    # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
             # Convert to tuple
-            decoder_inputs_tuple = tuple(decoder_inputs_tuple)
+            inputs_tuple = tuple(inputs_tuple)
 
             return [
                 i + 1,
-                encoder_inputs_tuple,
-                decoder_inputs_tuple,
-                model_outputs["encoder_hidden_states"],
-                model_outputs["decoder_all_cache_key"],
-                model_outputs["decoder_all_cache_value"],
-                tf.concat([decoded_ids, input_ids], axis=1),
+                inputs_tuple,
+                model_outputs["all_cache_key"],
+                model_outputs["all_cache_value"],
+                model_outputs["past_length"],
+                tf.concat([initial_id, input_ids], axis=1),
                 tf.concat([prediction_probs, p_probs], axis=1),
             ]
 
         # @tf.function(experimental_relax_shapes=True)
         def call_greedy(inputs):
-            encoder_inputs_copy = inputs.copy()
-            input_ids_orig = inputs["encoder_input_ids"]
+            input_ids_orig = inputs["input_ids"]
             # Original batch size and sequence length
-            batch_size = tf.shape(inputs["encoder_input_ids"])[0]
-            # Initialize with zeros
-            encoder_sequence_length = tf.shape(inputs["encoder_input_ids"])[1]
-            decoder_start_sequence_length = 1
+            batch_size = tf.shape(inputs["input_ids"])[0]
+            max_sequence_length = tf.shape(inputs["input_ids"])[1]
+            # Repeat for beam search (We nedd batch_size x beam_size)
+            model_inputs = {}
+            for input_key, input_value in inputs.items():
+                if input_key == "iterations":
+                    continue
+                model_inputs[input_key] = input_value
+
+            # Pre-initialize addtional inputs
+            zero_entry = tf.zeros(
+                (
+                    self.num_hidden_layers,
+                    batch_size,
+                    self.num_attention_heads,
+                    max_sequence_length,
+                    self.attention_state,
+                )
+            )
+            all_cache_key = zero_entry
+            all_cache_value = zero_entry
+            # past_length for keeping track of positional ids
+            past_length = tf.expand_dims(tf.zeros(batch_size, dtype=tf.int32), 0)
+            # Iterator to keep track of the loop
+            i = tf.constant([[0]])
 
             if self.max_iterations is None:
                 iterations = tf.squeeze(inputs["iterations"])
             else:
                 iterations = self.max_iterations
 
-            model_inputs = {}
-            for input_key, input_value in inputs.items():
-                # We dont want iterations in model_inputs
-                if input_key == "iterations":
-                    continue
-                model_inputs[input_key] = input_value
-            # Prepare inputs
-            # Encoder hidden states
-            encoder_hidden_states = tf.zeros((batch_size, encoder_sequence_length, self.embedding_size))
-            all_cache_key = tf.zeros(
-                (
-                    self.decoder_num_hidden_layers,
-                    batch_size,
-                    self.decoder_num_attention_heads,
-                    decoder_start_sequence_length,
-                    self.decoder_attention_state,
-                )
-            )
-            all_cache_value = tf.zeros(
-                (
-                    self.decoder_num_hidden_layers,
-                    batch_size,
-                    self.decoder_num_attention_heads,
-                    decoder_start_sequence_length,
-                    self.decoder_attention_state,
-                )
-            )
-
-            # Prepare Decoder inputs
-            decoder_input_ids = tf.cast(tf.ones(shape=(batch_size, 1)) * self.decoder_start_token_id, tf.int32)
-
-            # Iterator to keep track of the loop
-            i = tf.constant([[0]])
+            initial_id = tf.ones(shape=(batch_size, 1), dtype=tf.int32)
 
             # Add remaining model inputs
-            model_inputs["decoder_all_cache_key"] = all_cache_key
-            model_inputs["decoder_all_cache_value"] = all_cache_value
-            model_inputs["encoder_hidden_states"] = encoder_hidden_states
-            model_inputs["decoder_input_ids"] = decoder_input_ids
+            model_inputs["all_cache_key"] = all_cache_key
+            model_inputs["all_cache_value"] = all_cache_value
+            model_inputs["past_length"] = past_length
 
-            if "decoder_input_type_ids" in self.decoder_input_name_list:
-                model_inputs["decoder_input_type_ids"] = (
-                    tf.ones_like(model_inputs["decoder_input_ids"]) * self.decoder_input_type_ids
-                )
+            if "input_type_ids" in self.input_name_list:
+                model_inputs["input_type_ids"] = tf.ones_like(model_inputs["input_ids"]) * self.input_type_ids
 
-            # It is highly unlikely to happen in auto regressive modeling
-            if "decoder_input_mask" in self.decoder_input_name_list:
-                model_inputs["decoder_input_mask"] = (
-                    tf.ones_like(model_inputs["decoder_input_ids"]) * self.decoder_input_mask_ids
-                )
+            if "input_mask" in self.input_name_list:
+                model_inputs["input_mask"] = tf.ones_like(model_inputs["input_ids"]) * self.input_mask_ids
 
             model_outputs = self.model(model_inputs)
             model_logits = model_outputs["last_token_logits"] / self.temperature
-
             if self.do_sample:
                 prediction_ids = tf.random.categorical(model_logits, num_samples=1)
                 prediction_probs = tf_utils.gather_values_from_2d_tensor(model_logits, prediction_ids)
@@ -433,84 +399,60 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
 
             # Update iter
             i = i + 1
-            decoded_ids = tf.concat([decoder_input_ids, input_ids], axis=1)
+            all_cache_key = model_outputs["all_cache_key"]
+            all_cache_value = model_outputs["all_cache_value"]
+            initial_id = tf.concat([initial_id, input_ids], axis=1)
 
-            # Even though encoder values are not using , we need it as per
-            # models serialized versions
-            encoder_inputs_tuple = [None] * len(self.input_name_list)
-            encoder_input_shapes_tuple = [tf.TensorShape([None, None])] * len(self.input_name_list)
-            for index, name in self.input_name_map.items():
-                if name == "encoder_input_ids":
-                    encoder_inputs_tuple[index] = encoder_inputs_copy["encoder_input_ids"]
-                    # input_shapes_tuple.append(tf.TensorShape([None, None]))
-                    continue
-                if name == "encoder_input_type_ids":
-                    encoder_inputs_tuple[index] = encoder_inputs_copy["encoder_input_type_ids"]
-                    # input_shapes_tuple.append(tf.TensorShape([None, None]))
-                    continue
-                if name == "encoder_input_mask":
-                    encoder_inputs_tuple[index] = encoder_inputs_copy["encoder_input_mask"]
-                    # input_shapes_tuple.append(tf.TensorShape([None, None]))
-                    continue
-
-            encoder_inputs_tuple = tuple(encoder_inputs_tuple)
-            encoder_input_shapes_tuple = tuple(encoder_input_shapes_tuple)
+            masks = tf.cast(tf.not_equal(inputs["input_ids"], -1), tf.float32)
+            masks = tf.reshape(masks, (1, batch_size, 1, max_sequence_length, 1))
+            all_cache_key = all_cache_key * masks
+            all_cache_value = all_cache_value * masks
 
             # END
-            decoder_inputs_tuple = [None] * len(self.decoder_input_name_list)
-            decoder_input_shapes_tuple = [tf.TensorShape([None, None])] * len(self.decoder_input_name_list)
-            for index, name in self.decoder_input_name_map.items():
-                if name == "decoder_input_ids":
-                    decoder_inputs_tuple[index] = input_ids
+            inputs_tuple = [None] * len(self.input_name_list)
+            input_shapes_tuple = [tf.TensorShape([None, None])] * len(self.input_name_list)
+            for index, name in self.input_name_map.items():
+                if name == "input_ids":
+                    inputs_tuple[index] = input_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                if name == "decoder_input_type_ids":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_type_ids
-                # Highly unlikely to happen in auto regressive LM
-                if name == "decoder_input_mask":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_mask_ids
+                if name == "input_type_ids":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_type_ids
+                    # input_shapes_tuple.append(tf.TensorShape([None, None]))
+                    continue
+                if name == "input_mask":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_mask_ids
+                    # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
 
-            decoder_inputs_tuple = tuple(decoder_inputs_tuple)
-            decoder_input_shapes_tuple = tuple(decoder_input_shapes_tuple)
+            inputs_tuple = tuple(inputs_tuple)
+            input_shapes_tuple = tuple(input_shapes_tuple)
 
+            # maximum_iterations=self.max_iterations - 1
+            # maximum_iterations = iterations-1
             results = tf.while_loop(
                 cond,
                 body,
                 maximum_iterations=iterations - 1,
                 loop_vars=[
                     i,
-                    encoder_inputs_tuple,
-                    decoder_inputs_tuple,
-                    model_outputs["encoder_hidden_states"],
-                    model_outputs["decoder_all_cache_key"],
-                    model_outputs["decoder_all_cache_value"],
-                    decoded_ids,
+                    inputs_tuple,
+                    all_cache_key,
+                    all_cache_value,
+                    model_outputs["past_length"],
+                    initial_id,
                     prediction_probs,
                 ],
                 shape_invariants=[
                     i.get_shape(),
-                    encoder_input_shapes_tuple,
-                    decoder_input_shapes_tuple,
-                    tf.TensorShape([None, None, None]),
+                    input_shapes_tuple,
                     tf.TensorShape(
-                        [
-                            self.decoder_num_hidden_layers,
-                            None,
-                            self.decoder_num_attention_heads,
-                            None,
-                            self.decoder_attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
                     tf.TensorShape(
-                        [
-                            self.decoder_num_hidden_layers,
-                            None,
-                            self.decoder_num_attention_heads,
-                            None,
-                            self.decoder_attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
+                    tf.TensorShape([None, None]),
                     tf.TensorShape([None, None]),
                     tf.TensorShape([None, None]),
                 ],
@@ -545,11 +487,10 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
         # EOS check function
         def cond(
             i,
-            encoder_inputs_tuple,
-            decoder_inputs_tuple,
-            encoder_hidden_states,
+            input_ids,
             all_cache_key,
             all_cache_value,
+            past_length,
             alive_log_probs,
             alive_seq,
         ):
@@ -561,11 +502,10 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
 
         def body(
             i,
-            encoder_inputs_tuple,
-            decoder_inputs_tuple,
-            encoder_hidden_states,
+            inputs_tuple,
             all_cache_key,
             all_cache_value,
+            past_length,
             alive_log_probs,
             alive_seq,
         ):
@@ -586,24 +526,19 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             """
             inputs = {}
             for k in range(len(self.input_name_list)):
-                inputs[self.input_name_list[k]] = encoder_inputs_tuple[k]
-
-            for k in range(len(self.decoder_input_name_list)):
-                inputs[self.decoder_input_name_list[k]] = decoder_inputs_tuple[k]
-
-            inputs["encoder_hidden_states"] = encoder_hidden_states
-            inputs["decoder_all_cache_key"] = all_cache_key
-            inputs["decoder_all_cache_value"] = all_cache_value
+                inputs[self.input_name_list[k]] = inputs_tuple[k]
+            inputs["all_cache_key"] = all_cache_key
+            inputs["all_cache_value"] = all_cache_value
+            inputs["past_length"] = past_length
 
             beams_to_keep = 2 * self.beam_size
-
             model_outputs = self.model(inputs)
 
             model_logits = model_outputs["last_token_logits"]
-            model_logits = model_logits / self.temperature
 
-            all_cache_key = model_outputs["decoder_all_cache_key"]
-            all_cache_value = model_outputs["decoder_all_cache_value"]
+            all_cache_key = model_outputs["all_cache_key"]
+            all_cache_value = model_outputs["all_cache_value"]
+            past_length = model_outputs["past_length"]
 
             if self.top_k > 0:
                 model_logits = top_k_logits(model_logits, k=self.top_k)
@@ -611,7 +546,7 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 model_logits = top_p_logits(model_logits, p=self.top_p)
 
             vocab_size = tf.shape(model_logits)[1]
-            batch_size = tf.shape(inputs["encoder_input_ids"])[0] // self.beam_size
+            batch_size = tf.shape(inputs["input_ids"])[0] // self.beam_size
             logits = tf.reshape(model_logits, (batch_size, self.beam_size, -1))
             # # Convert logits to normalized log probs
             candidate_log_probs = _log_prob_from_logits(logits)
@@ -643,7 +578,7 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 next_scores = tf.gather(flat_log_probs, next_tokens, batch_dims=1)  # (batch_size, 2 * num_beams)
 
                 # # sort the sampled vector to make sure that the first num_beams
-                #  samples are the best
+                # samples are the best
                 next_scores_indices = tf.argsort(next_scores, direction="DESCENDING", axis=1)
                 next_scores = tf.gather(next_scores, next_scores_indices, batch_dims=1)  # (batch_size, num_beams * 2)
                 next_tokens = tf.gather(next_tokens, next_scores_indices, batch_dims=1)  # (batch_size, num_beams * 2)
@@ -651,9 +586,7 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 topk_log_probs = next_scores
                 topk_indices = next_tokens
             else:
-                topk_log_probs, topk_indices = tf.nn.top_k(
-                    flat_log_probs, k=beams_to_keep
-                )  # (batch_size x k (beams_to_keep))
+                topk_log_probs, topk_indices = tf.nn.top_k(flat_log_probs, k=beams_to_keep)
 
             topk_beam_indices = topk_indices // vocab_size
             topk_seq, coordinates = _gather_beams(alive_seq, topk_beam_indices, batch_size, beams_to_keep)
@@ -666,37 +599,36 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             input_ids = tf.reshape(topk_ids[:, : self.beam_size], [-1, 1])
             alive_seq = topk_alive_seq
 
-            all_cache_key, all_cache_value = self.reorder_past_batches(
-                all_cache_key, all_cache_value, coordinates, self.beam_size
-            )
-            model_outputs["decoder_all_cache_key"] = all_cache_key
-            model_outputs["decoder_all_cache_value"] = all_cache_value
+            inputs_tuple = [None] * len(self.input_name_list)
 
-            decoder_inputs_tuple = [None] * len(self.decoder_input_name_list)
-
-            for index, name in self.decoder_input_name_map.items():
-                if name == "decoder_input_ids":
-                    decoder_inputs_tuple[index] = input_ids
+            for index, name in self.input_name_map.items():
+                if name == "input_ids":
+                    inputs_tuple[index] = input_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                if name == "decoder_input_type_ids":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_type_ids
+                if name == "input_type_ids":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_type_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                if name == "decoder_input_mask":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_mask_ids
+                if name == "input_mask":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_mask_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
             # Convert to tuple
-            decoder_inputs_tuple = tuple(decoder_inputs_tuple)
+            inputs_tuple = tuple(inputs_tuple)
+
+            all_cache_key, all_cache_value = self.reorder_past_batches(
+                all_cache_key, all_cache_value, coordinates, self.beam_size
+            )
+            model_outputs["all_cache_key"] = all_cache_key
+            model_outputs["all_cache_value"] = all_cache_value
 
             return [
                 i + 1,
-                encoder_inputs_tuple,
-                decoder_inputs_tuple,
-                model_outputs["encoder_hidden_states"],
-                model_outputs["decoder_all_cache_key"],
-                model_outputs["decoder_all_cache_value"],
+                inputs_tuple,
+                model_outputs["all_cache_key"],
+                model_outputs["all_cache_value"],
+                model_outputs["past_length"],
                 alive_log_probs,
                 alive_seq,
             ]
@@ -707,55 +639,36 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             Args:
                 inputs ([dict]): [dict of tf.tensors (model inputs)]
             """
-
+            input_ids_orig = inputs["input_ids"]
             # We take 2x beams
             beams_to_keep = 2 * self.beam_size
-
-            input_ids_orig = inputs["encoder_input_ids"]
             # Original batch size and sequence length
-            batch_size = tf.shape(inputs["encoder_input_ids"])[0]
-            # Initialize with zeros
-            encoder_sequence_length = tf.shape(inputs["encoder_input_ids"])[1]
-            decoder_start_sequence_length = 1
-
+            batch_size = tf.shape(inputs["input_ids"])[0]
+            max_sequence_length = tf.shape(inputs["input_ids"])[1]
+            # Repeat for beam search (We nedd batch_size x beam_size)
             model_inputs = {}
             for input_key, input_value in inputs.items():
-                # We dont want iterations in model_inputs
                 if input_key == "iterations":
                     continue
                 model_inputs[input_key] = tf.repeat(input_value, [self.beam_size], axis=0)
-
-            encoder_inputs_copy = model_inputs.copy()
             # New batch size
-            batch_size_updated = tf.shape(model_inputs["encoder_input_ids"])[0]
-            # Prepare inputs
-            # Encoder hidden states
-            encoder_hidden_states = tf.zeros((batch_size_updated, encoder_sequence_length, self.embedding_size))
-            all_cache_key = tf.zeros(
+            batch_size_updated = tf.shape(model_inputs["input_ids"])[0]
+
+            # Pre-initialize addtional inputs
+            zero_entry = tf.zeros(
                 (
-                    self.decoder_num_hidden_layers,
+                    self.num_hidden_layers,
                     batch_size_updated,
-                    self.decoder_num_attention_heads,
-                    decoder_start_sequence_length,
-                    self.decoder_attention_state,
+                    self.num_attention_heads,
+                    max_sequence_length,
+                    self.attention_state,
                 )
             )
-            all_cache_value = tf.zeros(
-                (
-                    self.decoder_num_hidden_layers,
-                    batch_size_updated,
-                    self.decoder_num_attention_heads,
-                    decoder_start_sequence_length,
-                    self.decoder_attention_state,
-                )
-            )
-
-            # Prepare Decoder inputs
-            decoder_input_ids = tf.cast(
-                tf.ones(shape=(batch_size_updated, 1)) * self.decoder_start_token_id,
-                tf.int32,
-            )
-
+            all_cache_key = zero_entry
+            all_cache_value = zero_entry
+            # past_length for keeping track of positional ids
+            past_length = tf.expand_dims(tf.zeros(batch_size_updated, dtype=tf.int32), 0)
+            # Iterator to keep track of the loop
             i = tf.constant([[0]])
 
             if self.max_iterations is None:
@@ -764,22 +677,15 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 iterations = self.max_iterations
 
             # Add remaining model inputs
-            # Add remaining model inputs
-            model_inputs["decoder_all_cache_key"] = all_cache_key
-            model_inputs["decoder_all_cache_value"] = all_cache_value
-            model_inputs["encoder_hidden_states"] = encoder_hidden_states
-            model_inputs["decoder_input_ids"] = decoder_input_ids
+            model_inputs["all_cache_key"] = all_cache_key
+            model_inputs["all_cache_value"] = all_cache_value
+            model_inputs["past_length"] = past_length
 
-            if "decoder_input_type_ids" in self.decoder_input_name_list:
-                model_inputs["decoder_input_type_ids"] = (
-                    tf.ones_like(model_inputs["decoder_input_ids"]) * self.decoder_input_type_ids
-                )
+            if "input_type_ids" in self.input_name_list:
+                model_inputs["input_type_ids"] = tf.ones_like(model_inputs["input_ids"]) * self.input_type_ids
 
-            # Highly unlikely to happen in auot regressive tasks as "decoder" has "causal" mask
-            if "decoder_input_mask" in self.decoder_input_name_list:
-                model_inputs["decoder_input_mask"] = (
-                    tf.ones_like(model_inputs["decoder_input_ids"]) * self.decoder_input_mask_ids
-                )
+            if "input_mask" in self.input_name_list:
+                model_inputs["input_mask"] = tf.ones_like(model_inputs["input_ids"]) * self.input_mask_ids
 
             # We need this to re-ordering and keep track of best -log(prob))
             alive_log_probs = -np.inf * tf.ones((batch_size, self.beam_size - 1))
@@ -788,14 +694,12 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
 
             # First pass to the model
             model_outputs = self.model(model_inputs)
-            model_logits = model_outputs["last_token_logits"]
-            model_logits = model_logits / self.temperature
-
+            model_logits = model_outputs["last_token_logits"] / self.temperature
             # Update iter
             i = i + 1
-
-            all_cache_key = model_outputs["decoder_all_cache_key"]
-            all_cache_value = model_outputs["decoder_all_cache_value"]
+            all_cache_key = model_outputs["all_cache_key"]
+            all_cache_value = model_outputs["all_cache_value"]
+            past_length = model_outputs["past_length"]
 
             if self.top_k > 0:
                 model_logits = top_k_logits(model_logits, k=self.top_k)
@@ -856,91 +760,55 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             input_ids = tf.reshape(topk_ids[:, : self.beam_size], [-1, 1])
             alive_seq = topk_alive_seq
 
-            # decoded_ids = tf.concat([decoder_input_ids, input_ids], axis=1)
-
-            # Even though encoder values are not using , we need ot as per
-            # models serialized versions
-            encoder_inputs_tuple = [None] * len(self.input_name_list)
-            encoder_input_shapes_tuple = [tf.TensorShape([None, None])] * len(self.input_name_list)
+            inputs_tuple = [None] * len(self.input_name_list)
+            input_shapes_tuple = [tf.TensorShape([None, None])] * len(self.input_name_list)
             for index, name in self.input_name_map.items():
-                if name == "encoder_input_ids":
-                    encoder_inputs_tuple[index] = encoder_inputs_copy["encoder_input_ids"]
+                if name == "input_ids":
+                    inputs_tuple[index] = input_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                if name == "encoder_input_type_ids":
-                    encoder_inputs_tuple[index] = encoder_inputs_copy["encoder_input_type_ids"]
+                if name == "input_type_ids":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_type_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                if name == "encoder_input_mask":
-                    encoder_inputs_tuple[index] = encoder_inputs_copy["encoder_input_mask"]
+                if name == "input_mask":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_mask_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
 
-            encoder_inputs_tuple = tuple(encoder_inputs_tuple)
-            encoder_input_shapes_tuple = tuple(encoder_input_shapes_tuple)
+            inputs_tuple = tuple(inputs_tuple)
+            input_shapes_tuple = tuple(input_shapes_tuple)
 
-            # END
-            decoder_inputs_tuple = [None] * len(self.decoder_input_name_list)
-            decoder_input_shapes_tuple = [tf.TensorShape([None, None])] * len(self.decoder_input_name_list)
-            for index, name in self.decoder_input_name_map.items():
-                if name == "decoder_input_ids":
-                    decoder_inputs_tuple[index] = input_ids
-                    # input_shapes_tuple.append(tf.TensorShape([None, None]))
-                    continue
-                if name == "decoder_input_type_ids":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_type_ids
-                    continue
-                if name == "decoder_input_mask":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_mask_ids
-                    continue
+            # on step 0
 
-            decoder_inputs_tuple = tuple(decoder_inputs_tuple)
-            decoder_input_shapes_tuple = tuple(decoder_input_shapes_tuple)
+            masks = tf.cast(tf.not_equal(model_inputs["input_ids"], -1), tf.float32)
+            masks = tf.reshape(
+                masks,
+                (1, batch_size_updated, 1, tf.shape(model_inputs["input_ids"])[1], 1),
+            )
+            all_cache_key = all_cache_key * masks
+            all_cache_value = all_cache_value * masks
 
             all_cache_key, all_cache_value = self.reorder_past_batches(
                 all_cache_key, all_cache_value, coordinates, self.beam_size
             )
-            model_outputs["decoder_all_cache_key"] = all_cache_key
-            model_outputs["decoder_all_cache_value"] = all_cache_value
 
             # END
             results = tf.while_loop(
                 cond,
                 body,
                 maximum_iterations=iterations - 1,
-                loop_vars=[
-                    i,
-                    encoder_inputs_tuple,
-                    decoder_inputs_tuple,
-                    model_outputs["encoder_hidden_states"],
-                    model_outputs["decoder_all_cache_key"],
-                    model_outputs["decoder_all_cache_value"],
-                    alive_log_probs,
-                    alive_seq,
-                ],
+                loop_vars=[i, inputs_tuple, all_cache_key, all_cache_value, past_length, alive_log_probs, alive_seq],
                 shape_invariants=[
                     i.get_shape(),
-                    encoder_input_shapes_tuple,
-                    decoder_input_shapes_tuple,
-                    tf.TensorShape([None, None, None]),
+                    input_shapes_tuple,
                     tf.TensorShape(
-                        [
-                            self.decoder_num_hidden_layers,
-                            None,
-                            self.decoder_num_attention_heads,
-                            None,
-                            self.decoder_attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
                     tf.TensorShape(
-                        [
-                            self.decoder_num_hidden_layers,
-                            None,
-                            self.decoder_num_attention_heads,
-                            None,
-                            self.decoder_attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
+                    tf.TensorShape([None, None]),
                     tf.TensorShape([None, None]),
                     tf.TensorShape([None, None, None]),
                 ],
@@ -950,7 +818,7 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             results_dict["iterations"] = results[0]
             results_dict["input_ids"] = input_ids_orig
             # Skip -1 initial ids
-            results_dict["predicted_ids"] = tf.cast(results[-1][:, :, 1:], tf.int32)  # to remove initial 0
+            results_dict["predicted_ids"] = results[-1][:, :, 1:]  # to remove initial 0
 
             matched_positions = (
                 tf.squeeze(
@@ -971,7 +839,7 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             # no eos matched positions will be 0, replace with -1
             eos_pos_mask = tf.cast(tf.equal(matched_positions, 0), tf.int32) * -1
             matched_positions = tf.cast(matched_positions, tf.int32) + eos_pos_mask
-            results_dict["matched_eos_pos"] = tf.cast(matched_positions, tf.int32)
+            results_dict["matched_eos_pos"] = matched_positions
 
             return results_dict
 
@@ -980,34 +848,15 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
     def top_k_top(self):
 
         # EOS check function
-        def cond(
-            i,
-            encoder_inputs_tuple,
-            decoder_inputs_tuple,
-            encoder_hidden_states,
-            all_cache_key,
-            all_cache_value,
-            decoded_ids,
-            prediction_probs,
-        ):
+        def cond(i, input_ids, all_cache_key, all_cache_value, past_length, initial_id, prediction_probs):
             eos_check = tf.greater(
-                tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(decoded_ids, self.eos_id), tf.int32), axis=[1])),
+                tf.reduce_prod(tf.reduce_sum(tf.cast(tf.equal(initial_id, self.eos_id), tf.int32), axis=[1])),
                 0,
             )
             return tf.not_equal(eos_check, True)
 
-        def body(
-            i,
-            encoder_inputs_tuple,
-            decoder_inputs_tuple,
-            encoder_hidden_states,
-            all_cache_key,
-            all_cache_value,
-            decoded_ids,
-            prediction_probs,
-        ):
-
-            """[This is the body of the beam decoder]
+        def body(i, inputs_tuple, all_cache_key, all_cache_value, past_length, initial_id, prediction_probs):
+            """[This is the body of the top k top p decoder]
 
             Args:
                 i ([tf.tensor]): [iterator (an int)]
@@ -1016,22 +865,19 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 all_cache_value ([V]): [description]
                 past_length ([tf.tensor (1 x batch_size)]): [description]
                 This is our main output or decoded ids]
-                alive_log_probs ([tf.tensor]): [To keep track of active ids]
-                alive_seq ([tf.tensor]): [description]
+                initial_id ([tf.tensor]): [To keep track of concatanted ids generated
+                in each iteration]
+                prediction_probs (tf.tensor): Prediction probs 2D
 
             Returns:
                 [List of tensors]: [Outputs]
             """
             inputs = {}
             for k in range(len(self.input_name_list)):
-                inputs[self.input_name_list[k]] = encoder_inputs_tuple[k]
-
-            for k in range(len(self.decoder_input_name_list)):
-                inputs[self.decoder_input_name_list[k]] = decoder_inputs_tuple[k]
-
-            inputs["encoder_hidden_states"] = encoder_hidden_states
-            inputs["decoder_all_cache_key"] = all_cache_key
-            inputs["decoder_all_cache_value"] = all_cache_value
+                inputs[self.input_name_list[k]] = inputs_tuple[k]
+            inputs["all_cache_key"] = all_cache_key
+            inputs["all_cache_value"] = all_cache_value
+            inputs["past_length"] = past_length
 
             model_outputs = self.model(inputs)
             model_logits = model_outputs["last_token_logits"] / self.temperature
@@ -1052,32 +898,30 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 p_probs = tf.expand_dims(p_probs, 1)  # 2D
                 input_ids = tf.cast(tf.expand_dims(prediction_ids, axis=1), tf.int32)
 
-            decoder_inputs_tuple = [None] * len(self.decoder_input_name_list)
+            inputs_tuple = [None] * len(self.input_name_list)
 
-            for index, name in self.decoder_input_name_map.items():
-                if name == "decoder_input_ids":
-                    decoder_inputs_tuple[index] = input_ids
+            for index, name in self.input_name_map.items():
+                if name == "input_ids":
+                    inputs_tuple[index] = input_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                if name == "decoder_input_type_ids":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_type_ids
+                if name == "input_type_ids":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_type_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                if name == "decoder_input_mask":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_mask_ids
+                if name == "input_mask":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_mask_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
             # Convert to tuple
-            decoder_inputs_tuple = tuple(decoder_inputs_tuple)
-
+            inputs_tuple = tuple(inputs_tuple)
             return [
                 i + 1,
-                encoder_inputs_tuple,
-                decoder_inputs_tuple,
-                model_outputs["encoder_hidden_states"],
-                model_outputs["decoder_all_cache_key"],
-                model_outputs["decoder_all_cache_value"],
-                tf.concat([decoded_ids, input_ids], axis=1),
+                inputs_tuple,
+                model_outputs["all_cache_key"],
+                model_outputs["all_cache_value"],
+                model_outputs["past_length"],
+                tf.concat([initial_id, input_ids], axis=1),
                 tf.concat([prediction_probs, p_probs], axis=1),
             ]
 
@@ -1086,12 +930,9 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
             Args:
                 inputs ([dict]): [dict of tf.tensors (model inputs)]
             """
-            input_ids_orig = inputs["encoder_input_ids"]
-            # Original batch size and sequence length
-            batch_size = tf.shape(inputs["encoder_input_ids"])[0]
-            # Initialize with zeros
-            encoder_sequence_length = tf.shape(inputs["encoder_input_ids"])[1]
-            decoder_start_sequence_length = 1
+            input_ids_orig = inputs["input_ids"]
+            batch_size = tf.shape(inputs["input_ids"])[0]
+            max_sequence_length = tf.shape(inputs["input_ids"])[1]
 
             if self.max_iterations is None:
                 iterations = tf.squeeze(inputs["iterations"])
@@ -1103,60 +944,41 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 if input_key == "iterations":
                     continue
                 model_inputs[input_key] = tf.repeat(input_value, [self.num_return_sequences], axis=0)
+            # Updated batch size
+            batch_size_updated = tf.shape(model_inputs["input_ids"])[0]
 
-            encoder_inputs_copy = model_inputs.copy()
-            # New batch size
-            batch_size_updated = tf.shape(model_inputs["encoder_input_ids"])[0]
-            # Prepare inputs
-            # Encoder hidden states
-            encoder_hidden_states = tf.zeros((batch_size_updated, encoder_sequence_length, self.embedding_size))
-            all_cache_key = tf.zeros(
+            # Pre-initialize addtional inputs
+            zero_entry = tf.zeros(
                 (
-                    self.decoder_num_hidden_layers,
+                    self.num_hidden_layers,
                     batch_size_updated,
-                    self.decoder_num_attention_heads,
-                    decoder_start_sequence_length,
-                    self.decoder_attention_state,
+                    self.num_attention_heads,
+                    max_sequence_length,
+                    self.attention_state,
                 )
             )
-            all_cache_value = tf.zeros(
-                (
-                    self.decoder_num_hidden_layers,
-                    batch_size_updated,
-                    self.decoder_num_attention_heads,
-                    decoder_start_sequence_length,
-                    self.decoder_attention_state,
-                )
-            )
-
-            # Prepare Decoder inputs
-            decoder_input_ids = tf.cast(
-                tf.ones(shape=(batch_size_updated, 1)) * self.decoder_start_token_id,
-                tf.int32,
-            )
-
+            all_cache_key = zero_entry
+            all_cache_value = zero_entry
+            # past_length for keeping track of positional ids
+            past_length = tf.expand_dims(tf.zeros(batch_size_updated, dtype=tf.int32), 0)
+            # Iterator to keep track of the loop
             i = tf.constant([[0]])
+            initial_id = tf.ones(shape=(batch_size_updated, 1), dtype=tf.int32)
 
             # Add remaining model inputs
-            model_inputs["decoder_all_cache_key"] = all_cache_key
-            model_inputs["decoder_all_cache_value"] = all_cache_value
-            model_inputs["encoder_hidden_states"] = encoder_hidden_states
-            model_inputs["decoder_input_ids"] = decoder_input_ids
+            model_inputs["all_cache_key"] = all_cache_key
+            model_inputs["all_cache_value"] = all_cache_value
+            model_inputs["past_length"] = past_length
 
-            if "decoder_input_type_ids" in self.decoder_input_name_list:
-                model_inputs["decoder_input_type_ids"] = (
-                    tf.ones_like(model_inputs["decoder_input_ids"]) * self.decoder_input_type_ids
-                )
+            if "input_type_ids" in self.input_name_list:
+                model_inputs["input_type_ids"] = tf.ones_like(model_inputs["input_ids"]) * self.input_type_ids
 
-            # Highly unlikely to happen in auot regressive tasks as "decoder" has "causal" mask
-            if "decoder_input_mask" in self.decoder_input_name_list:
-                model_inputs["decoder_input_mask"] = (
-                    tf.ones_like(model_inputs["decoder_input_ids"]) * self.decoder_input_mask_ids
-                )
+            if "input_mask" in self.input_name_list:
+                model_inputs["input_mask"] = tf.ones_like(model_inputs["input_ids"]) * self.input_mask_ids
 
             # First pass to the model
             model_outputs = self.model(model_inputs)
-            model_logits = model_outputs["last_token_logits"] / self.temperature
+            model_logits = model_outputs["last_token_logits"] / self.tem
 
             if self.top_k > 0:
                 model_logits = top_k_logits(model_logits, k=self.top_k)
@@ -1174,47 +996,41 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 prediction_probs = tf.expand_dims(prediction_probs, 1)  # 2D
                 input_ids = tf.cast(tf.expand_dims(prediction_ids, axis=1), tf.int32)
 
-            # Update iter
-            i = i + 1
-            decoded_ids = tf.concat([decoder_input_ids, input_ids], axis=1)
-
-            # Even though encoder values are not using , we need ot as per models
-            #  serialized versions
-            encoder_inputs_tuple = [None] * len(self.input_name_list)
-            encoder_input_shapes_tuple = [tf.TensorShape([None, None])] * len(self.input_name_list)
+            inputs_tuple = [None] * len(self.input_name_list)
+            input_shapes_tuple = [tf.TensorShape([None, None])] * len(self.input_name_list)
             for index, name in self.input_name_map.items():
-                if name == "encoder_input_ids":
-                    encoder_inputs_tuple[index] = encoder_inputs_copy["encoder_input_ids"]
+                if name == "input_ids":
+                    inputs_tuple[index] = input_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                if name == "encoder_input_type_ids":
-                    encoder_inputs_tuple[index] = encoder_inputs_copy["encoder_input_type_ids"]
+                if name == "input_type_ids":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_type_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
-                if name == "encoder_input_mask":
-                    encoder_inputs_tuple[index] = encoder_inputs_copy["encoder_input_mask"]
+                if name == "input_mask":
+                    inputs_tuple[index] = tf.ones_like(input_ids) * self.input_mask_ids
                     # input_shapes_tuple.append(tf.TensorShape([None, None]))
                     continue
 
-            encoder_inputs_tuple = tuple(encoder_inputs_tuple)
-            encoder_input_shapes_tuple = tuple(encoder_input_shapes_tuple)
+            inputs_tuple = tuple(inputs_tuple)
+            input_shapes_tuple = tuple(input_shapes_tuple)
 
+            # Concatanate
+            initial_id = tf.concat([initial_id, input_ids], axis=1)
+
+            # on step 0
+
+            masks = tf.cast(tf.not_equal(model_inputs["input_ids"], -1), tf.float32)
+            masks = tf.reshape(
+                masks,
+                (1, batch_size_updated, 1, tf.shape(model_inputs["input_ids"])[1], 1),
+            )
+
+            all_cache_key = model_outputs["all_cache_key"]
+            all_cache_value = model_outputs["all_cache_value"]
+            all_cache_key = all_cache_key * masks
+            all_cache_value = all_cache_value * masks
             # END
-            decoder_inputs_tuple = [None] * len(self.decoder_input_name_list)
-            decoder_input_shapes_tuple = [tf.TensorShape([None, None])] * len(self.decoder_input_name_list)
-            for index, name in self.decoder_input_name_map.items():
-                if name == "decoder_input_ids":
-                    decoder_inputs_tuple[index] = input_ids
-                    continue
-                if name == "decoder_input_type_ids":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_type_ids
-                    continue
-                if name == "decoder_input_mask":
-                    decoder_inputs_tuple[index] = tf.ones_like(input_ids) * self.decoder_input_mask_ids
-                    continue
-
-            decoder_inputs_tuple = tuple(decoder_inputs_tuple)
-            decoder_input_shapes_tuple = tuple(decoder_input_shapes_tuple)
 
             results = tf.while_loop(
                 cond,
@@ -1222,37 +1038,23 @@ class TextDecoderSerializableSeq2Seq(tf.keras.layers.Layer):
                 maximum_iterations=iterations - 1,
                 loop_vars=[
                     i,
-                    encoder_inputs_tuple,
-                    decoder_inputs_tuple,
-                    model_outputs["encoder_hidden_states"],
-                    model_outputs["decoder_all_cache_key"],
-                    model_outputs["decoder_all_cache_value"],
-                    decoded_ids,
+                    inputs_tuple,
+                    all_cache_key,
+                    all_cache_value,
+                    model_outputs["past_length"],
+                    initial_id,
                     prediction_probs,
                 ],
                 shape_invariants=[
                     i.get_shape(),
-                    encoder_input_shapes_tuple,
-                    decoder_input_shapes_tuple,
-                    tf.TensorShape([None, None, None]),
+                    input_shapes_tuple,
                     tf.TensorShape(
-                        [
-                            self.decoder_num_hidden_layers,
-                            None,
-                            self.decoder_num_attention_heads,
-                            None,
-                            self.decoder_attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
                     tf.TensorShape(
-                        [
-                            self.decoder_num_hidden_layers,
-                            None,
-                            self.decoder_num_attention_heads,
-                            None,
-                            self.decoder_attention_state,
-                        ]
+                        [self.num_hidden_layers, None, self.num_attention_heads, None, self.attention_state]
                     ),
+                    tf.TensorShape([None, None]),
                     tf.TensorShape([None, None]),
                     tf.TensorShape([None, None]),
                 ],

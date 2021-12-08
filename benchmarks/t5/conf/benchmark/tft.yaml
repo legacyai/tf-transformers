@@ -2,13 +2,13 @@ task:
   name: tft
 
 data:
-  name: cnn_dailymail
+  name: xsum
   take_sample: false
   batch_size: 32
   max_length: 512
 
 model:
-  name: gpt2
+  name: t5-small
   type: textdecoder_saved_model
 
 text_generation:
