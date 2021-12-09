@@ -25,10 +25,13 @@ the benchmark script.
 
 All the configuration are managed using [Hydra](https://github.com/facebookresearch/hydra).
 
-[Machine] - Tesla V100-SXM2 32GB
-[Tensorflow-version] - 2.4.1
-[Huggingface-Transformer-Version] - 4.12.5
-[PyTorch-Version] - 1.9.0
+-> Machine - **Tesla V100-SXM2 32GB**
+
+-> Tensorflow-version - **2.4.1**
+
+-> Huggingface-Transformer-Version - **4.12.5**
+
+-> PyTorch-Version - **1.9.0**
 
 ## Tensorflow-Transformers. (tft)
 

@@ -56,3 +56,27 @@ class TextGenerationChainer(LegacyLayer):
             return inputs, layer_outputs
         model = LegacyModel(inputs=inputs, outputs=layer_outputs, name=self.model.name)
         return model
+
+
+class ClassificationChainer(LegacyLayer):
+    def __init__(self, tokenizer_model, model, **kwargs):
+        super(ClassificationChainer, self).__init__(is_training=False, use_dropout=False, name=model.name, **kwargs)
+        self.model = model
+        self.tokenizer_model = tokenizer_model
+        # Initialize model
+        self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
+
+    def call(self, inputs):
+        """Call"""
+        features = self.tokenizer_model(inputs)
+        result = self.model(features)
+        return result
+
+    def get_model(self, initialize_only=False):
+        """Get Model"""
+        inputs = self.tokenizer_model.input
+        layer_outputs = self(inputs)
+        if initialize_only:
+            return inputs, layer_outputs
+        model = LegacyModel(inputs=inputs, outputs=layer_outputs, name=self.model.name)
+        return model

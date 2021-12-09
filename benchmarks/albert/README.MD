@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Benchmark T5
+# Benchmark Albert
 
-- [Code - t5 Benchmark](https://github.com/legacyai/tf-transformers/tree/main/benchmark/t5)
+- [Code - Albert Benchmark](https://github.com/legacyai/tf-transformers/tree/main/benchmark/albert)
 
-This is used to benchmark the performance of T5 model on text generation tasks. We evaluate it using 3 frameworks.
+This is used to benchmark the performance of Albert model on text generation tasks. We evaluate it using 3 frameworks.
 Tensorflow-Transformers (default), HuggingFace PyTorch, HuggingFace Tensorflow and HuggingFace JAX (pending).
 Executing these scripts are fairly straightfoward and expect users to install the necessary libraries before executing
 the benchmark script.
@@ -36,53 +36,36 @@ All the configuration are managed using [Hydra](https://github.com/facebookresea
 ## Tensorflow-Transformers. (tft)
 
 The default benchmark mode is ```tft```.
-1. To execute ```Greedy Decoding``` (default) :
+1. To execute ```tft``` (default) :
     ```python run.py benchmark=tft```
 
-2. To execute ```Beam Decoding``` :
-    ```python run.py benchmark=tft benchmark.text_generation.mode=beam +benchmark.text_generation.num_beams=3```
+2. To execute ```type``` eg ```keras_model``` :
+    ```python run.py benchmark=tft benchmark.model.type=keras_model```
 
-        * a. textdecoder_keras_model    -  Uses tf.keras.Model.
-        * b. textdecoder_saved_model    -  Uses tf.saved_model, ```for``` loop to decode .
-        * c. textdecoder_serializable   -  Uses tf.saved_model, ```model + text generation``` is serialized together.
+        * a. keras_model    -  Uses tf.keras.Model.
+        * b. saved_model    -  Uses tf.saved_model, ```for``` loop to decode .
+        * c. saved_model_tftext   -  Uses tf.saved_model, ```model + text ``` is serialized together.
 
-3. To execute ```Greedy Decoding``` using let's say ```textdecoder_keras_model``` :
-    ```python run.py benchmark=tft benchmark.model.type=textdecoder_keras_model```
-
-[Note] - You can pass any arguments to ```tf_transformers.text.TextDecoder.decode``` arguments to the hydra configuration
-using ```+``` .
 
 ## HuggingFace-Tensorflow. (hf-tf)
 
-1. To execute ```Greedy Decoding``` (default) :
+1. To execute ```hf-tf``` (default) :
     ```python run.py benchmark=hf benchmark.model.type=tf```
 
-2. To execute ```Beam Decoding``` :
-    ```python run.py benchmark=hf benchmark.model.type=tf +benchmark.text_generation.num_beams=3 ```
-
-[Note] - You can pass any arguments to ```model.generate``` arguments to the hydra configuration
-using ```+``` .
 
 ## HuggingFace-PyTorch. (hf-pt)
 
-1. To execute ```Greedy Decoding``` (default) :
+1. To execute ```hf-pt``` (default) :
     ```python run.py benchmark=hf benchmark.model.type=pt```
-
-2. To execute ```Beam Decoding``` :
-    ```python run.py benchmark=hf benchmark.model.type=pt +benchmark.text_generation.num_beams=3 ```
 
 
 ## HuggingFace-JAX. (hf-jax) (Not Available)
 
-1. To execute ```Greedy Decoding``` (default) :
+1. To execute ```hf-jax``` (default) :
     ```python run.py benchmark=hf benchmark.model.type=jax```
 
-2. To execute ```Beam Decoding``` :
-    ```python run.py benchmark=hf benchmark.model.type=jax +benchmark.text_generation.num_beams=3 ```
 
-
-
-## Official Benchmarks on XSUM
+## Official Benchmarks on IMDB
 
 ```
 Greedy Decode:

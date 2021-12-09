@@ -1,0 +1,12 @@
+task:
+  name: tft
+
+data:
+  name: imdb
+  take_sample: false
+  batch_size: 32
+  max_length: 512
+
+model:
+  name: t5-small
+  type: textdecoder_saved_model

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-from tf_transformers.core.chainer import TextGenerationChainer
+from tf_transformers.core.chainer import ClassificationChainer, TextGenerationChainer
 from tf_transformers.core.legacy_layer import LegacyLayer
 from tf_transformers.core.legacy_model import LegacyModel
 from tf_transformers.core.legacy_module import LegacyModule, LegacyModuleCustom
