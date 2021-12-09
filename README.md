@@ -40,7 +40,7 @@ limitations under the License.
 
 tf-transformers is designed to harness the full power of Tensorflow 2, to make it much faster and simpler comparing to existing Tensorflow based NLP architectures. On an average, there is **80 %** improvement over current exsting Tensorflow based libraries, on text generation and other tasks. You can find more details in the Benchmarks section.
 
-All / Most NLP downstream tasks can be integrated into Tranformer based models with much ease. All the models can be trained using ```model.fit```, which supports **GPU**, **multi-GPU**, **TPU**.
+All / Most NLP downstream tasks can be easily integrated into Tranformer based models with much ease. All the models can be trained using ```model.fit```, which supports **GPU**, **multi-GPU**, **TPU**.
 
 ## Unique Features
 - **Faster AutoReggressive Decoding** using Tensorflow2. Faster than PyTorch in most experiments (V100 GPU). **80%** faster compared to existing TF based libararies (relative difference) Refer [benchmark code](tests/notebooks/benchmarks/).
