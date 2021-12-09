@@ -321,3 +321,10 @@ Flax), PyTorch, and/or TensorFlow.
     :caption: Research
 
     research/glue
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Benchmarks
+
+    benchmarks/gpt2
+    benchmarks/t5
