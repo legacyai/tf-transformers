@@ -58,6 +58,8 @@ class TftBenchmark:
         if take_sample:
             dataset = dataset.select(range(50))
 
+        # Add summarize: with text
+        dataset = dataset.map(lambda x: {'document': 'summarize: ' + x['document']})
         self.dataset = dataset
 
         dataset = dataset.map(
@@ -297,7 +299,6 @@ class TftBenchmark:
 
     def load_model_decoder_fn(self):
         """Load Model"""
-
         if self.model_type == "textdecoder_keras_model":
             decoder_fn = self._load_textdecoder_keras_model()
 
@@ -307,8 +308,8 @@ class TftBenchmark:
         if self.model_type == "textdecoder_serializable":
             decoder_fn = self._load_textdecoder_serializable()
 
-        if self.model_type == "textdecoder_model_serializable_tftext":
-            decoder_fn = self._load_textdecoder_model_serializable_tftext()
+        if self.model_type == "textdecoder_serializable_tftext":
+            decoder_fn = self._load_textdecoder_serializable_tftext()
 
         if self.model_type == "textdecoder_model":
             decoder_fn = self._load_textdecoder_model()
@@ -346,17 +347,19 @@ class TftBenchmark:
                 all_documents.append(item['document'])
 
             text_dataset = tf.data.Dataset.from_tensor_slices({'text': all_documents}).batch(
-                self.cfg.benchmark.data.batch_size, drop_remainder=True
+                self.cfg.benchmark.data.batch_size, drop_remainder=False
             )
             # Sample batch (to avoid first time compilation time)
-            sample_batch_inputs, _ = text_dataset.take(1)
-            outputs = decoder_fn(sample_batch_inputs)
+            for _batch_inputs in tqdm.tqdm(text_dataset, unit="batch "):
+                break
+            sample_batch_inputs = _batch_inputs
+            outputs = decoder_fn(sample_batch_inputs)  # noqa
 
             slines = 0
             start_time = time.time()
             for batch_inputs in tqdm.tqdm(text_dataset, unit="batch "):
                 outputs = decoder_fn(batch_inputs)  # noqa
-                batch_size = batch_inputs['encoder_input_ids'].shape[0]
+                batch_size = batch_inputs['text'].shape[0]
                 slines += batch_size
             end_time = time.time()
             shutil.rmtree(self.temp_dir)

@@ -52,7 +52,7 @@ using ```+``` .
 ## HuggingFace-Tensorflow. (hf-tf)
 
 1. To execute ```Greedy Decoding``` (default) :
-    ```python run.py +benchmark=hf benchmark.model.type=tf```
+    ```python run.py benchmark=hf benchmark.model.type=tf```
 
 2. To execute ```Beam Decoding``` :
     ```python run.py benchmark=hf benchmark.model.type=tf +benchmark.text_generation.num_beams=3 ```
@@ -63,7 +63,7 @@ using ```+``` .
 ## HuggingFace-PyTorch. (hf-pt)
 
 1. To execute ```Greedy Decoding``` (default) :
-    ```python run.py +benchmark=hf benchmark.model.type=pt```
+    ```python run.py benchmark=hf benchmark.model.type=pt```
 
 2. To execute ```Beam Decoding``` :
     ```python run.py benchmark=hf benchmark.model.type=pt +benchmark.text_generation.num_beams=3 ```
@@ -72,7 +72,7 @@ using ```+``` .
 ## HuggingFace-JAX. (hf-jax)
 
 1. To execute ```Greedy Decoding``` (default) :
-    ```python run.py +benchmark=hf benchmark.model.type=jax```
+    ```python run.py benchmark=hf benchmark.model.type=jax```
 
 2. To execute ```Beam Decoding``` :
     ```python run.py benchmark=hf benchmark.model.type=jax +benchmark.text_generation.num_beams=3 ```

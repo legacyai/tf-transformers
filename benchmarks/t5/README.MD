@@ -43,7 +43,7 @@ python run.py +benchmark=hf benchmark.model.type=tf
 ## Official Benchmarks on CNN DailyMail
 
 
-
+{'model_type': 'textdecoder_serializable_tftext', 'time_taken': 517.600218296051, 'samples_per_second': 21.89720869382885}
 
 ### Greedy Decode
 |                            |   batch_size | mode   |   max_length | time (sec) |   samples/second |
