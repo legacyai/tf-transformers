@@ -14,3 +14,4 @@ model:
 
 text_generation:
   max_length: 64
+  eos_token_id: 250000

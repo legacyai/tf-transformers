@@ -19,6 +19,7 @@
 # ==============================================================================
 """T5 Tokenizer based on TFText"""
 import tempfile
+import os
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -479,7 +480,7 @@ def post_process_and_write(cache_path, special_tokens):
     from sentencepiece import sentencepiece_model_pb2
 
     m = sentencepiece_model_pb2.ModelProto()
-    m.ParseFromString(open(cache_path, "rb").read())
+    m.ParseFromString(open(os.path.join(cache_path, 'spiece.model'), "rb").read())
 
     for token in special_tokens[::-1]:
         new_token = sentencepiece_model_pb2.ModelProto().SentencePiece()
@@ -494,7 +495,7 @@ def post_process_and_write(cache_path, special_tokens):
         new_token.score = 0
         m.pieces.append(new_token)
 
-    with open(cache_path, 'wb') as f:
+    with open(os.path.join(cache_path, 'spiece.model'), 'wb') as f:
         f.write(m.SerializeToString())
 
 
@@ -527,11 +528,11 @@ class T5TokenizerTFText:
             tokenizer.save_pretrained(str(cache_path))
             logging.info("Saving {} tokenizer to {}".format(model_name, cache_path))
 
-        # T5 has 100 extra tokens , which changes vocab_size to 32100 from 32000
-        # Apart from that embedding_size is 32128, which is super weird
-        # but we need to account for it
-        special_tokens = tokenizer.special_tokens_map['additional_special_tokens']
-        post_process_and_write(cache_path, special_tokens)
+            # T5 has 100 extra tokens , which changes vocab_size to 32100 from 32000
+            # Apart from that embedding_size is 32128, which is super weird
+            # but we need to account for it
+            special_tokens = tokenizer.special_tokens_map['additional_special_tokens']
+            post_process_and_write(cache_path, special_tokens)
 
         if max_length is None:
             max_length = tokenizer.max_len_single_sentence

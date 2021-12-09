@@ -361,6 +361,7 @@ class TftBenchmark:
                 outputs = decoder_fn(batch_inputs)  # noqa
                 batch_size = batch_inputs['text'].shape[0]
                 slines += batch_size
+                print("Outputs", outputs['predicted_ids'].shape)
             end_time = time.time()
             shutil.rmtree(self.temp_dir)
 
@@ -375,6 +376,7 @@ class TftBenchmark:
             start_time = time.time()
             for (batch_inputs, batch_size) in tqdm.tqdm(batched_datasets, unit="batch "):
                 outputs = decoder_fn(batch_inputs)  # noqa
+                # print("Outputs", outputs['predicted_ids'].shape)
                 slines += batch_size
             end_time = time.time()
             shutil.rmtree(self.temp_dir)
