@@ -156,10 +156,9 @@ class HFBenchmark:
 
         def decoder_fn(model, text_generation_kwargs):
             text_generation_kwargs = dict(text_generation_kwargs)
-            del text_generation_kwargs['max_length']  # we will pass it from inputs
 
-            def _decoder_fn(inputs, max_length):
-                return model.generate(**inputs, max_length=max_length, **text_generation_kwargs)
+            def _decoder_fn(inputs):
+                return model.generate(**inputs, **text_generation_kwargs)
 
             return _decoder_fn
 
@@ -176,10 +175,9 @@ class HFBenchmark:
 
         def decoder_fn(model, text_generation_kwargs):
             text_generation_kwargs = dict(text_generation_kwargs)
-            del text_generation_kwargs['max_length']  # we will pass it from inputs
 
-            def _decoder_fn(inputs, max_length):
-                return model.generate(**inputs, max_length=max_length, **text_generation_kwargs)
+            def _decoder_fn(inputs):
+                return model.generate(**inputs, **text_generation_kwargs)
 
             return _decoder_fn
 
@@ -278,13 +276,14 @@ class HFBenchmark:
         max_length = self.cfg.benchmark.text_generation.max_length
         # Sample batch (to avoid first time compilation time)
         sample_batch_inputs, _, seq_length = batched_datasets[0]
-        outputs = decoder_fn(sample_batch_inputs, seq_length + max_length)
+        outputs = decoder_fn(sample_batch_inputs)
 
         slines = 0
         start_time = time.time()
         for (batch_inputs, batch_size, seq_length) in tqdm.tqdm(batched_datasets, unit="batch "):
             # HF max_length needs seq_length + max_length
-            outputs = decoder_fn(batch_inputs, seq_length + max_length)  # noqa
+            outputs = decoder_fn(batch_inputs)  # noqa
+            # print("Outputs", outputs.shape)
             slines += batch_size
         end_time = time.time()
         shutil.rmtree(self.temp_dir)
