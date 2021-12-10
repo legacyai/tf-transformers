@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Benchmark Albert
+# Benchmark Roberta
 
-- [Code - Albert Benchmark](https://github.com/legacyai/tf-transformers/tree/main/benchmark/albert)
+- [Code - Roberta Benchmark](https://github.com/legacyai/tf-transformers/tree/main/benchmark/roberta)
 
-This is used to benchmark the performance of Albert model on text generation tasks. We evaluate it using 3 frameworks.
+This is used to benchmark the performance of Roberta model on text generation tasks. We evaluate it using 3 frameworks.
 Tensorflow-Transformers (default), HuggingFace PyTorch, HuggingFace Tensorflow and HuggingFace JAX (pending).
 Executing these scripts are fairly straightfoward and expect users to install the necessary libraries before executing
 the benchmark script.
@@ -43,9 +43,7 @@ The default benchmark mode is ```tft```.
     ```python run.py benchmark=tft benchmark.model.type=keras_model```
 
         * a. keras_model    -  Uses tf.keras.Model.
-        * b. saved_model    -  Uses tf.saved_model
-        * c. saved_model_tftext   -  Uses tf.saved_model, ```model + text ``` is serialized together.
-
+        * b. saved_model    -  Uses tf.saved_model .
 
 ## HuggingFace-Tensorflow. (hf-tf)
 
@@ -72,7 +70,6 @@ Text Classification:
 |                            |   batch_size | time (s)      |   samples/second |
 |:---------------------------|-------------:|:-------------:|:-----------|------
 | tft + saved_model          |           32 |  308.35 sec   |               82 |
-| tft + saved_model + tf-text|           32 |  311.16 sec   |               80 |
 | tft + keras_model          |           32 |  313.23 sec   |               80 |
 | hf_tf                      |           32 |  303.42 sec   |               83 |
 | hf_pt                      |           32 |  284.61 sec   |               88 |

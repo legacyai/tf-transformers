@@ -5,7 +5,7 @@ import time
 
 import tqdm
 from datasets import load_dataset
-from transformers import AlbertTokenizerFast
+from transformers import RobertaTokenizerFast
 
 _ALLOWED_DECODER_TYPES = [
     "tf",
@@ -26,7 +26,7 @@ class HFBenchmark:
 
         self.model_name = cfg.benchmark.model.name
 
-        self.tokenizer = AlbertTokenizerFast.from_pretrained(self.model_name)
+        self.tokenizer = RobertaTokenizerFast.from_pretrained(self.model_name)
 
         self.temp_dir = tempfile.mkdtemp()
 

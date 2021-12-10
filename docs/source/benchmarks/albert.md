@@ -43,7 +43,7 @@ The default benchmark mode is ```tft```.
     ```python run.py benchmark=tft benchmark.model.type=keras_model```
 
         * a. keras_model    -  Uses tf.keras.Model.
-        * b. saved_model    -  Uses tf.saved_model
+        * b. saved_model    -  Uses tf.saved_model, ```for``` loop to decode .
         * c. saved_model_tftext   -  Uses tf.saved_model, ```model + text ``` is serialized together.
 
 
@@ -73,7 +73,7 @@ Text Classification:
 |:---------------------------|-------------:|:-------------:|:-----------|------
 | tft + saved_model          |           32 |  308.35 sec   |               82 |
 | tft + saved_model + tf-text|           32 |  311.16 sec   |               80 |
-| tft + keras_model          |           32 |  313.23 sec   |               80 |
+| tft + keras_model + tf-text|           32 |  313.23 sec   |               80 |
 | hf_tf                      |           32 |  303.42 sec   |               83 |
 | hf_pt                      |           32 |  284.61 sec   |               88 |
 | hf_jax (pmap)              |           32 |  N/A          |              N/A |

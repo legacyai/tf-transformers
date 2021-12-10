@@ -6,13 +6,12 @@ import time
 import tensorflow as tf
 import tqdm
 from datasets import load_dataset
-from transformers import AlbertTokenizerFast
+from transformers import RobertaTokenizerFast
 
-from tf_transformers.core import ClassificationChainer
-from tf_transformers.models import AlbertModel as Model
-from tf_transformers.models import AlbertTokenizerTFText, Classification_Model
+from tf_transformers.models import Classification_Model
+from tf_transformers.models import RobertaModel as Model
 
-_ALLOWED_DECODER_TYPES = ["keras_model", "saved_model", "saved_model_tftext"]
+_ALLOWED_DECODER_TYPES = ["keras_model", "saved_model"]
 
 
 class TftBenchmark:
@@ -26,13 +25,8 @@ class TftBenchmark:
             raise ValueError("Unknow model type {} defined".format(self.model_type))
 
         self.model_name = cfg.benchmark.model.name
-        max_length = cfg.benchmark.data.max_length
 
-        self.tokenizer = AlbertTokenizerFast.from_pretrained(self.model_name)
-        self.tokenizer_tftext = AlbertTokenizerTFText.from_pretrained(
-            self.model_name, add_special_tokens=True, max_length=max_length, dynamic_padding=True, truncate=True
-        )
-
+        self.tokenizer = RobertaTokenizerFast.from_pretrained(self.model_name)
         self.temp_dir = tempfile.mkdtemp()
 
     def load_and_batch_dataset(self):
@@ -115,37 +109,6 @@ class TftBenchmark:
 
         return classifier_fn()
 
-    def _load_saved_model_tftext(self):
-        """Load using TextDecoder saved_model"""
-
-        def classifier_fn():
-            model = self.loaded.signatures['serving_default']
-
-            def _classifier_fn(inputs):
-                return model(**inputs)
-
-            return _classifier_fn
-
-        model_name = self.cfg.benchmark.model.name
-
-        tokenizer = self.tokenizer_tftext.get_model()
-        model = Model.from_pretrained(model_name=model_name)
-        model = Classification_Model(model, num_classes=2)
-        model = model.get_model()
-
-        model_fully_serialized = ClassificationChainer(tokenizer, model)
-        model_fully_serialized = model_fully_serialized.get_model()
-
-        # Save as saved_model
-        model_fully_serialized.save_serialized(self.temp_dir, overwrite=True)
-
-        # Load as saved_model
-        del model
-        del model_fully_serialized
-        self.loaded = tf.saved_model.load(self.temp_dir)
-
-        return classifier_fn()
-
     def load_model_classifier_fn(self):
         """Load Model"""
         if self.model_type == "keras_model":
@@ -153,9 +116,6 @@ class TftBenchmark:
 
         if self.model_type == "saved_model":
             classifier_fn = self._load_saved_model()
-
-        if self.model_type == "saved_model_tftext":
-            classifier_fn = self._load_saved_model_tftext()
 
         return classifier_fn
 
@@ -175,48 +135,19 @@ class TftBenchmark:
 
         #### Run classifier function
 
-        # This requires text as tensor slices, not features using AlbertTokenizer
-        # from HuggingFace
-        if self.model_type == 'saved_model_tftext':
+        # Sample batch (to avoid first time compilation time)
+        sample_batch_inputs, _ = batched_datasets[0]
+        outputs = classifier_fn(sample_batch_inputs)
 
-            all_documents = []
-            for item in self.dataset:
-                all_documents.append(item['text'])
+        slines = 0
+        start_time = time.time()
+        for (batch_inputs, batch_size) in tqdm.tqdm(batched_datasets, unit="batch "):
+            outputs = classifier_fn(batch_inputs)  # noqa
+            slines += batch_size
+        end_time = time.time()
+        shutil.rmtree(self.temp_dir)
 
-            text_dataset = tf.data.Dataset.from_tensor_slices({'text': all_documents}).batch(
-                self.cfg.benchmark.data.batch_size, drop_remainder=False
-            )
-            # Sample batch (to avoid first time compilation time)
-            for _batch_inputs in tqdm.tqdm(text_dataset, unit="batch "):
-                break
-            sample_batch_inputs = _batch_inputs
-            outputs = classifier_fn(sample_batch_inputs)  # noqa
-
-            slines = 0
-            start_time = time.time()
-            for batch_inputs in tqdm.tqdm(text_dataset, unit="batch "):
-                outputs = classifier_fn(batch_inputs)  # noqa
-                batch_size = batch_inputs['text'].shape[0]
-                slines += batch_size
-            end_time = time.time()
-            shutil.rmtree(self.temp_dir)
-
-            time_taken = end_time - start_time
-            samples_per_second = slines / time_taken
-        else:
-            # Sample batch (to avoid first time compilation time)
-            sample_batch_inputs, _ = batched_datasets[0]
-            outputs = classifier_fn(sample_batch_inputs)
-
-            slines = 0
-            start_time = time.time()
-            for (batch_inputs, batch_size) in tqdm.tqdm(batched_datasets, unit="batch "):
-                outputs = classifier_fn(batch_inputs)  # noqa
-                slines += batch_size
-            end_time = time.time()
-            shutil.rmtree(self.temp_dir)
-
-            time_taken = end_time - start_time
-            samples_per_second = slines / time_taken
+        time_taken = end_time - start_time
+        samples_per_second = slines / time_taken
 
         return {"model_type": self.model_type, "time_taken": time_taken, "samples_per_second": samples_per_second}

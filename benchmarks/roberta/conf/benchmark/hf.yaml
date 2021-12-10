@@ -1,5 +1,6 @@
 task:
-  name: tft
+  name: hf
+  device: cuda
 
 data:
   name: imdb
@@ -9,4 +10,4 @@ data:
 
 model:
   name: albert-base-v2
-  type: saved_model
+  type: tf
