@@ -3,11 +3,9 @@ task:
   device: cuda
 
 data:
-  name: imdb
   take_sample: false
   batch_size: 32
-  max_length: 512
 
 model:
-  name: roberta-base
+  name: google/vit-base-patch16-224
   type: tf

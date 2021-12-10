@@ -39,10 +39,9 @@ MODEL_TO_HF_URL = {}
 code_example = r'''
 
         >>> from tf_transformers.models import  ViTFeatureExtractorTF
-        >>> from tf_transformers.models import  VitModel
+        >>> from tf_transformers.models import  ViTModel
         >>> image_path_list = # List fo image paths
         >>> model_name = 'google/vit-base-patch16-224'
-        >>> vit_feature_extractor_tf = ViTFeatureExtractorTF(img_height=224, img_width=224)
         >>> feature_extractor = ViTFeatureExtractorTF(img_height=224, img_width=224)
         >>> model = ViTModel.from_pretrained(model_name, classification_labels=1000)
         >>> input_features = feature_extractor({'image': tf.constant(image_path_list)})

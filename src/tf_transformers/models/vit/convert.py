@@ -191,6 +191,6 @@ def convert_vit_pt(model, config, model_name):
     inputs_tf = tf.transpose(inputs_tf, [0, 2, 3, 1])
 
     outputs = model_hf(pixel_values)['last_hidden_state'].detach().numpy()
-    outputs_tf = model({"input_ids": inputs_tf})["token_embeddings"].numpy()
+    outputs_tf = model({"input_pixels": inputs_tf})["token_embeddings"].numpy()
     # Slightly bigger rtol
     tf.debugging.assert_near(tf.reduce_sum(outputs), tf.reduce_sum(outputs_tf), rtol=5.0)
