@@ -85,29 +85,54 @@ class Similarity_Model_Pretraining(LegacyLayer):
                 neighbour_outputs['token_embeddings']
             )
 
-        centre_sentence_embedding = self.linear_projection(centre_outputs['cls_output'])
-        neighbour_sentence_embedding = self.linear_projection(neighbour_outputs['cls_output'])
+        if self.clip_logits:
+            centre_sentence_embedding = self.linear_projection(centre_outputs['cls_output'])
+            neighbour_sentence_embedding = self.linear_projection(neighbour_outputs['cls_output'])
 
-        centre_sentence_embedding_mean = self.linear_projection(
-            self.get_mean_embeddings(centre_outputs['token_embeddings'], centre_inputs['input_mask'])
-        )
-        neighbour_sentence_embedding_mean = self.linear_projection(
-            self.get_mean_embeddings(neighbour_outputs['token_embeddings'], neighbour_inputs['input_mask'])
-        )
+            centre_sentence_embedding_mean = self.linear_projection(
+                self.get_mean_embeddings(centre_outputs['token_embeddings'], centre_inputs['input_mask'])
+            )
+            neighbour_sentence_embedding_mean = self.linear_projection(
+                self.get_mean_embeddings(neighbour_outputs['token_embeddings'], neighbour_inputs['input_mask'])
+            )
 
-        centre_sentence_embedding_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
-            centre_sentence_embedding
-        )
-        neighbour_sentence_embedding_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
-            neighbour_sentence_embedding
-        )
+            centre_sentence_embedding_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
+                centre_sentence_embedding
+            )
+            neighbour_sentence_embedding_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
+                neighbour_sentence_embedding
+            )
 
-        centre_sentence_embedding_mean_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
-            centre_sentence_embedding_mean
-        )
-        neighbour_sentence_embedding_mean_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
-            neighbour_sentence_embedding_mean
-        )
+            centre_sentence_embedding_mean_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
+                centre_sentence_embedding_mean
+            )
+            neighbour_sentence_embedding_mean_normalized = tf.keras.layers.Lambda(
+                lambda x: tf.nn.l2_normalize(x, axis=1)
+            )(neighbour_sentence_embedding_mean)
+        else:
+            centre_sentence_embedding = centre_outputs['cls_output']
+            neighbour_sentence_embedding = neighbour_outputs['cls_output']
+
+            centre_sentence_embedding_mean = self.get_mean_embeddings(
+                centre_outputs['token_embeddings'], centre_inputs['input_mask']
+            )
+            neighbour_sentence_embedding_mean = self.get_mean_embeddings(
+                neighbour_outputs['token_embeddings'], neighbour_inputs['input_mask']
+            )
+
+            centre_sentence_embedding_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
+                centre_sentence_embedding
+            )
+            neighbour_sentence_embedding_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
+                neighbour_sentence_embedding
+            )
+
+            centre_sentence_embedding_mean_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
+                centre_sentence_embedding_mean
+            )
+            neighbour_sentence_embedding_mean_normalized = tf.keras.layers.Lambda(
+                lambda x: tf.nn.l2_normalize(x, axis=1)
+            )(neighbour_sentence_embedding_mean)
 
         if self.clip_logits:
             # Clamp logits to a max of tf.math.log(100) = 4.6051702 as per CLIP model
