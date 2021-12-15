@@ -378,9 +378,7 @@ class TextDecoderSeq2Seq(object):
         i = 0
         eos_found = False
         while (i < max_iterations) and (eos_found is False):
-
             result = self.model_fn(inputs_repeated)
-
             model_logits = result["last_token_logits"] / temperature
             all_cache_key = result["decoder_all_cache_key"]
             all_cache_value = result["decoder_all_cache_value"]
@@ -393,8 +391,11 @@ class TextDecoderSeq2Seq(object):
 
             vocab_size = tf.shape(model_logits)[1]
             logits = tf.reshape(model_logits, (batch_size, beam_size, -1))
+
             # # Convert logits to normalized log probs
             candidate_log_probs = _log_prob_from_logits(logits)
+
+            # candidate_log_probs = tf.nn.log_softmax(logits, axis=-1)
 
             # Calculate new log probabilities if each of the alive sequences were
             # extended # by the the candidate IDs.
@@ -443,6 +444,7 @@ class TextDecoderSeq2Seq(object):
             topk_alive_seq = topk_seq[:, :beam_size, :]
             alive_log_probs = topk_log_probs[:, :beam_size]
             input_ids = tf.reshape(topk_ids[:, :beam_size], [-1, 1])
+
             alive_seq = topk_alive_seq
 
             all_cache_key, all_cache_value = self.reorder_past_batches(

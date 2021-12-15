@@ -384,6 +384,18 @@ class BigBirdRobertaTokenizerLayer(tf.keras.layers.Layer):
         else:
             tokens = self._tokenizer.tokenize(inputs)
             tokens = _reshape(tokens)
+
+            # This should be here
+            if self.pack_model_inputs:
+                tokens_dict = self.bert_pack_inputs(
+                    tokens,
+                    seq_length=self.max_length,
+                    start_of_sequence_id=self.cls_token_id,
+                    end_of_segment_id=self.sep_token_id,
+                    padding_id=self.pad_token_id,
+                )
+                return tokens_dict
+
             # If add special_tokens
             if self.add_special_tokens:
                 if self.truncate:
@@ -414,16 +426,6 @@ class BigBirdRobertaTokenizerLayer(tf.keras.layers.Layer):
                     input_mask=_reshape(input_mask),
                     input_type_ids=_reshape(input_type_ids),
                 )
-
-            if self.pack_model_inputs:
-                tokens_dict = self.bert_pack_inputs(
-                    tokens,
-                    seq_length=self.max_length,
-                    start_of_sequence_id=self.cls_token_id,
-                    end_of_segment_id=self.sep_token_id,
-                    padding_id=self.pad_token_id,
-                )
-                return tokens_dict
             else:
                 return tokens
 

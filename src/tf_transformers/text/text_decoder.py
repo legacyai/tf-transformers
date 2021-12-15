@@ -26,7 +26,8 @@ def TextDecoder(
         # Seq2Seq Model (EncoderDecoder Model)
         if "decoder" in model.model_config:
             # If provided use it directly
-            if decoder_start_token_id:
+            # Sometimes if decoder_start_token_id = 0, if decoder_start_token_id fails.
+            if isinstance(decoder_start_token_id, int):
                 return TextDecoderSeq2Seq(model, decoder_start_token_id, input_mask_ids, input_type_ids)
             if "decoder_start_token_id" in model.model_config['decoder']:
                 decoder_start_token_id = model.model_config['decoder']['decoder_start_token_id']
@@ -46,6 +47,8 @@ def TextDecoder(
             if 'input_ids' in model.signatures['serving_default'].structured_input_signature[1]:
                 return TextDecoderEncoderOnly(model, input_mask_ids, input_type_ids)
             else:
+                if isinstance(decoder_start_token_id, int):
+                    return TextDecoderSeq2Seq(model, decoder_start_token_id, input_mask_ids, input_type_ids)
                 # Seq2Seq (EncoderDecoder Model)
                 # Get it from saved_model config
                 if "decoder_start_token_id" in model.config:

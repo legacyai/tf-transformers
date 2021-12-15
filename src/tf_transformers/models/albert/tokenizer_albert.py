@@ -328,7 +328,7 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
             trimmed_segments, start_of_sequence_id=start_of_sequence_id, end_of_segment_id=end_of_segment_id
         )
         if self.add_special_tokens is False:
-            # Ignore cls token
+            # Ignore cls and sep token
             segments_combined = segments_combined[:, 1:-1]
             segment_ids = segment_ids[:, 1:-1]
         # Pad to dense Tensors.
@@ -382,7 +382,20 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
         else:
             tokens = self._tokenizer.tokenize(inputs)
             tokens = _reshape(tokens)
-            # If add special_tokens
+
+            # This should be here
+            if self.pack_model_inputs:
+                tokens_dict = self.bert_pack_inputs(
+                    tokens,
+                    seq_length=self.max_length,
+                    start_of_sequence_id=self.cls_token_id,
+                    end_of_segment_id=self.sep_token_id,
+                    padding_id=self.pad_token_id,
+                )
+                return tokens_dict
+
+            # If add special_tokens and self.pack_model_inputs = False
+            #  pack_model has truncate happening inside
             if self.add_special_tokens:
                 if self.truncate:
                     tokens = tokens[:, : self.max_length - 2]
@@ -412,16 +425,6 @@ class AlbertTokenizerLayer(tf.keras.layers.Layer):
                     input_mask=_reshape(input_mask),
                     input_type_ids=_reshape(input_type_ids),
                 )
-
-            if self.pack_model_inputs:
-                tokens_dict = self.bert_pack_inputs(
-                    tokens,
-                    seq_length=self.max_length,
-                    start_of_sequence_id=self.cls_token_id,
-                    end_of_segment_id=self.sep_token_id,
-                    padding_id=self.pad_token_id,
-                )
-                return tokens_dict
             else:
                 return tokens
 

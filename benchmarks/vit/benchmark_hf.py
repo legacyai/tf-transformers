@@ -38,6 +38,7 @@ class HFBenchmark:
             raise ValueError("Unknow model type {} defined".format(self.model_type))
 
         self.model_name = cfg.benchmark.model.name
+        self.device = cfg.benchmark.task.device
 
         self.feature_extractor = ViTFeatureExtractor.from_pretrained(self.model_name)
 
@@ -102,11 +103,15 @@ class HFBenchmark:
         slines = 0
         start_time = time.time()
 
-        batch_size = self.cfg.data.batch_size
+        batch_size = self.cfg.benchmark.data.batch_size
         for batch_images in tqdm.tqdm(batchify(self.all_flower_path, batch_size), unit="batch "):
             batch_images = [Image.open(file_) for file_ in batch_images]
             batch_size = len(batch_images)
-            inputs = self.feature_extractor(images=batch_images, return_tensors="pt")
+            if self.model_type == 'pt':
+                inputs_copy = self.feature_extractor(images=batch_images, return_tensors="pt")
+                inputs = {k: v.to(self.device) for k, v in inputs_copy.items()}
+            if self.model_type == 'tf':
+                inputs = self.feature_extractor(images=batch_images, return_tensors="tf")
             outputs = classifier_fn(inputs)  # noqa
             slines += batch_size
         end_time = time.time()

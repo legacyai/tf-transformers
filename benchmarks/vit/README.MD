@@ -44,7 +44,7 @@ The default benchmark mode is ```tft```.
 
         * a. keras_model    -  Uses tf.keras.Model.
         * b. saved_model    -  Uses tf.saved_model
-        * c. saved_model_tfimage   -  Uses tf.saved_model, ```model + tf.io ``` is serialized together.
+        * c. saved_model_tf-io   -  Uses tf.saved_model, ```model + tf.io ``` is serialized together.
 
 
 ## HuggingFace-Tensorflow. (hf-tf)
@@ -71,10 +71,10 @@ The default benchmark mode is ```tft```.
 Text Classification:
 |                            |   batch_size | time (s)      |   samples/second |
 |:---------------------------|-------------:|:-------------:|:-----------|------
-| tft + saved_model          |           32 |  308.35 sec   |               82 |
-| tft + saved_model +tf-image|           32 |  311.16 sec   |               80 |
-| tft + keras_model          |           32 |  313.23 sec   |               80 |
-| hf_tf                      |           32 |  303.42 sec   |               83 |
-| hf_pt                      |           32 |  284.61 sec   |               88 |
-| hf_jax (pmap)              |           32 |  N/A          |              N/A |
+| tft + saved_model          |           32 |  29.06  sec   |              126 |
+| tft + saved_model + tf-io  |           32 |  17.62  sec   |              208 |
+| tft + keras_model          |           32 |  29.48  sec   |              124 |
+| hf_tf                      |           32 |  95.84  sec   |               38 |
+| hf_pt                      |           32 |  24.79  sec   |              148 |
+| tft + keras + hf pipeline  |           32 |  94.44 sec    |               39 |
 ```

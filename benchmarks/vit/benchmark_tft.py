@@ -7,12 +7,19 @@ import time
 
 import tensorflow as tf
 import tqdm
+from transformers import ViTFeatureExtractor
 
 from tf_transformers.core import ClassificationChainer
 from tf_transformers.models import ViTFeatureExtractorTF
 from tf_transformers.models import ViTModel as Model
 
-_ALLOWED_DECODER_TYPES = ["keras_model", "saved_model", "saved_model_tfimage"]
+_ALLOWED_DECODER_TYPES = [
+    "keras_model",
+    "saved_model",
+    "saved_model_tfimage",
+    "keras_model_hf_pipeline",
+    'saved_model_hf_pipeline',
+]
 
 
 class TftBenchmark:
@@ -27,7 +34,8 @@ class TftBenchmark:
 
         self.model_name = cfg.benchmark.model.name
 
-        self.feature_extractor = ViTFeatureExtractorTF.from_pretrained(img_height=224, img_width=224)
+        self.feature_extractor = ViTFeatureExtractorTF(img_height=224, img_width=224)
+        self.feature_extractor_hf = ViTFeatureExtractor.from_pretrained(self.model_name)
 
         dataset_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz"
         self.data_dir = tf.keras.utils.get_file(origin=dataset_url, fname='flower_photos', untar=True)
@@ -110,7 +118,13 @@ class TftBenchmark:
             classifier_fn = self._load_saved_model()
 
         if self.model_type == "saved_model_tfimage":
-            classifier_fn = self._load_saved_model_tftext()
+            classifier_fn = self._load_saved_model_tfimage()
+
+        if self.model_type == "keras_model_hf_pipeline":
+            classifier_fn = self._load_keras_model()
+
+        if self.model_type == "saved_model_hf_pipeline":
+            classifier_fn = self._load_saved_model()
 
         return classifier_fn
 
@@ -119,14 +133,6 @@ class TftBenchmark:
         #### Load Decoder function
         classifier_fn = self.load_model_classifier_fn()
         print("Decoder function loaded succesfully")
-
-        #### Load dataset
-        batched_datasets = self.load_and_batch_dataset()
-        print("Dataset loaded succesfully")
-
-        import gc
-
-        gc.collect()
 
         #### Run classifier function
 
@@ -153,6 +159,32 @@ class TftBenchmark:
 
             time_taken = end_time - start_time
             samples_per_second = slines / time_taken
+
+        elif self.model_type in ['keras_model_hf_pipeline', 'saved_model_hf_pipeline']:
+
+            from PIL import Image
+
+            image_dataset = tf.data.Dataset.from_tensor_slices({'image': self.all_flower_path}).batch(
+                self.cfg.benchmark.data.batch_size, drop_remainder=False
+            )
+
+            slines = 0
+            start_time = time.time()
+            for batch_inputs in tqdm.tqdm(image_dataset, unit="batch "):
+                batch_inputs = batch_inputs['image'].numpy().tolist()
+                batch_images = [Image.open(file_) for file_ in batch_inputs]
+                batch_size = len(batch_images)
+                batch_inputs = self.feature_extractor_hf(images=batch_images, return_tensors="tf")
+                inputs = {}
+                inputs['input_pixels'] = tf.transpose(batch_inputs['pixel_values'], [0, 2, 3, 1])
+                outputs = classifier_fn(inputs)  # noqa
+                slines += batch_size
+            end_time = time.time()
+            shutil.rmtree(self.temp_dir)
+
+            time_taken = end_time - start_time
+            samples_per_second = slines / time_taken
+
         else:
             image_dataset = tf.data.Dataset.from_tensor_slices({'image': self.all_flower_path}).batch(
                 self.cfg.benchmark.data.batch_size, drop_remainder=False
@@ -164,7 +196,7 @@ class TftBenchmark:
 
             slines = 0
             start_time = time.time()
-            for batch_inputs in tqdm.tqdm(batched_datasets, unit="batch "):
+            for batch_inputs in tqdm.tqdm(image_dataset, unit="batch "):
                 batch_size = batch_inputs['image'].shape[0]
                 batch_inputs = self.feature_extractor(batch_inputs)
                 outputs = classifier_fn(batch_inputs)  # noqa

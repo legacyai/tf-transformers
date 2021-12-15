@@ -18,8 +18,8 @@
 # limitations under the License.
 # ==============================================================================
 """T5 Tokenizer based on TFText"""
-import tempfile
 import os
+import tempfile
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -382,6 +382,18 @@ class T5TokenizerLayer(tf.keras.layers.Layer):
         else:
             tokens = self._tokenizer.tokenize(inputs)
             tokens = _reshape(tokens)
+
+            # This should be here
+            if self.pack_model_inputs:
+                tokens_dict = self.bert_pack_inputs(
+                    tokens,
+                    seq_length=self.max_length,
+                    start_of_sequence_id=self.cls_token_id,
+                    end_of_segment_id=self.sep_token_id,
+                    padding_id=self.pad_token_id,
+                )
+                return tokens_dict
+
             # If add special_tokens
             if self.add_special_tokens:
                 if self.truncate:
@@ -408,16 +420,6 @@ class T5TokenizerLayer(tf.keras.layers.Layer):
 
                 # Assemble nest of input tensors as expected by BERT TransformerEncoder.
                 return dict(encoder_input_ids=_reshape(input_word_ids), encoder_input_mask=_reshape(input_mask))
-
-            if self.pack_model_inputs:
-                tokens_dict = self.bert_pack_inputs(
-                    tokens,
-                    seq_length=self.max_length,
-                    start_of_sequence_id=self.cls_token_id,
-                    end_of_segment_id=self.sep_token_id,
-                    padding_id=self.pad_token_id,
-                )
-                return tokens_dict
             else:
                 return tokens
 
