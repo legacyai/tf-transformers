@@ -45,22 +45,29 @@ def get_optimizer(
     return optimizer_fn
 
 
-def get_model(clip_logits, use_random_base):
+def get_model(clip_logits, use_random_base, siamese):
 
     if use_random_base is False:
 
         def model_fn():
             encoder = AlbertModel.from_pretrained("albert-base-v2")
-            decoder_config = AlbertModel.get_config("albert-base-v2")
-            # decoder_config['num_hidden_layers']= 6
-            decoder = AlbertModel.from_config(decoder_config)
-            encoder.save_checkpoint("/tmp/albert/", overwrite=True)
-            decoder.load_checkpoint("/tmp/albert")
 
-            model = Similarity_Model_Pretraining(
-                encoder=encoder, projection_dimension=768, decoder=decoder, clip_logits=clip_logits, siamese=False
-            )
-            model = model.get_model()
+            if siamese is False:
+                decoder_config = AlbertModel.get_config("albert-base-v2")
+                # decoder_config['num_hidden_layers']= 6
+                decoder = AlbertModel.from_config(decoder_config)
+                encoder.save_checkpoint("/tmp/albert/", overwrite=True)
+                decoder.load_checkpoint("/tmp/albert")
+
+                model = Similarity_Model_Pretraining(
+                    encoder=encoder, projection_dimension=768, decoder=decoder, clip_logits=clip_logits, siamese=False
+                )
+                model = model.get_model()
+            else:
+                model = Similarity_Model_Pretraining(
+                    encoder=encoder, projection_dimension=768, clip_logits=clip_logits, siamese=True
+                )
+                model = model.get_model()
 
             return model
 
@@ -71,11 +78,19 @@ def get_model(clip_logits, use_random_base):
         def model_fn():
             config = AlbertModel.get_config("albert-base-v2")
             encoder = AlbertModel.from_config(config)
-            decoder = AlbertModel.from_config(config)
-            model = Similarity_Model_Pretraining(
-                encoder=encoder, projection_dimension=768, decoder=decoder, clip_logits=clip_logits, siamese=False
-            )
-            model = model.get_model()
+            if siamese is False:
+
+                decoder = AlbertModel.from_config(config)
+                model = Similarity_Model_Pretraining(
+                    encoder=encoder, projection_dimension=768, decoder=decoder, clip_logits=clip_logits, siamese=False
+                )
+                model = model.get_model()
+
+            else:
+                model = Similarity_Model_Pretraining(
+                    encoder=encoder, projection_dimension=768, clip_logits=clip_logits, siamese=True
+                )
+                model = model.get_model()
 
             return model
 

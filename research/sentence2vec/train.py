@@ -27,6 +27,7 @@ optimizer_fn = get_optimizer(learning_rate, num_train_steps, num_warmup_steps, d
 
 clip_logits = True
 use_random_base = False
+siamese = True
 
 model_checkpoint_dir = 'gs://legacyai-bucket/sentence2vec_1'
 
@@ -51,7 +52,7 @@ tokenizer_layer = AlbertTokenizerTFText.from_pretrained("albert-base-v2", add_sp
 train_dataset = get_dataset(
     delim_regex_pattern, minimum_sentences, window_length, tokenizer_layer, max_seq_length, batch_size
 )
-model_fn = get_model(clip_logits, use_random_base)
+model_fn = get_model(clip_logits, use_random_base, siamese)
 
 
 # Train
