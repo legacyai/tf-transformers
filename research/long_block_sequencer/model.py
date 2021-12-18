@@ -1,29 +1,22 @@
 from long_block_encoder import Long_Block_Encoder
-from transformers import BartTokenizerFast, T5TokenizerFast
+from transformers import T5Tokenizer
 
 from tf_transformers.core import Trainer
 from tf_transformers.losses.loss_wrapper import get_lm_loss
-from tf_transformers.models import BartModel, EncoderDecoder, T5Model
+from tf_transformers.models import EncoderDecoder, T5Model, T5TokenizerTFText
 from tf_transformers.optimization import create_optimizer
 
 
 def get_model(model_name, num_splits, use_gru_layer, projection_dimension, return_all_layer_outputs):
     def model_fn():
-        if model_name.startswith('bart') or model_name.startswith('facebook/bart'):
-            model = BartModel.from_pretrained(
-                model_name, return_layer=True, decoder_kwargs={'return_all_layer_outputs': return_all_layer_outputs}
-            )
-        elif model_name.startswith('t5'):
-            model = T5Model.from_pretrained(
-                model_name, return_layer=True, decoder_kwargs={'return_all_layer_outputs': return_all_layer_outputs}
-            )
-        else:
-            raise ValueError("Unsupported model name {}".format(model_name))
-
+        model = T5Model.from_pretrained(
+            model_name, return_layer=True, decoder_kwargs={'return_all_layer_outputs': return_all_layer_outputs}
+        )
         # Get encoder and decoder
         encoder = model._encoder
         decoder = model._decoder
-        del model
+        del model  # Free memory
+
         if use_gru_layer:
             long_model = Long_Block_Encoder(
                 encoder, num_splits=num_splits, use_gru_layer=use_gru_layer, gru_units=projection_dimension
@@ -43,17 +36,11 @@ def get_model(model_name, num_splits, use_gru_layer, projection_dimension, retur
 
 def get_model_inference(model_name, num_splits, use_gru_layer, projection_dimension):
 
-    if model_name.startswith('bart') or model_name.startswith('facebook/bart'):
-        model = BartModel.from_pretrained(model_name, return_layer=True, decoder_kwargs={'use_auto_regressive': True})
-    elif model_name.startswith('t5'):
-        model = T5Model.from_pretrained(model_name, return_layer=True, decoder_kwargs={'use_auto_regressive': True})
-    else:
-        raise ValueError("Unsupported model name {}".format(model_name))
-
+    model = T5Model.from_pretrained(model_name, return_layer=True, use_auto_regressive=True)
     # Get encoder and decoder
     encoder = model._encoder
     decoder = model._decoder
-    del model
+    del model  # Free memory
     if use_gru_layer:
         long_model = Long_Block_Encoder(
             encoder, num_splits=num_splits, use_gru_layer=use_gru_layer, gru_units=projection_dimension
@@ -69,15 +56,14 @@ def get_model_inference(model_name, num_splits, use_gru_layer, projection_dimens
     return model_encoder
 
 
-def get_tokenizer(model_name):
-    if model_name.startswith('bart') or model_name.startswith('facebook/bart'):
-        tokenizer = BartTokenizerFast.from_pretrained(model_name)
-    elif model_name.startswith('t5'):
-        tokenizer = T5TokenizerFast.from_pretrained(model_name)
-    else:
-        raise ValueError("Unsupported model name {}".format(model_name))
+def get_tokenizer(model_name, encoder_seq_length):
+    tokenizer = T5TokenizerTFText.from_pretrained(
+        model_name, max_length=encoder_seq_length, add_special_tokens=True, truncate=True
+    )
 
-    return tokenizer
+    hf_tokenizer = T5Tokenizer.from_pretrained(model_name)
+
+    return tokenizer, hf_tokenizer
 
 
 def get_optimizer(learning_rate, examples, batch_size, epochs, use_constant_lr=False):

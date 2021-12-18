@@ -1,28 +1,26 @@
 data:
     data_directory:
-    train_batch_size: 32
+    train_batch_size: 16
 task:
   max_seq_len: 4096
   decoder_seq_len: 256
-  num_splits:
-  use_gru_layer:
-  projection_dimension:
+  num_splits: 8
+  use_gru_layer: false
+  projection_dimension: 512
 
 trainer:
-  dtype: bf16
-  num_gpus: 0
+  dtype: fp16
+  num_gpus: 2
   tpu_address:
-  epochs: 20
+  epochs: 3
   strategy: mirrored
-  steps_per_epoch: 50000
   model_checkpoint_dir:
-  callback_steps: 10000
 optimizer:
-  learning_rate: 1e-4
+  learning_rate: 0.001
   loss_type:
-  use_constant_lr: false
+  use_constant_lr: true
 model:
   is_training: true
   use_dropout: true
   num_layers: 12
-  model_name:
+  model_name: 't5-small'

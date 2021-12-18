@@ -397,7 +397,7 @@ class T5TokenizerLayer(tf.keras.layers.Layer):
             # If add special_tokens
             if self.add_special_tokens:
                 if self.truncate:
-                    tokens = tokens[:, : self.max_length - 2]
+                    tokens = tokens[:, : self.max_length - 1]
                 tokens = self._add_special_tokens(tokens)
             else:
                 if self.truncate:

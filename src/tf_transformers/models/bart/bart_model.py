@@ -57,6 +57,24 @@ code_example = r'''
 
 '''
 
+code_example_summarize = r'''
+        >>> import tensorflow as tf
+        >>> from tf_transformers.models import BartModel
+        >>> from tf_transformers.text import TextDecoder
+        >>> model = BartModel.from_pretrained('facebook/bart-large-cnn') # Convert
+        >>> model = BartModel.from_pretrained('facebook/bart-large-cnn', use_auto_regressive=True)
+        >>> decoder = TextDecoder(model)
+        >>> text = 'Text to summarize'
+        >>> inputs = tokenizer([text],
+                        max_length=1024,
+                        return_tensors='tf',
+                        padding=True, add_special_tokens=True)
+        >>> outputs = decoder.decode(inputs_tf, mode='beam', num_beams=4, max_iterations=96, do_sample=False, eos_id=2)
+        >>> outputs = outputs['predicted_ids'][:, 0, :] # Select best
+        >>> summaries = tokenizer.batch_decode(outputs.numpy())
+
+'''
+
 
 class BartModel(ModelWrapper):
     """Bart Encoder Wrapper"""

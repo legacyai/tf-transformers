@@ -672,7 +672,6 @@ class BartEncoder(LegacyLayer):
             all_cache_value[i] = cache_value
 
             decoder_outputs.append(embeddings)
-            print("Layer ", i, embeddings.shape, tf.reduce_sum(embeddings, axis=[0, 2]))
 
         # Stack all layers key and value together
         # num_layers x batch_size x num_heads x sequence_length x (hidden_dimension/num_heads)
