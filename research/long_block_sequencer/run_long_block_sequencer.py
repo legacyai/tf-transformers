@@ -16,7 +16,6 @@
 # ==============================================================================
 """This is the main script to run Long Block Sequencer Model"""
 import os
-import warnings
 
 import hydra
 from absl import logging
@@ -29,10 +28,7 @@ logging.set_verbosity("INFO")
 WANDB_PROJECT = os.getenv('WANDB_PROJECT', None)
 use_wandb = True
 if WANDB_PROJECT is None:
-    warnings.warn(
-        "For wandb-project should not be None.\
-        Set export WANDB_PROJECT=<project_name>"
-    )
+    logging.info("Not using wandb as no `WANDB_PROJECT` has been set via export ")
     use_wandb = False
 
 

@@ -1,5 +1,4 @@
 from long_block_encoder import Long_Block_Encoder
-from transformers import T5Tokenizer
 
 from tf_transformers.core import Trainer
 from tf_transformers.losses.loss_wrapper import get_lm_loss
@@ -61,26 +60,55 @@ def get_tokenizer(model_name, encoder_seq_length):
         model_name, max_length=encoder_seq_length, add_special_tokens=True, truncate=True
     )
 
-    hf_tokenizer = T5Tokenizer.from_pretrained(model_name)
-
-    return tokenizer, hf_tokenizer
+    return tokenizer
 
 
-def get_optimizer(learning_rate, examples, batch_size, epochs, use_constant_lr=False):
-    """Get AdamW optimizer"""
+def get_optimizer(
+    learning_rate,
+    steps_per_epoch,
+    epochs,
+    num_warmup_steps,
+    decay_function='polynomial',
+    weight_decay_rate=0.1,
+    optimizer_type='adamw',
+    use_constant_lr=False,
+):
+    """Get optimizer"""
 
-    steps_per_epoch = int(examples / batch_size)
+    # Total train steps is steps_per_epoch * epochs
     num_train_steps = steps_per_epoch * epochs
-    warmup_steps = int(0.1 * num_train_steps)
+
+    # Assuming warmup_steps is a ratio (float)
+    if isinstance(num_warmup_steps, float):
+        if num_warmup_steps < 1.0:
+            num_warmup_steps = int(num_warmup_steps * num_train_steps)
+        else:
+            raise ValueError(
+                "Provide num_warmup_steps is a float with value {}. Assuming\
+                its a ratio , the value should be less than 1.0".format(
+                    num_train_steps
+                )
+            )
+    else:
+        if isinstance(num_warmup_steps, int):
+            pass
+        else:
+            raise TypeError("Unspported type {} for num_warmup_steps".format(type(num_warmup_steps)))
+
+    # As in GPT2 paper, end_learning_rate = 0.1 * learning_rate
+    end_learning_rate = 0.1 * learning_rate
 
     def optimizer_fn():
-        if use_constant_lr:
-            from tf_transformers.optimization.adam_weighted import AdamWeightDecay
-
-            optimizer = AdamWeightDecay(learning_rate=learning_rate)
-            return optimizer
-
-        optimizer, learning_rate_fn = create_optimizer(learning_rate, num_train_steps, warmup_steps)
+        optimizer, learning_rate_fn = create_optimizer(
+            init_lr=learning_rate,
+            num_train_steps=num_train_steps,
+            num_warmup_steps=num_warmup_steps,
+            decay_function=decay_function,
+            weight_decay_rate=weight_decay_rate,
+            end_learning_rate=end_learning_rate,
+            optimizer_type=optimizer_type,
+            use_constant_lr=use_constant_lr,
+        )
         return optimizer
 
     return optimizer_fn

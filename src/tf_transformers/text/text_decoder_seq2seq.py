@@ -279,7 +279,7 @@ class TextDecoderSeq2Seq(object):
         matched_positions = tf.cast(matched_positions, tf.int32) + eos_pos_mask
 
         all_predictions = tf.expand_dims(tf.concat(all_predictions, axis=1), 1)
-        all_prediction_probs = tf.transpose(all_prediction_probs)
+        all_prediction_probs = tf.cast(tf.transpose(all_prediction_probs), tf.int32)
         return {
             "iterations": i + 1,  # scalar
             "input_ids": input_ids_original,  # 2D batch_size x seq_length

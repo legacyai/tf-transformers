@@ -321,6 +321,7 @@ Flax), PyTorch, and/or TensorFlow.
     :caption: Research
 
     research/glue
+    research/long_block_sequencer
 
 .. toctree::
     :maxdepth: 2
@@ -328,3 +329,5 @@ Flax), PyTorch, and/or TensorFlow.
 
     benchmarks/gpt2
     benchmarks/t5
+    benchmarks/albert
+    benchmarks/vit
