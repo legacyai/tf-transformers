@@ -19,7 +19,7 @@ All or most configurations can be managed using ```conf/config.yaml```. You can 
 
 Eg: For TPU , we need a data in GCS and model_checkpoint_dir to be in GCS too.
 
-``` python3 run_t5_modified.py \
+``` nohup python3 run_t5_modified.py \
     task.data_directory=gs://legacyai-bucket \
     task.train_batch_size=128 \
     trainer.dtype=bf16 \
@@ -28,8 +28,8 @@ Eg: For TPU , we need a data in GCS and model_checkpoint_dir to be in GCS too.
     trainer.epochs=100 \
     trainer.strategy=tpu \
     trainer.tpu_address=legacyai-tpu-1 \
-    optimizer.learning_rate=0.01
-    model.is_training=true
-    model.use_dropout=true
-    model.model_name=t5-small
+    optimizer.learning_rate=0.01 \
+    model.is_training=true \
+    model.use_dropout=true \
+    model.model_name=t5-small > logs &
     ```

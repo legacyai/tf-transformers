@@ -219,7 +219,9 @@ class EncoderDecoderwithMLM(LegacyLayer):
         encoder_cls = tf.gather_nd(encoder_hidden_states, encoder_cls_positions)
 
         encoder_cls = self.linear_projection(self._pooler_layer(encoder_cls))
-        encoder_logits = tf.matmul(encoder_embeddings_mlm, self._encoder.get_embedding_table(), transpose_b=True)
+        encoder_logits = tf.matmul(
+            encoder_embeddings_mlm, tf.cast(self._encoder.get_embedding_table(), tf_utils.get_dtype()), transpose_b=True
+        )
 
         # This is decoder_encoder_mask
         decoder_encoder_mask = CrossAttentionMask()([decoder_inputs["input_ids"], encoder_inputs["input_mask"]])
@@ -236,7 +238,10 @@ class EncoderDecoderwithMLM(LegacyLayer):
         decoder_cls = tf.gather_nd(decoder_outputs['token_embeddings'], decoder_cls_positions)
         decoder_cls = self.linear_projection(self._pooler_layer(decoder_cls))
 
-        logits = tf.matmul(encoder_cls, decoder_cls, transpose_b=True)
+        encoder_cls_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(encoder_cls)
+        decoder_cls_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(decoder_cls)
+
+        logits = tf.matmul(encoder_cls_normalized, decoder_cls_normalized, transpose_b=True)
 
         # Based on CLIP
         logits_scale = tf.math.exp(self.logits_scale)

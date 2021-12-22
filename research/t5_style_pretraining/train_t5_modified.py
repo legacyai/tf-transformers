@@ -32,7 +32,7 @@ def run_train(cfg, wandb):
 
     # Get model configs
     is_training = cfg.model.is_training
-    model_name = cfg.model_name
+    model_name = cfg.model.model_name
     use_dropout = cfg.model.use_dropout
 
     # Get task specific configs
@@ -50,7 +50,8 @@ def run_train(cfg, wandb):
     train_dataset = get_dataset(data_directory, tokenizer_layer, max_seq_len, train_batch_size)
 
     # Get loss type
-    training_loss_names = ['logits_loss', 'mlm_loss', 'lm_loss', 'loss']
+    # training_loss_names = ['logits_loss', 'mlm_loss', 'lm_loss', 'loss']
+    training_loss_names = ['lm_loss']
 
     # Get model fn
     model_fn = get_model(model_name, vocab_size, is_training, use_dropout)

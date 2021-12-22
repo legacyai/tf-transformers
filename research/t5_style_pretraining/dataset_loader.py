@@ -49,7 +49,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
 
     def mask_and_prepare_inputs(item):
 
-        input_ids = item['input_ids'].merge_dims(1, 2)
+        input_ids = item['input_ids']
         # Apply dynamic masking, with expand_dims on the input batch
         # If expand_dims is not there, whole word masking fails
         masked_token_ids, masked_pos, masked_lm_ids = tf_text.mask_language_model(
@@ -65,8 +65,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
         input_original_ids, _ = tf_text.pad_model_inputs(input_ids, max_seq_length=encoder_seq_length)
 
         # Decoder inputs
-        decoder_start_ids = tf.ones((batch_size, 1), dtype=tf.int32) * decoder_start_token_id
-        decoder_input_ids = tf.concat([decoder_start_ids, input_original_ids], axis=1)
+        decoder_input_ids = tf.concat([[[decoder_start_token_id]], input_original_ids], axis=1)
 
         labels = decoder_input_ids[:, 1:]  # Shift 1 position right
         # Make non pad_token_id positions 1 and pad_token_id pos 0
@@ -82,17 +81,17 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
         masked_lm_ids, _ = tf_text.pad_model_inputs(masked_lm_ids, max_seq_length=max_predictions_per_seq)
 
         inputs = {}
-        inputs['encoder_input_ids'] = input_word_ids
-        inputs['encoder_input_mask'] = input_mask
-        inputs['decoder_input_ids'] = decoder_input_ids
+        inputs['encoder_input_ids'] = tf.squeeze(input_word_ids, axis=0)
+        inputs['encoder_input_mask'] = tf.squeeze(input_mask, axis=0)
+        inputs['decoder_input_ids'] = tf.squeeze(decoder_input_ids, axis=0)
 
-        inputs['masked_lm_positions'] = masked_lm_positions
+        inputs['masked_lm_positions'] = tf.squeeze(masked_lm_positions, axis=0)
 
         outputs = {}
-        outputs['labels'] = labels
-        outputs['labels_mask'] = labels_mask
-        outputs['masked_lm_labels'] = masked_lm_ids
-        outputs['masked_lm_weights'] = masked_lm_weights
+        outputs['labels'] = tf.squeeze(labels, axis=0)
+        outputs['labels_mask'] = tf.squeeze(labels_mask, axis=0)
+        outputs['masked_lm_labels'] = tf.squeeze(masked_lm_ids, axis=0)
+        outputs['masked_lm_weights'] = tf.squeeze(masked_lm_weights, axis=0)
 
         return inputs, outputs
 
@@ -126,6 +125,6 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
 
     ds = dataset.batch(local_batch)
     ds = ds.map(text_to_features_batch, num_parallel_calls=tf.data.AUTOTUNE)
-    ds = ds.batch(batch_size)
     ds = ds.map(mask_and_prepare_inputs, num_parallel_calls=tf.data.AUTOTUNE)
+    ds = ds.batch(batch_size)
     return ds
