@@ -97,7 +97,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
 
     dataset = read_dataset(data_directory)
 
-    local_batch = 7  # This is used to pack maximum input tokens per sentences/example
+    local_batch = 10  # This is used to pack maximum input tokens per sentences/example
     encoder_seq_length = max_seq_len
 
     eos_id = tokenizer_layer.eos_token_id
