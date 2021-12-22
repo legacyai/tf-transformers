@@ -50,7 +50,7 @@ def run_train(cfg, wandb):
     train_dataset = get_dataset(data_directory, tokenizer_layer, max_seq_len, train_batch_size)
 
     # Get loss type
-    training_loss_names = ['logits_loss', 'mlm_loss', 'lm_loss', 'loss']
+    training_loss_names = ['logits_loss', 'mlm_loss', 'lm_loss']
 
     # Get model fn
     model_fn = get_model(model_name, vocab_size, is_training, use_dropout)

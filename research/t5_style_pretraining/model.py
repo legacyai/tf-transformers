@@ -117,26 +117,29 @@ def get_loss(loss_type):
 
     def loss_fn_combined(batch_labels, model_outputs):
 
-        # cast logits loss to float32 for stability
-        encoder_logits_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
-            labels=tf.range(tf.shape(model_outputs['logits'])[0]), logits=tf.cast(model_outputs['logits'], tf.float32)
-        )
+        # # cast logits loss to float32 for stability
+        # encoder_logits_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
+        #     labels=tf.range(tf.shape(model_outputs['logits'])[0]), logits=tf.cast(model_outputs['logits'], tf.float32)
+        # )
 
-        # take transpose of logits
-        decoder_logits_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
-            labels=tf.range(tf.shape(model_outputs['logits'])[0]),
-            logits=tf.cast(tf.transpose(model_outputs['logits']), tf.float32),
-        )
+        # # take transpose of logits
+        # decoder_logits_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
+        #     labels=tf.range(tf.shape(model_outputs['logits'])[0]),
+        #     logits=tf.cast(tf.transpose(model_outputs['logits']), tf.float32),
+        # )
 
-        logits_loss = (encoder_logits_loss + decoder_logits_loss) / 2.0
+        # logits_loss = (encoder_logits_loss + decoder_logits_loss) / 2.0
+        print("Encoder token logits", model_outputs['encoder_token_logits'].shape)
         mlm_loss = mlm_loss_fn(batch_labels, {'token_logits': model_outputs['encoder_token_logits']})
         lm_loss = lm_loss_fn(batch_labels, model_outputs)
 
         loss_results = {}
-        loss_results['logits_loss'] = logits_loss
+        # loss_results['logits_loss'] = logits_loss
         loss_results['mlm_loss'] = mlm_loss['loss']
         loss_results['lm_loss'] = lm_loss['loss']
-        loss_results['loss'] = (loss_results['logits_loss'] + loss_results['mlm_loss'] + loss_results['lm_loss']) / 3.0
+        # loss_results['loss'] = (loss_results['logits_loss'] + loss_results['mlm_loss'] + loss_results['lm_loss']) / 3.0
+        loss_results['loss'] = (loss_results['mlm_loss'] + loss_results['lm_loss']) / 2.0
+
         return loss_results
 
     return loss_fn_combined
