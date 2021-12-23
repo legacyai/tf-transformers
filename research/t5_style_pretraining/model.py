@@ -24,7 +24,7 @@ def get_model(model_name, vocab_size, is_training, use_dropout):
         encoder = T5Encoder(config=encoder_config, is_training=is_training, use_dropout=use_dropout)
         decoder = T5Encoder(
             config=decoder_config,
-            use_decoder=use_dropout,
+            use_decoder=True,
             mask_mode="causal",
             is_training=is_training,
             use_dropout=use_dropout,
@@ -116,14 +116,11 @@ def get_loss(loss_type):
     mlm_loss_fn = get_lm_loss()
 
     def loss_fn_combined(batch_labels, model_outputs):
-        
-        print("Logits", model_outputs['logits'].shape)
+
         # cast logits loss to float32 for stability
         encoder_logits_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
             labels=tf.range(tf.shape(model_outputs['logits'])[0]), logits=tf.cast(model_outputs['logits'], tf.float32)
         )
-        print("Encoder Logits", encoder_logits_loss.shape)
-        print()
 
         # take transpose of logits
         decoder_logits_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
@@ -139,13 +136,12 @@ def get_loss(loss_type):
         loss_results['logits_loss'] = logits_loss
         loss_results['mlm_loss'] = mlm_loss['loss']
         loss_results['lm_loss'] = lm_loss['loss']
-        
+
         loss_results['loss'] = (loss_results['logits_loss'] + loss_results['mlm_loss'] + loss_results['lm_loss']) / 3.0
 
         return loss_results
 
     return loss_fn_combined
-
 
 
 def get_trainer(distribution_strategy, dtype, num_gpus=0, tpu_address=None):

@@ -34,26 +34,35 @@ def read_dataset(data_directory):
 
 
 def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
-    def text_to_features_batch(item):
-        """Convert text to features by packing maximum contiguos sequences to ids"""
-        # Squeeze item
-        item = {'text': tf.squeeze(item['text'], axis=1)}
-        # Encode
-        input_ids = tokenizer_layer(item)
-        # Ragged to tensor
-        input_ids = input_ids.merge_dims(-2, 1)
-        # Add cls_token_id and eos_id to the end
-        input_ids = tf.concat([input_ids[: encoder_seq_length - 2], [cls_token_id], [eos_id]], axis=0)
-        input_ids = tf.RaggedTensor.from_tensor(tf.expand_dims(input_ids, axis=0))
-        return {'input_ids': input_ids}
-
     def mask_and_prepare_inputs(item):
 
-        input_ids = item['input_ids']
+        # text = tf.strings.join(tf.concat(tf.squeeze(item['text'], axis=1), axis=0))
+        text = tf.strings.reduce_join([tf.squeeze(item['text'], axis=1)])
+        # Encode
+        inputs = {'text': tf.strings.split(text, delimiter)}
+        segments = tokenizer_layer(inputs)
+
+        # Find the index which is equal to or greater (next greater) max_seq_len
+        max_seq_index = tf.where(segments.row_splits >= encoder_seq_length - 3)[0][
+            0
+        ]  # -3 to accomodate CLS_ENC, CLS_DEC, EOS
+        # Trim based on max_seq_len, As its a ragged tensor, we find max_seq_index
+        segments = segments[:max_seq_index]
+
+        if tf.not_equal(tf.shape(segments.merge_dims(-2, 1))[0], encoder_seq_length - 3):
+            difference = tf.shape(segments.merge_dims(-2, 1))[0] - (encoder_seq_length - 3)
+            difference = tf.cast(difference, tf.int64)
+            row_splits = segments.row_splits
+            row_splits = tf.concat([row_splits[:-1], [row_splits[-1] - difference]], axis=0)
+            segments = tf.concat([segments[:-1], [segments[-1][:-difference]]], axis=0)
+
+        # Add 3 special tokens
+        segments = tf.concat([[[cls_enc_token_id]], segments, [[cls_dec_token_id]], [[eos_token_id]]], axis=0)
+
         # Apply dynamic masking, with expand_dims on the input batch
         # If expand_dims is not there, whole word masking fails
         masked_token_ids, masked_pos, masked_lm_ids = tf_text.mask_language_model(
-            input_ids,
+            tf.expand_dims(segments, axis=0),  # super important
             item_selector=random_selector,
             mask_values_chooser=mask_values_chooser,
         )
@@ -62,6 +71,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
         input_word_ids, input_mask = tf_text.pad_model_inputs(masked_token_ids, max_seq_length=encoder_seq_length)
 
         # Original unmasked ids
+        input_ids = tf.RaggedTensor.from_tensor(tf.expand_dims(segments.merge_dims(-2, 1), 0))
         input_original_ids, _ = tf_text.pad_model_inputs(input_ids, max_seq_length=encoder_seq_length)
 
         # Decoder inputs
@@ -100,9 +110,10 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
     local_batch = 10  # This is used to pack maximum input tokens per sentences/example
     encoder_seq_length = max_seq_len
 
-    eos_id = tokenizer_layer.eos_token_id
-    cls_token_id = tokenizer_layer.cls_token_id
+    cls_enc_token_id = tokenizer_layer.cls_enc_token_id
+    cls_dec_token_id = tokenizer_layer.cls_dec_token_id
     decoder_start_token_id = tokenizer_layer.pad_token_id
+    delimiter = ' '
 
     # Random Selector (10 per)
 
@@ -115,7 +126,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
     random_selector = tf_text.RandomItemSelector(
         max_selections_per_batch=max_predictions_per_seq,
         selection_rate=selection_rate,
-        unselectable_ids=[unk_token_id, eos_token_id, pad_token_id, cls_token_id],
+        unselectable_ids=[unk_token_id, eos_token_id, pad_token_id, cls_enc_token_id, cls_dec_token_id],
     )
 
     # Mask Value chooser (Encapsulates the BERT MLM token selection logic)
@@ -124,7 +135,6 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
     mask_values_chooser = tf_text.MaskValuesChooser(vocab_size, mask_token_id, 0.8)
 
     ds = dataset.batch(local_batch)
-    ds = ds.map(text_to_features_batch, num_parallel_calls=tf.data.AUTOTUNE)
     ds = ds.map(mask_and_prepare_inputs, num_parallel_calls=tf.data.AUTOTUNE)
     ds = ds.batch(batch_size)
     return ds

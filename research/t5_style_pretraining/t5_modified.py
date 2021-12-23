@@ -217,9 +217,9 @@ class EncoderDecoderwithMLM(LegacyLayer):
         # Sometimes if we pad a sequence, last poistions might not represent CLS, so this is better
         # encoder_cls_positions = tf.where(tf.equal(inputs['encoder_input_ids'], self.cls_token_id))
         # encoder_cls = tf.gather_nd(encoder_hidden_states, encoder_cls_positions)
-        
-        # -2 is for CLS token position
-        encoder_cls = encoder_hidden_states[:, -2, :]
+
+        # 0 is for CLS_ENC position
+        encoder_cls = encoder_hidden_states[:, 0, :]
 
         encoder_cls = self.linear_projection(self._pooler_layer(encoder_cls))
         encoder_logits = tf.matmul(
@@ -240,9 +240,9 @@ class EncoderDecoderwithMLM(LegacyLayer):
         # decoder_cls_positions = tf.where(tf.equal(inputs['decoder_input_ids'], self.cls_token_id))
         # decoder_cls = tf.gather_nd(decoder_outputs['token_embeddings'], decoder_cls_positions)
         # decoder_cls = self.linear_projection(self._pooler_layer(decoder_cls))
-        
-        # -2 is for CLS token position
-        decoder_cls = decoder_outputs['token_embeddings'][:, -2, :]
+
+        # -1 is CLS_DEC last token position
+        decoder_cls = decoder_outputs['token_embeddings'][:, -1, :]
 
         encoder_cls_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(encoder_cls)
         decoder_cls_normalized = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(decoder_cls)

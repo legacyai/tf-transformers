@@ -82,7 +82,8 @@ class T5TokenizerLayer(tf.keras.layers.Layer):
         nbest_size: int = 0,
         alpha: float = 1.0,
         strip_diacritics=False,
-        cls_token_id=None,
+        cls_enc_token_id=None,
+        cls_dec_token_id=None,
         sep_token_id=None,
         bos_token_id=None,
         eos_token_id=None,
@@ -174,7 +175,8 @@ class T5TokenizerLayer(tf.keras.layers.Layer):
         self._tokenizer = self._create_tokenizer()
 
         # Tokenizer specifics
-        self.cls_token_id = cls_token_id
+        self.cls_enc_token_id = cls_enc_token_id
+        self.cls_dec_token_id = cls_dec_token_id
         self.sep_token_id = sep_token_id
         self.bos_token_id = bos_token_id
         self.eos_token_id = eos_token_id
@@ -522,7 +524,7 @@ class T5CustomTokenizerTFText:
             logging.info("Saving {} tokenizer to {}".format(model_name, cache_path))
 
             # Adding [MASK] as special token
-            special_tokens = ['[CLS]', '[MASK]']
+            special_tokens = ['[CLS_ENC]', '[MASK], [CLS_DEC]']
             post_process_and_write(cache_path, special_tokens)
 
         if max_length is None:
@@ -540,7 +542,8 @@ class T5CustomTokenizerTFText:
             decoder_start_token_id=None,
             unk_token_id=tokenizer.unk_token_id,
             pad_token_id=tokenizer.pad_token_id,
-            cls_token_id=32000,
+            cls_enc_token_id=32000,
+            cls_dec_token_id=32002,
             mask_token_id=32001,
             max_length=max_length,
             add_special_tokens=add_special_tokens,
