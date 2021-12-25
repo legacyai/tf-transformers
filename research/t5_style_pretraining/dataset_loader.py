@@ -91,9 +91,13 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
         masked_lm_ids, _ = tf_text.pad_model_inputs(masked_lm_ids, max_seq_length=max_predictions_per_seq)
 
         inputs = {}
-        inputs['encoder_input_ids'] = tf.squeeze(input_word_ids, axis=0)
-        inputs['encoder_input_mask'] = tf.squeeze(input_mask, axis=0)
-        inputs['decoder_input_ids'] = tf.squeeze(decoder_input_ids, axis=0)
+        # inputs['encoder_input_ids'] = tf.squeeze(input_word_ids, axis=0)
+        # inputs['encoder_input_mask'] = tf.squeeze(input_mask, axis=0)
+        # inputs['decoder_input_ids'] = tf.squeeze(decoder_input_ids, axis=0)
+
+        inputs['input_ids'] = tf.squeeze(input_word_ids, axis=0)
+        inputs['input_mask'] = tf.squeeze(input_mask, axis=0)
+
 
         inputs['masked_lm_positions'] = tf.squeeze(masked_lm_positions, axis=0)
 
