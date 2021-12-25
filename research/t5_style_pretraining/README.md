@@ -23,7 +23,7 @@ Eg: For TPU , we need a data in GCS and model_checkpoint_dir to be in GCS too.
     task.data_directory=gs://legacyai-bucket \
     task.train_batch_size=128 \
     trainer.dtype=bf16 \
-    trainer.model_checkpoint_dir=gs://legacyai-bucket/t5_style_t5_small \
+    trainer.model_checkpoint_dir=gs://legacyai-bucket/t5_style_t5_small_lr_0.0005 \
     trainer.steps_per_epoch=10000 \
     trainer.epochs=100 \
     trainer.strategy=tpu \

@@ -211,7 +211,6 @@ class EncoderDecoderwithMLM(LegacyLayer):
         masked_lm_positions = encoder_inputs['masked_lm_positions']
 
         encoder_embeddings_mlm = self._gather_indexes(encoder_hidden_states, masked_lm_positions)
-
         encoder_hidden_states = self._encoder_decoder_projection(encoder_hidden_states)
 
         # Sometimes if we pad a sequence, last poistions might not represent CLS, so this is better
