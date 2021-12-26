@@ -519,6 +519,7 @@ class T5CustomTokenizerTFText:
         from transformers import T5Tokenizer
 
         tokenizer = T5Tokenizer.from_pretrained(model_name)
+        original_vocab_size = tokenizer.vocab_size
         if not cache_path.exists():
             tokenizer.save_pretrained(str(cache_path))
             logging.info("Saving {} tokenizer to {}".format(model_name, cache_path))
@@ -542,9 +543,9 @@ class T5CustomTokenizerTFText:
             decoder_start_token_id=None,
             unk_token_id=tokenizer.unk_token_id,
             pad_token_id=tokenizer.pad_token_id,
-            cls_enc_token_id=32000,
-            cls_dec_token_id=32002,
-            mask_token_id=32001,
+            cls_enc_token_id=original_vocab_size,
+            mask_token_id=original_vocab_size + 1,
+            cls_dec_token_id=original_vocab_size + 2,
             max_length=max_length,
             add_special_tokens=add_special_tokens,
             pack_model_inputs=pack_model_inputs,

@@ -4,7 +4,7 @@ from t5_tokenizer_modified import T5CustomTokenizerTFText
 
 from tf_transformers.core import Trainer
 from tf_transformers.losses.loss_wrapper import get_lm_loss, get_lm_loss_label_smoothing
-from tf_transformers.models import T5Encoder, T5Model, GPT2Model, MaskedLMModel
+from tf_transformers.models import T5Encoder, T5Model, MaskedLMModel
 from tf_transformers.optimization import create_optimizer
 
 
@@ -13,22 +13,11 @@ def get_model(model_name, vocab_size, is_training, use_dropout):
 
     def model_fn():
 
-        # We use Roberta Style model, but we use BigBird Roberta Tokenizer
-        MODEL_NAME = 'gpt2'
-        config = GPT2Model.get_config(MODEL_NAME)
-        # We update the vocab_size for that reason
-        config['vocab_size'] = vocab_size
-        config['max_position_embeddings'] = max_seq_len
-        config['type_vocab_size'] = -1  # We do not need type embeddings
-        model = GPT2Model.from_config(config)
-        model = MaskedLMModel(model, config['embedding_size'], config['layer_norm_epsilon'], use_extra_mlm_layer=False)
-        model = model.get_model()
-        return model
-
         config = T5Model.get_config(model_name)
         encoder_config = config.copy()
         encoder_config['bidirectional'] = True
         encoder_config['vocab_size'] = vocab_size
+        encoder_config['layer_norm_epsilon'] = 1e-12  # As ig GPT2 and BERT
 
         decoder_config = config.copy()
         decoder_config['bidirectional'] = False
@@ -38,8 +27,6 @@ def get_model(model_name, vocab_size, is_training, use_dropout):
         encoder = MaskedLMModel(
             encoder, encoder_config['embedding_size'], encoder_config['layer_norm_epsilon'], use_extra_mlm_layer=False
         )
-
-        return encoder.get_model()
 
         decoder = T5Encoder(
             config=decoder_config,
@@ -129,36 +116,35 @@ def get_optimizer(
 def get_loss(loss_type):
     """Get Language Model Loss"""
 
-    # lm_loss_fn = get_lm_loss_label_smoothing(
-    #     label_column='labels', label_weights_column='labels_mask', prediction_column='decoder_token_logits'
-    # )
-    mlm_loss_fn = get_lm_loss()
+    lm_loss_fn = get_lm_loss_label_smoothing(
+        label_column='labels', label_weights_column='labels_mask', prediction_column='decoder_token_logits'
+    )
+    mlm_loss_fn = get_lm_loss_label_smoothing()
 
     def loss_fn_combined(batch_labels, model_outputs):
 
-        # # cast logits loss to float32 for stability
-        # encoder_logits_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
-        #     labels=tf.range(tf.shape(model_outputs['logits'])[0]), logits=tf.cast(model_outputs['logits'], tf.float32)
-        # )
+        # cast logits loss to float32 for stability
+        encoder_logits_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
+            labels=tf.range(tf.shape(model_outputs['logits'])[0]), logits=tf.cast(model_outputs['logits'], tf.float32)
+        )
 
-        # # take transpose of logits
-        # decoder_logits_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
-        #     labels=tf.range(tf.shape(model_outputs['logits'])[0]),
-        #     logits=tf.cast(tf.transpose(model_outputs['logits']), tf.float32),
-        # )
+        # take transpose of logits
+        decoder_logits_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
+            labels=tf.range(tf.shape(model_outputs['logits'])[0]),
+            logits=tf.cast(tf.transpose(model_outputs['logits']), tf.float32),
+        )
 
-        # logits_loss = (encoder_logits_loss + decoder_logits_loss) / 2.0
+        logits_loss = (encoder_logits_loss + decoder_logits_loss) / 2.0
         mlm_loss = mlm_loss_fn(batch_labels, {'token_logits': model_outputs['encoder_token_logits']})
-        # lm_loss = lm_loss_fn(batch_labels, model_outputs)
+        lm_loss = lm_loss_fn(batch_labels, model_outputs)
 
         loss_results = {}
-        # loss_results['logits_loss'] = logits_loss
+        loss_results['logits_loss'] = logits_loss
         loss_results['mlm_loss'] = mlm_loss['loss']
-        # loss_results['lm_loss'] = lm_loss['loss']
+        loss_results['lm_loss'] = lm_loss['loss']
 
-        # loss_results['loss'] = (loss_results['logits_loss'] + loss_results['mlm_loss'] + loss_results['lm_loss']) / 3.0
+        loss_results['loss'] = (loss_results['logits_loss'] + loss_results['mlm_loss'] + loss_results['lm_loss']) / 3.0
 
-        loss_results['loss'] = loss_results['mlm_loss']
         return loss_results
 
     return loss_fn_combined

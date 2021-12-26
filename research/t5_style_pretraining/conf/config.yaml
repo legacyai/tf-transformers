@@ -10,9 +10,9 @@ trainer:
   strategy: mirrored
   steps_per_epoch: 10000
   model_checkpoint_dir:
-  global_norm:
+  global_norm: 1.0
 optimizer:
-  learning_rate:  0.01
+  learning_rate:  0.001
   num_warmup_steps: 0.1
   decay_function: cosine
   adam_beta_1: 0.9
