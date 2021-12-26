@@ -4,7 +4,7 @@ from t5_tokenizer_modified import T5CustomTokenizerTFText
 
 from tf_transformers.core import Trainer
 from tf_transformers.losses.loss_wrapper import get_lm_loss, get_lm_loss_label_smoothing
-from tf_transformers.models import T5Encoder, T5Model, MaskedLMModel
+from tf_transformers.models import T5Encoder, T5Model, GPT2Model, MaskedLMModel
 from tf_transformers.optimization import create_optimizer
 
 
@@ -12,6 +12,19 @@ def get_model(model_name, vocab_size, is_training, use_dropout):
     """Get the model from model function"""
 
     def model_fn():
+
+        # We use Roberta Style model, but we use BigBird Roberta Tokenizer
+        MODEL_NAME = 'gpt2'
+        config = GPT2Model.get_config(MODEL_NAME)
+        # We update the vocab_size for that reason
+        config['vocab_size'] = vocab_size
+        config['max_position_embeddings'] = max_seq_len
+        config['type_vocab_size'] = -1  # We do not need type embeddings
+        model = GPT2Model.from_config(config)
+        model = MaskedLMModel(model, config['embedding_size'], config['layer_norm_epsilon'], use_extra_mlm_layer=False)
+        model = model.get_model()
+        return model
+
         config = T5Model.get_config(model_name)
         encoder_config = config.copy()
         encoder_config['bidirectional'] = True
