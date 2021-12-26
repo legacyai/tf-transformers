@@ -24,9 +24,6 @@ def get_model(model_name, vocab_size, is_training, use_dropout):
         decoder_config['vocab_size'] = vocab_size
 
         encoder = T5Encoder(config=encoder_config, is_training=is_training, use_dropout=use_dropout)
-        encoder = MaskedLMModel(
-            encoder, encoder_config['embedding_size'], encoder_config['layer_norm_epsilon'], use_extra_mlm_layer=False
-        )
 
         decoder = T5Encoder(
             config=decoder_config,
