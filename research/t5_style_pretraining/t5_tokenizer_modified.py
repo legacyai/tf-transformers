@@ -524,7 +524,7 @@ class T5CustomTokenizerTFText:
             logging.info("Saving {} tokenizer to {}".format(model_name, cache_path))
 
             # Adding [MASK] as special token
-            special_tokens = ['[CLS_ENC]', '[MASK], [CLS_DEC]']
+            special_tokens = ['[CLS_ENC]', '[MASK]', '[CLS_DEC]']
             post_process_and_write(cache_path, special_tokens)
 
         if max_length is None:
