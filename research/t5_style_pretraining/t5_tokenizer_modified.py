@@ -519,7 +519,7 @@ class T5CustomTokenizerTFText:
         from transformers import T5Tokenizer
 
         tokenizer = T5Tokenizer.from_pretrained(model_name)
-        original_vocab_size = tokenizer.vocab_size
+        original_vocab_size = tokenizer.vocab_size - 100 # exclude 100 special tokens
         if not cache_path.exists():
             tokenizer.save_pretrained(str(cache_path))
             logging.info("Saving {} tokenizer to {}".format(model_name, cache_path))

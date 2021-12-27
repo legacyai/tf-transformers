@@ -11,7 +11,6 @@ class EncoderDecoderwithMLM(LegacyLayer):
         self,
         encoder,
         decoder,
-        cls_token_id,
         is_training=False,
         use_dropout=False,
         decoder_start_token_id=None,
@@ -23,7 +22,6 @@ class EncoderDecoderwithMLM(LegacyLayer):
         self._is_training = is_training
         self._use_dropout = use_dropout
         self.decoder_start_token_id = decoder_start_token_id
-        self.cls_token_id = cls_token_id
 
         self._encoder_config_dict = self._encoder._config_dict
         self._decoder_config_dict = self._decoder._config_dict

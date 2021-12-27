@@ -57,7 +57,7 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
             segments = tf.concat([segments[:-1], [segments[-1][:-difference]]], axis=0)
 
         # Add 3 special tokens
-        segments = tf.concat([[[cls_enc_token_id]], segments, [[cls_dec_token_id]], [[eos_token_id]]], axis=0)
+        segments = tf.concat([[[cls_token_id]], segments, [[sep_token_id]], [[eos_token_id]]], axis=0)
 
         # Apply dynamic masking, with expand_dims on the input batch
         # If expand_dims is not there, whole word masking fails
@@ -109,23 +109,23 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
     local_batch = 10  # This is used to pack maximum input tokens per sentences/example
     encoder_seq_length = max_seq_len
 
-    cls_enc_token_id = tokenizer_layer.cls_enc_token_id
-    cls_dec_token_id = tokenizer_layer.cls_dec_token_id
-    decoder_start_token_id = tokenizer_layer.pad_token_id
+    cls_token_id = tokenizer_layer.cls_token_id
+    decoder_start_token_id = tokenizer_layer.bos_token_id
     delimiter = ' '
 
     # Random Selector (10 per)
 
-    max_predictions_per_seq = 100
-    selection_rate = 0.20
+    max_predictions_per_seq = 70
+    selection_rate = 0.15
     unk_token_id = tokenizer_layer.unk_token_id
     pad_token_id = tokenizer_layer.pad_token_id
     eos_token_id = tokenizer_layer.eos_token_id
+    sep_token_id = tokenizer_layer.sep_token_id
 
     random_selector = tf_text.RandomItemSelector(
         max_selections_per_batch=max_predictions_per_seq,
         selection_rate=selection_rate,
-        unselectable_ids=[unk_token_id, eos_token_id, pad_token_id, cls_enc_token_id, cls_dec_token_id],
+        unselectable_ids=[unk_token_id, eos_token_id, pad_token_id, cls_token_id, sep_token_id, decoder_start_token_id],
     )
 
     # Mask Value chooser (Encapsulates the BERT MLM token selection logic)
@@ -136,4 +136,5 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
     ds = dataset.batch(local_batch)
     ds = ds.map(mask_and_prepare_inputs, num_parallel_calls=tf.data.AUTOTUNE)
     ds = ds.batch(batch_size)
+
     return ds

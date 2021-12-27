@@ -4,7 +4,7 @@ from t5_tokenizer_modified import T5CustomTokenizerTFText
 
 from tf_transformers.core import Trainer
 from tf_transformers.losses.loss_wrapper import get_lm_loss, get_lm_loss_label_smoothing
-from tf_transformers.models import T5Encoder, T5Model, MaskedLMModel
+from tf_transformers.models import T5Encoder, T5Model
 from tf_transformers.optimization import create_optimizer
 
 
@@ -17,11 +17,13 @@ def get_model(model_name, vocab_size, is_training, use_dropout):
         encoder_config = config.copy()
         encoder_config['bidirectional'] = True
         encoder_config['vocab_size'] = vocab_size
-        encoder_config['layer_norm_epsilon'] = 1e-12  # As ig GPT2 and BERT
+        encoder_config['layer_norm_epsilon'] = 1e-12  # As in GPT2 and BERT
 
         decoder_config = config.copy()
         decoder_config['bidirectional'] = False
         decoder_config['vocab_size'] = vocab_size
+        encoder_config['layer_norm_epsilon'] = 1e-12  # As in GPT2 and BERT
+
 
         encoder = T5Encoder(config=encoder_config, is_training=is_training, use_dropout=use_dropout)
 
@@ -37,7 +39,7 @@ def get_model(model_name, vocab_size, is_training, use_dropout):
         decoder._embedding_layer = encoder._embedding_layer
 
         model = EncoderDecoderwithMLM(
-            encoder=encoder, decoder=decoder, cls_token_id=32000, is_training=is_training, use_dropout=use_dropout
+            encoder=encoder, decoder=decoder, is_training=is_training, use_dropout=use_dropout
         )
 
         model = model.get_model()
@@ -49,8 +51,15 @@ def get_model(model_name, vocab_size, is_training, use_dropout):
 
 def get_tokenizer(model_name):
     """Get tokenizer"""
-    tokenizer_layer = T5CustomTokenizerTFText.from_pretrained(model_name)
+    # tokenizer_layer = T5CustomTokenizerTFText.from_pretrained(model_name)
+    # return tokenizer_layer
+    
+    from tf_transformers.models import (
+        BigBirdRobertaTokenizerTFText)
+    TOKENIZER_NAME = "google/bigbird-roberta-large"
+    tokenizer_layer = BigBirdRobertaTokenizerTFText.from_pretrained(TOKENIZER_NAME)
     return tokenizer_layer
+
 
 
 def get_optimizer(
@@ -116,7 +125,7 @@ def get_loss(loss_type):
     lm_loss_fn = get_lm_loss_label_smoothing(
         label_column='labels', label_weights_column='labels_mask', prediction_column='decoder_token_logits'
     )
-    mlm_loss_fn = get_lm_loss_label_smoothing()
+    mlm_loss_fn = get_lm_loss()
 
     def loss_fn_combined(batch_labels, model_outputs):
 
