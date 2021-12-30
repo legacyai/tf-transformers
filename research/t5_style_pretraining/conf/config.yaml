@@ -1,7 +1,7 @@
 task:
   data_directory:
-  max_seq_len: 512
-  train_batch_size: 128
+  max_seq_len: 256
+  train_batch_size: 512
 trainer:
   dtype: bf16
   num_gpus: 0
