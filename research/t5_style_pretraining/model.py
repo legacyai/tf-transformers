@@ -51,14 +51,14 @@ def get_model(model_name, vocab_size, is_training, use_dropout):
 
 def get_tokenizer(model_name):
     """Get tokenizer"""
-    # tokenizer_layer = T5CustomTokenizerTFText.from_pretrained(model_name)
-    # return tokenizer_layer
-    
-    from tf_transformers.models import (
-        BigBirdRobertaTokenizerTFText)
-    TOKENIZER_NAME = "google/bigbird-roberta-large"
-    tokenizer_layer = BigBirdRobertaTokenizerTFText.from_pretrained(TOKENIZER_NAME)
+    tokenizer_layer = T5CustomTokenizerTFText.from_pretrained(model_name)
     return tokenizer_layer
+    
+    # from tf_transformers.models import (
+    #     BigBirdRobertaTokenizerTFText)
+    # TOKENIZER_NAME = "google/bigbird-roberta-large"
+    # tokenizer_layer = BigBirdRobertaTokenizerTFText.from_pretrained(TOKENIZER_NAME)
+    # return tokenizer_layer
 
 
 

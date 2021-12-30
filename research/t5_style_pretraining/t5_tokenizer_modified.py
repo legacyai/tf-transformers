@@ -541,7 +541,7 @@ class T5CustomTokenizerTFText:
             decoder_start_token_id=None,
             unk_token_id=tokenizer.unk_token_id,
             pad_token_id=tokenizer.pad_token_id,
-            cls_tokn_id=original_vocab_size,
+            cls_token_id=original_vocab_size,
             mask_token_id=original_vocab_size + 1,
             max_length=max_length,
             add_special_tokens=add_special_tokens,
