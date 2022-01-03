@@ -65,11 +65,11 @@ extensions = [
 ]
 
 
-intersphinx_mapping = {
-    'python': ('https://docs.python.org/3/', None),
-    'numpy': ('https://numpy.org/doc/stable/', None),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
-}
+# intersphinx_mapping = {
+#     'python': ('https://docs.python.org/3/', None),
+#     'numpy': ('https://numpy.org/doc/stable/', None),
+#     'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+# }
 
 suppress_warnings = [
     'ref.citation',  # Many duplicated citations in numpy/scipy docstrings.

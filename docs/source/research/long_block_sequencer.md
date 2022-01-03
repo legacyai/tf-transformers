@@ -17,7 +17,7 @@ limitations under the License.
 
 # Long Block Sequencer
 
-Long Block Sequence is a very simple yet an efficient way to make use of longer sequence in Attention based Transformer
+Long Block Sequencer is a very simple yet an efficient way to make use of longer sequence in Attention based Transformer
 models. The main reason, why Transformers are not able to scale to longer sequences is it because of the computational
 cost while training. The ```softmax``` operation at every layer makes the gradient cacluation to cause Out of Memory
 error.
@@ -29,7 +29,7 @@ The idea behind long block sequencer is simple. Instead of taking a long sequenc
 into equal chunks. Lets say ```sequence_length=4096``` and ```num_splits=8```, split these long sequence into ```8 (num_splits)``` sub sequence with ```512 sequence length (4097/8=512)``` each. Then process each sub sequence through the model of interest and concatanate all embeddings ```8 embeddings of batch_size x 512 x emb_dim ``` into a single embedding of size ``` batch_size x (4096) x emb_dim , where 4096 = 512 * 8 ``` matrix. Pass it through a feed forward network or RNN layer to have some non-linear interactions among them. This lets some information to pass through sub-embeddings during gradient calculation. This, final projection layer makes sure, all these indivudally processed sub embeddings get some interaction informaton while training. Then this final embedding can be used for any tasks.
 
 This is explained through the following image:
-![long-block-sequencer](imgs/long_block_sequencer.gif)
+![long-block-sequencer](../imgs/long_block_sequencer.gif)
 
 
 ### Advantages
@@ -64,7 +64,7 @@ Rogue SCORE
 |    |    Model         |seq_length|   Params |   R-2  |   R-1    |      R-l |
 |---:|-----------------:|---------:|---------:|-------:|---------:|---------:|
 |  0 |  t5-small        | 512      | 60M      | 0.07   |   N/A    |   N/A    |
-|  0 |  LB-t5-small     | 4096     | 60M      | 16.50  |  40.76   |   25.75  |
+|  0 |  LB-t5-small     | 4096     | 60M      | 17.41  |  41.89   |   26.44  |
 |  0 | Pegasus-base     | 1024     | 120M     | 15.15  |  39.98   |   25.23  |
 |  0 |BigBird-Roberta-B | 4096     | 120M     | 19.32  |  43.70   |   39.99  |
 
@@ -74,4 +74,5 @@ We have used ```greedy decoding```. with ```decoder_sequence_length=256```. For 
 
 ### Reference
 [1. BigBird](https://arxiv.org/pdf/2007.14062.pdf)
+
 [2. Pegasus](https://arxiv.org/pdf/1912.08777.pdf)

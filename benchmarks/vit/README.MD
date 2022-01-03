@@ -59,13 +59,7 @@ The default benchmark mode is ```tft```.
     ```python run.py benchmark=hf benchmark.model.type=pt```
 
 
-## HuggingFace-JAX. (hf-jax) (Not Available)
-
-1. To execute ```hf-jax``` (default) :
-    ```python run.py benchmark=hf benchmark.model.type=jax```
-
-
-## Official Benchmarks on IMDB
+## Official Benchmarks on Keras Flowed dataset (5000 samples)
 
 ```
 Text Classification:
