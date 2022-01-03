@@ -154,6 +154,7 @@ class Similarity_Model_Pretraining(LegacyLayer):
         )
         logits_mean = logits_scale * logits_mean
 
+        # Similar vectors produce similar values, make use of it to find masking posoitions except diagonal
         scores = tf.matmul(centre_sentence_embedding_normalized, centre_sentence_embedding_normalized, transpose_b=True)
         scores_mask = tf.where(
             tf.equal(scores, tf.linalg.diag_part(scores)),
