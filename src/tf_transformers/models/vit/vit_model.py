@@ -34,7 +34,14 @@ from tf_transformers.utils.docstring_utils import (
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {}
+MODEL_TO_HF_URL = {
+    'vit-large-patch32-384': "tftransformers/vit-large-patch32-384",
+    'vit-base-patch32-384': "tftransformers/vit-base-patch32-384",
+    'vit-large-patch16-224': "tftransformers/vit-large-patch16-224",
+    'vit-base-patch16-224': "tftransformers/vit-base-patch16-224",
+    'vit-large-patch32-224-in21k': "tftransformers/vit-large-patch32-224-in21k",
+    'vit-base-patch32-224-in21k': "tftransformers/vit-base-patch32-224-in21k",
+}
 
 code_example = r'''
 
