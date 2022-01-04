@@ -1,6 +1,8 @@
 from tf_transformers.models import ViTModel
-model_name = 'google/vit-large-patch32-384'
-model = ViTModel.from_pretrained(model_name, classification_labels=1000, cache_dir='MODELS')
+model_name = 'vit-large-patch32-384'
+model = ViTModel.from_pretrained(model_name)
+
+model = ViTModel.from_pretrained(model_name, classification_labels=1000)
 
 
 import os
@@ -21,7 +23,7 @@ cwd = os.getcwd()
 MODEL_DIR = '/home/sarathrnair/MODELS/'
 
 for model_name in models_list:
-    
+
     subprocess.run(['huggingface-cli', 'repo',
                     'create', '{}'.format(model_name),
                     '--yes',
@@ -32,12 +34,12 @@ for model_name in models_list:
     os.chdir("{}".format(new_working_dir))
     cached_model_dir = os.path.join(MODEL_DIR, "tf_transformers_cache/{}/".format(model_name))
     copy_tree(cached_model_dir, new_working_dir)
-    
+
     subprocess.run(["git-lfs", "track", "*"])
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "New Model"])
     subprocess.run(["git", "push"])
-    
+
     os.chdir("{}".format(cwd))
     time.sleep(2)
     logging.info("Completed {}".format(model_name))
