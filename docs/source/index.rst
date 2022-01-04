@@ -296,8 +296,6 @@ Flax), PyTorch, and/or TensorFlow.
     :maxdepth: 2
     :caption: Models
 
-    notebooks/test_sample
-
     model_doc/albert
     model_doc/bert
     model_doc/gpt2
@@ -306,6 +304,12 @@ Flax), PyTorch, and/or TensorFlow.
     model_doc/roberta.rst
     model_doc/vit.rst
     model_doc/parallelism
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Tutorials
+
+    Notebooks/1_read_write_tfrecords
 
 .. toctree::
     :maxdepth: 2

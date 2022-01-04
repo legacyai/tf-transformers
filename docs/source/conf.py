@@ -106,15 +106,12 @@ exclude_patterns = [
     # Sometimes sphinx reads its own outputs as inputs!
     'build/html',
     'build/jupyter_execute',
-    'notebooks/README.md',
     'README.md',
     # Ignore markdown source for notebooks; myst-nb builds from the ipynb
     # These are kept in sync using the jupytext pre-commit hook.
-    'notebooks/*.md',
+    'Notebooks/*.md',
     'jax-101/*.md',
-    'autodidax.md',
     # Attempt to fix RTD build failure
-    'transformations.md',
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -148,30 +145,29 @@ html_logo = '_static/transformers_mix.png'
 
 html_favicon = '_static/favicon.png'
 
-# -- <JAX? Options for myst ----------------------------------------------
-jupyter_execute_notebooks = "force"
-execution_allow_errors = False
-execution_fail_on_error = True  # Requires https://github.com/executablebooks/MyST-NB/pull/296
+# -- Options for myst ----------------------------------------------
+jupyter_execute_notebooks = "off"
+# execution_allow_errors = False
+# execution_fail_on_error = True  # Requires https://github.com/executablebooks/MyST-NB/pull/296
 
 # Notebook cell execution timeout; defaults to 30.
-execution_timeout = 100
+# execution_timeout = 100
 
 # List of patterns, relative to source directory, that match notebook
 # files that will not be executed.
-execution_excludepatterns = [
-    # Slow notebook: long time to load tf.ds
-    'notebooks/neural_network_with_tfds_data.*',
-    # Slow notebook
-    'notebooks/Neural_Network_and_Data_Loading.*',
-    'notebooks/score_matching.*',
-    'notebooks/maml.*',
-    'notebooks/.ipynb_*',
-    # Strange error apparently due to asynchronous cell execution
-    'notebooks/thinking_in_jax.*',
-    # TODO(jakevdp): enable execution on these
-    'jax-101/*',
-    'notebooks/xmap_tutorial.*',
-]
+# execution_excludepatterns = [
+#     # Slow notebook: long time to load tf.ds
+#     'notebooks/neural_network_with_tfds_data.*',
+#     # Slow notebook
+#     'notebooks/Neural_Network_and_Data_Loading.*',
+#     'notebooks/score_matching.*',
+#     'notebooks/maml.*',
+#     'notebooks/.ipynb_*',
+#     # Strange error apparently due to asynchronous cell execution
+#     'notebooks/thinking_in_jax.*',
+#     'jax-101/*',
+#     'notebooks/xmap_tutorial.*',
+# ]
 
 #  Configuration for OpenGraph and Twitter Card Tags.
 # These are responsible for creating nice shareable social images https://ahrefs.com/blog/open-graph-meta-tags/
@@ -232,7 +228,7 @@ htmlhelp_basename = "transformersdoc"
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "transformers.tex", "transformers Documentation", "huggingface", "manual"),
+    (master_doc, "tftransformers.tex", "tftransformers Documentation", "huggingface", "manual"),
 ]
 
 
@@ -240,7 +236,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "transformers", "transformers Documentation", [author], 1)]
+man_pages = [(master_doc, "tftransformers", "tftransformers Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
