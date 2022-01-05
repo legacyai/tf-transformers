@@ -1,0 +1,6 @@
+task:
+    name: stsb
+data:
+  name: stsb
+  num_classes: 1
+  max_seq_length: 128

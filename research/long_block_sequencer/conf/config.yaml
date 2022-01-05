@@ -1,0 +1,29 @@
+
+task:
+  max_seq_len: 4096
+  decoder_seq_len: 256
+  num_splits: 8
+  use_gru_layer: false
+  projection_dimension: 512
+  train_batch_size: 8
+
+trainer:
+  dtype: fp16
+  num_gpus: 2
+  tpu_address:
+  epochs: 3
+  strategy: mirrored
+  model_checkpoint_dir:
+optimizer:
+  learning_rate: 0.001
+  loss_type:
+  use_constant_lr: true
+model:
+  num_layers: 12
+  model_name: 't5-small'
+eval:
+  eval_batch_size: 4
+  model_checkpoint_dir:
+  model_checkpoint_path:
+  take_sample: false
+  mode:

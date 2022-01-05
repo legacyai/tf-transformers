@@ -1,0 +1,13 @@
+
+tokenizer:
+  model_file_path:
+  do_lower_case: false
+  special_tokens: ['[CLS]', '[MASK]', '</s>', '<unk>', '<pad>']
+data:
+    tfrecord_output_dir:
+    tfrecord_filename:
+    tfrecord_nfiles:
+    tfrecord_mode: train
+    tfrecord_overwrite: false
+    input_text_files:
+    batch_size: 1024

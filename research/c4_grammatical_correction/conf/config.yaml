@@ -1,0 +1,28 @@
+task:
+  data_directory:
+  max_seq_len: 64
+  train_batch_size: 512
+trainer:
+  dtype: bf16
+  num_gpus: 0
+  tpu_address:
+  epochs: 10
+  strategy: mirrored
+  steps_per_epoch: 50000
+  model_checkpoint_dir:
+  global_norm: 1.0
+optimizer:
+  learning_rate:  3e-5
+  num_warmup_steps: 0.1
+  decay_function: cosine
+  adam_beta_1: 0.9
+  adam_beta_2: 0.95
+  adam_epsilon: 10e-8
+  weight_decay_rate: 0.1
+  optimizer_type: adamw
+  loss_type:
+  use_constant_lr: false
+model:
+  is_training: false
+  use_dropout: false
+  num_layers: 12

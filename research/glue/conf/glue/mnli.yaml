@@ -1,0 +1,6 @@
+task:
+    name: mnli
+data:
+  name: mnli
+  num_classes: 3
+  max_seq_length: 256
