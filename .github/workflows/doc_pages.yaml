@@ -19,7 +19,6 @@ jobs:
     - name: install
       run: |
         poetry install -E docs
-        sudo apt-get install python3-sphinx
     - name: Build documentation
       run: |
         mkdir gh-pages

@@ -61,8 +61,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'matplotlib.sphinxext.plot_directive',
     'sphinx_autodoc_typehints',
-    'myst_nb',
 ]
+# 'myst_nb'
 
 
 # intersphinx_mapping = {
