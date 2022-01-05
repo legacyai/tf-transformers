@@ -18,12 +18,13 @@ jobs:
     - uses: abatilo/actions-poetry@v2.1.3
     - name: install
       run: poetry install -E docs
+      run: sudo apt-get install python3-sphinx
     - name: Build documentation
       run: |
         mkdir gh-pages
         touch gh-pages/.nojekyll
         cd docs/
-        make html
+        poetry run sphinx-build -b html . _build
         cp -r _build/* ../gh-pages/
     - name: Deploy documentation
       if: ${{ github.event.ref_type == 'tag' }}
