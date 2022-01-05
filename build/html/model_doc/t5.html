@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta property="og:title" content="T5" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="model_doc/t5.html" />
+  <meta property="og:description" content="Overview: The T5 model was presented in Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer by Colin Raffel, Noam Shazeer, Adam..." />
+  <meta property="og:image" content="png location" />
+  <meta property="og:image:alt" content="T5" />
+  <meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>T5 &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="MT5" href="mt5.html" />
+    <link rel="prev" title="OpenAI GPT2" href="gpt2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">T5</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#training">Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#t5config">T5Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#t5model">T5Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#t5encoder">T5Encoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Notebooks/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>T5</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/model_doc/t5.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="t5">
+<h1>T5<a class="headerlink" href="#t5" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The T5 model was presented in <a class="reference external" href="https://arxiv.org/pdf/1910.10683.pdf">Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer</a> by Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang,
+Michael Matena, Yanqi Zhou, Wei Li, Peter J. Liu.</p>
+<p>The abstract from the paper is the following:</p>
+<p><em>Transfer learning, where a model is first pre-trained on a data-rich task before being fine-tuned on a downstream
+task, has emerged as a powerful technique in natural language processing (NLP). The effectiveness of transfer learning
+has given rise to a diversity of approaches, methodology, and practice. In this paper, we explore the landscape of
+transfer learning techniques for NLP by introducing a unified framework that converts every language problem into a
+text-to-text format. Our systematic study compares pretraining objectives, architectures, unlabeled datasets, transfer
+approaches, and other factors on dozens of language understanding tasks. By combining the insights from our exploration
+with scale and our new “Colossal Clean Crawled Corpus”, we achieve state-of-the-art results on many benchmarks covering
+summarization, question answering, text classification, and more. To facilitate future work on transfer learning for
+NLP, we release our dataset, pre-trained models, and code.</em></p>
+<p>Tips:</p>
+<ul class="simple">
+<li><p>T5 is an encoder-decoder model pre-trained on a multi-task mixture of unsupervised and supervised tasks and for which
+each task is converted into a text-to-text format. T5 works well on a variety of tasks out-of-the-box by prepending a
+different prefix to the input corresponding to each task, e.g., for translation: <em>translate English to German: …</em>,
+for summarization: <em>summarize: …</em>.</p></li>
+<li><p>T5 uses relative scalar embeddings. Encoder input padding can be done on the left and on the right.</p></li>
+<li><p>See the <a class="reference internal" href="#training"><span class="std std-ref">Training</span></a>, <span class="xref std std-ref">inference</span> and <span class="xref std std-ref">scripts</span> sections below for all details regarding usage.</p></li>
+</ul>
+<p>T5 comes in different sizes:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://huggingface.co/t5-small">t5-small</a></p></li>
+<li><p><a class="reference external" href="https://huggingface.co/t5-base">t5-base</a></p></li>
+<li><p><a class="reference external" href="https://huggingface.co/t5-large">t5-large</a></p></li>
+</ul>
+<p>Based on the original T5 model, Google has released some follow-up works:</p>
+<ul class="simple">
+<li><p><strong>T5v1.1</strong>: T5v1.1 is an improved version of T5 with some architectural tweaks, and is pre-trained on C4 only without
+mixing in the supervised tasks. Refer to the documentation of T5v1.1 which can be found.</p></li>
+<li><p><strong>mT5</strong>: mT5 is a multilingual T5 model. It is pre-trained on the mC4 corpus, which includes 101 languages. Refer to
+the documentation of mT5 which can be found <a class="reference internal" href="mt5.html"><span class="doc">here</span></a>.</p></li>
+<li><p><strong>byT5</strong>: byT5 is a T5 model pre-trained on byte sequences rather than SentencePiece subword token sequences. Refer
+to the documentation of byT5 which can be found <span class="xref std std-doc">here</span>.</p></li>
+</ul>
+<p>All checkpoints can be found on the <a class="reference external" href="https://huggingface.co/tftransformers">hub</a>.</p>
+</div>
+<div class="section" id="training">
+<span id="id1"></span><h2>Training<a class="headerlink" href="#training" title="Permalink to this headline">¶</a></h2>
+<p>T5 is an encoder-decoder model and converts all NLP problems into a text-to-text format. It is trained using teacher
+forcing. This means that for training, we always need an input sequence and a corresponding target sequence. The input
+sequence is fed to the model using <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_ids</span></code>. The target sequence is shifted to the right, i.e., prepended by a
+start-sequence token and fed to the decoder using the <code class="xref py py-obj docutils literal notranslate"><span class="pre">decoder_input_ids</span></code>. In teacher-forcing style, the target
+sequence is then appended by the EOS token and corresponds to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">labels</span></code>. The PAD token is hereby used as the
+start-sequence token. T5 can be trained / fine-tuned both in a supervised and unsupervised fashion.</p>
+<p>Additional training tips:</p>
+<ul class="simple">
+<li><p>T5 models need a slightly higher learning rate than the default one set in the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Trainer</span></code> when using the AdamW
+optimizer. Typically, 1e-4 and 3e-4 work well for most problems (classification, summarization, translation, question
+answering, question generation). Note that T5 was pre-trained using the AdaFactor optimizer.</p></li>
+<li><p>According to <a class="reference external" href="https://discuss.huggingface.co/t/t5-finetuning-tips/684">this forum post</a>, task prefixes matter when
+(1) doing multi-task training (2) your task is similar or related to one of the supervised tasks used in T5’s
+pre-training mixture (see Appendix D of the <a class="reference external" href="https://arxiv.org/pdf/1910.10683.pdf">paper</a> for the task prefixes
+used).</p></li>
+<li><p>If training on TPU, it is recommended to pad all examples of the dataset to the same length or make use of
+<cite>pad_to_multiple_of</cite> to have a small number of predefined bucket sizes to fit all examples in. Dynamically padding
+batches to the longest example is not recommended on TPU as it triggers a recompilation for every batch shape that is
+encountered during training thus significantly slowing down the training. only padding up to the longest example in a
+batch) leads to very slow training on TPU.</p></li>
+</ul>
+<p><a class="reference external" href="https://arxiv.org/abs/1910.10683">Paper👆</a>
+<a class="reference external" href="https://github.com/google-research/text-to-text-transfer-transformer">Official Code👆</a></p>
+</div>
+<div class="section" id="t5config">
+<h2>T5Config<a class="headerlink" href="#t5config" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.t5.T5Config">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.t5.</span></code><code class="sig-name descname"><span class="pre">T5Config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_hidden_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_head_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2048</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_act</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gelu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_act</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'relu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_probs_dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_position_embeddings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_norm_epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_embedding_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'relative'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positional_buckets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_start_token_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/configuration_t5.html#T5Config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.t5.T5Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the configuration class to store the configuration of a <a class="reference internal" href="#tf_transformers.models.T5Model" title="tf_transformers.models.T5Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">T5Model</span></code></a>.
+It is used to instantiate an T5 model according to the specified arguments, defining the model architecture.
+Instantiating a configuration with the defaults will yield a similar configuration to that of the
+T5 <a class="reference external" href="https://huggingface.co/t5-small">base</a> architecture.</p>
+<p>Configuration objects inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerConfig</span></code> and can be used to control the model
+outputs. Read the documentation from <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerConfig</span></code> for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vocab_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 30000) – Vocabulary size of the T5 model. Defines the number of different tokens that can be represented by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">inputs_ids</span></code> passed when calling <code class="xref py py-class docutils literal notranslate"><span class="pre">T5Model</span></code> or
+<a class="reference internal" href="#tf_transformers.models.T5Encoder" title="tf_transformers.models.T5Encoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">T5Encoder</span></code></a>.</p></li>
+<li><p><strong>embedding_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 128) – Dimensionality of vocabulary embeddings.</p></li>
+<li><p><strong>num_hidden_layers</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 12) – Number of hidden layers in the Transformer encoder.</p></li>
+<li><p><strong>num_attention_heads</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 12) – Number of attention heads for each attention layer in the Transformer encoder.</p></li>
+<li><p><strong>attention_head_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Size of attention heads in each layer. Normally (embedding_size//num_attention_heads).</p></li>
+<li><p><strong>intermediate_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 3072) – The dimensionality of the “intermediate” (often named feed-forward) layer in the Transformer encoder.</p></li>
+<li><p><strong>inner_group_num</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 1) – The number of inner repetition of attention and ffn.</p></li>
+<li><p><strong>hidden_act</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">Callable</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;gelu&quot;</span></code>) – The non-linear activation function (function or string) in the encoder and pooler. If string,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;gelu&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relu&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;silu&quot;</span></code> and many are supported.</p></li>
+<li><p><strong>hidden_dropout_prob</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 0) – The dropout probability for all fully connected layers in the embeddings, encoder, and pooler.</p></li>
+<li><p><strong>max_position_embeddings</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 512) – The maximum sequence length that this model might ever be used with. Typically set this to something large
+(e.g., 512 or 1024 or 2048).</p></li>
+<li><p><strong>type_vocab_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 2) – The vocabulary size of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">token_type_ids</span></code> passed when calling <code class="xref py py-class docutils literal notranslate"><span class="pre">T5Model</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TFT5Model</span></code>.</p></li>
+<li><p><strong>initializer_range</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 0.02) – The standard deviation of the truncated_normal_initializer for initializing all weight matrices.</p></li>
+<li><p><strong>layer_norm_epsilon</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 1e-12) – The epsilon used by the layer normalization layers.</p></li>
+<li><p><strong>classifier_dropout_prob</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 0.1) – The dropout ratio for attached classifiers.</p></li>
+<li><p><strong>position_embedding_type</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code>) – Type of position embedding. Choose one of <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key&quot;</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key_query&quot;</span></code>. For positional embeddings use <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code>. For more information on
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key&quot;</span></code>, please refer to <a class="reference external" href="https://arxiv.org/abs/1803.02155">Self-Attention with Relative Position Representations (Shaw et al.)</a>. For more information on <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key_query&quot;</span></code>, please refer to
+<cite>Method 4</cite> in <a class="reference external" href="https://arxiv.org/abs/2009.13658">Improve Transformer Models with Better Relative Position Embeddings (Huang et al.)</a>.</p></li>
+<li><p><strong>bidirectional</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, <cite>optional</cite>, defaults to True) – For relative positional embeddings, Encoder has <code class="xref py py-obj docutils literal notranslate"><span class="pre">bidirectional=True</span></code>, while Decoder has
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">bidirectional=False</span></code>.</p></li>
+<li><p><strong>positional_buckets</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 32) – The number of buckets to use for each attention layer. For relative positional embeddings.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">T5Config</span><span class="p">,</span> <span class="n">T5Model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initializing an bert-base-uncased style configuration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">configuration</span> <span class="o">=</span> <span class="n">T5Config</span><span class="p">()</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initializing an Bert different style configuration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">configuration_new</span> <span class="o">=</span> <span class="n">T5Config</span><span class="p">(</span>
+<span class="gp">... </span>     <span class="n">embedding_size</span><span class="o">=</span><span class="mi">768</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="n">num_attention_heads</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="n">intermediate_size</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
+<span class="gp">... </span> <span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initializing a model from the original configuration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">T5Model</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Accessing the model configuration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">configuration</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_config_dict</span> <span class="c1"># This has more details than original configuration</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="t5model">
+<h2>T5Model<a class="headerlink" href="#t5model" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.T5Model">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">T5Model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'t5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5_model.html#T5Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>T5 Encoder Wrapper</p>
+<dl class="py method">
+<dt id="tf_transformers.models.T5Model.from_config">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_auto_regressive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5_model.html#T5Model.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Model.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>T5 Model from config :
+Instantiates a <code class="xref py py-class docutils literal notranslate"><span class="pre">T5Encoder</span></code> from a <a class="reference internal" href="#tf_transformers.models.t5.T5Config" title="tf_transformers.models.t5.T5Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">T5Config</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_dict</strong> (<a class="reference internal" href="#tf_transformers.models.t5.T5Config" title="tf_transformers.models.t5.T5Config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tf_transformers.models.t5.T5Config</span></code></a>) – Model configuration Object.</p></li>
+<li><p><strong>kwargs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">Any]</span></code>) – Additional parameters required to pass to the <code class="xref py py-class docutils literal notranslate"><span class="pre">T5Encoder</span></code>
+like: <code class="xref py py-obj docutils literal notranslate"><span class="pre">mask_mode</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_dropout</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_auto_regressive</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">sequence_length</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_mlm_layer</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_masked_lm_positions</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">return_all_layer_outputs</span></code> etc</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>LegacyModel/LegacyLayer .</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Model.from_pretrained">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_pretrained</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_checkpoint_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_from_hf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_fn_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoder_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_from_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_auto_regressive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_hub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5_model.html#T5Model.from_pretrained"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Model.from_pretrained" title="Permalink to this definition">¶</a></dt>
+<dd><p>T5 Model Pretrained with example :
+(<a class="reference internal" href="#tf_transformers.models.T5Model" title="tf_transformers.models.T5Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">tf_transformers.models.T5Model</span></code></a>) is a wrapper around (<a class="reference internal" href="#tf_transformers.models.T5Encoder" title="tf_transformers.models.T5Encoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">tf_transformers.models.T5Encoder</span></code></a>).</p>
+<p>Instantiates a <a class="reference internal" href="#tf_transformers.models.T5Encoder" title="tf_transformers.models.T5Encoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">T5Encoder</span></code></a> from a <code class="xref py py-obj docutils literal notranslate"><span class="pre">model_name</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Name of the model as in HuggingFace Transformers. eg: (<code class="xref py py-obj docutils literal notranslate"><span class="pre">t5-small</span></code>)</p></li>
+<li><p><strong>cache_dir</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Where model will be saved after conversion: If None for Linux based machine
+the directory will be (<code class="xref py py-obj docutils literal notranslate"><span class="pre">/tmp/tf_transformers_cache</span></code>)</p></li>
+<li><p><strong>model_checkpoint_dir</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Model checkpoint directory. If provided, we won’t convert from HF,
+rather, we try to load it from it.</p></li>
+<li><p><strong>convert_from_hf</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Whether we need to convert from HF to TFT(tensorflow transformers).
+default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+<li><p><strong>return_layer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to return tf.keras.layers.Layer/LegacyLayer.</p></li>
+<li><p><strong>return_config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to return TransformerConfig.</p></li>
+<li><p><strong>convert_fn_type</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – It will accept either of 3 values <code class="xref py py-obj docutils literal notranslate"><span class="pre">('tf',</span> <span class="pre">'pt',</span> <span class="pre">'both')</span></code>.
+default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">both</span></code>).</p></li>
+<li><p><strong>save_checkpoint_cache</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Do we need to save the checkpoints to cache directory.</p></li>
+<li><p><strong>load_from_cache</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Do we need to load the checkpoints from :obj:(<cite>cache_dir</cite>), if exists.</p></li>
+<li><p><strong>kwargs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">Any]</span></code>) – Additional parameters required to pass to the <a class="reference internal" href="#tf_transformers.models.T5Encoder" title="tf_transformers.models.T5Encoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">T5Encoder</span></code></a>
+like: <code class="xref py py-obj docutils literal notranslate"><span class="pre">mask_mode</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_dropout</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_auto_regressive</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">sequence_length</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_mlm_layer</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_masked_lm_positions</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">return_all_layer_outputs</span></code> etc. For more details please refer
+<a class="reference internal" href="#tf_transformers.models.T5Encoder" title="tf_transformers.models.T5Encoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">T5Encoder</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>LegacyModel/LegacyLayer with or without config.</p>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span>  <span class="n">T5Model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">T5Model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;t5-small&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoder_sequence_length</span> <span class="o">=</span> <span class="mi">64</span> <span class="c1"># Encoder</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoder_sequence_length</span> <span class="o">=</span> <span class="mi">37</span> <span class="c1"># Decoder</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoder_input_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">encoder_sequence_length</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoder_input_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">decoder_sequence_length</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoder_input_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">encoder_input_ids</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{{</span><span class="s1">&#39;encoder_input_ids&#39;</span><span class="p">:</span> <span class="n">input_ids</span><span class="p">,</span> <span class="s1">&#39;encoder_input_mask&#39;</span><span class="p">:</span> <span class="n">encoder_input_mask</span><span class="p">,</span> <span class="s2">&quot;decoder_input_ids&quot;</span><span class="p">:</span> <span class="n">decoder_input_ids</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Model.get_config">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">get_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5_model.html#T5Model.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Model.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a config from Huggingface hub if present</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Model.update_config">
+<code class="sig-name descname"><span class="pre">update_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tft_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hf_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5_model.html#T5Model.update_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Model.update_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update tft config with hf config. Useful while converting.
+:type tft_config: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>
+:param tft_config: Dict of TFT configuration.
+:type hf_config: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>
+:param hf_config: Dict of HF configuration.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="t5encoder">
+<h2>T5Encoder<a class="headerlink" href="#t5encoder" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.T5Encoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">T5Encoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5.html#T5Encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>T5 Model :</p>
+<p>This model inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyLayer</span></code>. Check the superclass documentation details
+and design inspiration of LegacyLayer.
+This model is also a <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers">tf.keras.layers.Layer</a> subclass. Use
+it as a regular TF 2.0 Keras layer and refer to the TF 2.0 documentation for all matter related to general usage
+and behavior.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>TF 2.0 models accepts input formats as Dict:
+- having all inputs as dict .</p>
+<p>This is recommended and useful when using <code class="xref py py-meth docutils literal notranslate"><span class="pre">tf.keras.Model.fit()</span></code> method which currently requires having all
+the tensors in the first argument of the model call function: <code class="xref py py-obj docutils literal notranslate"><span class="pre">model(inputs)</span></code>.</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors associated to the input names given in the docstring:
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">model({&quot;input_ids&quot;:</span> <span class="pre">input_ids,&quot;input_mask&quot;:</span> <span class="pre">input_mask,</span> <span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">input_type_ids})</span></code>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerConfig</span></code>) – Model configuration.</p></li>
+<li><p><strong>mask_mode</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – <p>Mask Mode defines the type of mask used in the architecture.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">causal</span></code>: Casual LM masking with masking upper triangular matrix eg: GPT2).</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">user_defined</span></code>: User defined LM masking eg: Bert, Albert, Roberta etc).</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">prefix</span></code>: Casual LM masking but bidirectional to model inputs).</p>
+</p></li>
+<li><p><strong>name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Model name.</p></li>
+<li><p><strong>use_dropout</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – If True only dropout will be enabled.</p></li>
+<li><p><strong>is_training</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – This is used to mainly switch to auto regressive tasks.</p></li>
+<li><p><strong>use_decoder</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – If true we will use <a class="reference internal" href="#tf_transformers.models.T5Encoder.call_decoder" title="tf_transformers.models.T5Encoder.call_decoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder()</span></code></a> while <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True</span></code>.</p></li>
+<li><p><strong>batch_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>) – Batch size.</p></li>
+<li><p><strong>sequence_length</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>) – If <code class="xref py py-obj docutils literal notranslate"><span class="pre">position_embedding_type='absolute'</span></code>, sequence length should be with in
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">tf_transformers.models.t5.T5Config.max_position_embeddings</span></code> limit.</p></li>
+<li><p><strong>use_mlm_layer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>) – If True, we will add
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">tf.keras.layers.Layer()</span></code> head as in case of Bert, Albert etc.</p></li>
+<li><p><strong>use_masked_lm_positions</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>) – If training
+an <cite>MLM Language Model</cite>, set <cite>use_masked_lm_positions=True</cite>. If it is True,
+inputs should have <code class="xref py py-obj docutils literal notranslate"><span class="pre">masked_lm_positions</span></code> in inputs . <cite>(batch_size x masked_labels_length)</cite>.</p></li>
+<li><p><strong>return_all_layer_outputs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>) – If True,
+outputs from all layers will be returned to the model.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tf_transformers.models.T5Encoder.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5.html#T5Encoder.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Encoder.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>T5 Call method :
+All calls to the model will be routed from here. This routing is more of like a <code class="xref py py-obj docutils literal notranslate"><span class="pre">Factory</span></code> concept.
+This routing will be decided, when the model is initialized. This cannot be changed dynamically.
+For more details, check <code class="xref py py-class docutils literal notranslate"><span class="pre">get_call_method</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A call cannot be changed <strong>dynamically</strong>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True/False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=True</span></code>:  return <a class="reference internal" href="#tf_transformers.models.T5Encoder.call_decoder" title="tf_transformers.models.T5Encoder.call_decoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder()</span></code></a>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True/False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=False</span></code>: return <a class="reference internal" href="#tf_transformers.models.T5Encoder.call_encoder" title="tf_transformers.models.T5Encoder.call_encoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_encoder()</span></code></a>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=True</span></code> and if
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code>: return <a class="reference internal" href="#tf_transformers.models.T5Encoder.call_decoder_auto_regressive" title="tf_transformers.models.T5Encoder.call_decoder_auto_regressive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder_auto_regressive()</span></code></a>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=False</span></code> and if
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code>: return <a class="reference internal" href="#tf_transformers.models.T5Encoder.call_encoder_auto_regressive" title="tf_transformers.models.T5Encoder.call_encoder_auto_regressive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_encoder_auto_regressive()</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Encoder.call_decoder">
+<code class="sig-name descname"><span class="pre">call_decoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5.html#T5Encoder.call_decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Encoder.call_decoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of T5 Decoder :
+An Encoder in general accepts <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_ids</span></code> and optional (<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="loweralpha simple">
+<li><p><strong>Inputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models accepts input formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all inputs as dict .</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors.</p>
+<p>Note: <code class="xref py py-obj docutils literal notranslate"><span class="pre">decoder_encoder_mask</span></code>, will be created automatically inside.</p>
+<ol class="loweralpha simple" start="2">
+<li><p><strong>Outputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models returns output formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all outputs as dict .</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Input</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Dict of tf.Tensor (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_ids&quot;:</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">decoder_sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span>
+<span class="pre">decoder_sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_mask&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">decoder_sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;encoder_hidden_states&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span>
+<span class="pre">encoder_sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size),</span>
+<span class="pre">:obj:</span></code>”decoder_encoder_mask”: tf.float32 (batch_size x
+encoder_sequence_length x decoder_sequence_length))</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dict of tf.Tensor.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)</span></code>)</p>
+<p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">return_all_layers=True</span></code>:</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)]</span></code>)</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Encoder.call_decoder_auto_regressive">
+<code class="sig-name descname"><span class="pre">call_decoder_auto_regressive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5.html#T5Encoder.call_decoder_auto_regressive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Encoder.call_decoder_auto_regressive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of T5 Decoder Auto Regressive/ Text Generation :
+A Decoder Auto Regressive model in general accepts <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_ids</span></code>, optional (<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>), <code class="xref py py-obj docutils literal notranslate"><span class="pre">all_cache_key</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">all_cache_value</span></code>.</p>
+<p>This is required for caching. But a user need not to be worry about this, as this will be
+encapsulated/abstracted inside <code class="xref py py-class docutils literal notranslate"><span class="pre">TextDecoder</span></code>. The main difference between Encoder Auto Regressive
+is, here no need of obj:<cite>past_length</cite>, as variable sequence length is not an issue.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="loweralpha simple">
+<li><p><strong>Inputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models accepts input formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all inputs as dict .</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors.</p>
+<ol class="loweralpha simple" start="2">
+<li><p><strong>Outputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models returns output formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all outputs as dict .</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Input</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Dict of tf.Tensor (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_ids&quot;:</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_mask&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dict of tf.Tensor.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;last_token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span>&#160; <span class="pre">vocab_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>
+)</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Encoder.call_encoder">
+<code class="sig-name descname"><span class="pre">call_encoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5.html#T5Encoder.call_encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Encoder.call_encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of T5 :
+An Encoder in general accepts <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_ids</span></code> and optional (<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="loweralpha simple">
+<li><p><strong>Inputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models accepts input formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all inputs as dict .</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code>
+- 1 for tokens that are <strong>not masked</strong>,
+- 0 for tokens that are <strong>masked</strong>.</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>
+- 0 for tokens that are <strong>Sentence A</strong>,
+- 1 for tokens that are <strong>Sentence B</strong>. (Not applicable to all. <strong>Roberta</strong> has only <strong>0</strong>.)</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors.</p>
+<ol class="loweralpha simple" start="2">
+<li><p><strong>Outputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models returns output formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all outputs as dict .</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Input</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Dict of tf.Tensor (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_ids&quot;:</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_mask&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dict of tf.Tensor.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)</span></code>)</p>
+<p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">return_all_layers=True</span></code>:</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)]</span></code>)</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Encoder.call_encoder_auto_regressive">
+<code class="sig-name descname"><span class="pre">call_encoder_auto_regressive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5.html#T5Encoder.call_encoder_auto_regressive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Encoder.call_encoder_auto_regressive" title="Permalink to this definition">¶</a></dt>
+<dd><p>T5 Encoder Text Generation :T5 encoder standalone text generation is not yet implemnted due to relative postional embedding</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Encoder.from_config">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_objects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5.html#T5Encoder.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Encoder.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a layer from its config.</p>
+<p>This method is the reverse of <cite>get_config</cite>,
+capable of instantiating the same layer from the config
+dictionary. It does not handle layer connectivity
+(handled by Network), nor weights (handled by <cite>set_weights</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the
+output of get_config.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A layer instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Encoder.get_config">
+<code class="sig-name descname"><span class="pre">get_config</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5.html#T5Encoder.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Encoder.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Configuration dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Encoder.get_embedding_table">
+<code class="sig-name descname"><span class="pre">get_embedding_table</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5.html#T5Encoder.get_embedding_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Encoder.get_embedding_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Embedding Table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Encoder.get_model">
+<code class="sig-name descname"><span class="pre">get_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialize_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/t5/t5.html#T5Encoder.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.T5Encoder.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
+:type self: <code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyLayer</span></code>
+:param self: Model layer
+:type initialize_only: <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>
+:param initialize_only: If False, model (LegacyModel) wont be returned.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.T5Encoder.transformer_layers">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">transformer_layers</span></code><a class="headerlink" href="#tf_transformers.models.T5Encoder.transformer_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of Transformer layers in the encoder.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gpt2.html" class="btn btn-neutral float-left" title="OpenAI GPT2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mt5.html" class="btn btn-neutral float-right" title="MT5" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

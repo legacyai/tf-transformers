@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta property="og:title" content="EncoderDecoder" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="model_doc/encoder_decoder.html" />
+  <meta property="og:description" content="Overview: The EncoderDecoder model also known as Seq2Seq Model, consists of Encoder and Decoder models, like Bert and GPT2 or Bert and Bert itself. For more ..." />
+  <meta property="og:image" content="png location" />
+  <meta property="og:image:alt" content="EncoderDecoder" />
+  <meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EncoderDecoder &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Notebooks/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>EncoderDecoder</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/model_doc/encoder_decoder.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="encoderdecoder">
+<h1>EncoderDecoder<a class="headerlink" href="#encoderdecoder" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The EncoderDecoder model also known as Seq2Seq Model, consists of Encoder and Decoder models, like
+Bert and GPT2 or Bert and Bert itself. For more details, please refer to Bart model <a class="reference internal" href="bart.html"><span class="doc">Bart</span></a> or T5 Model
+<a class="reference internal" href="t5.html"><span class="doc">T5</span></a> .
+This consits of:
+- Encoder and Decoder
+- Cross attention between Decoder and Encoder</p>
+</div>
+<div class="section" id="encoderdecoder-seq2seq">
+<h2>EncoderDecoder (Seq2Seq)<a class="headerlink" href="#encoderdecoder-seq2seq" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.EncoderDecoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">EncoderDecoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/encoder_decoder/encoder_decoder.html#EncoderDecoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.EncoderDecoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encoder Decoder Model</p>
+<dl class="py method">
+<dt id="tf_transformers.models.EncoderDecoder.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/encoder_decoder/encoder_decoder.html#EncoderDecoder.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.EncoderDecoder.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> – dict of tf.tensor</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dict of tf.tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.EncoderDecoder.call_auto_regressive">
+<code class="sig-name descname"><span class="pre">call_auto_regressive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/encoder_decoder/encoder_decoder.html#EncoderDecoder.call_auto_regressive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.EncoderDecoder.call_auto_regressive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of an EncoderDecoder Model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> (<em>[</em><em>dict of tf.Tensor</em><em>]</em>) – This is the input to the model.</p></li>
+<li><p><strong>--&gt; tf.int32</strong> (<em>'decoder_input_type_ids'</em>) – </p></li>
+<li><p><strong>--&gt; tf.int32</strong> – </p></li>
+<li><p><strong>--&gt; tf.int32</strong> – </p></li>
+<li><p><strong>--&gt; tf.int32</strong> – </p></li>
+<li><p><strong>--&gt; tf.int32</strong> – </p></li>
+<li><p><strong>--&gt; tf.int32</strong> – </p></li>
+<li><p><strong>--&gt; tf.float32</strong><strong> (</strong><strong>num_hidden_layers</strong> (<em>'decoder_all_cache_key'</em>) – batch_size ,
+num_attention_heads ,
+sequence_length,
+attention_head_size)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>:param<span class="classifier">batch_size ,</span></dt><dd><p>num_attention_heads ,
+sequence_length,
+attention_head_size)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>--&gt; tf.float32</strong><strong> (</strong><strong>num_hidden_layers</strong> (<em>'decoder_all_cache_value'</em>) – batch_size ,
+num_attention_heads ,
+sequence_length,
+attention_head_size)</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>:param<span class="classifier">batch_size ,</span></dt><dd><p>num_attention_heads ,
+sequence_length,
+attention_head_size)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>Output from the model</p>
+<p>’cls_output’        –&gt; tf.float32 (b x s) # optional
+‘token_embeddings’  –&gt; tf.float32 (b x s x h)
+‘all_layer_token_embeddings’ –&gt; tf.float32 (List of (b x s x h)</p>
+<blockquote>
+<div><p>from all layers)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>’all_layer_cls_output’       –&gt; tf.float32 (List of (b x s)</dt><dd><p>from all layers)</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>[dict of tf.Tensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.EncoderDecoder.call_forward">
+<code class="sig-name descname"><span class="pre">call_forward</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/encoder_decoder/encoder_decoder.html#EncoderDecoder.call_forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.EncoderDecoder.call_forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of an EncoderDecoder Model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> (<em>[</em><em>dict of tf.Tensor</em><em>]</em>) – This is the input to the model.</p></li>
+<li><p><strong>--&gt; tf.int32</strong> (<em>'decoder_input_type_ids'</em>) – </p></li>
+<li><p><strong>--&gt; tf.int32</strong> – </p></li>
+<li><p><strong>--&gt; tf.int32</strong> – </p></li>
+<li><p><strong>--&gt; tf.int32</strong> – </p></li>
+<li><p><strong>--&gt; tf.int32</strong> – </p></li>
+<li><p><strong>--&gt; tf.int32</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Output from the model</p>
+<p>’cls_output’        –&gt; tf.float32 (b x s) # optional
+‘token_embeddings’  –&gt; tf.float32 (b x s x h)
+‘all_layer_token_embeddings’ –&gt; tf.float32 (List of (b x s x h)</p>
+<blockquote>
+<div><p>from all layers)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>’all_layer_cls_output’       –&gt; tf.float32 (List of (b x s)</dt><dd><p>from all layers)</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[dict of tf.Tensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.EncoderDecoder.get_model">
+<code class="sig-name descname"><span class="pre">get_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialize_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/encoder_decoder/encoder_decoder.html#EncoderDecoder.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.EncoderDecoder.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
+:param self: model (tf.keras.Layer) instance
+:param initialize_only: bool</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

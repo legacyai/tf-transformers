@@ -1,6 +1,0 @@
-task:
-    name: sst2
-data:
-  name: sst2
-  num_classes: 2
-  max_seq_length: 256

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tf_transformers.models.encoder_decoder.encoder_decoder &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html"><img src="../../../../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Notebooks/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>tf_transformers.models.encoder_decoder.encoder_decoder</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tf_transformers.models.encoder_decoder.encoder_decoder</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding=utf-8</span>
+<span class="c1"># Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ==============================================================================</span>
+<span class="sd">&quot;&quot;&quot;The main wrapper to wrap Encoder Decoder models&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">absl</span> <span class="kn">import</span> <span class="n">logging</span>
+
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">LegacyLayer</span><span class="p">,</span> <span class="n">LegacyModel</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.layers.mask</span> <span class="kn">import</span> <span class="n">CrossAttentionMask</span>
+
+
+<span class="k">def</span> <span class="nf">assert_shapes</span><span class="p">(</span><span class="n">encoder_embeddings</span><span class="p">,</span> <span class="n">decoder_embeddings</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assert shapes</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        encoder_embeddings tf.tensor</span>
+<span class="sd">        decoder_embeddings tf.tensor</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: [description]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">encoder_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">encoder_embeddings</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">decoder_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">decoder_embeddings</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">encoder_shape</span> <span class="o">!=</span> <span class="n">decoder_shape</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Encoder shape </span><span class="si">{}</span><span class="s2"> not matching with Decoder shape </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">encoder_shape</span><span class="p">,</span> <span class="n">decoder_shape</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kc">True</span>
+
+
+<span class="k">def</span> <span class="nf">share_embedding_layers</span><span class="p">(</span><span class="n">encoder_layer</span><span class="p">,</span> <span class="n">decoder_layer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Share Embeddings Layers</span>
+<span class="sd">    Args:</span>
+<span class="sd">        encoder_layer ([tf.keras.layers.Layer]): Encoder</span>
+<span class="sd">        decoder_layer ([tf.keras.layers.Layer]): Decoder</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">assert_shapes</span><span class="p">(</span><span class="n">encoder_layer</span><span class="o">.</span><span class="n">_embedding_layer</span><span class="o">.</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_embedding_layer</span><span class="o">.</span><span class="n">embeddings</span><span class="p">)</span>
+    <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_embedding_layer</span> <span class="o">=</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_embedding_layer</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_type_embeddings_layer</span> <span class="ow">and</span> <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_type_embeddings_layer</span><span class="p">:</span>
+            <span class="n">assert_shapes</span><span class="p">(</span>
+                <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_type_embeddings_layer</span><span class="o">.</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_type_embeddings_layer</span><span class="o">.</span><span class="n">embeddings</span>
+            <span class="p">)</span>
+            <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_type_embeddings_layer</span> <span class="o">=</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_type_embeddings_layer</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_positional_embedding_layer</span> <span class="ow">and</span> <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_positional_embedding_layer</span><span class="p">:</span>
+            <span class="n">assert_shapes</span><span class="p">(</span>
+                <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_positional_embedding_layer</span><span class="o">.</span><span class="n">embeddings</span><span class="p">,</span>
+                <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_positional_embedding_layer</span><span class="o">.</span><span class="n">embeddings</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_positional_embedding_layer</span> <span class="o">=</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_positional_embedding_layer</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">share_encoder_layers</span><span class="p">(</span><span class="n">encoder_layer</span><span class="p">,</span> <span class="n">decoder_layer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Share Encoder layers with Decoder</span>
+<span class="sd">    Args:</span>
+<span class="sd">        encoder_layer ([tf.keras.layers.Layer]): Encoder</span>
+<span class="sd">        decoder_layer ([tf.keras.layers.Layer]): Decoder</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">enc_layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">encoder_layer</span><span class="o">.</span><span class="n">_transformer_layers</span><span class="p">):</span>
+        <span class="n">dec_layer</span> <span class="o">=</span> <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_transformer_layers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># If this doesn&#39;t match, we will be in trouble</span>
+        <span class="c1"># if enc_layer._attention_layer._use_auto_regressive == dec_layer._attention_layer._use_auto_regressive:</span>
+        <span class="n">dec_layer</span><span class="o">.</span><span class="n">_attention_layer</span> <span class="o">=</span> <span class="n">enc_layer</span><span class="o">.</span><span class="n">_attention_layer</span>
+
+        <span class="n">dec_layer</span><span class="o">.</span><span class="n">_attention_output_dense</span> <span class="o">=</span> <span class="n">enc_layer</span><span class="o">.</span><span class="n">_attention_output_dense</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dec_layer</span><span class="o">.</span><span class="n">_attention_layer_norm</span> <span class="o">=</span> <span class="n">enc_layer</span><span class="o">.</span><span class="n">_attention_layer_norm</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dec_layer</span><span class="o">.</span><span class="n">_intermediate_dense</span> <span class="o">=</span> <span class="n">enc_layer</span><span class="o">.</span><span class="n">_intermediate_dense</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dec_layer</span><span class="o">.</span><span class="n">_output_dense</span> <span class="o">=</span> <span class="n">enc_layer</span><span class="o">.</span><span class="n">_output_dense</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dec_layer</span><span class="o">.</span><span class="n">_output_layer_norm</span> <span class="o">=</span> <span class="n">enc_layer</span><span class="o">.</span><span class="n">_output_layer_norm</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_pooler_layer</span> <span class="ow">and</span> <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_pooler_layer</span><span class="p">:</span>
+            <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_pooler_layer</span> <span class="o">=</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_pooler_layer</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_use_mlm_layer</span> <span class="ow">and</span> <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_use_mlm_layer</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_masked_lm_layer</span> <span class="ow">and</span> <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_masked_lm_layer</span><span class="p">:</span>
+                <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_masked_lm_layer</span> <span class="o">=</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_masked_lm_layer</span>
+            <span class="k">if</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_masked_lm_bias</span> <span class="ow">and</span> <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_masked_lm_bias</span><span class="p">:</span>
+                <span class="n">decoder_layer</span><span class="o">.</span><span class="n">_masked_lm_bias</span> <span class="o">=</span> <span class="n">encoder_layer</span><span class="o">.</span><span class="n">_masked_lm_bias</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="EncoderDecoder"><a class="viewcode-back" href="../../../../model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder">[docs]</a><span class="k">class</span> <span class="nc">EncoderDecoder</span><span class="p">(</span><span class="n">LegacyLayer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Encoder Decoder Model&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">encoder</span><span class="p">,</span>
+        <span class="n">decoder</span><span class="p">,</span>
+        <span class="n">share_embeddings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">share_encoder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">is_training</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">use_dropout</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">decoder_start_token_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        EncoderDecoder is a wrapper to wrap and connect all Models.</span>
+<span class="sd">        .. note::</span>
+
+<span class="sd">            EncoderDecoder Models required an encoder and decoder layer.</span>
+<span class="sd">            This encoder and decoder should be from :class:`tf_transformers.core.LegacyLayer`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            encoder (:obj:`str`): Encoder ( :class:`tf_transformers.core.LegacyLayer` )</span>
+<span class="sd">            decoder (:obj:`str`): Decoder ( :class:`tf_transformers.core.LegacyLayer` )</span>
+<span class="sd">            share_embeddings (:obj:`bool`): Whether to share embeddings. But recommended it oustide the</span>
+<span class="sd">            class. Check following example with :class:`tf_transformers.model.BartEncoder```.</span>
+<span class="sd">            share_encoder (:obj:`bool`): Whether to share whole encoder with decoder. Its little</span>
+<span class="sd">            buggy and experimental.</span>
+<span class="sd">            is_training (:obj:`bool`): To enable dropout we have to enable this.</span>
+<span class="sd">            use_dropout (:obj:`bool`): Whether to use dropout.</span>
+<span class="sd">            decoder_start_token_id (:obj:`int`): This should be set, if not provide from decoder config.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            LegacyModel/LegacyLayer with or without config.</span>
+
+<span class="sd">        Examples::</span>
+
+<span class="sd">            &gt;&gt;&gt; from tf_transformers.models import  BartEncoder, EncodeDecoder</span>
+<span class="sd">            &gt;&gt;&gt; encoder_layer = Encoder(config=config_dict, name=&quot;bart_encoder&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; decoder_layer = Encoder(config=config_dict, name=&quot;bart_encoder&quot;,</span>
+<span class="sd">                                    use_decoder=True,</span>
+<span class="sd">                                    mask_mode=&quot;causal&quot;,</span>
+<span class="sd">            )</span>
+<span class="sd">            &gt;&gt;&gt; decoder_layer._embedding_layer = encoder_layer._embedding_layer # Share embeddings</span>
+<span class="sd">            &gt;&gt;&gt; model_layer = EncoderDecoder(encoder_layer, decoder_layer)</span>
+<span class="sd">            &gt;&gt;&gt; model = model_layer.get_model()</span>
+<span class="sd">            &gt;&gt;&gt; batch_size = 5</span>
+<span class="sd">            &gt;&gt;&gt; encoder_sequence_length = 64 # Encoder</span>
+<span class="sd">            &gt;&gt;&gt; decoder_sequence_length = 37 # Decoder</span>
+<span class="sd">            &gt;&gt;&gt; encoder_input_ids = tf.random.uniform(shape=(batch_size, encoder_sequence_length), dtype=tf.int32)</span>
+<span class="sd">            &gt;&gt;&gt; decoder_input_ids = tf.random.uniform(shape=(batch_size, decoder_sequence_length), dtype=tf.int32)</span>
+<span class="sd">            &gt;&gt;&gt; encoder_input_mask = tf.ones_like(encoder_input_ids)</span>
+<span class="sd">            &gt;&gt;&gt; inputs = {{&#39;encoder_input_ids&#39;: input_ids, &#39;encoder_input_mask&#39;: encoder_input_mask, \</span>
+<span class="sd">                &quot;decoder_input_ids&quot;: decoder_input_ids}</span>
+<span class="sd">            &gt;&gt;&gt; outputs = model(inputs)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_encoder</span> <span class="o">=</span> <span class="n">encoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span> <span class="o">=</span> <span class="n">decoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_share_embeddings</span> <span class="o">=</span> <span class="n">share_embeddings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_share_encoder</span> <span class="o">=</span> <span class="n">share_encoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_training</span> <span class="o">=</span> <span class="n">is_training</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_dropout</span> <span class="o">=</span> <span class="n">use_dropout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoder_start_token_id</span> <span class="o">=</span> <span class="n">decoder_start_token_id</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_encoder_config_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder</span><span class="o">.</span><span class="n">_config_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decoder_config_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">_config_dict</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;tf_transformers&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_share_embeddings</span><span class="p">:</span>
+            <span class="n">share_embedding_layers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_share_encoder</span><span class="p">:</span>
+            <span class="n">share_encoder_layers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_encoder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">EncoderDecoder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">is_training</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_dropout</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder</span><span class="o">.</span><span class="n">_mask_mode</span> <span class="o">!=</span> <span class="s2">&quot;user_defined&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;mask_mode for encoder should be `user-defined`.&quot;</span><span class="p">)</span>
+        <span class="c1"># Two different hidden dimension has to be changed</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder_config_dict</span><span class="p">[</span><span class="s2">&quot;embedding_size&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder_config_dict</span><span class="p">[</span><span class="s2">&quot;embedding_size&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_encoder_decoder_projection</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_encoder_config_dict</span><span class="p">[</span><span class="s2">&quot;embedding_size&quot;</span><span class="p">],</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_encoder_decoder_projection</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span>
+
+        <span class="c1"># Initialize model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_ouputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">initialize_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EncoderDecoder.get_model"><a class="viewcode-back" href="../../../../model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.get_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialize_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            self: model (tf.keras.Layer) instance</span>
+<span class="sd">            initialize_only: bool</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># encoder_sequence_length = self._encoder._sequence_length</span>
+        <span class="c1"># decoder_sequence_length = self._decoder._sequence_length</span>
+
+        <span class="n">encoder_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder</span><span class="o">.</span><span class="n">model_inputs</span>
+        <span class="n">decoder_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">model_inputs</span>
+
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Convert &#39;input_ids&#39; --&gt; &#39;encoder_input_ids&#39;</span>
+        <span class="c1"># Add &#39;encoder&#39; prefix</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">encoder_inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">,</span> <span class="s2">&quot;input_mask&quot;</span><span class="p">,</span> <span class="s2">&quot;input_type_ids&quot;</span><span class="p">]:</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">encoder_inputs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;encoder_&quot;</span> <span class="o">+</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+                    <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">encoder_inputs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;encoder_&quot;</span> <span class="o">+</span> <span class="n">k</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">encoder_inputs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;encoder_&quot;</span> <span class="o">+</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="c1"># Convert &#39;input_ids&#39; --&gt; &#39;decoder_input_ids&#39;</span>
+        <span class="c1"># Add &#39;decoder&#39; prefix</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">decoder_inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Do not add prefix if &#39;decoder&#39; or &#39;encoder&#39; is present</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;decoder&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;encoder&quot;</span><span class="p">):</span>
+                <span class="n">inputs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                <span class="k">continue</span>
+            <span class="c1"># We don&#39;t want to change name of all_cache_key to decoder_all_cache_key</span>
+            <span class="c1"># and similarily for all_cache_value . As it will raise issues</span>
+            <span class="c1"># while serializing</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all_cache_key&quot;</span><span class="p">,</span> <span class="s2">&quot;all_cache_value&quot;</span><span class="p">]:</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">decoder_inputs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;decoder_&quot;</span> <span class="o">+</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+                    <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">decoder_inputs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;decoder_&quot;</span> <span class="o">+</span> <span class="n">k</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">decoder_inputs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;decoder_&quot;</span> <span class="o">+</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="k">del</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;decoder_encoder_mask&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">_use_auto_regressive</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;encoder_hidden_states&quot;</span><span class="p">]</span>
+        <span class="n">layer_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initialize_only</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">layer_outputs</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">LegacyModel</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">layer_outputs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_name</span><span class="p">)</span>
+        <span class="c1"># Add config</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;encoder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder</span><span class="o">.</span><span class="n">_config_dict</span>
+        <span class="c1"># Check for decoder start token id in decoder</span>
+        <span class="k">if</span> <span class="s2">&quot;decoder_start_token_id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">_config_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_start_token_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;In EncoderDecoder setting, `decoder_start_token_id` has to set either from config or</span><span class="se">\</span>
+<span class="s2">                    constructor. Assuming we are in Auto Regressive setting&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Setting decoder_start_token_id = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder_start_token_id</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">_config_dict</span><span class="p">[</span><span class="s2">&quot;decoder_start_token_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_start_token_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If it is None in config</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">_config_dict</span><span class="p">[</span><span class="s2">&quot;decoder_start_token_id&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_start_token_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;In EncoderDecoder setting, `decoder_start_token_id` has to set either from config or</span><span class="se">\</span>
+<span class="s2">                        constructor. Assuming we are in Auto Regressive setting&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># If it is set in encoder-decoder constructor use it</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Setting decoder_start_token_id = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder_start_token_id</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">_config_dict</span><span class="p">[</span><span class="s2">&quot;decoder_start_token_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder_start_token_id</span>
+
+        <span class="n">config</span><span class="p">[</span><span class="s2">&quot;decoder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">_config_dict</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">model_config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="EncoderDecoder.call_forward"><a class="viewcode-back" href="../../../../model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.call_forward">[docs]</a>    <span class="k">def</span> <span class="nf">call_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward pass of an EncoderDecoder Model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            inputs ([dict of tf.Tensor]): This is the input to the model.</span>
+
+<span class="sd">            &#39;encoder_input_ids&#39;         --&gt; tf.int32 (b x s)</span>
+<span class="sd">            &#39;encoder_input_mask&#39;        --&gt; tf.int32 (b x s) # optional</span>
+<span class="sd">            &#39;encoder_input_type_ids&#39;    --&gt; tf.int32 (b x s) # optional</span>
+
+<span class="sd">            &#39;decoder_input_ids&#39;         --&gt; tf.int32 (b x s)</span>
+<span class="sd">            &#39;decoder_input_mask&#39;        --&gt; tf.int32 (b x s) # optional</span>
+<span class="sd">            &#39;decoder_input_type_ids&#39;    --&gt; tf.int32 (b x s) # optional</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            [dict of tf.Tensor]: Output from the model</span>
+
+<span class="sd">            &#39;cls_output&#39;        --&gt; tf.float32 (b x s) # optional</span>
+<span class="sd">            &#39;token_embeddings&#39;  --&gt; tf.float32 (b x s x h)</span>
+<span class="sd">            &#39;all_layer_token_embeddings&#39; --&gt; tf.float32 (List of (b x s x h)</span>
+<span class="sd">                                            from all layers)</span>
+<span class="sd">            &#39;all_layer_cls_output&#39;       --&gt; tf.float32 (List of (b x s)</span>
+<span class="sd">                                            from all layers)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Replace &#39;encoder_input_ids&#39;      to &#39;input_ids&#39;</span>
+        <span class="c1"># Replace &#39;encoder_input_mask&#39;     to &#39;input_mask&#39;</span>
+        <span class="c1"># Replace &#39;encoder_input_type_ids&#39; to &#39;input_type_ids&#39;</span>
+        <span class="n">encoder_inputs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;encoder_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">):</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;encoder_&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;encoder_hidden_states&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="c1"># Replace &#39;decoder_input_ids&#39;      to &#39;input_ids&#39;</span>
+        <span class="c1"># Replace &#39;decoder_input_mask&#39;     to &#39;input_mask&#39;</span>
+        <span class="c1"># Replace &#39;decoder_input_type_ids&#39; to &#39;input_type_ids&#39;</span>
+        <span class="n">decoder_inputs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;decoder_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">):</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;decoder_&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;decoder_encoder_mask&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Call Encoder and take the last hidden states (B x S x E)</span>
+        <span class="n">encoder_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder</span><span class="p">(</span><span class="n">encoder_inputs</span><span class="p">)</span>
+        <span class="n">encoder_hidden_states</span> <span class="o">=</span> <span class="n">encoder_outputs</span><span class="p">[</span><span class="s2">&quot;token_embeddings&quot;</span><span class="p">]</span>
+        <span class="n">encoder_hidden_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder_decoder_projection</span><span class="p">(</span><span class="n">encoder_hidden_states</span><span class="p">)</span>
+
+        <span class="c1"># This is decoder_encoder_mask</span>
+        <span class="n">decoder_encoder_mask</span> <span class="o">=</span> <span class="n">CrossAttentionMask</span><span class="p">()([</span><span class="n">decoder_inputs</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">],</span> <span class="n">encoder_inputs</span><span class="p">[</span><span class="s2">&quot;input_mask&quot;</span><span class="p">]])</span>
+
+        <span class="c1"># Add the inputs to decoder</span>
+        <span class="n">decoder_inputs</span><span class="p">[</span><span class="s2">&quot;encoder_hidden_states&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder_hidden_states</span>
+        <span class="n">decoder_inputs</span><span class="p">[</span><span class="s2">&quot;decoder_encoder_mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decoder_encoder_mask</span>
+
+        <span class="n">decoder_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="p">(</span><span class="n">decoder_inputs</span><span class="p">)</span>
+        <span class="n">decoder_outputs</span><span class="p">[</span><span class="s2">&quot;encoder_hidden_states&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder_hidden_states</span>
+        <span class="k">return</span> <span class="n">decoder_outputs</span></div>
+
+<div class="viewcode-block" id="EncoderDecoder.call_auto_regressive"><a class="viewcode-back" href="../../../../model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.call_auto_regressive">[docs]</a>    <span class="k">def</span> <span class="nf">call_auto_regressive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward pass of an EncoderDecoder Model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            inputs ([dict of tf.Tensor]): This is the input to the model.</span>
+
+<span class="sd">            &#39;encoder_input_ids&#39;         --&gt; tf.int32 (b x s)</span>
+<span class="sd">            &#39;encoder_input_mask&#39;        --&gt; tf.int32 (b x s) # optional</span>
+<span class="sd">            &#39;encoder_input_type_ids&#39;    --&gt; tf.int32 (b x s) # optional</span>
+
+<span class="sd">            &#39;decoder_input_ids&#39;         --&gt; tf.int32 (b x s)</span>
+<span class="sd">            &#39;decoder_input_mask&#39;        --&gt; tf.int32 (b x s) # optional</span>
+<span class="sd">            &#39;decoder_input_type_ids&#39;    --&gt; tf.int32 (b x s) # optional</span>
+
+<span class="sd">            &#39;decoder_all_cache_key&#39;     --&gt; tf.float32 (num_hidden_layers ,</span>
+<span class="sd">                                    batch_size ,</span>
+<span class="sd">                                    num_attention_heads ,</span>
+<span class="sd">                                    sequence_length,</span>
+<span class="sd">                                    attention_head_size)</span>
+
+<span class="sd">            &#39;decoder_all_cache_value&#39;    --&gt; tf.float32 (num_hidden_layers ,</span>
+<span class="sd">                                    batch_size ,</span>
+<span class="sd">                                    num_attention_heads ,</span>
+<span class="sd">                                    sequence_length,</span>
+<span class="sd">                                    attention_head_size)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            [dict of tf.Tensor]: Output from the model</span>
+
+<span class="sd">            &#39;cls_output&#39;        --&gt; tf.float32 (b x s) # optional</span>
+<span class="sd">            &#39;token_embeddings&#39;  --&gt; tf.float32 (b x s x h)</span>
+<span class="sd">            &#39;all_layer_token_embeddings&#39; --&gt; tf.float32 (List of (b x s x h)</span>
+<span class="sd">                                            from all layers)</span>
+<span class="sd">            &#39;all_layer_cls_output&#39;       --&gt; tf.float32 (List of (b x s)</span>
+<span class="sd">                                            from all layers)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">encoder_inputs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;encoder_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">):</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;encoder_&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;encoder_hidden_states&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="c1"># encoder_inputs[&quot;encoder_hidden_states&quot;] = inputs[&quot;encoder_hidden_states&quot;]</span>
+
+        <span class="n">decoder_inputs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;decoder_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">):</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;decoder_&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;decoder_encoder_mask&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="n">decoder_encoder_mask</span> <span class="o">=</span> <span class="n">CrossAttentionMask</span><span class="p">()([</span><span class="n">decoder_inputs</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">],</span> <span class="n">encoder_inputs</span><span class="p">[</span><span class="s2">&quot;input_mask&quot;</span><span class="p">]])</span>
+
+        <span class="c1"># While decoding we have to calculate it only once</span>
+        <span class="k">def</span> <span class="nf">use_cache_encoder</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;encoder_hidden_states&quot;</span><span class="p">])</span>
+
+        <span class="c1"># First step of decoding process</span>
+        <span class="k">def</span> <span class="nf">calculate_encoder_hidden_state</span><span class="p">():</span>
+            <span class="n">encoder_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder</span><span class="p">(</span><span class="n">encoder_inputs</span><span class="p">)</span>
+            <span class="n">encoder_hidden_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encoder_decoder_projection</span><span class="p">(</span><span class="n">encoder_outputs</span><span class="p">[</span><span class="s2">&quot;token_embeddings&quot;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">encoder_hidden_states</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="n">decoder_inputs</span><span class="p">[</span><span class="s2">&quot;all_cache_key&quot;</span><span class="p">]</span>
+        <span class="n">encoder_hidden_states</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">cache_key</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">),</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="n">calculate_encoder_hidden_state</span><span class="p">(),</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="n">use_cache_encoder</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+        <span class="n">decoder_inputs</span><span class="p">[</span><span class="s2">&quot;encoder_hidden_states&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder_hidden_states</span>
+        <span class="n">decoder_inputs</span><span class="p">[</span><span class="s2">&quot;decoder_encoder_mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decoder_encoder_mask</span>
+
+        <span class="n">decoder_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="p">(</span><span class="n">decoder_inputs</span><span class="p">)</span>
+        <span class="n">decoder_outputs</span><span class="p">[</span><span class="s2">&quot;encoder_hidden_states&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder_hidden_states</span>
+        <span class="n">decoder_outputs</span><span class="p">[</span><span class="s2">&quot;decoder_all_cache_key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decoder_outputs</span><span class="p">[</span><span class="s2">&quot;all_cache_key&quot;</span><span class="p">]</span>
+        <span class="n">decoder_outputs</span><span class="p">[</span><span class="s2">&quot;decoder_all_cache_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decoder_outputs</span><span class="p">[</span><span class="s2">&quot;all_cache_value&quot;</span><span class="p">]</span>
+
+        <span class="k">del</span> <span class="n">decoder_outputs</span><span class="p">[</span><span class="s2">&quot;all_cache_key&quot;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">decoder_outputs</span><span class="p">[</span><span class="s2">&quot;all_cache_value&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">decoder_outputs</span></div>
+
+<div class="viewcode-block" id="EncoderDecoder.call"><a class="viewcode-back" href="../../../../model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Call</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            inputs : dict of tf.tensor</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict of tf.tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_training</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">_use_auto_regressive</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call_auto_regressive</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call_forward</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outputs</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

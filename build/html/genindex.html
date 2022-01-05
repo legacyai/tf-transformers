@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Index &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script src="_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html"><img src="_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Notebooks/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Index</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
+ 
+</div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert.html#tf_transformers.models.albert.AlbertConfig">AlbertConfig (class in tf_transformers.models.albert)</a>
+</li>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder">AlbertEncoder (class in tf_transformers.models)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertModel">AlbertModel (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerLayer">AlbertTokenizerLayer (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerTFText">AlbertTokenizerTFText (class in tf_transformers.models)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/bart.html#tf_transformers.models.bart.BartConfig">BartConfig (class in tf_transformers.models.bart)</a>
+</li>
+      <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder">BartEncoder (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/bart.html#tf_transformers.models.BartModel">BartModel (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerLayer.bert_pack_inputs">bert_pack_inputs() (tf_transformers.models.AlbertTokenizerLayer method)</a>
+
+      <ul>
+        <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerLayer.bert_pack_inputs">(tf_transformers.models.BigBirdRobertaTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.bert_pack_inputs">(tf_transformers.models.T5TokenizerLayer method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/bert.html#tf_transformers.models.bert.BertConfig">BertConfig (class in tf_transformers.models.bert)</a>
+</li>
+      <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder">BertEncoder (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/bert.html#tf_transformers.models.BertModel">BertModel (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerLayer">BigBirdRobertaTokenizerLayer (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerTFText">BigBirdRobertaTokenizerTFText (class in tf_transformers.models)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder.call">call() (tf_transformers.models.AlbertEncoder method)</a>
+
+      <ul>
+        <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerLayer.call">(tf_transformers.models.AlbertTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder.call">(tf_transformers.models.BartEncoder method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder.call">(tf_transformers.models.BertEncoder method)</a>
+</li>
+        <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerLayer.call">(tf_transformers.models.BigBirdRobertaTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.call">(tf_transformers.models.EncoderDecoder method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder.call">(tf_transformers.models.GPT2Encoder method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder.call">(tf_transformers.models.MT5Encoder method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder.call">(tf_transformers.models.RobertaEncoder method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder.call">(tf_transformers.models.T5Encoder method)</a>
+</li>
+        <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.call">(tf_transformers.models.T5TokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTEncoder.call">(tf_transformers.models.ViTEncoder method)</a>
+</li>
+      </ul></li>
+      <li><a href="model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.call_auto_regressive">call_auto_regressive() (tf_transformers.models.EncoderDecoder method)</a>
+</li>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder.call_decoder">call_decoder() (tf_transformers.models.AlbertEncoder method)</a>
+
+      <ul>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder.call_decoder">(tf_transformers.models.BartEncoder method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder.call_decoder">(tf_transformers.models.BertEncoder method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder.call_decoder">(tf_transformers.models.GPT2Encoder method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder.call_decoder">(tf_transformers.models.MT5Encoder method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder.call_decoder">(tf_transformers.models.RobertaEncoder method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder.call_decoder">(tf_transformers.models.T5Encoder method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTEncoder.call_decoder">(tf_transformers.models.ViTEncoder method)</a>
+</li>
+      </ul></li>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder.call_decoder_auto_regressive">call_decoder_auto_regressive() (tf_transformers.models.AlbertEncoder method)</a>
+
+      <ul>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder.call_decoder_auto_regressive">(tf_transformers.models.BartEncoder method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder.call_decoder_auto_regressive">(tf_transformers.models.BertEncoder method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder.call_decoder_auto_regressive">(tf_transformers.models.GPT2Encoder method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder.call_decoder_auto_regressive">(tf_transformers.models.MT5Encoder method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder.call_decoder_auto_regressive">(tf_transformers.models.RobertaEncoder method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder.call_decoder_auto_regressive">(tf_transformers.models.T5Encoder method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTEncoder.call_decoder_auto_regressive">(tf_transformers.models.ViTEncoder method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerLayer.call_encode">call_encode() (tf_transformers.models.AlbertTokenizerLayer method)</a>
+
+      <ul>
+        <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerLayer.call_encode">(tf_transformers.models.BigBirdRobertaTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.call_encode">(tf_transformers.models.T5TokenizerLayer method)</a>
+</li>
+      </ul></li>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder.call_encoder">call_encoder() (tf_transformers.models.AlbertEncoder method)</a>
+
+      <ul>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder.call_encoder">(tf_transformers.models.BartEncoder method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder.call_encoder">(tf_transformers.models.BertEncoder method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder.call_encoder">(tf_transformers.models.GPT2Encoder method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder.call_encoder">(tf_transformers.models.MT5Encoder method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder.call_encoder">(tf_transformers.models.RobertaEncoder method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder.call_encoder">(tf_transformers.models.T5Encoder method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTEncoder.call_encoder">(tf_transformers.models.ViTEncoder method)</a>
+</li>
+      </ul></li>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder.call_encoder_auto_regressive">call_encoder_auto_regressive() (tf_transformers.models.AlbertEncoder method)</a>
+
+      <ul>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder.call_encoder_auto_regressive">(tf_transformers.models.BartEncoder method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder.call_encoder_auto_regressive">(tf_transformers.models.BertEncoder method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder.call_encoder_auto_regressive">(tf_transformers.models.GPT2Encoder method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder.call_encoder_auto_regressive">(tf_transformers.models.MT5Encoder method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder.call_encoder_auto_regressive">(tf_transformers.models.RobertaEncoder method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder.call_encoder_auto_regressive">(tf_transformers.models.T5Encoder method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTEncoder.call_encoder_auto_regressive">(tf_transformers.models.ViTEncoder method)</a>
+</li>
+      </ul></li>
+      <li><a href="model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.call_forward">call_forward() (tf_transformers.models.EncoderDecoder method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerLayer.decode">decode() (tf_transformers.models.AlbertTokenizerLayer method)</a>
+
+      <ul>
+        <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerLayer.decode">(tf_transformers.models.BigBirdRobertaTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.decode">(tf_transformers.models.T5TokenizerLayer method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerLayer.encode">encode() (tf_transformers.models.AlbertTokenizerLayer method)</a>
+
+      <ul>
+        <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerLayer.encode">(tf_transformers.models.BigBirdRobertaTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.encode">(tf_transformers.models.T5TokenizerLayer method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder">EncoderDecoder (class in tf_transformers.models)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder.from_config">from_config() (tf_transformers.models.AlbertEncoder class method)</a>
+
+      <ul>
+        <li><a href="model_doc/albert.html#tf_transformers.models.AlbertModel.from_config">(tf_transformers.models.AlbertModel class method)</a>
+</li>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder.from_config">(tf_transformers.models.BartEncoder class method)</a>
+</li>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartModel.from_config">(tf_transformers.models.BartModel class method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder.from_config">(tf_transformers.models.BertEncoder class method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertModel.from_config">(tf_transformers.models.BertModel class method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder.from_config">(tf_transformers.models.GPT2Encoder class method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Model.from_config">(tf_transformers.models.GPT2Model class method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder.from_config">(tf_transformers.models.MT5Encoder class method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Model.from_config">(tf_transformers.models.MT5Model class method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder.from_config">(tf_transformers.models.RobertaEncoder class method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaModel.from_config">(tf_transformers.models.RobertaModel class method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder.from_config">(tf_transformers.models.T5Encoder class method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Model.from_config">(tf_transformers.models.T5Model class method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTEncoder.from_config">(tf_transformers.models.ViTEncoder class method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTModel.from_config">(tf_transformers.models.ViTModel class method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertModel.from_pretrained">from_pretrained() (tf_transformers.models.AlbertModel class method)</a>
+
+      <ul>
+        <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerTFText.from_pretrained">(tf_transformers.models.AlbertTokenizerTFText class method)</a>
+</li>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartModel.from_pretrained">(tf_transformers.models.BartModel class method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertModel.from_pretrained">(tf_transformers.models.BertModel class method)</a>
+</li>
+        <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerTFText.from_pretrained">(tf_transformers.models.BigBirdRobertaTokenizerTFText class method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Model.from_pretrained">(tf_transformers.models.GPT2Model class method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Model.from_pretrained">(tf_transformers.models.MT5Model class method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaModel.from_pretrained">(tf_transformers.models.RobertaModel class method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Model.from_pretrained">(tf_transformers.models.T5Model class method)</a>
+</li>
+        <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerTFText.from_pretrained">(tf_transformers.models.T5TokenizerTFText class method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTModel.from_pretrained">(tf_transformers.models.ViTModel class method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder.get_config">get_config() (tf_transformers.models.AlbertEncoder method)</a>
+
+      <ul>
+        <li><a href="model_doc/albert.html#tf_transformers.models.AlbertModel.get_config">(tf_transformers.models.AlbertModel class method)</a>
+</li>
+        <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerLayer.get_config">(tf_transformers.models.AlbertTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder.get_config">(tf_transformers.models.BartEncoder method)</a>
+</li>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartModel.get_config">(tf_transformers.models.BartModel class method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder.get_config">(tf_transformers.models.BertEncoder method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertModel.get_config">(tf_transformers.models.BertModel class method)</a>
+</li>
+        <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerLayer.get_config">(tf_transformers.models.BigBirdRobertaTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder.get_config">(tf_transformers.models.GPT2Encoder method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Model.get_config">(tf_transformers.models.GPT2Model class method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder.get_config">(tf_transformers.models.MT5Encoder method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Model.get_config">(tf_transformers.models.MT5Model class method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder.get_config">(tf_transformers.models.RobertaEncoder method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaModel.get_config">(tf_transformers.models.RobertaModel class method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder.get_config">(tf_transformers.models.T5Encoder method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Model.get_config">(tf_transformers.models.T5Model class method)</a>
+</li>
+        <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.get_config">(tf_transformers.models.T5TokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTEncoder.get_config">(tf_transformers.models.ViTEncoder method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTModel.get_config">(tf_transformers.models.ViTModel class method)</a>
+</li>
+      </ul></li>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder.get_embedding_table">get_embedding_table() (tf_transformers.models.AlbertEncoder method)</a>
+
+      <ul>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder.get_embedding_table">(tf_transformers.models.BartEncoder method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder.get_embedding_table">(tf_transformers.models.BertEncoder method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder.get_embedding_table">(tf_transformers.models.GPT2Encoder method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder.get_embedding_table">(tf_transformers.models.MT5Encoder method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder.get_embedding_table">(tf_transformers.models.RobertaEncoder method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder.get_embedding_table">(tf_transformers.models.T5Encoder method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder.get_model">get_model() (tf_transformers.models.AlbertEncoder method)</a>
+
+      <ul>
+        <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerLayer.get_model">(tf_transformers.models.AlbertTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder.get_model">(tf_transformers.models.BartEncoder method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder.get_model">(tf_transformers.models.BertEncoder method)</a>
+</li>
+        <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerLayer.get_model">(tf_transformers.models.BigBirdRobertaTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.get_model">(tf_transformers.models.EncoderDecoder method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder.get_model">(tf_transformers.models.GPT2Encoder method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder.get_model">(tf_transformers.models.MT5Encoder method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder.get_model">(tf_transformers.models.RobertaEncoder method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder.get_model">(tf_transformers.models.T5Encoder method)</a>
+</li>
+        <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.get_model">(tf_transformers.models.T5TokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTEncoder.get_model">(tf_transformers.models.ViTEncoder method)</a>
+</li>
+      </ul></li>
+      <li><a href="model_doc/gpt2.html#tf_transformers.models.gpt2.GPT2Config">GPT2Config (class in tf_transformers.models.gpt2)</a>
+</li>
+      <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder">GPT2Encoder (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Model">GPT2Model (class in tf_transformers.models)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/mt5.html#tf_transformers.models.mt5.MT5Config">MT5Config (class in tf_transformers.models.mt5)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder">MT5Encoder (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Model">MT5Model (class in tf_transformers.models)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerLayer.preprocess">preprocess() (tf_transformers.models.AlbertTokenizerLayer method)</a>
+
+      <ul>
+        <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerLayer.preprocess">(tf_transformers.models.BigBirdRobertaTokenizerLayer method)</a>
+</li>
+        <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.preprocess">(tf_transformers.models.T5TokenizerLayer method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/roberta.html#tf_transformers.models.roberta.RobertaConfig">RobertaConfig (class in tf_transformers.models.roberta)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder">RobertaEncoder (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaModel">RobertaModel (class in tf_transformers.models)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/t5.html#tf_transformers.models.t5.T5Config">T5Config (class in tf_transformers.models.t5)</a>
+</li>
+      <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder">T5Encoder (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/t5.html#tf_transformers.models.T5Model">T5Model (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer">T5TokenizerLayer (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerTFText">T5TokenizerTFText (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertEncoder.transformer_layers">transformer_layers() (tf_transformers.models.AlbertEncoder property)</a>
+
+      <ul>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartEncoder.transformer_layers">(tf_transformers.models.BartEncoder property)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertEncoder.transformer_layers">(tf_transformers.models.BertEncoder property)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Encoder.transformer_layers">(tf_transformers.models.GPT2Encoder property)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Encoder.transformer_layers">(tf_transformers.models.MT5Encoder property)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaEncoder.transformer_layers">(tf_transformers.models.RobertaEncoder property)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Encoder.transformer_layers">(tf_transformers.models.T5Encoder property)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTEncoder.transformer_layers">(tf_transformers.models.ViTEncoder property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert.html#tf_transformers.models.AlbertModel.update_config">update_config() (tf_transformers.models.AlbertModel method)</a>
+
+      <ul>
+        <li><a href="model_doc/bart.html#tf_transformers.models.BartModel.update_config">(tf_transformers.models.BartModel method)</a>
+</li>
+        <li><a href="model_doc/bert.html#tf_transformers.models.BertModel.update_config">(tf_transformers.models.BertModel method)</a>
+</li>
+        <li><a href="model_doc/gpt2.html#tf_transformers.models.GPT2Model.update_config">(tf_transformers.models.GPT2Model method)</a>
+</li>
+        <li><a href="model_doc/mt5.html#tf_transformers.models.MT5Model.update_config">(tf_transformers.models.MT5Model method)</a>
+</li>
+        <li><a href="model_doc/roberta.html#tf_transformers.models.RobertaModel.update_config">(tf_transformers.models.RobertaModel method)</a>
+</li>
+        <li><a href="model_doc/t5.html#tf_transformers.models.T5Model.update_config">(tf_transformers.models.T5Model method)</a>
+</li>
+        <li><a href="model_doc/vit.html#tf_transformers.models.ViTModel.update_config">(tf_transformers.models.ViTModel method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/vit.html#tf_transformers.models.vit.ViTConfig">ViTConfig (class in tf_transformers.models.vit)</a>
+</li>
+      <li><a href="model_doc/vit.html#tf_transformers.models.ViTEncoder">ViTEncoder (class in tf_transformers.models)</a>
+</li>
+      <li><a href="model_doc/vit.html#tf_transformers.models.ViTModel">ViTModel (class in tf_transformers.models)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="model_doc/albert_tokenizer.html#tf_transformers.models.AlbertTokenizerLayer.vocab_size">vocab_size() (tf_transformers.models.AlbertTokenizerLayer property)</a>
+
+      <ul>
+        <li><a href="model_doc/bigbird_tokenizer.html#tf_transformers.models.BigBirdRobertaTokenizerLayer.vocab_size">(tf_transformers.models.BigBirdRobertaTokenizerLayer property)</a>
+</li>
+        <li><a href="model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.vocab_size">(tf_transformers.models.T5TokenizerLayer property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

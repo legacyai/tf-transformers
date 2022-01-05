@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta property="og:title" content="Tensorflow Transformers (tf-transformers)" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="index.html" />
+  <meta property="og:description" content="State-of-the-art Faster Natural Language Processing in TensorFlow 2.0. tf-transformers provides general-purpose architectures (BERT, GPT-2, RoBERTa, T5, Seq2..." />
+  <meta property="og:image" content="png location" />
+  <meta property="og:image:alt" content="Tensorflow Transformers (tf-transformers)" />
+  <meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tensorflow Transformers (tf-transformers) &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+        <script src="_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Quick tour" href="introduction_docs/quicktour.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#"><img src="_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Notebooks/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>Tensorflow Transformers (tf-transformers)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="tensorflow-transformers-tf-transformers">
+<h1>Tensorflow Transformers (tf-transformers)<a class="headerlink" href="#tensorflow-transformers-tf-transformers" title="Permalink to this headline">¶</a></h1>
+<p>State-of-the-art Faster Natural Language Processing in TensorFlow 2.0.</p>
+<p>tf-transformers  provides general-purpose
+architectures (BERT, GPT-2, RoBERTa, T5, Seq2Seq…) for Natural Language Understanding (NLU) and Natural
+Language Generation (NLG) with over 32+ pretrained models in 100+ languages in TensorFlow 2.0.</p>
+<p>tf-transformers is the fastest library for Transformer based architectures, comparing to existing similar
+implementations in TensorFlow 2.0. It is 80x faster comparing to famous similar libraries like HuggingFace Tensorflow
+2.0 implementations. For more details about benchmarking please look <cite>BENCHMARK</cite> here.</p>
+<p>This is the documentation of our repository <a class="reference external" href="https://github.com/legacyai/tf-transformers">tf-transformers</a>. You can
+also follow our <a href="#id1"><span class="problematic" id="id2">`DOCUMENTATION`__</span></a> that teaches how to use this library, as well as the
+other features of this library.</p>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>High performance on NLU and NLG tasks</p></li>
+<li><p>Low barrier to entry for educators and practitioners</p></li>
+</ul>
+<p>State-of-the-art NLP for everyone:</p>
+<ul class="simple">
+<li><p>Deep learning researchers</p></li>
+<li><p>Hands-on practitioners</p></li>
+<li><p>AI/ML/NLP teachers and educators</p></li>
+</ul>
+<p>Lower compute costs, smaller carbon footprint:</p>
+<ul class="simple">
+<li><p>Researchers can share trained models instead of always retraining</p></li>
+<li><p>Practitioners can reduce compute time and production costs</p></li>
+<li><p>8 architectures with over 30 pretrained models, some in more than 100 languages</p></li>
+</ul>
+<p>Choose the right framework for every part of a model’s lifetime:</p>
+<ul class="simple">
+<li><p>Train state-of-the-art models in 3 lines of code</p></li>
+<li><p>Complete support for Tensorflow 2.0 models.</p></li>
+<li><p>Seamlessly pick the right framework for training, evaluation, production</p></li>
+</ul>
+<p>Current number of checkpoints: <img alt="checkpoints" src="https://img.shields.io/endpoint?url=https://huggingface.co/api/shields/models&amp;color=brightgreen" /></p>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<p>The documentation is organized in five parts:</p>
+<ul>
+<li><p><strong>GET STARTED</strong> contains a quick tour, the installation instructions and some useful information about our philosophy
+and a glossary.</p></li>
+<li><p><strong>USING 🤗 TRANSFORMERS</strong> contains general tutorials on how to use the library.</p></li>
+<li><p><strong>ADVANCED GUIDES</strong> contains more advanced guides that are more specific to a given script or part of the library.</p></li>
+<li><p><strong>RESEARCH</strong> focuses on tutorials that have less to do with how to use the library but more about general research in
+transformers model</p></li>
+<li><p>The three last section contain the documentation of each public class and function, grouped in:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>MAIN CLASSES</strong> for the main classes exposing the important APIs of the library.</p></li>
+<li><p><strong>MODELS</strong> for the classes and functions related to each model implemented in the library.</p></li>
+<li><p><strong>INTERNAL HELPERS</strong> for the classes and functions we use internally.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>The library currently contains Jax, PyTorch and Tensorflow implementations, pretrained model weights, usage scripts and
+conversion utilities for the following models.</p>
+<div class="section" id="supported-models">
+<h3>Supported models<a class="headerlink" href="#supported-models" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="model_doc/albert.html"><span class="doc">ALBERT</span></a> (from Google Research and the Toyota Technological Institute at Chicago) released
+with the paper <a class="reference external" href="https://arxiv.org/abs/1909.11942">ALBERT: A Lite BERT for Self-supervised Learning of Language Representations</a>, by Zhenzhong Lan, Mingda Chen, Sebastian Goodman, Kevin Gimpel, Piyush
+Sharma, Radu Soricut.</p></li>
+<li><p><a class="reference internal" href="model_doc/bart.html"><span class="doc">BART</span></a> (from Facebook) released with the paper <a class="reference external" href="https://arxiv.org/pdf/1910.13461.pdf">BART: Denoising Sequence-to-Sequence
+Pre-training for Natural Language Generation, Translation, and Comprehension</a> by Mike Lewis, Yinhan Liu, Naman Goyal, Marjan Ghazvininejad, Abdelrahman
+Mohamed, Omer Levy, Ves Stoyanov and Luke Zettlemoyer.</p></li>
+<li><p><a class="reference internal" href="model_doc/bert.html"><span class="doc">BERT</span></a> (from Google) released with the paper <a class="reference external" href="https://arxiv.org/abs/1810.04805">BERT: Pre-training of Deep Bidirectional
+Transformers for Language Understanding</a> by Jacob Devlin, Ming-Wei Chang,
+Kenton Lee and Kristina Toutanova.</p></li>
+<li><p><span class="xref std std-doc">BERT For Sequence Generation</span> (from Google) released with the paper <a class="reference external" href="https://arxiv.org/abs/1907.12461">Leveraging
+Pre-trained Checkpoints for Sequence Generation Tasks</a> by Sascha Rothe, Shashi
+Narayan, Aliaksei Severyn.</p></li>
+<li><p><a class="reference internal" href="model_doc/clip.html"><span class="doc">CLIP</span></a> (from OpenAI) released with the paper <a class="reference external" href="https://arxiv.org/abs/2103.00020">Learning Transferable Visual Models From
+Natural Language Supervision</a> by Alec Radford, Jong Wook Kim, Chris Hallacy,
+Aditya Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen
+Krueger, Ilya Sutskever.</p></li>
+<li><p><a class="reference internal" href="model_doc/gpt2.html"><span class="doc">GPT-2</span></a> (from OpenAI) released with the paper <a class="reference external" href="https://blog.openai.com/better-language-models/">Language Models are Unsupervised Multitask
+Learners</a> by Alec Radford*, Jeffrey Wu*, Rewon Child, David
+Luan, Dario Amodei** and Ilya Sutskever**.</p></li>
+<li><p><span class="xref std std-doc">M2M100</span> (from Facebook) released with the paper <a class="reference external" href="https://arxiv.org/abs/2010.11125">Beyond English-Centric Multilingual
+Machine Translation</a> by by Angela Fan, Shruti Bhosale, Holger Schwenk, Zhiyi
+Ma, Ahmed El-Kishky, Siddharth Goyal, Mandeep Baines, Onur Celebi, Guillaume Wenzek, Vishrav Chaudhary, Naman
+Goyal, Tom Birch, Vitaliy Liptchinsky, Sergey Edunov, Edouard Grave, Michael Auli, Armand Joulin.</p></li>
+<li><p><span class="xref std std-doc">MarianMT</span> Machine translation models trained using <a class="reference external" href="http://opus.nlpl.eu/">OPUS</a> data by
+Jörg Tiedemann. The <a class="reference external" href="https://marian-nmt.github.io/">Marian Framework</a> is being developed by the Microsoft
+Translator Team.</p></li>
+<li><p><a class="reference internal" href="model_doc/mbart.html"><span class="doc">MBart</span></a> (from Facebook) released with the paper <a class="reference external" href="https://arxiv.org/abs/2001.08210">Multilingual Denoising Pre-training for
+Neural Machine Translation</a> by Yinhan Liu, Jiatao Gu, Naman Goyal, Xian Li,
+Sergey Edunov, Marjan Ghazvininejad, Mike Lewis, Luke Zettlemoyer.</p></li>
+<li><p><a class="reference internal" href="model_doc/mbart.html"><span class="doc">MBart-50</span></a> (from Facebook) released with the paper <a class="reference external" href="https://arxiv.org/abs/2008.00401">Multilingual Translation with Extensible
+Multilingual Pretraining and Finetuning</a> by Yuqing Tang, Chau Tran, Xian Li,
+Peng-Jen Chen, Naman Goyal, Vishrav Chaudhary, Jiatao Gu, Angela Fan.</p></li>
+<li><p><a class="reference internal" href="model_doc/mt5.html"><span class="doc">MT5</span></a> (from Google AI) released with the paper <a class="reference external" href="https://arxiv.org/abs/2010.11934">mT5: A massively multilingual pre-trained
+text-to-text transformer</a> by Linting Xue, Noah Constant, Adam Roberts, Mihir
+Kale, Rami Al-Rfou, Aditya Siddhant, Aditya Barua, Colin Raffel.</p></li>
+<li><p><a class="reference internal" href="model_doc/roberta.html"><span class="doc">RoBERTa</span></a> (from Facebook), released together with the paper a <a class="reference external" href="https://arxiv.org/abs/1907.11692">Robustly Optimized BERT
+Pretraining Approach</a> by Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Mandar
+Joshi, Danqi Chen, Omer Levy, Mike Lewis, Luke Zettlemoyer, Veselin Stoyanov.</p></li>
+<li><p><a class="reference internal" href="model_doc/t5.html"><span class="doc">T5</span></a> (from Google AI) released with the paper <a class="reference external" href="https://arxiv.org/abs/1910.10683">Exploring the Limits of Transfer Learning with a
+Unified Text-to-Text Transformer</a> by Colin Raffel and Noam Shazeer and Adam
+Roberts and Katherine Lee and Sharan Narang and Michael Matena and Yanqi Zhou and Wei Li and Peter J. Liu.</p></li>
+<li><p><a class="reference internal" href="model_doc/vit.html"><span class="doc">Vision Transformer (ViT)</span></a> (from Google AI) released with the paper <a class="reference external" href="https://arxiv.org/abs/2010.11929">An Image is Worth 16x16
+Words: Transformers for Image Recognition at Scale</a> by Alexey Dosovitskiy,
+Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias
+Minderer, Georg Heigold, Sylvain Gelly, Jakob Uszkoreit, Neil Houlsby.</p></li>
+<li><p><a class="reference internal" href="model_doc/visual_bert.html"><span class="doc">VisualBERT</span></a> (from UCLA NLP) released with the paper <a class="reference external" href="https://arxiv.org/pdf/1908.03557">VisualBERT: A Simple and
+Performant Baseline for Vision and Language</a> by Liunian Harold Li, Mark
+Yatskar, Da Yin, Cho-Jui Hsieh, Kai-Wei Chang.</p></li>
+<li><p><a class="reference internal" href="model_doc/wav2vec2.html"><span class="doc">Wav2Vec2</span></a> (from Facebook AI) released with the paper <a class="reference external" href="https://arxiv.org/abs/2006.11477">wav2vec 2.0: A Framework for
+Self-Supervised Learning of Speech Representations</a> by Alexei Baevski, Henry
+Zhou, Abdelrahman Mohamed, Michael Auli.</p></li>
+</ol>
+</div>
+<div class="section" id="supported-frameworks">
+<h3>Supported frameworks<a class="headerlink" href="#supported-frameworks" title="Permalink to this headline">¶</a></h3>
+<p>The table below represents the current support in the library for each of those models, whether they have a Python
+tokenizer (called “slow”). A “fast” tokenizer backed by the 🤗 Tokenizers library, whether they have support in Jax (via
+Flax), PyTorch, and/or TensorFlow.</p>
+<table class="center-aligned-table docutils align-default">
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 15%" />
+<col style="width: 18%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Model</p></th>
+<th class="head"><p>Tokenizer slow</p></th>
+<th class="head"><p>Tokenizer fast</p></th>
+<th class="head"><p>PyTorch support</p></th>
+<th class="head"><p>TensorFlow support</p></th>
+<th class="head"><p>Flax Support</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ALBERT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-odd"><td><p>BART</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>BeiT</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>BERT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>Bert Generation</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>BigBird</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>BigBirdPegasus</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>Blenderbot</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>BlenderbotSmall</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>CamemBERT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>Canine</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>CLIP</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>ConvBERT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>CTRL</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>DeBERTa</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>DeBERTa-v2</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>DeiT</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>DETR</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>DistilBERT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-odd"><td><p>DPR</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>ELECTRA</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-odd"><td><p>Encoder decoder</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>FairSeq Machine-Translation</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>FlauBERT</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>Funnel Transformer</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>GPT Neo</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>GPT-J</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>Hubert</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>I-BERT</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>LayoutLM</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>LayoutLMv2</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>LED</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>Longformer</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>LUKE</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>LXMERT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>M2M100</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>Marian</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-odd"><td><p>mBART</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>MegatronBert</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>MobileBERT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>MPNet</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>mT5</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>OpenAI GPT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>OpenAI GPT-2</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>Pegasus</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>ProphetNet</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>RAG</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reformer</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>RemBERT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>RetriBERT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>RoBERTa</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-odd"><td><p>RoFormer</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>Speech2Text</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>Splinter</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>SqueezeBERT</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>T5</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>TAPAS</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>Transformer-XL</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>VisualBert</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>ViT</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p>Wav2Vec2</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-odd"><td><p>XLM</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>XLM-RoBERTa</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>XLMProphetNet</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>XLNet</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>✅</p></td>
+<td><p>❌</p></td>
+</tr>
+</tbody>
+</table>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction_docs/installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction_docs/installation.html#installation-with-pip">Installation with pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction_docs/installation.html#editable-install">Editable install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction_docs/installation.html#caching-models">Caching models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction_docs/installation.html#do-you-want-to-run-a-tf-ransformer-model-on-a-mobile-device">Do you want to run a tf-ransformer model on a mobile device?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction_docs/philosophy.html">Philosophy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction_docs/philosophy.html#main-concepts">Main concepts</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/albert.html">ALBERT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/albert.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/albert.html#albertconfig">AlbertConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/albert.html#albertmodel">AlbertModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/albert.html#albertencoder">AlbertEncoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/bert.html">BERT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/bert.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/bert.html#bertconfig">BertConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/bert.html#bertmodel">BertModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/bert.html#bertencoder">BertEncoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/gpt2.html">OpenAI GPT2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/gpt2.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/gpt2.html#gpt2config">GPT2Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/gpt2.html#gpt2model">GPT2Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/gpt2.html#gpt2encoder">GPT2Encoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/t5.html">T5</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/t5.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/t5.html#training">Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/t5.html#t5config">T5Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/t5.html#t5model">T5Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/t5.html#t5encoder">T5Encoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/mt5.html">MT5</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/mt5.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/mt5.html#mt5config">MT5Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/mt5.html#mt5model">MT5Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/mt5.html#mt5encoder">MT5Encoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/roberta.html">RoBERTa</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/roberta.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/roberta.html#robertaconfig">RobertaConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/roberta.html#robertamodel">RobertaModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/roberta.html#robertaencoder">RobertaEncoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/vit.html">Vision Transformer (ViT)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/vit.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/vit.html#vitconfig">ViTConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/vit.html#vitmodel">ViTModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/vit.html#vitencoder">ViTEncoder</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/parallelism.html">Model Parallelism</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#parallelism-overview">Parallelism overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#concepts">Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#data-parallel">Data Parallel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#zero-data-parallel">ZeRO Data Parallel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#naive-model-parallel-vertical-and-pipeline-parallel">Naive Model Parallel (Vertical) and Pipeline Parallel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#tensor-parallelism">Tensor Parallelism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#dp-pp">DP+PP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#dp-pp-tp">DP+PP+TP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#dp-pp-tp-zero">DP+PP+TP+ZeRO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#flexflow">FlexFlow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#which-strategy-to-use-when">Which Strategy To Use When</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Notebooks/1_read_write_tfrecords.html">Writing and Reading TFRecords</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Notebooks/1_read_write_tfrecords.html#load-data-and-tokenizer">Load Data and Tokenizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Notebooks/1_read_write_tfrecords.html#write-tfrecord">Write TFRecord</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Notebooks/1_read_write_tfrecords.html#read-tfrecords">Read TFRecords</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/albert_tokenizer.html">ALBERT Tokenizer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/albert_tokenizer.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/albert_tokenizer.html#alberttokenizertftext">AlbertTokenizerTFText</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/albert_tokenizer.html#alberttokenizerlayer">AlbertTokenizerLayer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/bigbird_tokenizer.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/bigbird_tokenizer.html#bigbirdrobertatokenizertftext">BigBirdRobertaTokenizerTFText</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/bigbird_tokenizer.html#bigbirdrobertatokenizerlayer">BigBirdRobertaTokenizerLayer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/t5_tokenizer.html">T5 Tokenizer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/t5_tokenizer.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/t5_tokenizer.html#t5tokenizertftext">T5TokenizerTFText</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/t5_tokenizer.html#t5tokenizerlayer">T5TokenizerLayer</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="research/glue.html">Glue Model Evaluation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#ax">ax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#cola">cola</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#mnli">mnli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#mnli-matched">mnli_matched</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#mnli-mismatched">mnli_mismatched</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#mrpc">mrpc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#qnli">qnli</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#qqp">qqp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#rte">rte</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#sst2">sst2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#stsb">stsb</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#how-to-run-evaluation-using-tensorflow-transformers">How to run Evaluation using Tensorflow Transformers.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#glue-score-calculated">GLUE SCORE calculated</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#id1">GLUE SCORE calculated</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/glue.html#how-to-change-the-base-model">How to change the base model?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="research/long_block_sequencer.html">Long Block Sequencer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="research/long_block_sequencer.html#advantages">Advantages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/long_block_sequencer.html#code-and-results">Code and Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="research/long_block_sequencer.html#rogue-score">Rogue SCORE</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/gpt2.html">Benchmark GPT2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/gpt2.html#tensorflow-transformers-tft">Tensorflow-Transformers. (tft)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/gpt2.html#huggingface-tensorflow-hf-tf">HuggingFace-Tensorflow. (hf-tf)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/gpt2.html#huggingface-pytorch-hf-pt">HuggingFace-PyTorch. (hf-pt)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/gpt2.html#huggingface-jax-hf-jax">HuggingFace-JAX. (hf-jax)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/gpt2.html#official-benchmarks-on-cnn-dailymail">Official Benchmarks on CNN DailyMail</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/t5.html">Benchmark T5</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/t5.html#tensorflow-transformers-tft">Tensorflow-Transformers. (tft)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/t5.html#huggingface-tensorflow-hf-tf">HuggingFace-Tensorflow. (hf-tf)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/t5.html#huggingface-pytorch-hf-pt">HuggingFace-PyTorch. (hf-pt)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/t5.html#huggingface-jax-hf-jax-not-available">HuggingFace-JAX. (hf-jax) (Not Available)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/t5.html#official-benchmarks-on-xsum">Official Benchmarks on XSUM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/albert.html">Benchmark Albert</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/albert.html#tensorflow-transformers-tft">Tensorflow-Transformers. (tft)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/albert.html#huggingface-tensorflow-hf-tf">HuggingFace-Tensorflow. (hf-tf)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/albert.html#huggingface-pytorch-hf-pt">HuggingFace-PyTorch. (hf-pt)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/albert.html#huggingface-jax-hf-jax-not-available">HuggingFace-JAX. (hf-jax) (Not Available)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/albert.html#official-benchmarks-on-imdb">Official Benchmarks on IMDB</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/vit.html">Benchmark ViT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/vit.html#tensorflow-transformers-tft">Tensorflow-Transformers. (tft)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/vit.html#huggingface-tensorflow-hf-tf">HuggingFace-Tensorflow. (hf-tf)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/vit.html#huggingface-pytorch-hf-pt">HuggingFace-PyTorch. (hf-pt)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/vit.html#official-benchmarks-on-keras-flowed-dataset-5000-samples">Official Benchmarks on Keras Flowed dataset (5000 samples)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction_docs/quicktour.html" class="btn btn-neutral float-right" title="Quick tour" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

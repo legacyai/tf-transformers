@@ -1,0 +1,21 @@
+# sphinx <4 required by myst-nb v0.12.0 (Feb 2021)
+# sphinx >=3 required by sphinx-autodoc-typehints v1.11.1 (Oct 2020)
+sphinx >=3, <4
+sphinx_rtd_theme
+sphinx-autodoc-typehints==1.11.1
+jupyter-sphinx>=0.3.2
+myst-nb
+
+# Packages as per HuggingFace extensions
+sphinx_rtd_theme
+recommonmark
+sphinx_markdown_tables
+sphinxext-opengraph
+sphinx-copybutton
+matplotlib
+
+# Model specifics
+tensorflow-text
+sentencepiece
+tqdm
+transformers

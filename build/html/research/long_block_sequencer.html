@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta property="og:title" content="Long Block Sequencer" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="research/long_block_sequencer.html" />
+  <meta property="og:description" content="Long Block Sequencer is a very simple yet an efficient way to make use of longer sequence in Attention based Transformer models. The main reason, why Transfo..." />
+  <meta property="og:image" content="png location" />
+  <meta property="og:image:alt" content="Long Block Sequencer" />
+  <meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Long Block Sequencer &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Benchmark GPT2" href="../benchmarks/gpt2.html" />
+    <link rel="prev" title="Glue Model Evaluation" href="glue.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Notebooks/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Long Block Sequencer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#advantages">Advantages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#code-and-results">Code and Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rogue-score">Rogue SCORE</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#decoding-and-hyperparameter">Decoding and HyperParameter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reference">Reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Long Block Sequencer</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/research/long_block_sequencer.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <!---
+Copyright 2021 The TFT Team. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<div class="tex2jax_ignore mathjax_ignore section" id="long-block-sequencer">
+<h1>Long Block Sequencer<a class="headerlink" href="#long-block-sequencer" title="Permalink to this headline">¶</a></h1>
+<p>Long Block Sequencer is a very simple yet an efficient way to make use of longer sequence in Attention based Transformer
+models. The main reason, why Transformers are not able to scale to longer sequences is it because of the computational
+cost while training. The <code class="docutils literal notranslate"><span class="pre">softmax</span></code> operation at every layer makes the gradient cacluation to cause Out of Memory
+error.</p>
+<p>Most recent works like BigBird, LongFormer etc has been developed on the top of concepts like Sparsity. And it does makes sense, because very long sequences have very less contextual connection. The sentence appear in the starting of long
+sequence might have less connection with the last sequence. So, its a natural choice to have sparsity, moreover <code class="docutils literal notranslate"><span class="pre">softmax</span></code> on the top of these long sequence any way produce significantly smaller values.</p>
+<p>The idea behind long block sequencer is simple. Instead of taking a long sequence as it is, try to split it internally
+into equal chunks. Lets say <code class="docutils literal notranslate"><span class="pre">sequence_length=4096</span></code> and <code class="docutils literal notranslate"><span class="pre">num_splits=8</span></code>, split these long sequence into <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">(num_splits)</span></code> sub sequence with <code class="docutils literal notranslate"><span class="pre">512</span> <span class="pre">sequence</span> <span class="pre">length</span> <span class="pre">(4097/8=512)</span></code> each. Then process each sub sequence through the model of interest and concatanate all embeddings <code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">embeddings</span> <span class="pre">of</span> <span class="pre">batch_size</span> <span class="pre">x</span> <span class="pre">512</span> <span class="pre">x</span> <span class="pre">emb_dim</span> </code> into a single embedding of size <code class="docutils literal notranslate"><span class="pre">batch_size</span> <span class="pre">x</span> <span class="pre">(4096)</span> <span class="pre">x</span> <span class="pre">emb_dim</span> <span class="pre">,</span> <span class="pre">where</span> <span class="pre">4096</span> <span class="pre">=</span> <span class="pre">512</span> <span class="pre">*</span> <span class="pre">8</span></code> matrix. Pass it through a feed forward network or RNN layer to have some non-linear interactions among them. This lets some information to pass through sub-embeddings during gradient calculation. This, final projection layer makes sure, all these indivudally processed sub embeddings get some interaction informaton while training. Then this final embedding can be used for any tasks.</p>
+<p>This is explained through the following image:
+<img alt="long-block-sequencer" src="../_images/long_block_sequencer.gif" /></p>
+<div class="section" id="advantages">
+<h2>Advantages<a class="headerlink" href="#advantages" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>This approach allows us to train models very easily and with no Out of Memory in most cases.</p></li>
+<li><p>After training we can use same old architecture for inference for no or minimal changes.</p></li>
+<li><p>Any existing pre-trained models can be used as base model for this approach, so its a very generelizable approach.
+4 <code class="docutils literal notranslate"><span class="pre">t5-small</span></code> can be trained with <code class="docutils literal notranslate"><span class="pre">sequence_length</span> <span class="pre">=</span> <span class="pre">4096</span></code>, with batch_size of <code class="docutils literal notranslate"><span class="pre">6</span></code> in a <code class="docutils literal notranslate"><span class="pre">Tesla</span> <span class="pre">V100</span> <span class="pre">32</span> <span class="pre">GB</span> <span class="pre">GPU</span></code>.</p></li>
+</ol>
+</div>
+<div class="section" id="code-and-results">
+<h2>Code and Results<a class="headerlink" href="#code-and-results" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/legacyai/tf-transformers/tree/main/research/long_block_sequncer">T5 Long Block Sequencer</a></p></li>
+</ul>
+<p>We have trained Long Block Sequence with t5-small on PubMed Sumamrization. PubMed has very long Sentences, some even range
+to sequence_length of 8000 subwords or more. The result show that, long range context is required for this task and we were
+able to have <code class="docutils literal notranslate"><span class="pre">Rogue-2</span> <span class="pre">F1</span> <span class="pre">Score</span></code> better than Pegasus Base, BigBird-Roberta Base also. This seems to be a huge improvement, considering the size of the model <code class="docutils literal notranslate"><span class="pre">t5-small</span></code>, which has <code class="docutils literal notranslate"><span class="pre">60</span> <span class="pre">million</span> </code> parameters compared to Prgasus or BigBird-Roberta which has <code class="docutils literal notranslate"><span class="pre">120</span> <span class="pre">million</span></code> parameters.</p>
+<p>To train the model run
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">run_long_block_sequencer.py</span> <span class="pre">task.num_splits=8</span> <span class="pre">trainer.model_checkpoint_dir=&lt;YOUR_DIR&gt;_splits-8</span> <span class="pre">task.train_batch_size=8</span> </code></p>
+<p>To evaluate the model for all checkpoints
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">evaluate.py</span> <span class="pre">eval.model_checkpoint_dir=&lt;YOUR_DIR&gt;</span> </code></p>
+<p>To evaluate only on a particular checkpoint
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">evaluate.py</span> <span class="pre">eval.model_checkpoint_path=&lt;YOUR_CHECKPOINT_PATH&gt;</span> </code></p>
+<p><a class="reference external" href="https://huggingface.co/datasets/pubmed">PubMed-Dataset</a></p>
+</div>
+<div class="section" id="rogue-score">
+<h2>Rogue SCORE<a class="headerlink" href="#rogue-score" title="Permalink to this headline">¶</a></h2>
+<table class="colwidths-auto docutils align-default">
+<thead>
+<tr class="row-odd"><th class="text-align:right head"><p></p></th>
+<th class="text-align:right head"><p>Model</p></th>
+<th class="text-align:right head"><p>seq_length</p></th>
+<th class="text-align:right head"><p>Params</p></th>
+<th class="text-align:right head"><p>R-2</p></th>
+<th class="text-align:right head"><p>R-1</p></th>
+<th class="text-align:right head"><p>R-l</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>t5-small</p></td>
+<td class="text-align:right"><p>512</p></td>
+<td class="text-align:right"><p>60M</p></td>
+<td class="text-align:right"><p>0.07</p></td>
+<td class="text-align:right"><p>N/A</p></td>
+<td class="text-align:right"><p>N/A</p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>LB-t5-small</p></td>
+<td class="text-align:right"><p>4096</p></td>
+<td class="text-align:right"><p>60M</p></td>
+<td class="text-align:right"><p>17.41</p></td>
+<td class="text-align:right"><p>41.89</p></td>
+<td class="text-align:right"><p>26.44</p></td>
+</tr>
+<tr class="row-even"><td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>Pegasus-base</p></td>
+<td class="text-align:right"><p>1024</p></td>
+<td class="text-align:right"><p>120M</p></td>
+<td class="text-align:right"><p>15.15</p></td>
+<td class="text-align:right"><p>39.98</p></td>
+<td class="text-align:right"><p>25.23</p></td>
+</tr>
+<tr class="row-odd"><td class="text-align:right"><p>0</p></td>
+<td class="text-align:right"><p>BigBird-Roberta-B</p></td>
+<td class="text-align:right"><p>4096</p></td>
+<td class="text-align:right"><p>120M</p></td>
+<td class="text-align:right"><p>19.32</p></td>
+<td class="text-align:right"><p>43.70</p></td>
+<td class="text-align:right"><p>39.99</p></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="decoding-and-hyperparameter">
+<h3>Decoding and HyperParameter<a class="headerlink" href="#decoding-and-hyperparameter" title="Permalink to this headline">¶</a></h3>
+<p>We have used <code class="docutils literal notranslate"><span class="pre">greedy</span> <span class="pre">decoding</span></code>. with <code class="docutils literal notranslate"><span class="pre">decoder_sequence_length=256</span></code>. For training, we trained the model with constant <code class="docutils literal notranslate"><span class="pre">learning_rate=0.001</span></code>.</p>
+</div>
+<div class="section" id="reference">
+<h3>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://arxiv.org/pdf/2007.14062.pdf">1. BigBird</a></p>
+<p><a class="reference external" href="https://arxiv.org/pdf/1912.08777.pdf">2. Pegasus</a></p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="glue.html" class="btn btn-neutral float-left" title="Glue Model Evaluation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../benchmarks/gpt2.html" class="btn btn-neutral float-right" title="Benchmark GPT2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

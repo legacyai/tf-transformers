@@ -1,6 +1,0 @@
-data:
-  name: mc4
-  version:
-  split: train
-  output_text_file: 'output.txt'
-  data_keys: ['text']

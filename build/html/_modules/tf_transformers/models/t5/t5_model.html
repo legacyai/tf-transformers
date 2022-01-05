@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tf_transformers.models.t5.t5_model &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html"><img src="../../../../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Notebooks/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>tf_transformers.models.t5.t5_model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tf_transformers.models.t5.t5_model</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding=utf-8</span>
+<span class="c1"># Copyright 2021 TF-Transformers Authors and The TensorFlow Authors.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ==============================================================================</span>
+<span class="c1"># flake8: noqa</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">absl</span> <span class="kn">import</span> <span class="n">logging</span>
+
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">ModelWrapper</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.core.read_from_hub</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_config_cache</span><span class="p">,</span>
+    <span class="n">get_config_only</span><span class="p">,</span>
+    <span class="n">load_pretrained_model</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.models.encoder_decoder</span> <span class="kn">import</span> <span class="n">EncoderDecoder</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.models.t5</span> <span class="kn">import</span> <span class="n">T5Encoder</span> <span class="k">as</span> <span class="n">Encoder</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.models.t5.configuration_t5</span> <span class="kn">import</span> <span class="n">T5Config</span> <span class="k">as</span> <span class="n">ModelConfig</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.models.t5.convert</span> <span class="kn">import</span> <span class="n">convert_t5_pt</span> <span class="k">as</span> <span class="n">convert_pt</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.models.t5.convert</span> <span class="kn">import</span> <span class="n">convert_t5_tf</span> <span class="k">as</span> <span class="n">convert_tf</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.utils.docstring_file_utils</span> <span class="kn">import</span> <span class="n">add_start_docstrings</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.utils.docstring_utils</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ENCODER_MODEL_CONFIG_DOCSTRING</span><span class="p">,</span>
+    <span class="n">ENCODER_PRETRAINED_DOCSTRING</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">MODEL_TO_HF_URL</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;t5-small&quot;</span><span class="p">:</span> <span class="s2">&quot;tftransformers/t5-small&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;t5-base&quot;</span><span class="p">:</span> <span class="s2">&quot;tftransformers/t5-base&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;t5-large&quot;</span><span class="p">:</span> <span class="s2">&quot;tftransformers/t5-large&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">code_example</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;&#39;&#39;</span>
+
+<span class="s1">        &gt;&gt;&gt; from tf_transformers.models import  T5Model</span>
+<span class="s1">        &gt;&gt;&gt; model = T5Model.from_pretrained(&quot;t5-small&quot;)</span>
+<span class="s1">        &gt;&gt;&gt; batch_size = 5</span>
+<span class="s1">        &gt;&gt;&gt; encoder_sequence_length = 64 # Encoder</span>
+<span class="s1">        &gt;&gt;&gt; decoder_sequence_length = 37 # Decoder</span>
+<span class="s1">        &gt;&gt;&gt; encoder_input_ids = tf.random.uniform(shape=(batch_size, encoder_sequence_length), dtype=tf.int32)</span>
+<span class="s1">        &gt;&gt;&gt; decoder_input_ids = tf.random.uniform(shape=(batch_size, decoder_sequence_length), dtype=tf.int32)</span>
+<span class="s1">        &gt;&gt;&gt; encoder_input_mask = tf.ones_like(encoder_input_ids)</span>
+<span class="s1">        &gt;&gt;&gt; inputs = {{&#39;encoder_input_ids&#39;: input_ids, &#39;encoder_input_mask&#39;: encoder_input_mask, &quot;decoder_input_ids&quot;: decoder_input_ids}</span>
+<span class="s1">        &gt;&gt;&gt; outputs = model(inputs)</span>
+
+<span class="s1">&#39;&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="T5Model"><a class="viewcode-back" href="../../../../model_doc/t5.html#tf_transformers.models.T5Model">[docs]</a><span class="k">class</span> <span class="nc">T5Model</span><span class="p">(</span><span class="n">ModelWrapper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;T5 Encoder Wrapper&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;t5&#39;</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save_checkpoint_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            model_name (str): Model name</span>
+<span class="sd">            cache_dir (str): cache dir to save the mode checkpoints</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">T5Model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">save_checkpoint_cache</span><span class="o">=</span><span class="n">save_checkpoint_cache</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="T5Model.update_config"><a class="viewcode-back" href="../../../../model_doc/t5.html#tf_transformers.models.T5Model.update_config">[docs]</a>    <span class="k">def</span> <span class="nf">update_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tft_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">hf_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update tft config with hf config. Useful while converting.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            tft_config: Dict of TFT configuration.</span>
+<span class="sd">            hf_config: Dict of HF configuration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tft_config</span><span class="p">[</span><span class="s2">&quot;vocab_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf_config</span><span class="p">[</span><span class="s2">&quot;vocab_size&quot;</span><span class="p">]</span>
+        <span class="n">tft_config</span><span class="p">[</span><span class="s2">&quot;embedding_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf_config</span><span class="p">[</span><span class="s2">&quot;d_model&quot;</span><span class="p">]</span>
+        <span class="n">tft_config</span><span class="p">[</span><span class="s2">&quot;intermediate_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf_config</span><span class="p">[</span><span class="s2">&quot;d_ff&quot;</span><span class="p">]</span>
+        <span class="c1"># tft_config[&quot;type_vocab_size&quot;] = hf_config[&quot;type_vocab_size&quot;]</span>
+        <span class="c1"># tft_config[&quot;max_position_embeddings&quot;] = hf_config[&quot;max_position_embeddings&quot;]</span>
+
+        <span class="n">tft_config</span><span class="p">[</span><span class="s2">&quot;num_attention_heads&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf_config</span><span class="p">[</span><span class="s2">&quot;num_heads&quot;</span><span class="p">]</span>
+        <span class="n">tft_config</span><span class="p">[</span><span class="s2">&quot;num_hidden_layers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf_config</span><span class="p">[</span><span class="s2">&quot;num_layers&quot;</span><span class="p">]</span>
+        <span class="n">tft_config</span><span class="p">[</span><span class="s2">&quot;positional_buckets&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf_config</span><span class="p">[</span><span class="s2">&quot;relative_attention_num_buckets&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">tft_config</span></div>
+
+<div class="viewcode-block" id="T5Model.get_config"><a class="viewcode-back" href="../../../../model_doc/t5.html#tf_transformers.models.T5Model.get_config">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a config from Huggingface hub if present&quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if it is under tf_transformers</span>
+        <span class="k">if</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="n">MODEL_TO_HF_URL</span><span class="p">:</span>
+            <span class="n">URL</span> <span class="o">=</span> <span class="n">MODEL_TO_HF_URL</span><span class="p">[</span><span class="n">model_name</span><span class="p">]</span>
+            <span class="n">config_dict</span> <span class="o">=</span> <span class="n">get_config_only</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">config_dict</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Check inside huggingface</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">()</span>
+            <span class="n">config_dict</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">cls_ref</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">PretrainedConfig</span>
+
+                <span class="n">hf_config</span> <span class="o">=</span> <span class="n">PretrainedConfig</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+                <span class="n">hf_config</span> <span class="o">=</span> <span class="n">hf_config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+                <span class="n">config_dict</span> <span class="o">=</span> <span class="n">cls_ref</span><span class="o">.</span><span class="n">update_config</span><span class="p">(</span><span class="n">config_dict</span><span class="p">,</span> <span class="n">hf_config</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">config_dict</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Error: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Failed loading config from HuggingFace&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="T5Model.from_config"><a class="viewcode-back" href="../../../../model_doc/t5.html#tf_transformers.models.T5Model.from_config">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@add_start_docstrings</span><span class="p">(</span>
+        <span class="s2">&quot;T5 Model from config :&quot;</span><span class="p">,</span>
+        <span class="n">ENCODER_MODEL_CONFIG_DOCSTRING</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;transformers.models.T5Encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;tf_transformers.models.t5.T5Config&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">from_config</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">,</span>
+        <span class="n">return_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">encoder_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">decoder_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_auto_regressive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">):</span>
+            <span class="n">config_dict</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">config_dict</span> <span class="o">=</span> <span class="n">config</span>  <span class="c1"># Dummy call to cls, as we need `_update_kwargs_and_config` function to be used here.</span>
+        <span class="n">cls_ref</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="c1"># if we allow names other than</span>
+        <span class="c1"># whats in the class, we might not be able</span>
+        <span class="c1"># to convert from hf properly.</span>
+        <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+        <span class="n">encoder_kwargs_copy</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">encoder_kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">encoder_kwargs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;encoder kwargs should be dict&quot;</span><span class="p">)</span>
+            <span class="n">encoder_kwargs_copy</span> <span class="o">=</span> <span class="n">cls_ref</span><span class="o">.</span><span class="n">_update_kwargs_and_config</span><span class="p">(</span><span class="n">encoder_kwargs</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+
+        <span class="c1"># if a config is provided, we wont be doing any extra .</span>
+        <span class="c1"># Just create a model and return it with random_weights</span>
+        <span class="c1"># (Distribute strategy fails)</span>
+        <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;bidirectional&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">encoder_layer</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config_dict</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;t5_encoder&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">encoder_kwargs_copy</span><span class="p">)</span>
+
+        <span class="n">decoder_kwargs_copy</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">decoder_kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">decoder_kwargs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;decoder kwargs should be dict&quot;</span><span class="p">)</span>
+            <span class="n">decoder_kwargs_copy</span> <span class="o">=</span> <span class="n">cls_ref</span><span class="o">.</span><span class="n">_update_kwargs_and_config</span><span class="p">(</span><span class="n">decoder_kwargs</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+
+        <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;bidirectional&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">decoder_layer</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config_dict</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;t5_decoder&quot;</span><span class="p">,</span>
+            <span class="n">use_decoder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">mask_mode</span><span class="o">=</span><span class="s2">&quot;causal&quot;</span><span class="p">,</span>
+            <span class="n">use_auto_regressive</span><span class="o">=</span><span class="n">use_auto_regressive</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">decoder_kwargs_copy</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">model_layer</span> <span class="o">=</span> <span class="n">EncoderDecoder</span><span class="p">(</span><span class="n">encoder_layer</span><span class="p">,</span> <span class="n">decoder_layer</span><span class="p">,</span> <span class="n">share_embeddings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model_layer</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Create model from config&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">return_layer</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">model_layer</span>
+        <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="T5Model.from_pretrained"><a class="viewcode-back" href="../../../../model_doc/t5.html#tf_transformers.models.T5Model.from_pretrained">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@add_start_docstrings</span><span class="p">(</span>
+        <span class="s2">&quot;T5 Model Pretrained with example :&quot;</span><span class="p">,</span>
+        <span class="n">ENCODER_PRETRAINED_DOCSTRING</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot;tf_transformers.models.T5Model&quot;</span><span class="p">,</span> <span class="s2">&quot;tf_transformers.models.T5Encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;t5-small&quot;</span><span class="p">,</span> <span class="n">code_example</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">from_pretrained</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">model_checkpoint_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">convert_from_hf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">return_layer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">return_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">convert_fn_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span>
+        <span class="n">encoder_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">decoder_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">save_checkpoint_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">load_from_cache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">use_auto_regressive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">skip_hub</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># Load a base config and then overwrite it</span>
+        <span class="n">cls_ref</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">cache_dir</span><span class="p">,</span> <span class="n">save_checkpoint_cache</span><span class="p">)</span>
+        <span class="c1"># Check if model is in out Huggingface cache</span>
+        <span class="k">if</span> <span class="n">model_name</span> <span class="ow">in</span> <span class="n">MODEL_TO_HF_URL</span> <span class="ow">and</span> <span class="n">skip_hub</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">URL</span> <span class="o">=</span> <span class="n">MODEL_TO_HF_URL</span><span class="p">[</span><span class="n">model_name</span><span class="p">]</span>
+            <span class="n">config_dict</span><span class="p">,</span> <span class="n">local_cache</span> <span class="o">=</span> <span class="n">get_config_cache</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span>
+
+            <span class="n">encoder_kwargs_copy</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">encoder_kwargs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">encoder_kwargs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;encoder kwargs should be dict&quot;</span><span class="p">)</span>
+                <span class="n">encoder_kwargs_copy</span> <span class="o">=</span> <span class="n">cls_ref</span><span class="o">.</span><span class="n">_update_kwargs_and_config</span><span class="p">(</span><span class="n">encoder_kwargs</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+
+            <span class="c1"># if a config is provided, we wont be doing any extra .</span>
+            <span class="c1"># Just create a model and return it with random_weights</span>
+            <span class="c1">#  (Distribute strategy fails)</span>
+            <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;bidirectional&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">encoder_layer</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config_dict</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;t5_encoder&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">encoder_kwargs_copy</span><span class="p">)</span>
+
+            <span class="n">decoder_kwargs_copy</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">decoder_kwargs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">decoder_kwargs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;decoder kwargs should be dict&quot;</span><span class="p">)</span>
+                <span class="n">decoder_kwargs_copy</span> <span class="o">=</span> <span class="n">cls_ref</span><span class="o">.</span><span class="n">_update_kwargs_and_config</span><span class="p">(</span><span class="n">decoder_kwargs</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+
+            <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;bidirectional&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="s2">&quot;use_auto_regressive&quot;</span> <span class="ow">in</span> <span class="n">decoder_kwargs_copy</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">decoder_kwargs_copy</span><span class="p">[</span><span class="s2">&quot;use_auto_regressive&quot;</span><span class="p">]</span>
+            <span class="n">decoder_layer</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span>
+                <span class="n">config</span><span class="o">=</span><span class="n">config_dict</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;t5_decoder&quot;</span><span class="p">,</span>
+                <span class="n">use_decoder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">mask_mode</span><span class="o">=</span><span class="s2">&quot;causal&quot;</span><span class="p">,</span>
+                <span class="n">use_auto_regressive</span><span class="o">=</span><span class="n">use_auto_regressive</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">decoder_kwargs_copy</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">model_layer</span> <span class="o">=</span> <span class="n">EncoderDecoder</span><span class="p">(</span><span class="n">encoder_layer</span><span class="p">,</span> <span class="n">decoder_layer</span><span class="p">,</span> <span class="n">share_embeddings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model_layer</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span>
+
+            <span class="c1"># Load Model</span>
+            <span class="n">load_pretrained_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">local_cache</span><span class="p">,</span> <span class="n">URL</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">return_layer</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">return_config</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">model_layer</span><span class="p">,</span> <span class="n">config_dict</span>
+                <span class="k">return</span> <span class="n">model_layer</span>
+            <span class="k">if</span> <span class="n">return_config</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">config_dict</span>
+            <span class="k">return</span> <span class="n">model</span>
+
+        <span class="n">config</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">()</span>
+        <span class="n">config_dict</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">PretrainedConfig</span>
+
+            <span class="n">hf_config</span> <span class="o">=</span> <span class="n">PretrainedConfig</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+            <span class="n">hf_config</span> <span class="o">=</span> <span class="n">hf_config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">config_dict</span> <span class="o">=</span> <span class="n">cls_ref</span><span class="o">.</span><span class="n">update_config</span><span class="p">(</span><span class="n">config_dict</span><span class="p">,</span> <span class="n">hf_config</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Error: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Failed loading config from HuggingFace&quot;</span><span class="p">)</span>
+
+        <span class="c1"># if we allow names other than</span>
+        <span class="c1"># whats in the class, we might not be able</span>
+        <span class="c1"># to convert from hf properly.</span>
+        <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+        <span class="n">encoder_kwargs_copy</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">encoder_kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">encoder_kwargs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;encoder kwargs should be dict&quot;</span><span class="p">)</span>
+            <span class="n">encoder_kwargs_copy</span> <span class="o">=</span> <span class="n">cls_ref</span><span class="o">.</span><span class="n">_update_kwargs_and_config</span><span class="p">(</span><span class="n">encoder_kwargs</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+
+        <span class="c1"># if a config is provided, we wont be doing any extra .</span>
+        <span class="c1"># Just create a model and return it with random_weights</span>
+        <span class="c1">#  (Distribute strategy fails)</span>
+        <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;bidirectional&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">encoder_layer</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config_dict</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;t5_encoder&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">encoder_kwargs_copy</span><span class="p">)</span>
+
+        <span class="n">decoder_kwargs_copy</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">decoder_kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">decoder_kwargs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;decoder kwargs should be dict&quot;</span><span class="p">)</span>
+            <span class="n">decoder_kwargs_copy</span> <span class="o">=</span> <span class="n">cls_ref</span><span class="o">.</span><span class="n">_update_kwargs_and_config</span><span class="p">(</span><span class="n">decoder_kwargs</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">)</span>
+
+        <span class="n">config_dict</span><span class="p">[</span><span class="s2">&quot;bidirectional&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s2">&quot;use_auto_regressive&quot;</span> <span class="ow">in</span> <span class="n">decoder_kwargs_copy</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">decoder_kwargs_copy</span><span class="p">[</span><span class="s2">&quot;use_auto_regressive&quot;</span><span class="p">]</span>
+        <span class="n">decoder_layer</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config_dict</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;t5_decoder&quot;</span><span class="p">,</span>
+            <span class="n">use_decoder</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">mask_mode</span><span class="o">=</span><span class="s2">&quot;causal&quot;</span><span class="p">,</span>
+            <span class="n">use_auto_regressive</span><span class="o">=</span><span class="n">use_auto_regressive</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">decoder_kwargs_copy</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">model_layer</span> <span class="o">=</span> <span class="n">EncoderDecoder</span><span class="p">(</span><span class="n">encoder_layer</span><span class="p">,</span> <span class="n">decoder_layer</span><span class="p">,</span> <span class="n">share_embeddings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model_layer</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span>
+        <span class="c1"># Give preference to model_checkpoint_dir</span>
+        <span class="k">if</span> <span class="n">model_checkpoint_dir</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">load_succesfuly</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">cls_ref</span><span class="o">.</span><span class="n">model_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">load_from_cache</span><span class="p">:</span>
+                        <span class="n">model</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cls_ref</span><span class="o">.</span><span class="n">model_path</span><span class="p">))</span>
+                        <span class="n">load_succesfuly</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">convert_from_hf</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">load_succesfuly</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">convert_fn_type</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+                    <span class="n">cls_ref</span><span class="o">.</span><span class="n">convert_hf_to_tf</span><span class="p">(</span>
+                        <span class="n">model</span><span class="p">,</span>
+                        <span class="n">config_dict</span><span class="p">,</span>
+                        <span class="n">convert_tf_fn</span><span class="o">=</span><span class="n">convert_tf</span><span class="p">,</span>
+                        <span class="n">convert_pt_fn</span><span class="o">=</span><span class="n">convert_pt</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">convert_fn_type</span> <span class="o">==</span> <span class="s2">&quot;tf&quot;</span><span class="p">:</span>
+                    <span class="n">cls_ref</span><span class="o">.</span><span class="n">convert_hf_to_tf</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">,</span> <span class="n">convert_tf_fn</span><span class="o">=</span><span class="n">convert_tf</span><span class="p">,</span> <span class="n">convert_pt_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">convert_fn_type</span> <span class="o">==</span> <span class="s2">&quot;pt&quot;</span><span class="p">:</span>
+                    <span class="n">cls_ref</span><span class="o">.</span><span class="n">convert_hf_to_tf</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">config_dict</span><span class="p">,</span> <span class="n">convert_tf_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convert_pt_fn</span><span class="o">=</span><span class="n">convert_pt</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_layer</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">return_config</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">model_layer</span><span class="p">,</span> <span class="n">config_dict</span>
+            <span class="k">return</span> <span class="n">model_layer</span>
+        <span class="k">if</span> <span class="n">return_config</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">config_dict</span>
+        <span class="k">return</span> <span class="n">model</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

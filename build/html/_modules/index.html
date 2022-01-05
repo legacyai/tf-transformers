@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview: module code &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Notebooks/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Overview: module code</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>All modules for which code is available</h1>
+<ul><li><a href="tf_transformers/models/albert/albert.html">tf_transformers.models.albert.albert</a></li>
+<li><a href="tf_transformers/models/albert/albert_model.html">tf_transformers.models.albert.albert_model</a></li>
+<li><a href="tf_transformers/models/albert/configuration_albert.html">tf_transformers.models.albert.configuration_albert</a></li>
+<li><a href="tf_transformers/models/albert/tokenizer_albert.html">tf_transformers.models.albert.tokenizer_albert</a></li>
+<li><a href="tf_transformers/models/bart/bart.html">tf_transformers.models.bart.bart</a></li>
+<li><a href="tf_transformers/models/bart/bart_model.html">tf_transformers.models.bart.bart_model</a></li>
+<li><a href="tf_transformers/models/bart/configuration_bart.html">tf_transformers.models.bart.configuration_bart</a></li>
+<li><a href="tf_transformers/models/bert/bert.html">tf_transformers.models.bert.bert</a></li>
+<li><a href="tf_transformers/models/bert/bert_model.html">tf_transformers.models.bert.bert_model</a></li>
+<li><a href="tf_transformers/models/bert/configuration_bert.html">tf_transformers.models.bert.configuration_bert</a></li>
+<li><a href="tf_transformers/models/bigbird/tokenizer_bigbird_roberta.html">tf_transformers.models.bigbird.tokenizer_bigbird_roberta</a></li>
+<li><a href="tf_transformers/models/encoder_decoder/encoder_decoder.html">tf_transformers.models.encoder_decoder.encoder_decoder</a></li>
+<li><a href="tf_transformers/models/gpt2/configuration_gpt2.html">tf_transformers.models.gpt2.configuration_gpt2</a></li>
+<li><a href="tf_transformers/models/gpt2/gpt2.html">tf_transformers.models.gpt2.gpt2</a></li>
+<li><a href="tf_transformers/models/gpt2/gpt2_model.html">tf_transformers.models.gpt2.gpt2_model</a></li>
+<li><a href="tf_transformers/models/mt5/configuration_mt5.html">tf_transformers.models.mt5.configuration_mt5</a></li>
+<li><a href="tf_transformers/models/mt5/mt5.html">tf_transformers.models.mt5.mt5</a></li>
+<li><a href="tf_transformers/models/mt5/mt5_model.html">tf_transformers.models.mt5.mt5_model</a></li>
+<li><a href="tf_transformers/models/roberta/configuration_roberta.html">tf_transformers.models.roberta.configuration_roberta</a></li>
+<li><a href="tf_transformers/models/roberta/roberta.html">tf_transformers.models.roberta.roberta</a></li>
+<li><a href="tf_transformers/models/roberta/roberta_model.html">tf_transformers.models.roberta.roberta_model</a></li>
+<li><a href="tf_transformers/models/t5/configuration_t5.html">tf_transformers.models.t5.configuration_t5</a></li>
+<li><a href="tf_transformers/models/t5/t5.html">tf_transformers.models.t5.t5</a></li>
+<li><a href="tf_transformers/models/t5/t5_model.html">tf_transformers.models.t5.t5_model</a></li>
+<li><a href="tf_transformers/models/t5/tokenizer_t5.html">tf_transformers.models.t5.tokenizer_t5</a></li>
+<li><a href="tf_transformers/models/vit/configuration_vit.html">tf_transformers.models.vit.configuration_vit</a></li>
+<li><a href="tf_transformers/models/vit/vit.html">tf_transformers.models.vit.vit</a></li>
+<li><a href="tf_transformers/models/vit/vit_model.html">tf_transformers.models.vit.vit_model</a></li>
+</ul>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

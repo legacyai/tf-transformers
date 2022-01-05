@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tf_transformers.models.roberta.configuration_roberta &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+        <script src="../../../../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html"><img src="../../../../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Notebooks/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>tf_transformers.models.roberta.configuration_roberta</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tf_transformers.models.roberta.configuration_roberta</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding=utf-8</span>
+<span class="c1"># Copyright 2021 TF-Transformers Authors.</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ====================================================================</span>
+<span class="sd">&quot;&quot;&quot; Roberta model configuration &quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">TransformerConfig</span>
+
+
+<div class="viewcode-block" id="RobertaConfig"><a class="viewcode-back" href="../../../../model_doc/roberta.html#tf_transformers.models.roberta.RobertaConfig">[docs]</a><span class="k">class</span> <span class="nc">RobertaConfig</span><span class="p">(</span><span class="n">TransformerConfig</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the configuration class to store the configuration of a :class:`~tf_transformers.models.RobertaModel`.</span>
+<span class="sd">    It is used to instantiate an ALBERT model according to the specified arguments, defining the model architecture.</span>
+<span class="sd">    Instantiating a configuration with the defaults will yield a similar configuration to that of the</span>
+<span class="sd">    ALBERT `base &lt;https://huggingface.co/bert-base-uncased&gt;`__ architecture.</span>
+
+<span class="sd">    Configuration objects inherit from :class:`~tf_transformers.models.TransformerConfig` and can be used to control the model</span>
+<span class="sd">    outputs. Read the documentation from :class:`~tf_transformers.models.TransformerConfig` for more information.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        vocab_size (:obj:`int`, `optional`, defaults to 30522):</span>
+<span class="sd">            Vocabulary size of the ALBERT model. Defines the number of different tokens that can be represented by the</span>
+<span class="sd">            :obj:`inputs_ids` passed when calling :class:`~tf_transformers.model.RobertaModel` or</span>
+<span class="sd">            :class:`~tf_transformers.models.RobertaEncoder`.</span>
+<span class="sd">        embedding_size (:obj:`int`, `optional`, defaults to 128):</span>
+<span class="sd">            Dimensionality of vocabulary embeddings.</span>
+<span class="sd">        embedding_projection_size (:obj:`int`):</span>
+<span class="sd">            Dimensionality of the encoder layers and the pooler layer. Useful for Roberta.</span>
+<span class="sd">        num_hidden_layers (:obj:`int`, `optional`, defaults to 12):</span>
+<span class="sd">            Number of hidden layers in the Transformer encoder.</span>
+<span class="sd">        num_attention_heads (:obj:`int`, `optional`, defaults to 12):</span>
+<span class="sd">            Number of attention heads for each attention layer in the Transformer encoder.</span>
+<span class="sd">        attention_head_size (:obj:`int`):</span>
+<span class="sd">            Size of attention heads in each layer. Normally (embedding_size//num_attention_heads).</span>
+<span class="sd">        intermediate_size (:obj:`int`, `optional`, defaults to 3072):</span>
+<span class="sd">            The dimensionality of the &quot;intermediate&quot; (often named feed-forward) layer in the Transformer encoder.</span>
+<span class="sd">        hidden_act (:obj:`str` or :obj:`Callable`, `optional`, defaults to :obj:`&quot;gelu&quot;`):</span>
+<span class="sd">            The non-linear activation function (function or string) in the encoder and pooler. If string,</span>
+<span class="sd">            :obj:`&quot;gelu&quot;`, :obj:`&quot;relu&quot;`, :obj:`&quot;silu&quot;` and many are supported.</span>
+<span class="sd">        hidden_dropout_prob (:obj:`float`, `optional`, defaults to 0):</span>
+<span class="sd">            The dropout probability for all fully connected layers in the embeddings, encoder, and pooler.</span>
+<span class="sd">        max_position_embeddings (:obj:`int`, `optional`, defaults to 512):</span>
+<span class="sd">            The maximum sequence length that this model might ever be used with. Typically set this to something large</span>
+<span class="sd">            (e.g., 512 or 1024 or 2048).</span>
+<span class="sd">        type_vocab_size (:obj:`int`, `optional`, defaults to 2):</span>
+<span class="sd">            The vocabulary size of the :obj:`token_type_ids` passed when calling :class:`~transformers.RobertaModel` or</span>
+<span class="sd">            :class:`~transformers.TFRobertaModel`.</span>
+<span class="sd">        initializer_range (:obj:`float`, `optional`, defaults to 0.02):</span>
+<span class="sd">            The standard deviation of the truncated_normal_initializer for initializing all weight matrices.</span>
+<span class="sd">        layer_norm_epsilon (:obj:`float`, `optional`, defaults to 1e-12):</span>
+<span class="sd">            The epsilon used by the layer normalization layers.</span>
+<span class="sd">        classifier_dropout_prob (:obj:`float`, `optional`, defaults to 0.1):</span>
+<span class="sd">            The dropout ratio for attached classifiers.</span>
+<span class="sd">        position_embedding_type (:obj:`str`, `optional`, defaults to :obj:`&quot;absolute&quot;`):</span>
+<span class="sd">            Type of position embedding. Choose one of :obj:`&quot;absolute&quot;`, :obj:`&quot;relative_key&quot;`,</span>
+<span class="sd">            :obj:`&quot;relative_key_query&quot;`. For positional embeddings use :obj:`&quot;absolute&quot;`. For more information on</span>
+<span class="sd">            :obj:`&quot;relative_key&quot;`, please refer to `Self-Attention with Relative Position Representations (Shaw et al.)</span>
+<span class="sd">            &lt;https://arxiv.org/abs/1803.02155&gt;`__. For more information on :obj:`&quot;relative_key_query&quot;`, please refer to</span>
+<span class="sd">            `Method 4` in `Improve Transformer Models with Better Relative Position Embeddings (Huang et al.)</span>
+<span class="sd">            &lt;https://arxiv.org/abs/2009.13658&gt;`__.</span>
+<span class="sd">        num_hidden_groups (:obj:`int`, `optional`, defaults to 1):</span>
+<span class="sd">            Number of groups for the hidden layers, parameters in the same group are shared.</span>
+
+<span class="sd">    Examples::</span>
+
+<span class="sd">        &gt;&gt;&gt; from tf_transformers.models import RobertaConfig, RobertaModel</span>
+<span class="sd">        &gt;&gt;&gt; # Initializing an bert-base-uncased style configuration</span>
+<span class="sd">        &gt;&gt;&gt; configuration = RobertaConfig()</span>
+
+<span class="sd">        &gt;&gt;&gt; # Initializing an Roberta different style configuration</span>
+<span class="sd">        &gt;&gt;&gt; configuration_new = RobertaConfig(</span>
+<span class="sd">        ...      embedding_size=768,</span>
+<span class="sd">        ...      num_attention_heads=12,</span>
+<span class="sd">        ...      intermediate_size=3072,</span>
+<span class="sd">        ...  )</span>
+
+<span class="sd">        &gt;&gt;&gt; # Initializing a model from the original configuration</span>
+<span class="sd">        &gt;&gt;&gt; model = RobertaModel.from_config(configuration)</span>
+
+<span class="sd">        &gt;&gt;&gt; # Accessing the model configuration</span>
+<span class="sd">        &gt;&gt;&gt; configuration = model._config_dict # This has more details than original configuration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">vocab_size</span><span class="o">=</span><span class="mi">50265</span><span class="p">,</span>
+        <span class="n">embedding_size</span><span class="o">=</span><span class="mi">768</span><span class="p">,</span>
+        <span class="n">num_hidden_layers</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">num_attention_heads</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+        <span class="n">attention_head_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+        <span class="n">intermediate_size</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
+        <span class="n">hidden_act</span><span class="o">=</span><span class="s2">&quot;gelu&quot;</span><span class="p">,</span>
+        <span class="n">intermediate_act</span><span class="o">=</span><span class="s2">&quot;gelu&quot;</span><span class="p">,</span>
+        <span class="n">hidden_dropout_prob</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">attention_probs_dropout_prob</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_position_embeddings</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+        <span class="n">type_vocab_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">initializer_range</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">layer_norm_epsilon</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
+        <span class="n">position_embedding_type</span><span class="o">=</span><span class="s2">&quot;absolute&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">vocab_size</span><span class="o">=</span><span class="n">vocab_size</span><span class="p">,</span>
+            <span class="n">embedding_size</span><span class="o">=</span><span class="n">embedding_size</span><span class="p">,</span>
+            <span class="n">num_hidden_layers</span><span class="o">=</span><span class="n">num_hidden_layers</span><span class="p">,</span>
+            <span class="n">num_attention_heads</span><span class="o">=</span><span class="n">num_attention_heads</span><span class="p">,</span>
+            <span class="n">attention_head_size</span><span class="o">=</span><span class="n">attention_head_size</span><span class="p">,</span>
+            <span class="n">hidden_act</span><span class="o">=</span><span class="n">hidden_act</span><span class="p">,</span>
+            <span class="n">intermediate_act</span><span class="o">=</span><span class="n">intermediate_act</span><span class="p">,</span>
+            <span class="n">intermediate_size</span><span class="o">=</span><span class="n">intermediate_size</span><span class="p">,</span>
+            <span class="n">hidden_dropout_prob</span><span class="o">=</span><span class="n">hidden_dropout_prob</span><span class="p">,</span>
+            <span class="n">attention_probs_dropout_prob</span><span class="o">=</span><span class="n">attention_probs_dropout_prob</span><span class="p">,</span>
+            <span class="n">max_position_embeddings</span><span class="o">=</span><span class="n">max_position_embeddings</span><span class="p">,</span>
+            <span class="n">type_vocab_size</span><span class="o">=</span><span class="n">type_vocab_size</span><span class="p">,</span>
+            <span class="n">initializer_range</span><span class="o">=</span><span class="n">initializer_range</span><span class="p">,</span>
+            <span class="n">layer_norm_epsilon</span><span class="o">=</span><span class="n">layer_norm_epsilon</span><span class="p">,</span>
+            <span class="n">position_embedding_type</span><span class="o">=</span><span class="n">position_embedding_type</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
