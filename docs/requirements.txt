@@ -7,12 +7,8 @@ jupyter-sphinx>=0.3.2
 myst-nb
 
 # Packages as per HuggingFace extensions
-sphinx_rtd_theme
 recommonmark
 sphinx_markdown_tables
 sphinxext-opengraph
 sphinx-copybutton
-
-# Packages used for CI tests.
-pytest
-pytest-xdist
+matplotlib
