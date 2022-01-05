@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta property="og:title" content="<no title>" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="Notebooks/1_read_write_tfrecords.html" />
+  <meta property="og:description" content="{,- “cells”: [,-{, “cell_type”: “code”, “execution_count”: null, “id”: “b9073a76”, “metadata”: {}, “outputs”: [], “source”: [],.}, { “cell_type”: “markdown”,..." />
+  <meta property="og:image" content="png location" />
+  <meta property="og:image:alt" content="<no title>" />
+  <meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;no title&gt; &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ALBERT Tokenizer" href="../model_doc/albert_tokenizer.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="../model_doc/parallelism.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">GLUE SCORE calculated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html#id1">GLUE SCORE calculated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Rogue SCORE</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>&lt;no title&gt;</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Notebooks/1_read_write_tfrecords.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <dl>
+<dt>{</dt><dd><dl>
+<dt>“cells”: [</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “b9073a76”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</dd>
+</dl>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“id”: “570f55c0”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“### Writing and Reading TFRecordsn”,
+“n”,
+“n”,
+“Tensoflow-Transformers has off the shelf support to write and read tfrecord with so much ease.n”,
+“It also allows you to shard, shuffle and batch your data most of the times, with minimal code.n”,
+“n”,
+“Here we will see, how can we make use of these utilities to write and read tfrecords.n”,
+“n”,
+“For this examples, we will be using a [<strong>Squad Dataset</strong>](<a class="reference external" href="https://huggingface.co/datasets/squad">https://huggingface.co/datasets/squad</a> &quot;Squad Dataset&quot;), to convert it to a text to text problem usingn”,
+“GPT2 Tokenizer.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “bb537615”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: 12,
+“id”: “18ed0d13”,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“from tf_transformers.data import TFWriter, TFReadern”,
+“from transformers import GPT2TokenizerFastn”,
+“n”,
+“from datasets import load_datasetn”,
+“n”,
+“import tempfilen”,
+“import jsonn”,
+“import glob”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “a5392617”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“id”: “79f82c0e”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“#### Load Data and Tokenizern”,
+“n”,
+“We will load dataset and tokenizer. Then we will define the length for the examples.n”,
+“It is important to make sure we have limit the length within the allowed limit of each models.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “e38fba3a”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “0225f8dd”,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“# Load Datasetn”,
+“dataset = load_dataset(&quot;squad&quot;)n”,
+“tokenizer = GPT2TokenizerFast.from_pretrained(‘gpt2’)n”,
+“n”,
+“# Define length for examplesn”,
+“max_passage_length = 384n”,
+“max_question_length = 64n”,
+“max_answer_length = 40”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “1e61ca30”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“id”: “ce679ced”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“#### Write TFRecordn”,
+“n”,
+“To write a TFRecord, we need to provide a schema (<strong>dict</strong>). This schema supports <strong>int</strong>, <strong>float</strong>, <strong>bytes</strong>.n”,
+“n”,
+“<strong>TFWriter</strong>, support [<strong>FixedLen</strong>](<a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/io/FixedLenFeature">https://www.tensorflow.org/api_docs/python/tf/io/FixedLenFeature</a>) andn”,
+“[<strong>VarLen</strong>](<a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/io/VarLenFeature">https://www.tensorflow.org/api_docs/python/tf/io/VarLenFeature</a>) feature types. n”,
+“n”,
+“The recommended and easiest is to use <strong>Varlen</strong>, this will be faster and easy to write and read.n”,
+“We can also pad it accordingly after reading.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “9bb86f29”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: 27,
+“id”: “d0e4ad0d”,
+“metadata”: {},
+“outputs”: [</p>
+<blockquote>
+<div><dl>
+<dt>{</dt><dd><p>“name”: “stdout”,
+“output_type”: “stream”,
+“text”: [</p>
+<blockquote>
+<div><p>“Tag trainn”</p>
+</div></blockquote>
+<p>]</p>
+</dd>
+</dl>
+<p>},
+{</p>
+<blockquote>
+<div><p>“name”: “stderr”,
+“output_type”: “stream”,
+“text”: [</p>
+<blockquote>
+<div><p>“<a class="reference external" href="INFO:absl:Total">INFO:absl:Total</a> individual observations/examples written is 87599 in 86.43202519416809 secondsn”,
+“<a class="reference external" href="INFO:absl:All">INFO:absl:All</a> writer objects closedn”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>],
+“source”: [</p>
+<blockquote>
+<div><p>“def parse_train(dataset, tokenizer, max_passage_length, max_question_length, max_answer_length, key):n”,
+”    &quot;&quot;&quot;Function o to parse examplesn”,
+“n”,
+”    Args:n”,
+”        dataset (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dataet</span></code>): HF datasetn”,
+”        tokenizer (<code class="xref py py-obj docutils literal notranslate"><span class="pre">tokenizer</span></code>): HF Tokenizern”,
+”        max_passage_length (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>): Passage Lengthn”,
+”        max_question_length (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>): Question Lengthn”,
+”        max_answer_length (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>): Answer Lengthn”,
+”        key (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>): Key of dataset (<cite>train</cite>, <cite>validation</cite> etc)n”,
+”    &quot;&quot;&quot;    n”,
+”    result = {}n”,
+”    for f in dataset[key]:n”,
+”        question_input_ids =  tokenizer(item[‘context’], max_length=max_passage_length, truncation=True)[‘input_ids’] + [tokenizer.bos_token_id]n”,
+”        passage_input_ids  =  tokenizer(item[‘question’], max_length=max_question_length, truncation=True)[‘input_ids’]  + \n”,
+”        [tokenizer.bos_token_id] n”,
+”        n”,
+”        # Input Question + Contextn”,
+”        # We should make sure that we will mask labels here,as we dont want model to predict inputsn”,
+”        input_ids = question_input_ids + passage_input_idsn”,
+”        labels_mask = [0] * len(input_ids)n”,
+”        n”,
+”        # Answer partn”,
+”        answer_ids = tokenizer(item[‘answers’][‘text’][0], max_length=max_answer_length, truncation=True)[‘input_ids’] + \n”,
+”        [tokenizer.bos_token_id]n”,
+”        input_ids = input_ids + answer_idsn”,
+”        labels_mask = labels_mask + [1] * len(answer_ids)n”,
+”        n”,
+”        # Shift positions to make proper training examplesn”,
+”        labels = input_ids[1:]n”,
+”        labels_mask = labels_mask[1:]n”,
+”        n”,
+”        input_ids = input_ids[:-1]n”,
+“n”,
+”        result = {}n”,
+”        result[‘input_ids’] = input_idsn”,
+”        n”,
+”        result[‘labels’] = labelsn”,
+”        result[‘labels_mask’] = labels_maskn”,
+”        n”,
+”        yield resultn”,
+”        n”,
+“# Write using TF Writern”,
+“n”,
+“schema = {n”,
+”    &quot;input_ids&quot;: (&quot;var_len&quot;, &quot;int&quot;),n”,
+”    &quot;labels&quot;: (&quot;var_len&quot;, &quot;int&quot;),n”,
+”    &quot;labels_mask&quot;: (&quot;var_len&quot;, &quot;int&quot;),n”,
+“}n”,
+“n”,
+“tfrecord_train_dir = tempfile.mkdtemp()n”,
+“tfrecord_filename = ‘squad’n”,
+“n”,
+“tfwriter = TFWriter(schema=schema, n”,
+”                    file_name=tfrecord_filename, n”,
+”                    model_dir=tfrecord_train_dir,n”,
+”                    tag=’train’,n”,
+”                    overwrite=Truen”,
+”                    )n”,
+“n”,
+“# Train datasetn”,
+“train_parser_fn = parse_train(dataset, tokenizer, max_passage_length, max_question_length, max_answer_length, key=’train’)n”,
+“tfwriter.process(parse_fn=train_parser_fn)”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “be3ecd9c”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “markdown”,
+“id”: “bdb058f7”,
+“metadata”: {},
+“source”: [</p>
+<blockquote>
+<div><p>“#### Read TFRecordsn”,
+“n”,
+“To read a TFRecord, we need to provide a schema (<strong>dict</strong>). This schema supports <strong>int</strong>, <strong>float</strong>, <strong>bytes</strong>.n”,
+“n”,
+“<strong>TFWReader</strong>, support [<strong>FixedLen</strong>](<a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/io/FixedLenFeature">https://www.tensorflow.org/api_docs/python/tf/io/FixedLenFeature</a>) andn”,
+“[<strong>VarLen</strong>](<a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/io/VarLenFeature">https://www.tensorflow.org/api_docs/python/tf/io/VarLenFeature</a>) feature types. n”,
+“We can also <strong>auto_batch</strong>, <strong>shuffle</strong>, choose the optional keys (not all keys in tfrecords) might not be required while reading, etc in a single function.”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “bb816a61”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: 28,
+“id”: “1df198d9”,
+“metadata”: {},
+“outputs”: [],
+“source”: [</p>
+<blockquote>
+<div><p>“# Read TFRecordn”,
+“n”,
+“schema = json.load(open(&quot;{}/schema.json&quot;.format(tfrecord_train_dir)))n”,
+“all_files = glob.glob(&quot;{}/<a href="#id1"><span class="problematic" id="id2">*</span></a>.tfrecord&quot;.format(tfrecord_train_dir))n”,
+“tf_reader = TFReader(schema=schema, n”,
+”                    tfrecord_files=all_files)n”,
+“n”,
+“x_keys = [‘input_ids’]n”,
+“y_keys = [‘labels’, ‘labels_mask’]n”,
+“batch_size = 16n”,
+“train_dataset = tf_reader.read_record(auto_batch=True, n”,
+”                                   keys=x_keys,n”,
+”                                   batch_size=batch_size, n”,
+”                                   x_keys = x_keys, n”,
+”                                   y_keys = y_keys,n”,
+”                                   shuffle=True, n”,
+”                                   drop_remainder=Truen”,
+”                                  )”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “4b16442c”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: 29,
+“id”: “880d8c0b”,
+“metadata”: {},
+“outputs”: [</p>
+<blockquote>
+<div><dl>
+<dt>{</dt><dd><p>“name”: “stdout”,
+“output_type”: “stream”,
+“text”: [</p>
+<blockquote>
+<div><p>“{‘input_ids’: &lt;tf.Tensor: shape=(16, 187), dtype=int32, numpy=n”,
+“array([[19895,  5712, 20221, …, 12944,   343,   516],n”,
+”       [19895,  5712, 20221, …, 12944,   343,   516],n”,
+”       [19895,  5712, 20221, …, 12944,   343,   516],n”,
+”       …,n”,
+”       [19895,  5712, 20221, …, 12944,   343,   516],n”,
+”       [19895,  5712, 20221, …, 12944,   343,   516],n”,
+”       [19895,  5712, 20221, …, 12944,   343,   516]], dtype=int32)&gt;} {‘labels’: &lt;tf.Tensor: shape=(16, 187), dtype=int32, numpy=n”,
+“array([[ 5712, 20221,    11, …,   343,   516, 50256],n”,
+”       [ 5712, 20221,    11, …,   343,   516, 50256],n”,
+”       [ 5712, 20221,    11, …,   343,   516, 50256],n”,
+”       …,n”,
+”       [ 5712, 20221,    11, …,   343,   516, 50256],n”,
+”       [ 5712, 20221,    11, …,   343,   516, 50256],n”,
+”       [ 5712, 20221,    11, …,   343,   516, 50256]], dtype=int32)&gt;, ‘labels_mask’: &lt;tf.Tensor: shape=(16, 187), dtype=int32, numpy=n”,
+“array([[0, 0, 0, …, 1, 1, 1],n”,
+”       [0, 0, 0, …, 1, 1, 1],n”,
+”       [0, 0, 0, …, 1, 1, 1],n”,
+”       …,n”,
+”       [0, 0, 0, …, 1, 1, 1],n”,
+”       [0, 0, 0, …, 1, 1, 1],n”,
+”       [0, 0, 0, …, 1, 1, 1]], dtype=int32)&gt;}n”</p>
+</div></blockquote>
+<p>]</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>],
+“source”: [</p>
+<blockquote>
+<div><p>“for (batch_inputs, batch_labels) in train_dataset:n”,
+”    print(batch_inputs, batch_labels)n”,
+”    break”</p>
+</div></blockquote>
+<p>]</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “7648e4cd”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</div></blockquote>
+<p>},
+{</p>
+<blockquote>
+<div><p>“cell_type”: “code”,
+“execution_count”: null,
+“id”: “8904f689”,
+“metadata”: {},
+“outputs”: [],
+“source”: []</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>],
+“metadata”: {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“jupytext”: {</dt><dd><p>“formats”: “ipynb,md:myst”</p>
+</dd>
+</dl>
+<p>},
+“kernelspec”: {</p>
+<blockquote>
+<div><p>“display_name”: “Python 3 (ipykernel)”,
+“language”: “python”,
+“name”: “python3”</p>
+</div></blockquote>
+<p>},
+“language_info”: {</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“codemirror_mode”: {</dt><dd><p>“name”: “ipython”,
+“version”: 3</p>
+</dd>
+</dl>
+<p>},
+“file_extension”: “.py”,
+“mimetype”: “text/x-python”,
+“name”: “python”,
+“nbconvert_exporter”: “python”,
+“pygments_lexer”: “ipython3”,
+“version”: “3.8.11”</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>},
+“nbformat”: 4,
+“nbformat_minor”: 5</p>
+</dd>
+</dl>
+<p>}</p>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../model_doc/parallelism.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../model_doc/albert_tokenizer.html" class="btn btn-neutral float-right" title="ALBERT Tokenizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

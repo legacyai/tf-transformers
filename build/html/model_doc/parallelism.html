@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta property="og:title" content="<no title>" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="model_doc/parallelism.html" />
+  <meta property="og:description" content="<!— Copyright 2021 The HuggingFace Team. All rights reserved. Licensed under the Apache License, Version 2.0 (the “License”); you may not use this file excep..." />
+  <meta property="og:image" content="png location" />
+  <meta property="og:image:alt" content="<no title>" />
+  <meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;no title&gt; &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="../Notebooks/1_read_write_tfrecords.html" />
+    <link rel="prev" title="Vision Transformer (ViT)" href="vit.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vit.html">Vision Transformer (ViT)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">GLUE SCORE calculated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html#id1">GLUE SCORE calculated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Rogue SCORE</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>&lt;no title&gt;</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/model_doc/parallelism.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p>&lt;!—
+Copyright 2021 The HuggingFace Team. All rights reserved.</p>
+<p>Licensed under the Apache License, Version 2.0 (the “License”);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<blockquote>
+<div><p><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+</div></blockquote>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+–&gt;</p>
+<p># Model Parallelism</p>
+<p>## Parallelism overview</p>
+<p>In the modern machine learning the various approaches to parallelism are used to:
+1. fit very large models onto limited hardware - e.g. t5-11b is 45GB in just model params
+2. significantly speed up training - finish training that would take a year in hours</p>
+<p>We will first discuss in depth various 1D parallelism techniques and their pros and cons and then look at how they can be combined into 2D and 3D parallelism to enable an even faster training and to support even bigger models. Various other powerful alternative approaches will be presented.</p>
+<p>While the main concepts most likely will apply to any other framework, this article is focused on PyTorch-based implementations.</p>
+<p>## Concepts</p>
+<p>The following is the brief description of the main concepts that will be described later in depth in this document.</p>
+<ol class="arabic simple">
+<li><p>DataParallel (DP) - the same setup is replicated multiple times, and each being fed a slice of the data. The processing is done in parallel and all setups are synchronized at the end of each training step.</p></li>
+<li><p>TensorParallel (TP) - each tensor is split up into multiple chunks, so instead of having the whole tensor reside on a single gpu, each shard of the tensor resides on its designated gpu. During processing each shard gets processed separately and in parallel on different GPUs and the results are synced at the end of the step. This is what one may call horizontal parallelism, as the splitting happens on horizontal level.</p></li>
+<li><p>PipelineParallel (PP) - the model is split up vertically (layer-level) across multiple GPUs, so that only one or several layers of the model are places on a single gpu. Each gpu processes in parallel different stages of the pipeline and working on a small chunk of the batch.</p></li>
+<li><p>Zero Redundancy Optimizer (ZeRO) - Also performs sharding of the tensors somewhat similar to TP, except the whole tensor gets reconstructed in time for a forward or backward computation, therefore the model does’t need to be modified. It also supports various offloading techniques to compensate for limited GPU memory.</p></li>
+<li><p>Sharded DDP - is another name for the foundational ZeRO concept as used by various other implementations of ZeRO.</p></li>
+</ol>
+<p>## Data Parallel</p>
+<p>Most users with just 2 GPUs already enjoy the increased training speed up thanks to DataParallel (DP) and DistributedDataParallel (DDP) that are almost trivial to use. This is a built-in feature of Pytorch.</p>
+<p>## ZeRO Data Parallel</p>
+<p>ZeRO-powered data parallelism (ZeRO-DP) is described on the following diagram from this [blog post](<a class="reference external" href="https://www.microsoft.com/en-us/research/blog/zero-deepspeed-new-system-optimizations-enable-training-models-with-over-100-billion-parameters/">https://www.microsoft.com/en-us/research/blog/zero-deepspeed-new-system-optimizations-enable-training-models-with-over-100-billion-parameters/</a>)
+![DeepSpeed-Image-1](imgs/parallelism-zero.png)</p>
+<p>It can be difficult to wrap one’s head around it, but in reality the concept is quite simple. This is just the usual DataParallel (DP), except, instead of replicating the full model params, gradients and optimizer states, each GPU stores only a slice of it.  And then at run-time when the full layer params are needed just for the given layer, all GPUs synchronize to give each other parts that they miss - this is it.</p>
+<p>Consider this simple model with 3 layers, where each layer has 3 params:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">La</span> <span class="pre">|</span> <span class="pre">Lb</span> <span class="pre">|</span> <span class="pre">Lc</span>
+<span class="pre">---|----|---</span>
+<span class="pre">a0</span> <span class="pre">|</span> <span class="pre">b0</span> <span class="pre">|</span> <span class="pre">c0</span>
+<span class="pre">a1</span> <span class="pre">|</span> <span class="pre">b1</span> <span class="pre">|</span> <span class="pre">c1</span>
+<span class="pre">a2</span> <span class="pre">|</span> <span class="pre">b2</span> <span class="pre">|</span> <span class="pre">c2</span>
+<span class="pre">`</span></code>
+Layer La has weights a0, a1 and a2.</p>
+<p>If we have 3 GPUs, the Sharded DDP (= Zero-DP) splits the model onto 3 GPUs like so:</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a>`
+GPU0:
+La | Lb | Lc
+—<a href="#id11"><span class="problematic" id="id12">|----|</span></a>—
+a0 | b0 | c0</p>
+<p>GPU1:
+La | Lb | Lc
+—<a href="#id13"><span class="problematic" id="id14">|----|</span></a>—
+a1 | b1 | c1</p>
+<p>GPU2:
+La | Lb | Lc
+—<a href="#id15"><span class="problematic" id="id16">|----|</span></a>—
+a2 | b2 | c2
+<a href="#id3"><span class="problematic" id="id4">``</span></a><a href="#id5"><span class="problematic" id="id6">`</span></a></p>
+<p>In a way this is the same horizontal slicing, as tensor parallelism, if you imagine the typical DNN diagram. Vertical slicing is where one puts whole layer-groups on different GPUs. But it’s just the starting point.</p>
+<p>Now each of these GPUs will get the usual mini-batch as it works in DP:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">x0</span> <span class="pre">=&gt;</span> <span class="pre">GPU0</span>
+<span class="pre">x1</span> <span class="pre">=&gt;</span> <span class="pre">GPU1</span>
+<span class="pre">x2</span> <span class="pre">=&gt;</span> <span class="pre">GPU2</span>
+<span class="pre">`</span></code></p>
+<p>The inputs are unmodified - they think they are going to be processed by the normal model.</p>
+<p>First, the inputs hit the layer La.</p>
+<p>Let’s focus just on GPU0: x0 needs a0, a1, a2 params to do its forward path, but GPU0 has only a0 - it gets sent a1 from GPU1 and a2 from GPU2, bringing all pieces of the model together.</p>
+<p>In parallel, GPU1 gets mini-batch x1 and it only has a1, but needs a0 and a2 params, so it gets those from GPU0 and GPU2.</p>
+<p>Same happens to GPU2 that gets input x2. It gets a0 and a1 from GPU0 and GPU1, and with its a2 it reconstructs the full tensor.</p>
+<p>All 3 GPUs get the full tensors reconstructed and a forward happens.</p>
+<p>As soon as the calculation is done, the data that is no longer needed gets dropped - it’s only used during the calculation. The reconstruction is done efficiently via a pre-fetch.</p>
+<p>And the whole process is repeated for layer Lb, then Lc forward-wise, and then backward Lc -&gt; Lb -&gt; La.</p>
+<p>To me this sounds like an efficient group backpacking weight distribution strategy:</p>
+<ol class="arabic simple">
+<li><p>person A carries the tent</p></li>
+<li><p>person B carries the stove</p></li>
+<li><p>person C carries the axe</p></li>
+</ol>
+<p>Now each night they all share what they have with others and get from others what the don’t have, and in the morning they pack up their allocated type of gear and continue on their way. This is Sharded DDP / Zero DP.</p>
+<p>Compare this strategy to the simple one where each person has to carry their own tent, stove and axe, which would be far more inefficient. This is DataParallel (DP and DDP) in Pytorch.</p>
+<p>While reading the literature on this topic you may encounter the following synonyms: Sharded, Partitioned.</p>
+<p>If you pay close attention the way ZeRO partitions the model’s weights - it looks very similar to tensor parallelism which will be discussed later. This is because it partitions/shards each layer’s weights, unlike vertical model parallelism which is discussed next.</p>
+<p>Implementations:</p>
+<ul class="simple">
+<li><p>[DeepSpeed](<a class="reference external" href="https://www.deepspeed.ai/features/#the-zero-redundancy-optimizer">https://www.deepspeed.ai/features/#the-zero-redundancy-optimizer</a>) ZeRO-DP stages 1+2+3</p></li>
+<li><p>[Fairscale](<a class="reference external" href="https://github.com/facebookresearch/fairscale/#optimizer-state-sharding-zero">https://github.com/facebookresearch/fairscale/#optimizer-state-sharding-zero</a>) ZeRO-DP stages 1+2+3</p></li>
+<li><p>[<cite>transformers</cite> integration](<a class="reference external" href="https://huggingface.co/transformers/master/main_classes/trainer.html#trainer-integrations">https://huggingface.co/transformers/master/main_classes/trainer.html#trainer-integrations</a>)</p></li>
+</ul>
+<p>## Naive Model Parallel (Vertical) and Pipeline Parallel</p>
+<p>Naive Model Parallel (MP) is where one spreads groups of model layers across multiple GPUs. The mechanism is relatively simple - switch the desired layers <cite>.to()</cite> the desired devices and now whenever the data goes in and out those layers switch the data to the same device as the layer and leave the rest unmodified.</p>
+<p>We refer to it as Vertical MP, because if you remember how most models are drawn, we slice the layers vertically. For example, if the following diagram shows an 8-layer model:</p>
+<p><a href="#id7"><span class="problematic" id="id8">``</span></a>`
+===================  ===================
+|  0 | 1 | 2 | 3  |  |  4 | 5 | 6 | 7  |
+===================  ===================</p>
+<blockquote>
+<div><p>gpu0                 gpu1</p>
+</div></blockquote>
+<p><a href="#id9"><span class="problematic" id="id10">``</span></a>`
+we just sliced it in 2 vertically, placing layers 0-3 onto GPU0 and 4-7 to GPU1.</p>
+<p>Now while data travels from layer 0 to 1, 1 to 2 and 2 to 3 this is just the normal model. But when data needs to pass from layer 3 to layer 4 it needs to travel from GPU0 to GPU1 which introduces a communication overhead. If the participating GPUs are on the same compute node (e.g. same physical machine) this copying is pretty fast, but if the GPUs are located on different compute nodes (e.g. multiple machines) the communication overhead could be significantly larger.</p>
+<p>Then layers 4 to 5 to 6 to 7 are as a normal model would have and when the 7th layer completes we often need to send the data back to layer 0 where the labels are (or alternatively send the labels to the the last layer). Now the loss can be computed and the optimizer can do its work.</p>
+<p>Problems:
+- the main deficiency and why this one is called “naive” MP, is that all but one GPU is idle at any given moment. So if 4 GPUs are used, it’s almost identical to quadrupling the amount of memory of a single GPU, and ignoring the rest of the hardware. Plus there is the overhead of copying the data between devices. So 4x 6GB cards will be able to accommodate the same size as 1x 24GB card using naive MP, except the latter will complete the training faster, since it doesn’t have the data copying overhead. But, say, if you have 40GB cards and need to fit a 45GB model you can with 4x 40GB cards (but barely because of the gradient and optimizer states)
+- shared embeddings may need to get copied back and forth between GPUs.</p>
+<p>Pipeline Parallel (PP) is almost identical to a naive MP, but it solves the GPU idling problem, by chunking the incoming batch into micro-batches and artificially creating a pipeline, which allows different GPUs to concurrently participate in the computation process.</p>
+<p>The following illustration from the [GPipe paper](<a class="reference external" href="https://ai.googleblog.com/2019/03/introducing-gpipe-open-source-library.html">https://ai.googleblog.com/2019/03/introducing-gpipe-open-source-library.html</a>) shows the naive MP on the top, and PP on the bottom:</p>
+<p>![mp-pp](imgs/parallelism-gpipe-bubble.png)</p>
+<p>It’s easy to see from the bottom diagram how PP has less dead zones, where GPUs are idle. The idle parts are referred to as the “bubble”.</p>
+<p>Both parts of the diagram show a parallelism that is of degree 4. That is 4 GPUs are participating in the pipeline. So there is the forward path of 4 pipe stages F0, F1, F2 and F3 and then the return reverse order backward path of B3, B2, B1 and B0.</p>
+<p>PP introduces a new hyper-parameter to tune and it’s <cite>chunks</cite> which defines how many chunks of data are sent in a sequence through the same pipe stage. For example, in the bottomw diagram you can see that <cite>chunks=4</cite>. GPU0 performs the same forward path on chunk 0, 1, 2 and 3 (F0,0, F0,1, F0,2, F0,3) and then it waits for other GPUs to do their work and only when their work is starting to be complete, GPU0 starts to work again doing the backward path for chunks 3, 2, 1 and 0 (B0,3, B0,2, B0,1, B0,0).</p>
+<p>Note that conceptually this is the same concept as gradient accumulation steps (GAS). Pytorch uses <cite>chunks</cite>, whereas DeepSpeed refers to the same hyper-parameter as GAS.</p>
+<p>Because of the chunks, PP introduces the concept of micro-batches (MBS). DP splits the global data batch size into mini-batches, so if you have a DP degree of 4, a global batch size of 1024 gets split up into 4 mini-batches of 256 each (1024/4). And if the number of <cite>chunks</cite> (or GAS) is 32 we end up with a micro-batch size of 8 (256/32). Each Pipeline stage works with a single micro-batch at a time.</p>
+<p>To calculate the global batch size of the DP + PP setup we then do: <cite>mbs*chunks*dp_degree</cite> (<cite>8*32*4=1024</cite>).</p>
+<p>Let’s go back to the diagram.</p>
+<p>With <cite>chunks=1</cite> you end up with the naive MP, which is very inefficient. With a very large <cite>chunks</cite> value you end up with tiny micro-batch sizes which could be not every efficient either. So one has to experiment to find the value that leads to the highest efficient utilization of the gpus.</p>
+<p>While the diagram shows that there is a bubble of “dead” time that can’t be parallelized because the last <cite>forward</cite> stage has to wait for <cite>backward</cite> to complete the pipeline, the purpose of finding the best value for <cite>chunks</cite> is to enable a high concurrent GPU utilization across all participating GPUs which translates to minimizing the size of the bubble.</p>
+<p>Problems:
+- have to modify the model quite heavily, because Pipeline requires one to rewrite the normal flow of modules into a <cite>nn.Sequential</cite> sequence of the same, which may require changes to the design of the model.
+- currently the Pipeline API is very restricted. If you had a bunch of python variables being passed in the very first stage of the Pipeline, you will have to find a way around it. Currently, the pipeline interface requires either a single Tensor or a tuple of Tensors as the only input and output. These tensors must have a batch size as the very first dimension, since pipeline is going to chunk the mini batch into micro-batches. Possible improvements are being discussed here <a class="reference external" href="https://github.com/pytorch/pytorch/pull/50693">https://github.com/pytorch/pytorch/pull/50693</a>
+- have to arrange each layer so that the output of one model becomes an input to the other model</p>
+<p>Implementations:
+- [Pytorch](<a class="reference external" href="https://pytorch.org/docs/stable/pipeline.html">https://pytorch.org/docs/stable/pipeline.html</a>) (initial support in pytorch-1.8, and progressively getting improved in 1.9 and more so in 1.10). Some [examples](<a class="reference external" href="https://github.com/pytorch/pytorch/blob/master/benchmarks/distributed/pipeline/pipe.py">https://github.com/pytorch/pytorch/blob/master/benchmarks/distributed/pipeline/pipe.py</a>)
+- [FairScale](<a class="reference external" href="https://fairscale.readthedocs.io/en/latest/tutorials/pipe.html">https://fairscale.readthedocs.io/en/latest/tutorials/pipe.html</a>)
+- [DeepSpeed](<a class="reference external" href="https://www.deepspeed.ai/tutorials/pipeline/">https://www.deepspeed.ai/tutorials/pipeline/</a>)
+- [Megatron-LM](<a class="reference external" href="https://github.com/NVIDIA/Megatron-LM">https://github.com/NVIDIA/Megatron-LM</a>) has an internal implementation - no API.</p>
+<p>🤗 Transformers status: as of this writing none of the models supports full-PP. GPT2 and T5 models have naive PP support. The main obstacle is being unable to convert the models to <cite>nn.Sequential</cite> and have all the inputs to be Tensors. This is because currently the models include many features that make the conversion very complicated, and will need to be removed to accomplish that.</p>
+<p>Other approaches:</p>
+<p>DeepSpeed and SageMaker use the concept of an [Interleaved Pipeline](<a class="reference external" href="https://docs.aws.amazon.com/sagemaker/latest/dg/model-parallel-core-features.html">https://docs.aws.amazon.com/sagemaker/latest/dg/model-parallel-core-features.html</a>)
+![interleaved-pipeline-execution](imgs/parallelism-sagemaker-interleaved-pipeline.png)</p>
+<p>Here the bubble (idle time) is further minimized by prioritizing backward passes.</p>
+<p>According to [the same document](<a class="reference external" href="https://docs.aws.amazon.com/sagemaker/latest/dg/model-parallel-core-features.html">https://docs.aws.amazon.com/sagemaker/latest/dg/model-parallel-core-features.html</a>), it might be able to automate the non <cite>nn.Sequential</cite> model conversion to pipeline. The only problem is that this is currently only available at AWS, so you can’t run it on your own hardware.</p>
+<p>## Tensor Parallelism</p>
+<p>In Tensor Parallelism each GPU processes only a slice of a tensor and only aggregates the full tensor for operations that require the whole thing.</p>
+<p>In this section we use concepts and diagrams from the [Megatron-LM](<a class="reference external" href="https://github.com/NVIDIA/Megatron-LM">https://github.com/NVIDIA/Megatron-LM</a>) paper: [Efficient Large-Scale Language Model Training on GPU Clusters](<a class="reference external" href="https://arxiv.org/abs/2104.04473">https://arxiv.org/abs/2104.04473</a>).</p>
+<p>The main building block of any transformer is a fully connected <cite>nn.Linear</cite> followed by a nonlinear activation <cite>GeLU</cite>.</p>
+<p>Following the Megatron’s paper notation, we can write the dot-product part of it as <cite>Y = GeLU(XA)</cite>, where <cite>X</cite> and <cite>Y</cite> are the input and output vectors, and <cite>A</cite> is the weight matrix.</p>
+<p>If we look at the computation in matrix form, it’s easy to see how the matrix multiplication can be split between multiple GPUs:
+![Parallel GEMM](imgs/parallelism-tp-parallel_gemm.png)</p>
+<p>If we split the weight matrix <cite>A</cite> column-wise across <cite>N</cite> GPUs and perform matrix multiplications <cite>XA_1</cite> through <cite>XA_n</cite> in parallel, then we will end up with <cite>N</cite> output vectors <cite>Y_1, Y_2, …, Y_n</cite> which can be fed into <cite>GeLU</cite> independently:
+![independent GeLU](imgs/parallelism-tp-independent-gelu.png)</p>
+<p>Using this principle, we can update an MLP of arbitrary depth, without the need for any synchronization between GPUs until the very end, where we need to reconstruct the output vector from shards. The Megatron-LM paper authors provide a helpful illustration for that:
+![parallel shard processing](imgs/parallelism-tp-parallel_shard_processing.png)</p>
+<p>Parallelizing the multi-headed attention layers is even simpler, since they are already inherently parallel, due to having multiple independent heads!
+![parallel self-attention](imgs/parallelism-tp-parallel_self_attention.png)</p>
+<p>Special considerations: TP requires very fast network, and therefore it’s not advisable to do TP across more than one node. Practically, if a node has 4 GPUs, the highest TP degree is therefore 4. If you need a TP degree of 8, you need to use nodes that have at least 8 GPUs.</p>
+<p>This section is based on the original much more [detailed TP overview](<a class="reference external" href="https://github.com/huggingface/transformers/issues/10321#issuecomment-783543530">https://github.com/huggingface/transformers/issues/10321#issuecomment-783543530</a>).
+by [&#64;anton-l](<a class="reference external" href="https://github.com/anton-l">https://github.com/anton-l</a>).</p>
+<p>Alternative names:
+- DeepSpeed calls it [tensor slicing](<a class="reference external" href="https://www.deepspeed.ai/features/#model-parallelism">https://www.deepspeed.ai/features/#model-parallelism</a>)</p>
+<p>Implementations:
+- [Megatron-LM](<a class="reference external" href="https://github.com/NVIDIA/Megatron-LM">https://github.com/NVIDIA/Megatron-LM</a>) has an internal implementation, as it’s very model-specific
+- [parallelformers](<a class="reference external" href="https://github.com/tunib-ai/parallelformers">https://github.com/tunib-ai/parallelformers</a>) (only inference at the moment)</p>
+<p>🤗 Transformers status:
+- core: not yet implemented in the core
+- but if you want inference [parallelformers](<a class="reference external" href="https://github.com/tunib-ai/parallelformers">https://github.com/tunib-ai/parallelformers</a>) provides this support for most of our models. So until this is implemented in the core you can use theirs. And hopefully training mode will be supported too.
+- Deepspeed-Inference also supports our BERT, GPT-2, and GPT-Neo models in their super-fast CUDA-kernel-based inference mode, see more [here](<a class="reference external" href="https://www.deepspeed.ai/tutorials/inference-tutorial/">https://www.deepspeed.ai/tutorials/inference-tutorial/</a>)</p>
+<p>## DP+PP</p>
+<p>The following diagram from the DeepSpeed [pipeline tutorial](<a class="reference external" href="https://www.deepspeed.ai/tutorials/pipeline/">https://www.deepspeed.ai/tutorials/pipeline/</a>) demonstrates how one combines DP with PP.</p>
+<p>![dp-pp-2d](imgs/parallelism-zero-dp-pp.png)</p>
+<p>Here it’s important to see how DP rank 0 doesn’t see GPU2 and DP rank 1 doesn’t see GPU3. To DP there is just GPUs 0 and 1 where it feeds data as if there were just 2 GPUs. GPU0 “secretly” offloads some of its load to GPU2 using PP. And GPU1 does the same by enlisting GPU3 to its aid.</p>
+<p>Since each dimension requires at least 2 GPUs, here you’d need at least 4 GPUs.</p>
+<p>Implementations:
+- [DeepSpeed](<a class="reference external" href="https://github.com/microsoft/DeepSpeed">https://github.com/microsoft/DeepSpeed</a>)
+- [Megatron-LM](<a class="reference external" href="https://github.com/NVIDIA/Megatron-LM">https://github.com/NVIDIA/Megatron-LM</a>)</p>
+<p>🤗 Transformers status: not yet implemented</p>
+<p>## DP+PP+TP</p>
+<p>To get an even more efficient training a 3D parallelism is used where PP is combined with TP and DP. This can be seen in the following diagram.</p>
+<p>![dp-pp-tp-3d](imgs/parallelism-deepspeed-3d.png)</p>
+<p>This diagram is from a blog post [3D parallelism: Scaling to trillion-parameter models](<a class="reference external" href="https://www.microsoft.com/en-us/research/blog/deepspeed-extreme-scale-model-training-for-everyone/">https://www.microsoft.com/en-us/research/blog/deepspeed-extreme-scale-model-training-for-everyone/</a>), which is a good read as well.</p>
+<p>Since each dimension requires at least 2 GPUs, here you’d need at least 8 GPUs.</p>
+<p>Implementations:
+- [DeepSpeed](<a class="reference external" href="https://github.com/microsoft/DeepSpeed">https://github.com/microsoft/DeepSpeed</a>) - DeepSpeed also includes an even more efficient DP, which they call ZeRO-DP.
+- [Megatron-LM](<a class="reference external" href="https://github.com/NVIDIA/Megatron-LM">https://github.com/NVIDIA/Megatron-LM</a>)</p>
+<p>🤗 Transformers status: not yet implemented, since we have no PP and TP.</p>
+<p>## DP+PP+TP+ZeRO</p>
+<p>One of the main features of DeepSpeed is ZeRO, which is a super-scalable extension of DP. It has already been discussed in [ZeRO Data Parallel](#zero-data-parallel). Normally it’s a standalone feature that doesn’t require PP or TP. But it can be combined with PP and TP.</p>
+<p>When ZeRO-DP is combined with PP (and optinally TP) it typically enables only ZeRO stage 1 (optimizer sharding).</p>
+<p>While it’s theoretically possible to use ZeRO stage 2 (gradient sharding) with Pipeline Parallelism, it will have bad performance impacts. There would need to be an additional reduce-scatter collective for every micro-batch to aggregate the gradients before sharding, which adds a potentially significant communication overhead. By nature of Pipeline Parallelism, small micro-batches are used and instead the focus is on trying to balance arithmetic intensity (micro-batch size) with minimizing the Pipeline bubble (number of micro-batches). Therefore those communication costs are going to hurt.</p>
+<p>In addition, There are already fewer layers than normal due to PP and so the memory savings won’t be huge. PP already reduces gradient size by <code class="docutils literal notranslate"><span class="pre">1/PP</span></code>, and so gradient sharding savings on top of that are less significant than pure DP.</p>
+<p>ZeRO stage 3 is not a good choice either for the same reason - more inter-node communications required.</p>
+<p>And since we have ZeRO, the other benefit is ZeRO-Offload. Since this is stage 1 optimizer states can be offloaded to CPU.</p>
+<p>Implementations:
+- [Megatron-DeepSpeed](<a class="reference external" href="https://github.com/microsoft/Megatron-DeepSpeed">https://github.com/microsoft/Megatron-DeepSpeed</a>)</p>
+<p>🤗 Transformers status: not yet implemented, since we have no PP and TP.</p>
+<p>## FlexFlow</p>
+<p>[FlexFlow](<a class="reference external" href="https://github.com/flexflow/FlexFlow">https://github.com/flexflow/FlexFlow</a>) also solves the parallelization problem in a slightly different approach.</p>
+<p>Paper: [“Beyond Data and Model Parallelism for Deep Neural Networks” by Zhihao Jia, Matei Zaharia, Alex Aiken](<a class="reference external" href="https://arxiv.org/abs/1807.05358">https://arxiv.org/abs/1807.05358</a>)</p>
+<p>It performs a sort of 4D Parallelism over Sample-Operator-Attribute-Parameter.</p>
+<ol class="arabic simple">
+<li><p>Sample = Data Parallelism</p></li>
+<li><p>Operator = part vertical Layer Parallelism, but it can split the layer too - more refined level</p></li>
+<li><p>Attribute = horizontal Model Parallelism (Megatron-LM style)</p></li>
+<li><p>Parameter = Sharded model params</p></li>
+</ol>
+<p>and they are working on Pipeline Parallelism. I guess ZeRO-DP is Sample+Parameter in this context.</p>
+<p>![flex-flow-soap](imgs/parallelism-flexflow.jpeg)</p>
+<p>The significance of this framework is that it takes resources like (1) GPU/TPU/CPU vs. (2) RAM/DRAM vs. (3) fast-intra-connect/slow-inter-connect and it automatically optimizes all these  algorithmically deciding which parallelisation to use where.</p>
+<p>One very important aspect is that FlexFlow is designed for optimizing DNN parallelizations for models with static and fixed workloads, since models with dynamic behavior may prefer different parallelization strategies across iterations.</p>
+<p>So the promise is very attractive - it runs a 30min simulation on the cluster of choice and it comes up with the best strategy to utilise this specific environment. If you add/remove/replace any parts it’ll run and re-optimize the plan for that. And then you can train. A different setup will have its own custom optimization.</p>
+<p>🤗 Transformers status: not yet integrated. We already have our models FX-trace-able via [transformers.utils.fx](<a class="reference external" href="https://github.com/huggingface/transformers/blob/master/src/transformers/utils/fx.py">https://github.com/huggingface/transformers/blob/master/src/transformers/utils/fx.py</a>), which is a prerequisite for FlexFlow, so someone needs to figure out what needs to be done to make FlexFlow work with our models.</p>
+<p>## Which Strategy To Use When</p>
+<p>Here is a very rough outlook at which parallelism strategy to use when. The first on the list is typically faster.</p>
+<p><strong>⇨ Single GPU</strong></p>
+<ul>
+<li><p>Model fits onto a single GPU:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Normal use</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>Model doesn’t fit onto a single GPU:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>ZeRO + Offload CPU and optionally NVMe</p></li>
+</ol>
+</div></blockquote>
+</li>
+</ul>
+<p><strong>⇨ Single Node / Multi-GPU</strong></p>
+<ul>
+<li><p>Model fits onto a single GPU:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>DDP - Distributed DP</p></li>
+<li><p>ZeRO - may or may not be faster depending on the situation and configuration used</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>Model doesn’t fit onto a single GPU:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>PP</p></li>
+<li><p>ZeRO</p></li>
+<li><p>TP</p></li>
+</ol>
+<p>With very fast intra-node connectivity of NVLINK or NVSwitch all three should be mostly on par, without these PP will be faster than TP and ZeRO. The degree of TP may also make a difference. Best to experiment to find the winner on your particular setup.</p>
+</div></blockquote>
+</li>
+</ul>
+<p><strong>⇨ Multi-Node / Multi-GPU</strong></p>
+<ul>
+<li><p>When you have fast inter-node connectivity:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>ZeRO - as it requires close to no modifications to the model</p></li>
+<li><p>PP+TP+DP - less communications, but requires massive changes to the model</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>when you have slow inter-node connectivity and still low on GPU memory:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>DP+PP+TP+ZeRO-1</p></li>
+</ol>
+</div></blockquote>
+</li>
+</ul>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="vit.html" class="btn btn-neutral float-left" title="Vision Transformer (ViT)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Notebooks/1_read_write_tfrecords.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

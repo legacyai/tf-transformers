@@ -1,0 +1,24 @@
+/* Code block Changes Comments */
+.highlight .c1, .highlight .sd{
+    color: rgb(146, 56, 56);
+  }
+
+  /* Code block Changes from import*/
+  .highlight .kn, .highlight .nv, .highlight .s2, .highlight .ow {
+    color: #6670FF;
+  }
+
+  /* Code block Changes methods*/
+  .highlight .nn, .highlight .k, .highlight .s1, .highlight .nb, .highlight .bp, .highlight .kc {
+    color: #3C2478;
+  }
+
+  /* Code block Changes >>*/
+  .highlight .gp {
+    color: #3C2478;
+  }
+
+  /* Code block Changes Add border*/
+  .rst-content div[class^='highlight'] {
+    border-color: #1a1a1a;
+  }

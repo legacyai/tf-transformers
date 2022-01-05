@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta property="og:title" content="<no title>" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="benchmarks/t5.html" />
+  <meta property="og:description" content="<!— Copyright 2021 The TFT Team. All rights reserved. Licensed under the Apache License, Version 2.0 (the “License”); you may not use this file except in com..." />
+  <meta property="og:image" content="png location" />
+  <meta property="og:image:alt" content="<no title>" />
+  <meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;no title&gt; &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="albert.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="gpt2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">GLUE SCORE calculated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html#id1">GLUE SCORE calculated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Rogue SCORE</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>&lt;no title&gt;</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/benchmarks/t5.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p>&lt;!—
+Copyright 2021 The TFT Team. All rights reserved.</p>
+<p>Licensed under the Apache License, Version 2.0 (the “License”);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<blockquote>
+<div><p><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+</div></blockquote>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+–&gt;</p>
+<p># Benchmark T5</p>
+<ul class="simple">
+<li><p>[Code - t5 Benchmark](<a class="reference external" href="https://github.com/legacyai/tf-transformers/tree/main/benchmark/t5">https://github.com/legacyai/tf-transformers/tree/main/benchmark/t5</a>)</p></li>
+</ul>
+<p>This is used to benchmark the performance of T5 model on text generation tasks. We evaluate it using 3 frameworks.
+Tensorflow-Transformers (default), HuggingFace PyTorch, HuggingFace Tensorflow and HuggingFace JAX (pending).
+Executing these scripts are fairly straightfoward and expect users to install the necessary libraries before executing
+the benchmark script.</p>
+<p>All the configuration are managed using [Hydra](<a class="reference external" href="https://github.com/facebookresearch/hydra">https://github.com/facebookresearch/hydra</a>).</p>
+<p>-&gt; Machine - <strong>Tesla V100-SXM2 32GB</strong></p>
+<p>-&gt; Tensorflow-version - <strong>2.4.1</strong></p>
+<p>-&gt; Huggingface-Transformer-Version - <strong>4.12.5</strong></p>
+<p>-&gt; PyTorch-Version - <strong>1.9.0</strong></p>
+<p>## Tensorflow-Transformers. (tft)</p>
+<p>The default benchmark mode is <code class="docutils literal notranslate"><span class="pre">`tft`</span></code>.
+1. To execute <code class="docutils literal notranslate"><span class="pre">`Greedy</span> <span class="pre">Decoding`</span></code> (default) :</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">`python</span> <span class="pre">run.py</span> <span class="pre">benchmark=tft`</span></code></p>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><dl>
+<dt>To execute <code class="docutils literal notranslate"><span class="pre">`Beam</span> <span class="pre">Decoding`</span></code> :</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`python</span> <span class="pre">run.py</span> <span class="pre">benchmark=tft</span> <span class="pre">benchmark.text_generation.mode=beam</span> <span class="pre">+benchmark.text_generation.num_beams=3`</span></code></p>
+<blockquote>
+<div><ul class="simple">
+<li><ol class="loweralpha simple">
+<li><p>textdecoder_keras_model    -  Uses tf.keras.Model.</p></li>
+</ol>
+</li>
+<li><ol class="loweralpha simple" start="2">
+<li><p>textdecoder_saved_model    -  Uses tf.saved_model, <code class="docutils literal notranslate"><span class="pre">`for`</span></code> loop to decode .</p></li>
+</ol>
+</li>
+<li><ol class="loweralpha simple" start="3">
+<li><p>textdecoder_serializable   -  Uses tf.saved_model, <code class="docutils literal notranslate"><span class="pre">`model</span> <span class="pre">+</span> <span class="pre">text</span> <span class="pre">generation`</span></code> is serialized together.</p></li>
+</ol>
+</li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>To execute <code class="docutils literal notranslate"><span class="pre">`Greedy</span> <span class="pre">Decoding`</span></code> using let’s say <code class="docutils literal notranslate"><span class="pre">`textdecoder_keras_model`</span></code> :</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`python</span> <span class="pre">run.py</span> <span class="pre">benchmark=tft</span> <span class="pre">benchmark.model.type=textdecoder_keras_model`</span></code></p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>[Note] - You can pass any arguments to <code class="docutils literal notranslate"><span class="pre">`tf_transformers.text.TextDecoder.decode`</span></code> arguments to the hydra configuration
+using <code class="docutils literal notranslate"><span class="pre">`+`</span></code> .</p>
+<p>## HuggingFace-Tensorflow. (hf-tf)</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt>To execute <code class="docutils literal notranslate"><span class="pre">`Greedy</span> <span class="pre">Decoding`</span></code> (default) :</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`python</span> <span class="pre">run.py</span> <span class="pre">benchmark=hf</span> <span class="pre">benchmark.model.type=tf`</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>To execute <code class="docutils literal notranslate"><span class="pre">`Beam</span> <span class="pre">Decoding`</span></code> :</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`python</span> <span class="pre">run.py</span> <span class="pre">benchmark=hf</span> <span class="pre">benchmark.model.type=tf</span> <span class="pre">+benchmark.text_generation.num_beams=3</span> <span class="pre">`</span></code></p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>[Note] - You can pass any arguments to <code class="docutils literal notranslate"><span class="pre">`model.generate`</span></code> arguments to the hydra configuration
+using <code class="docutils literal notranslate"><span class="pre">`+`</span></code> .</p>
+<p>## HuggingFace-PyTorch. (hf-pt)</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt>To execute <code class="docutils literal notranslate"><span class="pre">`Greedy</span> <span class="pre">Decoding`</span></code> (default) :</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`python</span> <span class="pre">run.py</span> <span class="pre">benchmark=hf</span> <span class="pre">benchmark.model.type=pt`</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>To execute <code class="docutils literal notranslate"><span class="pre">`Beam</span> <span class="pre">Decoding`</span></code> :</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`python</span> <span class="pre">run.py</span> <span class="pre">benchmark=hf</span> <span class="pre">benchmark.model.type=pt</span> <span class="pre">+benchmark.text_generation.num_beams=3</span> <span class="pre">`</span></code></p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>## HuggingFace-JAX. (hf-jax) (Not Available)</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt>To execute <code class="docutils literal notranslate"><span class="pre">`Greedy</span> <span class="pre">Decoding`</span></code> (default) :</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`python</span> <span class="pre">run.py</span> <span class="pre">benchmark=hf</span> <span class="pre">benchmark.model.type=jax`</span></code></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>To execute <code class="docutils literal notranslate"><span class="pre">`Beam</span> <span class="pre">Decoding`</span></code> :</dt><dd><p><code class="docutils literal notranslate"><span class="pre">`python</span> <span class="pre">run.py</span> <span class="pre">benchmark=hf</span> <span class="pre">benchmark.model.type=jax</span> <span class="pre">+benchmark.text_generation.num_beams=3</span> <span class="pre">`</span></code></p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>## Official Benchmarks on XSUM</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">Greedy</span> <span class="pre">Decode:</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160; <span class="pre">batch_size</span> <span class="pre">|</span> <span class="pre">mode</span>&#160;&#160; <span class="pre">|</span>&#160;&#160; <span class="pre">max_length</span> <span class="pre">|</span> <span class="pre">time</span> <span class="pre">(s)</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160; <span class="pre">samples/second</span> <span class="pre">|</span>
+<span class="pre">|:---------------------------|-------------:|:-------|-------------:|:-----------|-----------------:|</span>
+<span class="pre">|</span> <span class="pre">tf_transformers_serialized</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">32</span> <span class="pre">|</span> <span class="pre">greedy</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">64</span> <span class="pre">|</span> <span class="pre">514</span> <span class="pre">sec</span>&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">22</span> <span class="pre">|</span>
+<span class="pre">|</span> <span class="pre">tf_transformers</span> <span class="pre">+</span> <span class="pre">tf-text</span>&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">32</span> <span class="pre">|</span> <span class="pre">greedy</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">64</span> <span class="pre">|</span> <span class="pre">517</span> <span class="pre">sec</span>&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">22</span> <span class="pre">|</span>
+<span class="pre">|</span> <span class="pre">hf_tf</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">32</span> <span class="pre">|</span> <span class="pre">greedy</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">64</span> <span class="pre">|</span> <span class="pre">1800</span> <span class="pre">sec</span>&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">6</span> <span class="pre">|</span>
+<span class="pre">|</span> <span class="pre">hf_pt</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">32</span> <span class="pre">|</span> <span class="pre">greedy</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">64</span> <span class="pre">|</span> <span class="pre">278</span> <span class="pre">sec</span>&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">41</span> <span class="pre">|</span>
+<span class="pre">|</span> <span class="pre">hf_jax</span> <span class="pre">(model.generate)</span>&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">32</span> <span class="pre">|</span> <span class="pre">greedy</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">64</span> <span class="pre">|</span> <span class="pre">N/A</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">N/A</span> <span class="pre">|</span>
+<span class="pre">|</span> <span class="pre">hf_jax</span> <span class="pre">(pmap)</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">32</span> <span class="pre">|</span> <span class="pre">greedy</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">64</span> <span class="pre">|</span> <span class="pre">N/A</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">N/A</span> <span class="pre">|</span>
+<span class="pre">`</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">Beam</span> <span class="pre">Decode:</span>
+<span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160; <span class="pre">batch_size</span> <span class="pre">|</span> <span class="pre">mode</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160; <span class="pre">max_length</span> <span class="pre">|</span> <span class="pre">time</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span> <span class="pre">samples/second</span>&#160;&#160; <span class="pre">|</span>
+<span class="pre">|:---------------------------|-------------:|:-------------------|-------------:|:------------|:-----------------|</span>
+<span class="pre">|</span> <span class="pre">tf_transformers_serialized</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">32</span> <span class="pre">|</span> <span class="pre">beam</span> <span class="pre">-</span> <span class="pre">num_beams=3</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">64</span> <span class="pre">|</span> <span class="pre">503</span> <span class="pre">sec</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">23|</span>
+<span class="pre">|</span> <span class="pre">tf_transformers</span> <span class="pre">+</span> <span class="pre">tf-text</span>&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">32</span> <span class="pre">|</span> <span class="pre">beam</span> <span class="pre">-</span> <span class="pre">num_beams=3</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">64</span> <span class="pre">|</span> <span class="pre">509</span> <span class="pre">sec</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">23|</span>
+<span class="pre">|</span> <span class="pre">hf_tf</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">32</span> <span class="pre">|</span> <span class="pre">beam</span> <span class="pre">-</span> <span class="pre">num_beams=3</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">64</span> <span class="pre">|</span> <span class="pre">3240</span> <span class="pre">sec</span>&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">3</span> <span class="pre">|</span>
+<span class="pre">|</span> <span class="pre">hf_pt</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">32</span> <span class="pre">|</span> <span class="pre">beam</span> <span class="pre">-</span> <span class="pre">num_beams=3</span> <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">64</span> <span class="pre">|</span> <span class="pre">660</span> <span class="pre">sec</span>&#160;&#160;&#160;&#160; <span class="pre">|</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">17|</span>
+<span class="pre">`</span></code></p>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gpt2.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="albert.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

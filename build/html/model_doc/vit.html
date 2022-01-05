@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta property="og:title" content="Vision Transformer (ViT)" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="model_doc/vit.html" />
+  <meta property="og:description" content="Overview: The Vision Transformer (ViT) model was proposed in An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale by Alexey Dosovitskiy..." />
+  <meta property="og:image" content="png location" />
+  <meta property="og:image:alt" content="Vision Transformer (ViT)" />
+  <meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vision Transformer (ViT) &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="parallelism.html" />
+    <link rel="prev" title="RoBERTa" href="roberta.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roberta.html">RoBERTa</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Vision Transformer (ViT)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vitconfig">ViTConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vitmodel">ViTModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vitencoder">ViTEncoder</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">GLUE SCORE calculated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html#id1">GLUE SCORE calculated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Rogue SCORE</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Vision Transformer (ViT)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/model_doc/vit.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="vision-transformer-vit">
+<h1>Vision Transformer (ViT)<a class="headerlink" href="#vision-transformer-vit" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is a recently introduced model so the API hasn’t been tested extensively. There may be some bugs or slight
+breaking changes to fix it in the future. If you see something strange, file a <a class="reference external" href="https://github.com/huggingface/transformers/issues/new?assignees=&amp;labels=&amp;template=bug-report.md&amp;title">Github Issue</a>.</p>
+</div>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The Vision Transformer (ViT) model was proposed in <a class="reference external" href="https://arxiv.org/abs/2010.11929">An Image is Worth 16x16 Words: Transformers for Image Recognition
+at Scale</a> by Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk
+Weissenborn, Xiaohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, Jakob
+Uszkoreit, Neil Houlsby. It’s the first paper that successfully trains a Transformer encoder on ImageNet, attaining
+very good results compared to familiar convolutional architectures.</p>
+<p>The abstract from the paper is the following:</p>
+<p><em>While the Transformer architecture has become the de-facto standard for natural language processing tasks, its
+applications to computer vision remain limited. In vision, attention is either applied in conjunction with
+convolutional networks, or used to replace certain components of convolutional networks while keeping their overall
+structure in place. We show that this reliance on CNNs is not necessary and a pure transformer applied directly to
+sequences of image patches can perform very well on image classification tasks. When pre-trained on large amounts of
+data and transferred to multiple mid-sized or small image recognition benchmarks (ImageNet, CIFAR-100, VTAB, etc.),
+Vision Transformer (ViT) attains excellent results compared to state-of-the-art convolutional networks while requiring
+substantially fewer computational resources to train.</em></p>
+<p>Tips:</p>
+<ul class="simple">
+<li><p>To feed images to the Transformer encoder, each image is split into a sequence of fixed-size non-overlapping patches,
+which are then linearly embedded. A [CLS] token is added to serve as representation of an entire image, which can be
+used for classification. The authors also add absolute position embeddings, and feed the resulting sequence of
+vectors to a standard Transformer encoder.</p></li>
+<li><p>As the Vision Transformer expects each image to be of the same size (resolution), one can use
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ViTFeatureExtractor</span></code> to resize (or rescale) and normalize images for the model.</p></li>
+<li><p>Both the patch resolution and image resolution used during pre-training or fine-tuning are reflected in the name of
+each checkpoint. For example, <code class="xref py py-obj docutils literal notranslate"><span class="pre">google/vit-base-patch16-224</span></code> refers to a base-sized architecture with patch
+resolution of 16x16 and fine-tuning resolution of 224x224. All checkpoints can be found on the <a class="reference external" href="https://huggingface.co/models?search=vit">hub</a>.</p></li>
+<li><p>The available checkpoints are either (1) pre-trained on <a class="reference external" href="http://www.image-net.org/">ImageNet-21k</a> (a collection of
+14 million images and 21k classes) only, or (2) also fine-tuned on <a class="reference external" href="http://www.image-net.org/challenges/LSVRC/2012/">ImageNet</a> (also referred to as ILSVRC 2012, a collection of 1.3 million
+images and 1,000 classes).</p></li>
+<li><p>The Vision Transformer was pre-trained using a resolution of 224x224. During fine-tuning, it is often beneficial to
+use a higher resolution than pre-training <a class="reference external" href="https://arxiv.org/abs/1906.06423">(Touvron et al., 2019)</a>, <a class="reference external" href="https://arxiv.org/abs/1912.11370">(Kolesnikov
+et al., 2020)</a>. In order to fine-tune at higher resolution, the authors perform
+2D interpolation of the pre-trained position embeddings, according to their location in the original image.</p></li>
+<li><p>The best results are obtained with supervised pre-training, which is not the case in NLP. The authors also performed
+an experiment with a self-supervised pre-training objective, namely masked patched prediction (inspired by masked
+language modeling). With this approach, the smaller ViT-B/16 model achieves 79.9% accuracy on ImageNet, a significant
+improvement of 2% to training from scratch, but still 4% behind supervised pre-training.</p></li>
+</ul>
+<p><a class="reference external" href="https://arxiv.org/abs/2010.11929">Paper👆</a>
+<a class="reference external" href="https://github.com/google-research/vision_transformert">Official Code👆</a></p>
+</div>
+<div class="section" id="vitconfig">
+<h2>ViTConfig<a class="headerlink" href="#vitconfig" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="vitmodel">
+<h2>ViTModel<a class="headerlink" href="#vitmodel" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="vitencoder">
+<h2>ViTEncoder<a class="headerlink" href="#vitencoder" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="roberta.html" class="btn btn-neutral float-left" title="RoBERTa" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="parallelism.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
