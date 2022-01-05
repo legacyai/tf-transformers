@@ -7,9 +7,14 @@ jupyter-sphinx>=0.3.2
 myst-nb
 
 # Packages as per HuggingFace extensions
+sphinx_rtd_theme
 recommonmark
 sphinx_markdown_tables
 sphinxext-opengraph
 sphinx-copybutton
-matplotlib
-tensorflow==2.7.0
+
+# Model specifics
+tensorflow-text
+sentencepiece
+tqdm
+transformers
