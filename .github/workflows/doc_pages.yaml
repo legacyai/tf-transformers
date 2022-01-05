@@ -24,7 +24,7 @@ jobs:
         make html
         cp -r build/* ../gh-pages/
     - name: Deploy documentation
-      if: ${{ github.event.ref_type == 'tag' }}
+      if: ${{ github.event_name == 'push' }}
       uses: JamesIves/github-pages-deploy-action@4.1.4
       with:
         branch: gh-pages
