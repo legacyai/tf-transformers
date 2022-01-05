@@ -24,7 +24,7 @@ jobs:
         mkdir gh-pages
         touch gh-pages/.nojekyll
         cd docs/
-        make html
+        poetry make html
         cp -r _build/* ../gh-pages/
     - name: Deploy documentation
       if: ${{ github.event.ref_type == 'tag' }}
