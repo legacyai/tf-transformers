@@ -12,6 +12,7 @@ recommonmark
 sphinx_markdown_tables
 sphinxext-opengraph
 sphinx-copybutton
+matplotlib
 
 # Model specifics
 tensorflow-text
