@@ -22,7 +22,9 @@ jobs:
         cd docs/
         pip3 install -r requirements.txt
         make html
-        cp -r ../* ../gh-pages/.
+        cp -r ../docs ../gh-pages/docs
+        cp -r ../src ../gh-pages/src 
+        cp -r ../research ../gh-pages/research
     - name: Deploy documentation
       if: ${{ github.event_name == 'push' }}
       uses: JamesIves/github-pages-deploy-action@4.1.4
