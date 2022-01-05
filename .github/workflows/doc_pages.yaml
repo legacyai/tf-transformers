@@ -17,8 +17,9 @@ jobs:
         python-version: 3.7
     - uses: abatilo/actions-poetry@v2.1.3
     - name: install
-      run: poetry install -E docs
-      run: sudo apt-get install python3-sphinx
+      run: |
+        poetry install -E docs
+        sudo apt-get install python3-sphinx
     - name: Build documentation
       run: |
         mkdir gh-pages
