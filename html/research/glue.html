@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta property="og:title" content="GLUE SCORE calculated" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="research/glue.html" />
+  <meta property="og:description" content="<!— Copyright 2021 The TFT Team. All rights reserved. Licensed under the Apache License, Version 2.0 (the “License”); you may not use this file except in com..." />
+  <meta property="og:image" content="png location" />
+  <meta property="og:image:alt" content="GLUE SCORE calculated" />
+  <meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GLUE SCORE calculated &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Rogue SCORE" href="long_block_sequencer.html" />
+    <link rel="prev" title="T5 Tokenizer" href="../model_doc/t5_tokenizer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GLUE SCORE calculated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#id1">GLUE SCORE calculated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="long_block_sequencer.html">Rogue SCORE</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>GLUE SCORE calculated</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/research/glue.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p>&lt;!—
+Copyright 2021 The TFT Team. All rights reserved.</p>
+<p>Licensed under the Apache License, Version 2.0 (the “License”);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+<blockquote>
+<div><p><a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+</div></blockquote>
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+–&gt;</p>
+<p># Glue Model Evaluation</p>
+<p>GLUE, the General Language Understanding Evaluation benchmark (<a class="reference external" href="https://gluebenchmark.com/">https://gluebenchmark.com/</a>) is a collection of resources for training, evaluating, and analyzing natural language understanding systems.
+The leaderboard for the GLUE benchmark can be found [at this address](<a class="reference external" href="https://gluebenchmark.com/">https://gluebenchmark.com/</a>). It comprises the following tasks:</p>
+<p>#### ax</p>
+<p>A manually-curated evaluation dataset for fine-grained analysis of system performance on a broad range of linguistic phenomena. This dataset evaluates sentence understanding through Natural Language Inference (NLI) problems. Use a model trained on MulitNLI to produce predictions for this dataset.</p>
+<p>#### cola</p>
+<p>The Corpus of Linguistic Acceptability consists of English acceptability judgments drawn from books and journal articles on linguistic theory. Each example is a sequence of words annotated with whether it is a grammatical English sentence.</p>
+<p>#### mnli</p>
+<p>The Multi-Genre Natural Language Inference Corpus is a crowdsourced collection of sentence pairs with textual entailment annotations. Given a premise sentence and a hypothesis sentence, the task is to predict whether the premise entails the hypothesis (entailment), contradicts the hypothesis (contradiction), or neither (neutral). The premise sentences are gathered from ten different sources, including transcribed speech, fiction, and government reports. The authors of the benchmark use the standard test set, for which they obtained private labels from the RTE authors, and evaluate on both the matched (in-domain) and mismatched (cross-domain) section. They also uses and recommend the SNLI corpus as 550k examples of auxiliary training data.</p>
+<p>#### mnli_matched</p>
+<p>The matched validation and test splits from MNLI. See the “mnli” BuilderConfig for additional information.</p>
+<p>#### mnli_mismatched</p>
+<p>The mismatched validation and test splits from MNLI. See the “mnli” BuilderConfig for additional information.</p>
+<p>#### mrpc</p>
+<p>The Microsoft Research Paraphrase Corpus (Dolan &amp; Brockett, 2005) is a corpus of sentence pairs automatically extracted from online news sources, with human annotations for whether the sentences in the pair are semantically equivalent.</p>
+<p>#### qnli</p>
+<p>The Stanford Question Answering Dataset is a question-answering dataset consisting of question-paragraph pairs, where one of the sentences in the paragraph (drawn from Wikipedia) contains the answer to the corresponding question (written by an annotator). The authors of the benchmark convert the task into sentence pair classification by forming a pair between each question and each sentence in the corresponding context, and filtering out pairs with low lexical overlap between the question and the context sentence. The task is to determine whether the context sentence contains the answer to the question. This modified version of the original task removes the requirement that the model select the exact answer, but also removes the simplifying assumptions that the answer is always present in the input and that lexical overlap is a reliable cue.</p>
+<p>#### qqp</p>
+<p>The Quora Question Pairs2 dataset is a collection of question pairs from the community question-answering website Quora. The task is to determine whether a pair of questions are semantically equivalent.</p>
+<p>#### rte</p>
+<p>The Recognizing Textual Entailment (RTE) datasets come from a series of annual textual entailment challenges. The authors of the benchmark combined the data from RTE1 (Dagan et al., 2006), RTE2 (Bar Haim et al., 2006), RTE3 (Giampiccolo et al., 2007), and RTE5 (Bentivogli et al., 2009). Examples are constructed based on news and Wikipedia text. The authors of the benchmark convert all datasets to a two-class split, where for three-class datasets they collapse neutral and contradiction into not entailment, for consistency.</p>
+<p>#### sst2</p>
+<p>The Stanford Sentiment Treebank consists of sentences from movie reviews and human annotations of their sentiment. The task is to predict the sentiment of a given sentence. It uses the two-way (positive/negative) class split, with only sentence-level labels.</p>
+<p>#### stsb</p>
+<p>The Semantic Textual Similarity Benchmark (Cer et al., 2017) is a collection of sentence pairs drawn from news headlines, video and image captions, and natural language inference data. Each pair is human-annotated with a similarity score from 1 to 5.</p>
+<p>Note:
+- [WNLI] (Winograd is not included in our evaluation code)</p>
+<p>## How to run Evaluation using Tensorflow Transformers.</p>
+<p>Evaluation GLUE using Tensorflow Transformers is fairly easy. The default code is written for <code class="docutils literal notranslate"><span class="pre">`AlbertModel`</span></code>.
+All the configuration are managed using [Hydra](<a class="reference external" href="https://github.com/facebookresearch/hydra">https://github.com/facebookresearch/hydra</a>).</p>
+<ul class="simple">
+<li><p>[GLUE Evaluation](<a class="reference external" href="https://github.com/legacyai/tf-transformers/tree/main/research/glue">https://github.com/legacyai/tf-transformers/tree/main/research/glue</a>)</p></li>
+</ul>
+<p>#### Evaluate using Joint Loss</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">python</span> <span class="pre">run_glue.py</span> <span class="pre">optimizer.loss_type=joint</span>
+<span class="pre">`</span></code></p>
+<p>#### Evaluate without Joint Loss</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">python</span> <span class="pre">run_glue.py</span>
+<span class="pre">`</span></code></p>
+<p>#### To run a task individually (eg: MRPC)
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">python</span> <span class="pre">run_glue.py</span> <span class="pre">+glue=mrpc</span> <span class="pre">glue.data.max_seq_length=128</span>
+<span class="pre">`</span></code></p>
+<p>After the code got executed there will be an output folder generated as per <code class="docutils literal notranslate"><span class="pre">`Hydra`</span></code> configuration.
+Output folder looks like this <code class="docutils literal notranslate"><span class="pre">`outputs/2021-10-17/13-54-47/`</span></code></p>
+<p>Upon succesful execution of code, output looks like this .</p>
+<div class="section" id="glue-score-calculated">
+<h1>GLUE SCORE calculated<a class="headerlink" href="#glue-score-calculated" title="Permalink to this headline">¶</a></h1>
+<div class="line-block">
+<div class="line">|     cola |     mnli |     mrpc |   qnli |      qqp |   rte |   sst2 |     stsb |   glue_score |</div>
+</div>
+<p><a href="#id2"><span class="problematic" id="id3">|---:|</span></a>———:<a href="#id4"><span class="problematic" id="id5">|---------:|</span></a>———:<a href="#id6"><span class="problematic" id="id7">|-------:|</span></a>———:<a href="#id8"><span class="problematic" id="id9">|------:|</span></a>——-:<a href="#id10"><span class="problematic" id="id11">|---------:|</span></a>————-:|
+|  0 | 0.574227 | 0.8481   | 0.890    | 0.916  | 0.889    | 0.725 | 0.919  | 0.901    |   0.833384   |</p>
+</div>
+<div class="section" id="id1">
+<h1>GLUE SCORE calculated<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="line-block">
+<div class="line">|      cola |     mnli |     mrpc |     qnli |      qqp |      rte |     sst2 |      stsb |   glue_score |</div>
+</div>
+<p><a href="#id12"><span class="problematic" id="id13">|:---------|</span></a>———-:<a href="#id14"><span class="problematic" id="id15">|---------:|</span></a>———:<a href="#id16"><span class="problematic" id="id17">|---------:|</span></a>———:<a href="#id18"><span class="problematic" id="id19">|---------:|</span></a>———:<a href="#id20"><span class="problematic" id="id21">|----------:|</span></a>————-:|
+| layer_1  | 0         | 0.581514 | 0.748025 | 0.612484 | 0.730661 | 0.552347 | 0.807339 | 0.0593384 |     0.511464 |
+| layer_2  | 0.0181483 | 0.737464 | 0.777894 | 0.822259 | 0.834173 | 0.570397 | 0.869266 | 0.8295    |     0.682388 |
+| layer_3  | 0.253889  | 0.78251  | 0.809552 | 0.859418 | 0.863381 | 0.588448 | 0.881881 | 0.862159  |     0.737655 |
+| layer_4  | 0.378279  | 0.810607 | 0.845078 | 0.883397 | 0.874679 | 0.631769 | 0.905963 | 0.877547  |     0.775915 |
+| layer_5  | 0.478266  | 0.82725  | 0.867434 | 0.896394 | 0.882526 | 0.642599 | 0.916284 | 0.889308  |     0.800008 |
+| layer_6  | 0.518539  | 0.835905 | 0.879525 | 0.909024 | 0.886847 | 0.67509  | 0.918578 | 0.894333  |     0.81473  |
+| layer_7  | 0.561713  | 0.842418 | 0.890978 | 0.913051 | 0.888815 | 0.700361 | 0.918578 | 0.898398  |     0.826789 |
+| layer_8  | 0.573798  | 0.845268 | 0.892842 | 0.915431 | 0.889218 | 0.689531 | 0.917431 | 0.898625  |     0.827768 |
+| layer_9  | 0.571642  | 0.846082 | 0.897044 | 0.914882 | 0.889671 | 0.700361 | 0.918578 | 0.901202  |     0.829933 |
+| layer_10 | 0.566903  | 0.847608 | 0.895647 | 0.915614 | 0.889495 | 0.714801 | 0.919725 | 0.902506  |     0.831537 |
+| layer_11 | 0.574227  | 0.848117 | 0.890978 | 0.916712 | 0.889708 | 0.725632 | 0.919725 | 0.901971  |     0.833384 |
+| layer_12 | 0.573001  | 0.848117 | 0.887111 | 0.91598  | 0.889409 | 0.722022 | 0.920872 | 0.899414  |     0.831991 |</p>
+<p>## How to change the base model?</p>
+<p>Base model and tokenizer can be changed in <code class="docutils literal notranslate"><span class="pre">`model.py`</span></code> . But based on the special tokens, you might need to
+modify some part of the code.</p>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../model_doc/t5_tokenizer.html" class="btn btn-neutral float-left" title="T5 Tokenizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="long_block_sequencer.html" class="btn btn-neutral float-right" title="Rogue SCORE" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
