@@ -33,6 +33,19 @@ from tf_transformers.core.performance_utils import (
 from tf_transformers.utils import tf_utils
 
 
+# COLORS
+class Color:
+    BLACK = 30
+    RED = 31
+    GREEN = 32
+    YELLOW = 33
+    BLUE = 34
+    MAGENTA = 35
+    CYAN = 36
+    WHITE = 37
+    RESET = 39
+
+
 def flat_callback_scores(callback_scores: List):
     callback_scores_flatten = []
     for item in callback_scores:
@@ -279,7 +292,7 @@ def train_and_eval(
 
     def do_validation(validation_dataset_distributed):
         """Batch validation"""
-        with tqdm.trange(validation_steps, unit=" Validation batch ") as val_bar:
+        with tqdm.trange(validation_steps, unit=" Validation batch ", colour='blue') as val_bar:
             step_counter = 0
             _do_validation(validation_dataset_distributed)
             val_bar.set_description(
@@ -354,7 +367,7 @@ def train_and_eval(
     epochs = epochs + ckpt_number
     for epoch in range(ckpt_number, epochs):
         # start_epoch_time = time.time()
-        with tqdm.trange(STEPS, unit="batch ") as tepoch:
+        with tqdm.trange(STEPS, unit="batch ", colour='green') as tepoch:
             for step in tepoch:
                 steps_covered = (step + 1) * steps_per_call
                 global_step += steps_per_call
@@ -553,7 +566,8 @@ class Trainer:
             keras_utils.set_session_config(enable_xla=enable_xla)
 
         # This should be outisde the distribution scope (important)
-        tf.keras.backend.clear_session()
+        # TODO: From 2.5 onwards this has to be disabled
+        # tf.keras.backend.clear_session()
 
         # Log info
         logging.info("Policy: ----> {}".format(keras_utils.get_policy_name()))
