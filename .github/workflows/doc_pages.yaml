@@ -1,4 +1,4 @@
-name: Documentation
+name: Documentation Build
 on:
   push:
     branches: [ main ]
