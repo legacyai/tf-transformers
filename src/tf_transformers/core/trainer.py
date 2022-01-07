@@ -366,7 +366,7 @@ def train_and_eval(
     STEPS = steps_per_epoch // steps_per_call
     epochs = epochs + ckpt_number
     for epoch in range(ckpt_number, epochs):
-        # start_epoch_time = time.time()
+        # start_epoch_time = time.time() # TODO Check colors
         with tqdm.trange(STEPS, unit="batch ", colour='green') as tepoch:
             for step in tepoch:
                 steps_covered = (step + 1) * steps_per_call
