@@ -1,4 +1,4 @@
-exclude: '.git|.tox|tests'
+exclude: '.git|.tox|tests|tutorials|docs'
 default_stages: [commit]
 fail_fast: true
 
@@ -7,8 +7,14 @@ repos:
     rev: v3.4.0
     hooks:
       - id: check-docstring-first
+        exclude: ^tutorials/
+        exclude: ^docs/
       - id: trailing-whitespace
+        exclude: ^tutorials/
+        exclude: ^docs/
       - id: end-of-file-fixer
+        exclude: ^tutorials/
+        exclude: ^docs/
       - id: check-toml
       - id: check-merge-conflict
       - id: check-added-large-files
@@ -36,3 +42,18 @@ repos:
     hooks:
       - id: mypy
         args: [--no-strict-optional, --ignore-missing-imports]
+
+  - repo: https://github.com/mwouts/jupytext
+    rev: v1.13.5
+    hooks:
+    - id: jupytext
+      args: [--sync, 'tutorials/*.ipynb']
+
+
+  - repo: local
+    hooks:
+    - id: move_tutorial_to_docs
+      name: move_tutorial_to_docs
+      entry: python move_tutorial_to_docs.py
+      language: python
+      verbose: true
