@@ -1,4 +1,4 @@
-exclude: '.git|.tox|tests|tutorials|docs'
+exclude: '.git|.tox|tests|docs'
 default_stages: [commit]
 fail_fast: true
 
@@ -7,14 +7,11 @@ repos:
     rev: v3.4.0
     hooks:
       - id: check-docstring-first
-        exclude: ^tutorials/
-        exclude: ^docs/
+        exclude: ^tutorials/*
       - id: trailing-whitespace
-        exclude: ^tutorials/
-        exclude: ^docs/
+        exclude: ^tutorials/*
       - id: end-of-file-fixer
-        exclude: ^tutorials/
-        exclude: ^docs/
+        exclude: ^tutorials/*
       - id: check-toml
       - id: check-merge-conflict
       - id: check-added-large-files
@@ -47,6 +44,7 @@ repos:
     rev: v1.13.5
     hooks:
     - id: jupytext
+      files: ^tutorials/
       args: [--sync, 'tutorials/*.ipynb']
 
 
