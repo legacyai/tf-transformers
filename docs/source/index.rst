@@ -309,7 +309,7 @@ Flax), PyTorch, and/or TensorFlow.
     :maxdepth: 2
     :caption: Tutorials
 
-    Notebooks/1_read_write_tfrecords
+    tutorials/1_read_write_tfrecords
 
 .. toctree::
     :maxdepth: 2
