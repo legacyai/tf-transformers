@@ -12,4 +12,6 @@ per-file-ignores =
 exclude =
     .git,
     __pycache__,
-    tests
+    tests,
+    docs,
+    tutorials

@@ -29,5 +29,5 @@ def move_to_docs():
 
 
 if __name__ == '__main__':
-    add_new_files_to_jupytext()
-    move_to_docs
+    add_new_files_to_jupytext() # Convert new notebooks to md using jupytext
+    move_to_docs # Move new tuorials to docs
