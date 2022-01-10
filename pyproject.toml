@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tf-transformers"
-version = "1.0.4"
+version = "1.0.5"
 description = "NLP with Transformer based models on Tensorflow 2.0"
 authors = ["Sarath R Nair <s4sarath@gmail.com>"]
 maintainers = ["Sarath R Nair <s4sarath@gmail.com>"]
