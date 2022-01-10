@@ -33,7 +33,7 @@ commitizen = "^2.20.3"
 [tool.commitizen]
 name = "cz_conventional_commits"
 version = "1.0.0"
-tag_format = "1.0.0"
+tag_format = "v1.0.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
