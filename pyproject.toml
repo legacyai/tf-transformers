@@ -37,9 +37,8 @@ version_toml = [
     "pyproject.toml:tool.poetry.version"
 ]
 version_pattern = [
-    "README.md:rev: v{version}",
-    "docs/CONTRIBUTING.md:tryceratops, version {version}"
-]
+    "README.md:version: v{version}"
+    ]
 branch = "main"
 upload_to_pypi = true
 upload_to_release = true
