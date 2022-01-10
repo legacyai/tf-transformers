@@ -31,7 +31,7 @@ python-semantic-release = "^7.23.0"
 
 [tool.semantic_release]
 version_variable = [
-    "src/__init__.py:__version__"
+    "src/tf_transformers/__init__.py:__version__"
 ]
 version_toml = [
     "pyproject.toml:tool.poetry.version"
