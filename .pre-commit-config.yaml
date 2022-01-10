@@ -45,6 +45,13 @@ repos:
     id: jupytext
   repo: https://github.com/mwouts/jupytext
   rev: v1.13.5
+
+- hooks:
+  - id: commitizen
+    stages: [commit-msg]
+  repo: https://github.com/commitizen-tools/commitizen
+  rev: v1.23.0
+
 - hooks:
   - entry: python custom_hook.py
     id: custom_hook
@@ -52,8 +59,3 @@ repos:
     name: custom_hook
     verbose: true
   repo: local
-- hooks:
-  - id: commitizen
-    stages: [commit-msg]
-  repo: https://github.com/commitizen-tools/commitizen
-  rev: v2.20.3
