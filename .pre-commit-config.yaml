@@ -7,11 +7,11 @@ repos:
     rev: v3.4.0
     hooks:
       - id: check-docstring-first
-        exclude: ^tutorials/*
+        exclude: ^tutorials/
       - id: trailing-whitespace
-        exclude: ^tutorials/*
+        exclude: ^tutorials/
       - id: end-of-file-fixer
-        exclude: ^tutorials/*
+        exclude: ^tutorials/
       - id: check-toml
       - id: check-merge-conflict
       - id: check-added-large-files
@@ -50,8 +50,8 @@ repos:
 
   - repo: local
     hooks:
-    - id: move_tutorial_to_docs
-      name: move_tutorial_to_docs
-      entry: python move_tutorial_to_docs.py
+    - id: custom_hook
+      name: custom_hook
+      entry: python custom_hook.py
       language: python
       verbose: true
