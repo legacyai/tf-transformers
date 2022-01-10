@@ -50,7 +50,7 @@ repos:
   - id: commitizen
     stages: [commit-msg]
   repo: https://github.com/commitizen-tools/commitizen
-  rev: master
+  rev: v2.20.3
 
 - hooks:
   - entry: python custom_hook.py
