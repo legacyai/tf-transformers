@@ -62,7 +62,7 @@ jobs:
           pip install python-semantic-release
           git config user.name github-actions
           git config user.email github-actions@github.com
-          semantic-release publish 
+          semantic-release publish -v DEBUG
     # Step 5. Publish to TestPyPI
     - uses: pypa/gh-action-pypi-publish@release/v1
       with:
