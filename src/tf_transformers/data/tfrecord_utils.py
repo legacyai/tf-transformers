@@ -113,7 +113,6 @@ class TFWriter(object):
         # Schema Check
         self.is_schema_valid(schema)
         self.tag = tag
-        print("Tag", tag)
         if tag not in ["train", "eval"]:
             logging.info("Unknown tag {} found".format(tag))
             raise Exception("Unknwon Tag")
@@ -518,7 +517,6 @@ if __name__ == "__main__":
     import glob
 
     all_files = glob.glob("test**")
-    print("All files", all_files)
     tf_reader = TFReader(tf_dummy_schema, all_files)
     dataset = tf_reader.read_record()
 
@@ -566,6 +564,5 @@ if __name__ == "__main__":
         tf_writer.write_record(data_2)
 
     all_files = glob.glob("test2**")
-    print("All files", all_files)
     tf_reader = TFReader(tf_dummy_schema, all_files, keys=[])
     dataset = tf_reader.read_record()

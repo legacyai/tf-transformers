@@ -31,13 +31,15 @@ python-semantic-release = "^7.23.0"
 
 [tool.semantic_release]
 version_variable = [
-    "src/tf_transformers/__init__.py:__version__"
+    "src/tf_transformers/__init__.py:__version__",
+    "tests/test_tf_transformers.py:version"
 ]
 version_toml = [
     "pyproject.toml:tool.poetry.version"
 ]
 version_pattern = [
     "README.md:version: v{version}"
+
     ]
 branch = "main"
 upload_to_pypi = true
