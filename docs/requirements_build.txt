@@ -18,3 +18,4 @@ matplotlib
 tensorflow-text==2.7.0
 sentencepiece
 tqdm
+transformers
