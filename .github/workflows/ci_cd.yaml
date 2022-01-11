@@ -86,10 +86,6 @@ jobs:
   build-docs:
     # Only run this job if the "ci" job passes
     needs: cd
-    on:
-      push:
-        branches: [ main ]
-        tags: '*'
     # Step 1. Set up operating system
     runs-on: ubuntu-latest
     steps:
