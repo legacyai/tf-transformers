@@ -1,5 +1,9 @@
 name: Documentation Build
 on:
+  workflow_run:
+    workflows: ["ci-cd"]
+    types:
+      - completed
   push:
     branches: [ main ]
     tags: '*'
@@ -14,13 +18,13 @@ jobs:
         fetch-depth: 0
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: 3.9
     - name: Build documentation
       run: |
         mkdir gh-pages
         touch gh-pages/.nojekyll
         cd docs/
-        pip3 install -r requirements.txt
+        pip3 install -r requirements_build.txt
         make html
         cp -r * ../gh-pages/
     - name: Deploy documentation
