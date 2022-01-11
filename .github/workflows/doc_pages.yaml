@@ -25,7 +25,7 @@ jobs:
         touch gh-pages/.nojekyll
         cd docs/
         pip3 install -r requirements_build.txt
-        make html
+        make clean html
         cp -r * ../gh-pages/
     - name: Deploy documentation
       if: ${{ github.event_name == 'push' }}
