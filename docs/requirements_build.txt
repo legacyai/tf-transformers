@@ -13,3 +13,9 @@ sphinx_markdown_tables
 sphinxext-opengraph
 sphinx-copybutton
 matplotlib
+
+# Packaged for build
+tensorflow-text==2.7.0
+sentencepiece
+tqdm
+transformers

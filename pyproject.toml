@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tf-transformers"
-version = "1.0.0"
+version = "1.0.6"
 description = "NLP with Transformer based models on Tensorflow 2.0"
 authors = ["Sarath R Nair <s4sarath@gmail.com>"]
 maintainers = ["Sarath R Nair <s4sarath@gmail.com>"]
@@ -20,8 +20,9 @@ keywords = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-sphinx = { version = "4.2.0", optional = true }
-
+tqdm = "^4.62.3"
+transformers = "^4.15.0"
+sentencepiece = "^0.1.96"
 
 
 [tool.poetry.dev-dependencies]
@@ -29,17 +30,27 @@ pytest = "^5.2"
 pylint = "^2.6.0"
 coverage = {extras = ["toml"], version = "^5.5"}
 pytest-cov = "^2.11.1"
+python-semantic-release = "^7.23.0"
 
-[tool.poetry.extras]
-docs = ["sphinx",
-        "sphinx-rtd-theme",
-        "sphinxcontrib-napoleon", "sphinx-autodoc-typehints", "jupyter-sphinx",
-        "myst-nb", "recommonmark","sphinx_markdown_tables","sphinxext-opengraph",
-        "sphinx-copybutton"
-        ]
+[tool.semantic_release]
+version_variable = [
+    "src/tf_transformers/__init__.py:__version__",
+    "tests/test_tf_transformers.py:version"
+]
+version_toml = [
+    "pyproject.toml:tool.poetry.version"
+]
+version_pattern = [
+    "README.md:version: v{version}"
+
+    ]
+branch = "main"
+upload_to_pypi = true
+upload_to_release = true
+build_command = "pip install poetry && poetry build"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.4"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
@@ -64,6 +75,7 @@ exclude = '''
     | buck-out
     | build
     | dist
+    | tutorials
   )/
   | foo.py           # also separately exclude a file named foo.py in
                      # the root of the project

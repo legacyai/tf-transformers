@@ -1,38 +1,61 @@
-exclude: '.git|.tox|tests'
-default_stages: [commit]
+default_stages:
+- commit
+exclude: .git|.tox|tests|docs
 fail_fast: true
-
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
-    hooks:
-      - id: check-docstring-first
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-toml
-      - id: check-merge-conflict
-      - id: check-added-large-files
+- hooks:
+  - exclude: ^tutorials/
+    id: check-docstring-first
+  - exclude: ^tutorials/
+    id: trailing-whitespace
+  - exclude: ^tutorials/
+    id: end-of-file-fixer
+  - id: check-toml
+  - id: check-merge-conflict
+  - id: check-added-large-files
+  repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.1.0
+- hooks:
+  - id: black
+  repo: https://github.com/psf/black
+  rev: 21.12b0
+- hooks:
+  - id: isort
+  repo: https://github.com/timothycrosley/isort
+  rev: 5.10.1
+- hooks:
+  - additional_dependencies:
+    - flake8-bugbear
+    - flake8-implicit-str-concat
+    id: flake8
+  repo: https://gitlab.com/pycqa/flake8
+  rev: 3.9.2
+- hooks:
+  - args:
+    - --no-strict-optional
+    - --ignore-missing-imports
+    id: mypy
+  repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v0.931
+- hooks:
+  - args:
+    - --sync
+    - tutorials/*.ipynb
+    files: ^tutorials/
+    id: jupytext
+  repo: https://github.com/mwouts/jupytext
+  rev: v1.13.5
 
-  - repo: https://github.com/psf/black
-    rev: 20.8b1
-    hooks:
-      - id: black
+# - hooks:
+#   - id: commitizen
+#     stages: [commit-msg]
+#   repo: https://github.com/commitizen-tools/commitizen
+#   rev: v2.20.3
 
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.6.4
-    hooks:
-      - id: isort
-
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.4
-    hooks:
-      - id: flake8
-        additional_dependencies:
-          - flake8-bugbear
-          - flake8-implicit-str-concat
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.910
-    hooks:
-      - id: mypy
-        args: [--no-strict-optional, --ignore-missing-imports]
+- hooks:
+  - entry: python custom_hook.py
+    id: custom_hook
+    language: python
+    name: custom_hook
+    verbose: true
+  repo: local
