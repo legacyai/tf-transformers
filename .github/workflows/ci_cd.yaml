@@ -23,7 +23,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install package
       run: |
-        pip install poetry=1.1.12
+        pip install poetry==1.1.12
         poetry install
     # Step 6. Run tests for pycounts
     - name: Test with pytest
@@ -67,7 +67,7 @@ jobs:
     - uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        password: ${{ secrets.TEST_PYPI_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
         skip_existing: true
     # Step 6. Test install from TestPyPI
@@ -81,5 +81,38 @@ jobs:
     - uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+        password: ${{ secrets.PYPI_TOKEN }}
         skip_existing: true
+  build-docs:
+    # Only run this job if the "ci" job passes
+    needs: cd
+    on:
+      push:
+        branches: [ main ]
+        tags: '*'
+    # Step 1. Set up operating system
+    runs-on: ubuntu-latest
+    steps:
+    # Step 2. Set up Python 3.9
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    # Step 3. Check-out repository so we can access its contents
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    # Step 4. Use PSR to make release
+    - name: Build docs and push to gh-pages
+      run: |
+          mkdir gh-pages
+          touch gh-pages/.nojekyll
+          cd docs/
+          pip3 install -r requirements_build.txt
+          make clean html
+          cp -r * ../gh-pages/
+    - name: Deploy documentation
+      if: ${{ github.event_name == 'push' }}
+      uses: JamesIves/github-pages-deploy-action@4.1.4
+      with:
+        branch: gh-pages
+        folder: gh-pages
