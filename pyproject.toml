@@ -45,8 +45,9 @@ version_pattern = [
 
     ]
 branch = "main"
-upload_to_pypi = true
-upload_to_release = true
+dist_path = "dist/"
+upload_to_pypi = false
+remove_dist = false
 build_command = "pip install poetry && poetry build"
 
 [build-system]
