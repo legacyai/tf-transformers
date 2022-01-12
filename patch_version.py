@@ -1,9 +1,9 @@
 # This script is adapted from python-semantic-release
 
-from absl import logger
+from absl import logging
 from semantic_release import cli
 
-logger.set_verbosity("DEBUG")
+logging.set_verbosity("DEBUG")
 
 
 def push_version(retry=False, noop=False, force_level=None, **kwargs):
@@ -13,16 +13,16 @@ def push_version(retry=False, noop=False, force_level=None, **kwargs):
     """
 
     if retry:
-        logger.info("Retrying publication of the same version")
+        logging.info("Retrying publication of the same version")
     else:
-        logger.info("Creating new version")
+        logging.info("Creating new version")
 
     # Get the current version number
     try:
         current_version = cli.get_current_version()
-        logger.info(f"Current version: {current_version}")
+        logging.info(f"Current version: {current_version}")
     except cli.GitError as e:
-        logger.error(str(e))
+        logging.error(str(e))
         return False
 
     if not cli.should_bump_version(
