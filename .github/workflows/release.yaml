@@ -2,9 +2,6 @@ name: Release
 on: 
   release:
     types: [published]
-  push:
-    tags:
-      - '*'
 
 jobs:
   release:
@@ -19,11 +16,15 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: '3.9'
-    - name: Patch version
+    - name: Patch version and commit
       run: |
         echo "Tag retrived is ${{ steps.vars.outputs.tag }}"
-        pip install python-semantic-release
-        pip install absl-py
+        pip install poetry
+        poetry version ${{ steps.vars.outputs.tag }}
         git config user.name github-actions
         git config user.email github-actions@github.com
         python patch_version.py ${{ steps.vars.outputs.tag }}
+        git add src/tf_transformers/__init__.py
+        git add tests/test_tf_transformers.py
+        git commit -m "Updated version to ${{ steps.vars.outputs.tag }}"
+        git push

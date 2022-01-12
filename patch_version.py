@@ -1,51 +1,24 @@
 # This script is adapted from python-semantic-release
+# flake8: noqa
 
 import sys
 
-from absl import logging
-from semantic_release import cli
 
-logging.set_verbosity("DEBUG")
-
-
-def push_version(required_version, retry=False, noop=False, force_level=None, **kwargs):
+def patch(required_version):
     """
-    Detect the new version according to git log and semver.
-    Write the new version number and commit it, unless the noop option is True.
-
-
+    Write the new version to init and test file
     """
 
-    # if retry:
-    #     logging.info("Retrying publication of the same version")
-    # else:
-    #     logging.info("Creating new version")
+    # Edit src
+    with open('src/tf_transformers/__init__.py', 'w') as f:
+        f.write('__version__ = "{}"\n'.format(required_version))
 
-    # # Get the current version number
-    # try:
-    #     current_version = cli.get_current_version()
-    #     logging.info(f"Current version: {current_version}")
-    # except cli.GitError as e:
-    #     logging.error(str(e))
-    #     return False
-
-    # if not cli.should_bump_version(
-    #     current_version=current_version, new_version=required_version, retry=retry, noop=noop
-    # ):
-    #     return False
-
-    # if retry:
-    #     # No need to make changes to the repo, we're just retrying.
-    #     return True
-
-    # Set version and commit
-    cli.set_new_version(required_version)
-    cli.commit_new_version(required_version)
-    # Bump the version
-    cli.bump_version(required_version, level_bump='dummy')
-    return True
+    # Edit test
+    test_content = 'from tf_transformers import __version__\n\nversion = "{}"\ndef test_version():\n    assert __version__ == version\n'
+    with open('tests/test_tf_transformers.py', 'w') as f:
+        f.write(test_content.format(required_version))
 
 
 if __name__ == '__main__':
     version = sys.argv[-1]  # last cli argument
-    push_version(version)
+    patch(version)
