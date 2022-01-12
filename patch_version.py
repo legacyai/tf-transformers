@@ -12,6 +12,8 @@ def push_version(current_version, retry=False, noop=False, force_level=None, **k
     """
     Detect the new version according to git log and semver.
     Write the new version number and commit it, unless the noop option is True.
+
+
     """
 
     # if retry:
