@@ -23,6 +23,7 @@ python = "^3.7"
 tqdm = "^4.62.3"
 transformers = "^4.15.0"
 sentencepiece = "^0.1.96"
+absl-py = "^1.0.0"
 
 
 [tool.poetry.dev-dependencies]
