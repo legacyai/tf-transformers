@@ -30,7 +30,7 @@ def push_version(required_version, retry=False, noop=False, force_level=None, **
         return False
 
     if not cli.should_bump_version(
-        current_version=current_version, new_version=current_version, retry=retry, noop=noop
+        current_version=current_version, new_version=required_version, retry=retry, noop=noop
     ):
         return False
 
