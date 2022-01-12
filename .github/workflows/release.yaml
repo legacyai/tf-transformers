@@ -9,7 +9,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
+        ref: ${{ github.head_ref }}
+        # ref: ${{ github.event.pull_request.head.ref }}
     - name: Get tag
       id: vars
       run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
