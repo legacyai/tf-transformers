@@ -17,8 +17,9 @@ jobs:
       with:
         python-version: '3.9'
     - name: Set tag
-      run: git tag ${{ github.event.inputs.version }}
-      run: echo "Tag is ${{ github.event.inputs.version }}"
+      run: |
+        git tag ${{ github.event.inputs.version }}
+        echo "Tag is ${{ github.event.inputs.version }}"
     - name: Patch version
       run: |
         pip install python-semantic-release
