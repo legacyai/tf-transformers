@@ -2,6 +2,10 @@ name: Release
 on: 
   release:
     types: [published]
+  push:
+    tags:
+      - '*'
+
 jobs:
   release:
     runs-on: ubuntu-latest
