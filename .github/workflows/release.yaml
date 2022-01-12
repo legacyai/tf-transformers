@@ -24,5 +24,7 @@ jobs:
         echo "Tag retrived is ${{ steps.vars.outputs.tag }}"
         pip install python-semantic-release
         pip install absl-py
+        git config user.name github-actions
+        git config user.email github-actions@github.com
         python patch_version.py ${{ steps.vars.outputs.tag }}
         semantic-release changelog -v DEBUG
