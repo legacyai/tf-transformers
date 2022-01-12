@@ -10,8 +10,8 @@ jobs:
       with:
         fetch-depth: 0
     - name: Get tag
-        id: vars
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      id: vars
+      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
     - uses: actions/setup-python@v2
       with:
         python-version: '3.9'
