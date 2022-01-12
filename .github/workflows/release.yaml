@@ -8,9 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        ref: ${{ github.head_ref }}
-        # ref: ${{ github.event.pull_request.head.ref }}
     - name: Get tag
       id: vars
       run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
@@ -28,4 +25,4 @@ jobs:
         git add src/tf_transformers/__init__.py
         git add tests/test_tf_transformers.py
         git commit -m "Updated version to ${{ steps.vars.outputs.tag }}"
-        git push
+        git push origin HEAD:main
