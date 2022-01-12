@@ -1,11 +1,7 @@
 name: Release
 on: 
-  workflow_dispatch:
-    inputs:
-      version:
-        description: Bump Version
-        default: v1.0.0
-        required: true
+  release:
+    types: [published]
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -13,16 +9,16 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
+    - name: Get tag
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
     - uses: actions/setup-python@v2
       with:
         python-version: '3.9'
-    - name: Set tag
-      run: |
-        git tag ${{ github.event.inputs.version }}
-        echo "Tag is ${{ github.event.inputs.version }}"
     - name: Patch version
       run: |
+        echo "Tag retrived is ${{ steps.vars.outputs.tag }}"
         pip install python-semantic-release
         pip install absl-py
-        python patch_version.py
+        python patch_version.py ${{ steps.vars.outputs.tag }}
         semantic-release changelog -v DEBUG
