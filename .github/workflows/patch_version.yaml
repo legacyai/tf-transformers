@@ -1,4 +1,4 @@
-name: Release
+name: Patch version
 on: 
   release:
     types: [published]
@@ -22,6 +22,7 @@ jobs:
         git config user.name github-actions
         git config user.email github-actions@github.com
         python patch_version.py ${{ steps.vars.outputs.tag }}
+        git add pyproject.toml
         git add src/tf_transformers/__init__.py
         git add tests/test_tf_transformers.py
         git commit -m "Updated version to ${{ steps.vars.outputs.tag }}"

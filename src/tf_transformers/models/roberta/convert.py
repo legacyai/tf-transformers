@@ -61,6 +61,10 @@ def convert_roberta_pt(model, config, model_name):
         local_config = model._config_dict
     except Exception as e:
         # LegacyModel
+        import traceback
+
+        print(traceback.format_exc())
+        logging.error(e)
         local_config = model.model_config
 
     if local_config['use_dropout']:
@@ -241,7 +245,6 @@ def convert_roberta_pt(model, config, model_name):
         outputs_pt = torch.argmax(outputs_pt.last_hidden_state, dim=2)[0].numpy()
 
     # Do the following only if model is MaskedLMModel
-    from tf_transformers.models import MaskedLMModel
 
     mlm_model = False
     for var in model.variables:
@@ -318,6 +321,10 @@ def convert_roberta_tf(model, config, model_name):
         local_config = model._config_dict
     except Exception as e:
         # LegacyModel
+        import traceback
+
+        print(traceback.format_exc())
+        logging.error(e)
         local_config = model.model_config
 
     if local_config['use_dropout']:
@@ -500,7 +507,6 @@ def convert_roberta_tf(model, config, model_name):
         outputs_hf = tf.argmax(outputs_hf.last_hidden_state, axis=2)[0].numpy()
 
     # Do the following only if model is MaskedLMModel
-    from tf_transformers.models import MaskedLMModel
 
     mlm_model = False
     for var in model.variables:

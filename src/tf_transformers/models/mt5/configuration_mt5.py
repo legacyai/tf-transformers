@@ -115,7 +115,7 @@ class MT5Config(TransformerConfig):
         position_embedding_type="relative",
         bidirectional=True,
         positional_buckets=32,
-        decoder_start_token_id=0
+        decoder_start_token_id=0,
     ):
         super().__init__(
             vocab_size=vocab_size,
@@ -135,5 +135,5 @@ class MT5Config(TransformerConfig):
             position_embedding_type=position_embedding_type,
             bidirectional=bidirectional,
             positional_buckets=positional_buckets,
-            decoder_start_token_id=decoder_start_token_id
+            decoder_start_token_id=decoder_start_token_id,
         )

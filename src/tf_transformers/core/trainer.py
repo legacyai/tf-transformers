@@ -231,6 +231,9 @@ def train_and_eval(
                         logging.info("Callbacks in progress at step {} . . . .".format(global_step))
                         current_trainer_kwargs = locals()
                         trainer_kwargs.update(current_trainer_kwargs)
+                        trainer_kwargs['validation_steps'] = validation_steps  # Adding validation steps
+                        trainer_kwargs['epoch'] = epoch
+                        trainer_kwargs['strategy'] = strategy
                         score = callback(trainer_kwargs)
                         logging.info("Callback score {} at step {}".format(score, global_step))
                         callback_scores.append(score)
@@ -245,6 +248,9 @@ def train_and_eval(
                 for callback in callbacks:
                     current_trainer_kwargs = locals()
                     trainer_kwargs.update(current_trainer_kwargs)
+                    trainer_kwargs['validation_steps'] = validation_steps  # Adding validation steps
+                    trainer_kwargs['epoch'] = epoch
+                    trainer_kwargs['strategy'] = strategy
                     score = callback(trainer_kwargs)
                     callback_scores.append(score)
                     logging.info("Callback score {} at epoch {}".format(score, epoch))
@@ -267,7 +273,7 @@ def train_and_eval(
             validation_steps += 1
 
     @tf.function
-    def _do_validation(dataset):
+    def _do_validation(dist_inputs):
         """The step function for one validation step"""
 
         def validate_step(dist_inputs):
@@ -277,30 +283,35 @@ def train_and_eval(
             loss = compute_loss_valid(batch_labels, model_outputs)
             return loss
 
-        for dist_inputs in dataset:
-            loss = strategy.run(validate_step, args=(dist_inputs,))
-            # strategy reduce (SUM) is important
-            # If not SUM, final loss might not be a good representative of global batch
+        loss = validate_step(dist_inputs)
+        return loss
+
+    def do_validation(validation_dataset_distributed):
+        """Batch validation"""
+        validation_dataset_iter = iter(validation_dataset_distributed)
+        step_counter = 0
+        val_bar = tqdm.tqdm(range(validation_steps), unit="batch ", colour='blue')
+        for step_counter in val_bar:
+
+            dist_inputs = next(validation_dataset_iter)
+            loss = strategy.run(_do_validation, args=(dist_inputs,))
             loss = {
                 name: strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
                 for name, loss_value in loss.items()
             }
+            validation_result = {}
             for name, loss_value in loss.items():
                 # get loss metric object based on loss names ('loss', 'loss1' etc . . . .)
                 validation_loss_metric = validation_loss_dict_metric[name]
                 validation_loss_metric.update_state(loss_value)
-
-    def do_validation(validation_dataset_distributed):
-        """Batch validation"""
-        with tqdm.trange(validation_steps, unit=" Validation batch ", colour='blue') as val_bar:
-            step_counter = 0
-            _do_validation(validation_dataset_distributed)
+                validation_result[name] = validation_loss_metric.result().numpy()
             val_bar.set_description(
-                "Epoch {}/{} --- Val Step {}/{} ".format(epoch, epochs, step_counter, validation_steps)
+                "Validation: Epoch {}/{} --- Step {}/{} ".format(epoch, epochs, step_counter, validation_steps)
             )
-
-            validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
             val_bar.set_postfix(**validation_result)
+            # step_counter += 1
+
+        validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
         return validation_result
 
     # Train Functions
@@ -372,7 +383,7 @@ def train_and_eval(
                 steps_covered = (step + 1) * steps_per_call
                 global_step += steps_per_call
                 tepoch.set_description(
-                    "Epoch {}/{} --- Step {}/{} --- total examples {}".format(
+                    "Train: Epoch {}/{} --- Step {}/{} --- total examples {}".format(
                         epoch, epochs, steps_covered, steps_per_epoch, total_examples_processed
                     )
                 )

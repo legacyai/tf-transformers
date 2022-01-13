@@ -16,8 +16,10 @@
 # ==============================================================================
 
 """TF Transformers general config file for Transformer based models"""
+
+
 class TransformerConfig:
-    
+
     r"""
     This is the configuration class to store the configuration of a :class:`~transformers.AlbertModel` or a
     :class:`~transformers.TFAlbertModel`. It is used to instantiate an ALBERT model according to the specified
@@ -74,6 +76,6 @@ class TransformerConfig:
             <https://arxiv.org/abs/2009.13658>`__.
 
     """
-    
+
     def __init__(self) -> None:
         pass

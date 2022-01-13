@@ -60,6 +60,10 @@ def convert_bert_pt(model, config, model_name):
         local_config = model._config_dict
     except Exception as e:
         # LegacyModel
+        import traceback
+
+        print(traceback.format_exc())
+        logging.error(e)
         local_config = model.model_config
 
     if local_config['use_dropout']:
@@ -234,8 +238,6 @@ def convert_bert_pt(model, config, model_name):
         outputs_pt = torch.argmax(outputs_pt.last_hidden_state, dim=2)[0].numpy()
 
     # Do the following only if model is MaskedLMModel
-    from tf_transformers.models import MaskedLMModel
-
     mlm_model = False
     for var in model.variables:
         if '/mlm/' in var.name:
@@ -312,6 +314,10 @@ def convert_bert_tf(model, config, model_name):
         local_config = model._config_dict
     except Exception as e:
         # LegacyModel
+        import traceback
+
+        print(traceback.format_exc())
+        logging.error(e)
         local_config = model.model_config
 
     if local_config['use_dropout']:
@@ -397,6 +403,7 @@ def convert_bert_tf(model, config, model_name):
 
     # BertModel
     from transformers import TFBertModel
+
     model_hf = TFBertModel.from_pretrained(model_name)
     # HF model variable name to variable values, for fast retrieval
     from_to_variable_dict = {var.name: var for var in model_hf.variables}
@@ -474,8 +481,8 @@ def convert_bert_tf(model, config, model_name):
             #             from_to_variable_dict.get(original_var),
             #     )
             model.variables[index].assign(
-                                from_to_variable_dict.get(original_var),
-                        )
+                from_to_variable_dict.get(original_var),
+            )
             assigned_map.append((original_var, legacy_var))
             continue
 
@@ -492,8 +499,6 @@ def convert_bert_tf(model, config, model_name):
         outputs_hf = tf.argmax(outputs_hf.last_hidden_state, axis=2)[0].numpy()
 
     # Do the following only if model is MaskedLMModel
-    from tf_transformers.models import MaskedLMModel
-
     mlm_model = False
     for var in model.variables:
         if '/mlm/' in var.name:
@@ -501,7 +506,7 @@ def convert_bert_tf(model, config, model_name):
             break
     if mlm_model is False:
         return True
-    
+
     # BertMLM
     from transformers import TFBertForMaskedLM
 

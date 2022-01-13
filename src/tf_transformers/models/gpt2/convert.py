@@ -38,6 +38,10 @@ def convert_gpt2_pt(model, config, model_name):
         local_config = model._config_dict
     except Exception as e:
         # LegacyModel
+        import traceback
+
+        print(traceback.format_exc())
+        logging.error(e)
         local_config = model.model_config
 
     if local_config['use_dropout']:
@@ -168,6 +172,10 @@ def convert_gpt2_tf(model, config, model_name):
         local_config = model._config_dict
     except Exception as e:
         # LegacyModel
+        import traceback
+
+        print(traceback.format_exc())
+        logging.error(e)
         local_config = model.model_config
 
     if local_config['use_dropout']:

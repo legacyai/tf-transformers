@@ -1,39 +1,39 @@
-# name: ci-cd
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - main
+name: ci-cd
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-# jobs:
-#   ci:
-#     # Step 1. Set up operating system
-#     runs-on: ${{ matrix.os }}
-#     strategy:
-#       matrix:
-#         os: [macos-latest, ubuntu-latest]
-#     steps:
-#     # Step 2. Set up Python 3.9
-#     - uses: actions/setup-python@v2
-#       with:
-#         python-version: 3.9
-#     # Step 3. Check-out repository so we can access its contents
-#     - uses: actions/checkout@v2
-#     - name: Install package
-#       run: |
-#         pip install poetry==1.1.12
-#         poetry install
-#     # Step 6. Run tests for pycounts
-#     - name: Test with pytest
-#       run: poetry run pytest tests/test_tf_transformers.py --cov-report=xml --cov=tests
-#     # Step 7. Use Codecov to track coverage
-#     - uses: codecov/codecov-action@v2
-#       with:
-#         file: ./coverage.xml    # coverage report
-#         fail_ci_if_error: true  # terminate workflow if there's an error
-#         token: ${{ secrets.CODECOV_TOKEN }}
-#         flags: unittests
-#         name: codecov-umbrella
-#         verbose: true
+jobs:
+  ci:
+    # Step 1. Set up operating system
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+    # Step 2. Set up Python 3.9
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    # Step 3. Check-out repository so we can access its contents
+    - uses: actions/checkout@v2
+    - name: Install package
+      run: |
+        pip install poetry==1.1.12
+        poetry install
+    # Step 6. Run tests for pycounts
+    - name: Test with pytest
+      run: poetry run pytest tests/test_tf_transformers.py --cov-report=xml --cov=tests
+    # Step 7. Use Codecov to track coverage
+    - uses: codecov/codecov-action@v2
+      with:
+        file: ./coverage.xml    # coverage report
+        fail_ci_if_error: true  # terminate workflow if there's an error
+        token: ${{ secrets.CODECOV_TOKEN }}
+        flags: unittests
+        name: codecov-umbrella
+        verbose: true
