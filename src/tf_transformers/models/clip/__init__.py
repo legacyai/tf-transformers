@@ -22,4 +22,4 @@ from tf_transformers.models.clip.configuration_clip import (
     CLIPImageConfig,
     CLIPTextConfig,
 )
-from tf_transformers.models.vit.vit_feature_extractor import ViTFeatureExtractorTF
+from tf_transformers.models.clip.clip_feature_extractor import CLIPFeatureExtractorTF
