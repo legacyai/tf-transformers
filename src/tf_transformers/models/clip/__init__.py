@@ -16,10 +16,10 @@
 # ==============================================================================
 from tf_transformers.models.clip.clip import CLIPEncoder
 from tf_transformers.models.clip.clip_image_encoder import CLIPImageEncoder
-from tf_transformers.models.clip.clip_model import CLIPModel
 from tf_transformers.models.clip.clip_text_encoder import CLIPTextEncoder
 from tf_transformers.models.clip.configuration_clip import (
     CLIPImageConfig,
     CLIPTextConfig,
 )
 from tf_transformers.models.clip.clip_feature_extractor import CLIPFeatureExtractorTF
+from tf_transformers.models.clip.clip_model import CLIPModel

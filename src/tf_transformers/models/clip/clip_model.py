@@ -25,8 +25,9 @@ from tf_transformers.core.read_from_hub import (
     get_config_only,
     load_pretrained_model,
 )
-from tf_transformers.models.clip import CLIPEncoder as Encoder
-from tf_transformers.models.clip import CLIPImageEncoder, CLIPTextEncoder
+from tf_transformers.models.clip.clip import CLIPEncoder as Encoder
+from tf_transformers.models.clip.clip_image_encoder import CLIPImageEncoder
+from tf_transformers.models.clip.clip_text_encoder import CLIPTextEncoder
 from tf_transformers.models.clip.configuration_clip import CLIPImageConfig
 from tf_transformers.models.clip.configuration_clip import (
     CLIPImageConfig as ModelConfig,
