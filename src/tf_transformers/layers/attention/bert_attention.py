@@ -292,12 +292,10 @@ class MultiHeadAttention(LegacyLayer):
         query_tensor = tf.transpose(query_tensor, [0, 2, 1, 3])
         key_tensor = tf.transpose(key_tensor, [0, 2, 1, 3])
         value_tensor = tf.transpose(value_tensor, [0, 2, 1, 3])
-
         # attention_scores = tf.einsum(
         #      "BNFH,BNTH->BNFT",  query_tensor, key_tensor)
 
         attention_scores = tf.matmul(query_tensor, key_tensor, transpose_b=True)
-
         attention_scores = tf.multiply(attention_scores, 1.0 / math.sqrt(float(self._head_size)))
         attention_probs = self._masked_softmax([attention_scores, attention_mask])
         # This is actually dropping out entire tokens to attend to, which might

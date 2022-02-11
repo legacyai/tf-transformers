@@ -34,8 +34,7 @@ def read_dataset(data_directory):
 
 
 def get_dataset_pack_full(data_directory, tokenizer_layer, max_seq_len, batch_size):
-    def mask_and_prepare_inputs(item):
-
+    def mask_and_prepare_inputs(text):
 
         # Encode
         inputs = {'text': tf.strings.split(text, delimiter)}
@@ -104,7 +103,7 @@ def get_dataset_pack_full(data_directory, tokenizer_layer, max_seq_len, batch_si
         return inputs, outputs
 
     dataset = read_dataset(data_directory)
-    local_batch = 10 # for batching and packing inputs together
+    local_batch = 10  # for batching and packing inputs together
     encoder_seq_length = max_seq_len
     cls_token_id = tokenizer_layer.cls_token_id
     decoder_start_token_id = tokenizer_layer.pad_token_id
@@ -135,7 +134,6 @@ def get_dataset_pack_full(data_directory, tokenizer_layer, max_seq_len, batch_si
     return ds
 
 
-
 def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
     def mask_and_prepare_inputs(item):
 
@@ -151,14 +149,14 @@ def get_dataset(data_directory, tokenizer_layer, max_seq_len, batch_size):
         # Trim based on max_seq_len, As its a ragged tensor, we find max_seq_index
         segments = segments[:max_seq_index]
 
-        min_seq_length_minus = tf.cast(min_seq_length-2, tf.int32)
+        min_seq_length_minus = tf.cast(min_seq_length - 2, tf.int32)
         if tf.not_equal(tf.shape(segments.merge_dims(-2, 1))[0], min_seq_length_minus):
             difference = tf.shape(segments.merge_dims(-2, 1))[0] - min_seq_length_minus
             difference = tf.cast(difference, tf.int64)
             row_splits = segments.row_splits
             row_splits = tf.concat([row_splits[:-1], [row_splits[-1] - difference]], axis=0)
             segments = tf.concat([segments[:-1], [segments[-1][:-difference]]], axis=0)
-            
+
         # Add 2 special tokens
         segments = tf.concat([[[cls_token_id]], segments, [[eos_token_id]]], axis=0)
 

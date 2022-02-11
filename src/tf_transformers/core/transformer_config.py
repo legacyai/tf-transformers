@@ -89,6 +89,8 @@ class TransformerConfig:
             The number of input channels.
         num_labels (:obj:`int`, `optional`, defaults to :obj:`1000`):
             Total number of labels by which model has been pre-trained
+        projection_dim (:obj:`int`, `optional`, defaults to :obj:`512`):
+            Unified projection dim for image and text encoders in CLIP.
 
 
     """
@@ -111,7 +113,7 @@ class TransformerConfig:
         initializer_range=None,
         layer_norm_epsilon=None,
         position_embedding_type="absolute",
-        num_hidden_groups=1,
+        num_hidden_groups=None,
         positional_buckets=None,
         bidirectional=None,
         cls_token_id=None,
@@ -124,6 +126,7 @@ class TransformerConfig:
         patch_size=None,
         num_channels=None,
         num_labels=None,
+        projection_dim=None,
     ):
         self.vocab_size = vocab_size
         self.embedding_size = embedding_size
@@ -148,6 +151,7 @@ class TransformerConfig:
         self.patch_size = patch_size
         self.num_channels = num_channels
         self.num_labels = num_labels
+        self.projection_dim = projection_dim
 
         # Convert attributes to dict and del "self" from that
         self._inputs = locals()
@@ -155,4 +159,9 @@ class TransformerConfig:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert attributes of class to dict"""
-        return self._inputs
+        config = {}
+        for k, v in self._inputs.items():
+            if v is None:
+                continue
+            config[k] = v
+        return config

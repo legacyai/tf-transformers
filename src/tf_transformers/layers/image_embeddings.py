@@ -35,6 +35,7 @@ class PatchEmbeddings(tf.keras.layers.Layer):
         embedding_width,
         initializer="glorot_uniform",
         dtype=tf.float32,
+        use_bias=True,
         name="patch_embeddings",
         **kwargs,
     ):
@@ -52,6 +53,7 @@ class PatchEmbeddings(tf.keras.layers.Layer):
         self._patch_size = patch_size
         self._num_channels = patch_size
         self._embedding_width = embedding_width
+        self._use_bias = use_bias
 
     def get_config(self):
         """Config based on init arguments
@@ -85,6 +87,7 @@ class PatchEmbeddings(tf.keras.layers.Layer):
             self._embedding_width,
             kernel_size=(self._patch_size, self._patch_size),
             strides=(self._patch_size, self._patch_size),
+            use_bias=self._use_bias,
         )
 
         super(PatchEmbeddings, self).build(input_shape)

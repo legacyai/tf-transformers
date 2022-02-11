@@ -80,9 +80,9 @@ ENCODER_CLASS_DOCSTRING = r"""
 
             (:obj:`prefix`: Casual LM masking but bidirectional to model inputs).
         name (:obj:`str`): Model name.
-        use_dropout (:obj:`str`): If True only dropout will be enabled.
-        is_training (:obj:`str`): This is used to mainly switch to auto regressive tasks.
-        use_decoder (:obj:`str`): If true we will use :meth:`call_decoder` while :obj:`is_training=True`.
+        use_dropout (:obj:`bool`): If True only dropout will be enabled.
+        is_training (:obj:`bool`): This is used to mainly switch to auto regressive tasks.
+        use_decoder (:obj:`bool`): If true we will use :meth:`call_decoder` while :obj:`is_training=True`.
         batch_size  (:obj:`int`, `optional`, defaults to :obj:`None`): Batch size.
         sequence_length (:obj:`int`, `optional`, defaults to :obj:`None`):: Sequence Length.
                 If :obj:`position_embedding_type='absolute'`, sequence length should be with in
@@ -179,6 +179,55 @@ CALL_ENCODER_DOCSTRING_IMAGE = r"""
             (:obj:`"cls_output": tf.float32 (batch_size x sequence_length)`,
             :obj:`"token_embeddings": tf.float32 (batch_size x sequence_length x embedding_size)`,
             :obj:`"token_logits": tf.float32 (batch_size x sequence_length x vocab_size)`)
+
+            If :obj:`return_all_layers=True`:
+
+            (:obj:`"all_layer_token_embeddings": tf.float32 List[(batch_size x sequence_length x embedding_size)]`,
+            :obj:`"all_layer_token_logits": tf.float32 List[(batch_size x sequence_length x vocab_size)]`,
+            :obj:`"all_layer_cls_output": tf.float32 List[(batch_size x sequence_length)]`)
+
+        """
+        
+CALL_ENCODER_DOCSTRING_CLIP = r"""
+        An Encoder in general accepts :obj:`input_ids` and optional (:obj:`input_mask` and :obj:`input_type_ids`)
+
+        .. note::
+            a. **Inputs**.
+
+            TF 2.0 models accepts input formats as :obj:`Dict`:
+            - having all inputs as dict .
+
+            :obj:`input_mask`
+            - 1 for tokens that are **not masked**,
+            - 0 for tokens that are **masked**.
+
+            :obj:`input_type_ids`
+            - 0 for tokens that are **Sentence A**,
+            - 1 for tokens that are **Sentence B**. (Not applicable to all. **Roberta** has only **0**.)
+
+            Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+            - a dictionary with one or several input Tensors.
+
+            b. **Outputs**.
+
+            TF 2.0 models returns output formats as :obj:`Dict`:
+            - having all outputs as dict .
+
+        Args:
+            inputs: Dict of tf.Tensor (:obj:`"input_pixels": tf.int32 (batch_size x sequence_length)`,
+                                       :obj:`"input_ids": Optional. tf.int32 (batch_size x sequence_length)`
+                                       :obj:`"input_type_ids": Optional. tf.int32 (batch_size x sequence_length)`,
+                                       :obj:`"input_mask": Optional. tf.int32 (batch_size x sequence_length)`)
+
+        Returns:
+            result: Dict of tf.Tensor.
+
+            (:obj:`"image_cls_output": tf.float32 (batch_size x sequence_length)`,
+            :obj:`"image_features": tf.float32 (batch_size x sequence_length)`,
+            :obj:`"text_cls_output": tf.float32 (batch_size x sequence_length)`,       
+            :obj:`"text_features": tf.float32 (batch_size x sequence_length)`,
+            :obj:`"text_token_embeddings": tf.float32 (batch_size x sequence_length x embedding_size)`
+            )
 
             If :obj:`return_all_layers=True`:
 
