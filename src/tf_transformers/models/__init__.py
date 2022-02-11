@@ -57,7 +57,7 @@ from tf_transformers.models.vit import (
 
 from tf_transformers.models.clip import (
     CLIPImageConfig,
-    CLIPTextConfig
+    CLIPTextConfig,
     CLIPEncoder,
     CLIPImageEncoder,
     CLIPTextEncoder,
