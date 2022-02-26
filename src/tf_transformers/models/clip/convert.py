@@ -202,9 +202,9 @@ def convert_image_model_pt(model, config, model_hf):
     # logits scale
     mapping_dict['logit_scale'] = 'logits_scale:0'
 
-    # Projections
-    mapping_dict['visual_projection.weight'] = 'tftransformers/clip/visual_projection/kernel:0'
-    mapping_dict['text_projection.weight'] = 'tftransformers/clip/text_projection/kernel:0'
+    # Projections (Image and Text)
+    mapping_dict['visual_projection.weight'] = 'tf_transformers/clip_image/visual_projection/kernel:0'
+    mapping_dict['text_projection.weight'] = 'tf_transformers/clip_text/text_projection/kernel:0'
 
     from_to_variable_dict = {name: var.detach().numpy() for name, var in model_hf.named_parameters()}
 

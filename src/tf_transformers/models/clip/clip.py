@@ -44,13 +44,7 @@ class CLIPEncoder(LegacyLayer):
         self.text_encoder = text_encoder
         assert self.image_encoder._config_dict['projection_dim'] == self.text_encoder._config_dict['projection_dim']
 
-        self.projection_dim = self.image_encoder._config_dict['projection_dim']
         self.logits_scale = tf.Variable(tf.math.log(1 / 0.07), name='logits_scale')
-        self.visual_projection = tf.keras.layers.Dense(
-            units=self.projection_dim, name='visual_projection', use_bias=False
-        )
-        self.text_projection = tf.keras.layers.Dense(units=self.projection_dim, name='text_projection', use_bias=False)
-
         # Initialize model
         self.model_inputs, self.model_ouputs = self.get_model(initialize_only=True)
 
@@ -103,18 +97,13 @@ class CLIPEncoder(LegacyLayer):
         image_outputs = self.image_encoder(image_inputs)
         text_outputs = self.text_encoder(text_inputs)
 
-        # # Image Projection
-        image_cls_output = image_outputs['cls_output']
+        # Image Projection
+        image_features_unnormalized = image_outputs['cls_output']
+        # Text Projection
+        text_features_unnormalized = text_outputs['cls_output']
 
-        image_features_unnormalized = self.visual_projection(image_cls_output)
-
-        # # Text Projection
-
-        text_features_unnormalized = self.text_projection(text_outputs['cls_output'])
-
-        # # Normalize
+        # Normalize
         image_features = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(image_features_unnormalized)
-
         text_features = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(text_features_unnormalized)
 
         # cosine similarity as logits

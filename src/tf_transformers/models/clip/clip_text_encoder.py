@@ -78,6 +78,7 @@ class CLIPTextEncoder(LegacyLayer):
         self._batch_size = batch_size
         self._sequence_length = sequence_length
         self._return_all_layer_outputs = return_all_layer_outputs
+        self._projection_dim = config['projection_dim']
 
         # self._self_setattr_tracking = False
         super(CLIPTextEncoder, self).__init__(
@@ -97,6 +98,7 @@ class CLIPTextEncoder(LegacyLayer):
             "batch_size": self._batch_size,
             "sequence_length": self._sequence_length,
             "return_all_layer_outputs": self._return_all_layer_outputs,
+            "projection_dim": self._projection_dim,
         }
         # Update config dict with passed config
         self._config_dict.update(config)
@@ -136,6 +138,9 @@ class CLIPTextEncoder(LegacyLayer):
                 name="transformer/layer_%d" % i,
             )
             self._transformer_layers.append(layer)
+
+        # Projection Layer
+        self.text_projection = tf.keras.layers.Dense(units=self._projection_dim, name='text_projection', use_bias=False)
 
         self.call_fn = self.get_call_method(self._config_dict)
         # Initialize model
@@ -307,8 +312,9 @@ class CLIPTextEncoder(LegacyLayer):
         #     "last_token_logits": last_token_logits,
         # }
 
+        cls_output = self.text_projection(cls_token_tensor)
         result = {
-            "cls_output": cls_token_tensor,
+            "cls_output": cls_output,
             "token_embeddings": token_embeddings,
         }
 
@@ -318,7 +324,7 @@ class CLIPTextEncoder(LegacyLayer):
                 per_layer_token_embeddings = self._last_layer_norm(per_layer_token_embeddings)
 
                 per_cls_token_tensor = tf.gather_nd(per_layer_token_embeddings, positions_gathered)
-                all_cls_output.append(per_cls_token_tensor)
+                all_cls_output.append(self.text_projection(per_cls_token_tensor))
 
                 # layer_token_logits = tf.matmul(
                 #     per_layer_token_embeddings,

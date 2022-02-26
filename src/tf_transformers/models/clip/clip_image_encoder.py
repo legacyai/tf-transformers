@@ -81,6 +81,7 @@ class CLIPImageEncoder(LegacyLayer):
         self._patch_size = config['patch_size']
         self._image_size = config['image_size']
         self._num_channels = config['num_channels']
+        self._projection_dim = config['projection_dim']
 
         one_side_patch = config['image_size'] // config['patch_size']
         self._num_patches = (one_side_patch * one_side_patch) + 1  # 1 for CLS token
@@ -107,6 +108,7 @@ class CLIPImageEncoder(LegacyLayer):
             "patch_size": self._patch_size,
             "image_size": self._image_size,
             "num_channels": self._num_channels,
+            "projection_dim": self._projection_dim,
         }
         # Update config dict with passed config
         self._config_dict.update(config)
@@ -152,6 +154,11 @@ class CLIPImageEncoder(LegacyLayer):
                 name="transformer/layer_%d" % i,
             )
             self._transformer_layers.append(layer)
+
+        # Projection Layer
+        self.visual_projection = tf.keras.layers.Dense(
+            units=self._projection_dim, name='visual_projection', use_bias=False
+        )
 
         self.call_fn = self.get_call_method(self._config_dict)
         # Initialize model
@@ -227,8 +234,8 @@ class CLIPImageEncoder(LegacyLayer):
         # First word of last layer outputs [CLS]
         cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(token_embeddings)
         # batch_size x embedding_size
-        # cls_output = self._pooler_layer(cls_token_tensor)
-        result = {"token_embeddings": token_embeddings, "cls_output": cls_token_tensor}
+        cls_output = self.visual_projection(cls_token_tensor)
+        result = {"token_embeddings": token_embeddings, "cls_output": cls_output}
         if self._return_all_layer_outputs:
             # all_cls_token_tensors = []
             all_cls_output = []
@@ -239,7 +246,7 @@ class CLIPImageEncoder(LegacyLayer):
                 )
                 # all_cls_token_tensors.append(per_cls_token_tensor)
                 # all_cls_output.append(self._pooler_layer(per_cls_token_tensor))
-                all_cls_output.append(per_cls_token_tensor)
+                all_cls_output.append(self.visual_projection(per_cls_token_tensor))
 
             result["all_layer_token_embeddings"] = encoder_outputs
             result["all_layer_cls_output"] = all_cls_output
