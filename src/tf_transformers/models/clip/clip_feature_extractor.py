@@ -95,7 +95,16 @@ class CLIPFeatureExtractorTF(LegacyLayer):
         if self.rescale:
             self.rescaler = tf.keras.layers.Rescaling(scale=scale_value)
         if self.normalize:
-            self.normalizer = tf.keras.layers.Normalization(axis=-1, mean=mean, variance=variance)
+            mean = tf.constant([mean])
+            variance = tf.constant([variance])
+
+            def standardize(image_data):
+                image_data -= mean
+                image_data /= variance
+                return image_data
+
+            # self.normalizer = tf.keras.layers.Normalization(axis=-1, mean=mean, variance=variance)
+            self.normalizer = standardize
 
         # Initialize model
         self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)

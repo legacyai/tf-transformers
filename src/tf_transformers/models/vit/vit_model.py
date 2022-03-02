@@ -159,7 +159,7 @@ class ViTModel(ModelWrapper):
     @add_start_docstrings(
         "Bert Model Pretrained with example :",
         ENCODER_PRETRAINED_DOCSTRING.format(
-            "tf_transformers.models.BertModel", "tf_transformers.models.BertEncoder", "bert-base-uncased", code_example
+            "tf_transformers.models.ViTModel", "tf_transformers.models.ViTEncoder", "vit-base-patch16-224", code_example
         ),
     )
     def from_pretrained(

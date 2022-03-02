@@ -37,20 +37,23 @@ from tf_transformers.models.clip.convert import convert_clip_pt as convert_pt
 from tf_transformers.utils.docstring_file_utils import add_start_docstrings
 from tf_transformers.utils.docstring_utils import ENCODER_PRETRAINED_DOCSTRING
 
-MODEL_TO_HF_URL = {}
+MODEL_TO_HF_URL = {
+    "clip-vit-base-patch16": "tftransformers/clip-vit-base-patch16",
+    "clip-vit-base-patch32": "tftransformers/clip-vit-base-patch32",
+    "clip-vit-large-patch14": "tftransformers/clip-vit-large-patch14",
+    "openai/clip-vit-base-patch16": "tftransformers/clip-vit-base-patch16",
+    "openai/clip-vit-base-patch32": "tftransformers/clip-vit-base-patch32",
+    "openai/clip-vit-large-patch14": "tftransformers/clip-vit-large-patch14",
+}
 
 code_example = r'''
 
-        >>> from tf_transformers.models import  ViTFeatureExtractorTF
-        >>> from tf_transformers.models import  ViTModel
+        >>> from tf_transformers.models import  CLIPFeatureExtractorTF
+        >>> from tf_transformers.models import  CLIPModel
         >>> image_path_list = # List fo image paths
-        >>> model_name = 'google/vit-base-patch16-224'
-        >>> feature_extractor = ViTFeatureExtractorTF(img_height=224, img_width=224)
-        >>> model = ViTModel.from_pretrained(model_name, classification_labels=1000)
-        >>> input_features = feature_extractor({'image': tf.constant(image_path_list)})
-        >>> model_outputs = model(input_features)
-        >>> predicted_class = tf.argmax(model_outputs['class_logits'], axis=-1)
-
+        >>> model_name = 'openai/clip-base-patch16'
+        >>> feature_extractor = CLIPFeatureExtractorTF(img_height=224, img_width=224)
+        >>> model = CLIPModel.from_pretrained(model_name)
 
 '''
 
@@ -202,9 +205,9 @@ class CLIPModel(ModelWrapper):
 
     @classmethod
     @add_start_docstrings(
-        "Bert Model Pretrained with example :",
+        "CLIP Model Pretrained with example :",
         ENCODER_PRETRAINED_DOCSTRING.format(
-            "tf_transformers.models.BertModel", "tf_transformers.models.BertEncoder", "bert-base-uncased", code_example
+            "tf_transformers.models.CLIPModel", "tf_transformers.models.CLIPEncoder", "clip-base-patch16", code_example
         ),
     )
     def from_pretrained(

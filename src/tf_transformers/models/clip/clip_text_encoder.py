@@ -56,6 +56,7 @@ class CLIPTextEncoder(LegacyLayer):
         batch_size: bool = None,
         sequence_length: bool = None,
         return_all_layer_outputs: bool = False,
+        use_first_token_as_cls: bool = False,
         **kwargs,
     ):
 
@@ -79,6 +80,7 @@ class CLIPTextEncoder(LegacyLayer):
         self._sequence_length = sequence_length
         self._return_all_layer_outputs = return_all_layer_outputs
         self._projection_dim = config['projection_dim']
+        self._use_first_token_as_cls = use_first_token_as_cls
 
         # self._self_setattr_tracking = False
         super(CLIPTextEncoder, self).__init__(
@@ -291,13 +293,16 @@ class CLIPTextEncoder(LegacyLayer):
         # batch_size x sequence_length x embedding_size
         token_embeddings = self._last_layer_norm(encoder_outputs[-1])
 
-        # We have to create indices, argmax_indices to gather using gather_nd
-        # In CLIP we have to take best pos at the end of upadded input sequence
-        batch_size = tf.shape(input_ids)[0]
-        indices = tf.range(batch_size)
-        last_unpadded_index = tf.cast(tf.argmax(input_ids, axis=1), tf.int32)
-        positions_gathered = tf.transpose(tf.stack([indices, last_unpadded_index]))
-        cls_token_tensor = tf.gather_nd(token_embeddings, positions_gathered)
+        if self._use_first_token_as_cls:
+            cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(token_embeddings)
+        else:
+            # We have to create indices, argmax_indices to gather using gather_nd
+            # In CLIP we have to take best pos at the end of upadded input sequence
+            batch_size = tf.shape(input_ids)[0]
+            indices = tf.range(batch_size)
+            last_unpadded_index = tf.cast(tf.argmax(input_ids, axis=1), tf.int32)
+            positions_gathered = tf.transpose(tf.stack([indices, last_unpadded_index]))
+            cls_token_tensor = tf.gather_nd(token_embeddings, positions_gathered)
 
         # token_logits = tf.matmul(
         #     token_embeddings, tf.cast(self.get_embedding_table(), dtype=tf_utils.get_dtype()), transpose_b=True
@@ -323,7 +328,12 @@ class CLIPTextEncoder(LegacyLayer):
             for per_layer_token_embeddings in encoder_outputs:
                 per_layer_token_embeddings = self._last_layer_norm(per_layer_token_embeddings)
 
-                per_cls_token_tensor = tf.gather_nd(per_layer_token_embeddings, positions_gathered)
+                if self._use_first_token_as_cls:
+                    per_cls_token_tensor = tf.keras.layers.Lambda(lambda x: tf.squeeze(x[:, 0:1, :], axis=1))(
+                        per_layer_token_embeddings
+                    )
+                else:
+                    per_cls_token_tensor = tf.gather_nd(per_layer_token_embeddings, positions_gathered)
                 all_cls_output.append(self.text_projection(per_cls_token_tensor))
 
                 # layer_token_logits = tf.matmul(

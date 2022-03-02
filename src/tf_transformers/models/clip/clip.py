@@ -130,4 +130,39 @@ class CLIPEncoder(LegacyLayer):
         outputs['logits_per_text'] = logits_per_text
         outputs['logits_per_image'] = logits_per_image
 
+        # Iterate over all layers if required
+        all_layer_logits_per_image = []
+        all_layer_logits_per_text = []
+        if 'all_layer_cls_output' in text_outputs and 'all_layer_cls_output' in image_outputs:
+            num_layers = len(text_outputs['all_layer_cls_output'])
+            for i in range(num_layers):
+                # Image Projection
+                image_features_unnormalized = image_outputs['all_layer_cls_output'][i]
+                # Text Projection
+                text_features_unnormalized = text_outputs['all_layer_cls_output'][i]
+
+                # Normalize
+                image_features = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
+                    image_features_unnormalized
+                )
+                text_features = tf.keras.layers.Lambda(lambda x: tf.nn.l2_normalize(x, axis=1))(
+                    text_features_unnormalized
+                )
+
+                # cosine similarity as logits
+                logits_scale = tf.clip_by_value(
+                    self.logits_scale, clip_value_min=tf.math.log(1 / 0.07), clip_value_max=4.6051752
+                )
+
+                logits_scale = tf.math.exp(logits_scale)
+
+                logits_per_text = tf.matmul(text_features, image_features, transpose_b=True) * logits_scale
+                logits_per_image = tf.matmul(image_features, text_features, transpose_b=True) * logits_scale
+
+                all_layer_logits_per_image.append(logits_per_image)
+                all_layer_logits_per_text.append(logits_per_text)
+
+            outputs['all_layer_logits_per_image'] = all_layer_logits_per_image
+            outputs['all_layer_logits_per_text'] = all_layer_logits_per_text
+
         return outputs
