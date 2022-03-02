@@ -119,6 +119,7 @@ def get_tensorboard_writers(model_checkpoint_dir):
 
 def train_and_eval(
     model,
+    trainable_variables,
     optimizer,
     strategy,
     epochs,
@@ -329,20 +330,20 @@ def train_and_eval(
                 # Means we are in GPU fp16 mixed precision
                 if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
                     loss_scaled = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
-                    scaled_gradients = tape.gradient(loss_scaled["loss"], model.trainable_variables)
+                    scaled_gradients = tape.gradient(loss_scaled["loss"], trainable_variables)
                     grads = optimizer.get_unscaled_gradients(scaled_gradients)
                     if clip_norm:
                         # Apply some clipping
                         grads, _ = tf.clip_by_global_norm(grads, clip_norm)
                 else:
-                    grads = tape.gradient(loss["loss"], model.trainable_variables)
+                    grads = tape.gradient(loss["loss"], trainable_variables)
                     if clip_norm:
                         # Apply some clipping
                         grads, _ = tf.clip_by_global_norm(grads, clip_norm)
                 # TODO
                 # Scales down the loss for gradients to be invariant from replicas.
                 # loss = loss / strategy.num_replicas_in_sync
-            optimizer.apply_gradients(zip(grads, model.trainable_variables))
+            optimizer.apply_gradients(zip(grads, trainable_variables))
             # training_loss.update_state(loss * strategy.num_replicas_in_sync)
             return loss
 
@@ -383,8 +384,13 @@ def train_and_eval(
                 steps_covered = (step + 1) * steps_per_call
                 global_step += steps_per_call
                 tepoch.set_description(
-                    "Train: Epoch {}/{} --- Step {}/{} --- total examples {}".format(
-                        epoch, epochs, steps_covered, steps_per_epoch, total_examples_processed
+                    "Train: Epoch {}/{} --- Step {}/{} --- total examples {} , trainable variables {}".format(
+                        epoch,
+                        epochs,
+                        steps_covered,
+                        steps_per_epoch,
+                        total_examples_processed,
+                        len(trainable_variables),
                     )
                 )
                 # Call Train
@@ -561,6 +567,7 @@ class Trainer:
         latest_checkpoint: str = None,
         clip_norm=None,
         wandb=None,
+        trainable_variables_name=None,
     ):
 
         if steps_per_epoch:
@@ -665,9 +672,20 @@ class Trainer:
             training_loss_names, validation_loss_names
         )
 
+        # get trainable variables if provided
+        if trainable_variables_name is None:
+            trainable_variables = model.trainable_variables
+        else:
+            assert isinstance(trainable_variables_name, list)
+            trainable_variables = []
+            for var in model.variables:
+                if var.name in trainable_variables_name:
+                    trainable_variables.append(var)
+
         history = {}
         training_history, validation_history, callback_scores = train_and_eval(
             model,
+            trainable_variables,
             optimizer,
             self.distribution_strategy,
             epochs,
