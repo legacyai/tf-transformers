@@ -14,9 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-from tf_transformers.layers.attention.bart_attention import BartAttention
-from tf_transformers.layers.attention.bert_attention import MultiHeadAttention
-from tf_transformers.layers.attention.bigbird_attention import BigBirdAttention
-from tf_transformers.layers.attention.clip_attention import CLIPMultiHeadAttention
-from tf_transformers.layers.attention.gpt2_attention import GPT2Attention
-from tf_transformers.layers.attention.t5_attention import T5Attention
+from tf_transformers.models.clip.clip import CLIPEncoder
+from tf_transformers.models.clip.clip_image_encoder import CLIPImageEncoder
+from tf_transformers.models.clip.clip_text_encoder import CLIPTextEncoder
+from tf_transformers.models.clip.configuration_clip import (
+    CLIPImageConfig,
+    CLIPTextConfig,
+)
+from tf_transformers.models.clip.clip_feature_extractor import CLIPFeatureExtractorTF
+from tf_transformers.models.clip.clip_model import CLIPModel

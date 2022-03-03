@@ -1,0 +1,29 @@
+name: Patch version
+on: 
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get tag
+      id: vars
+      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: Patch version and commit
+      run: |
+        echo "Tag retrived is ${{ steps.vars.outputs.tag }}"
+        pip install poetry
+        poetry version ${{ steps.vars.outputs.tag }}
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        python patch_version.py ${{ steps.vars.outputs.tag }}
+        git add pyproject.toml
+        git add src/tf_transformers/__init__.py
+        git add tests/test_tf_transformers.py
+        git commit -m "Updated version to ${{ steps.vars.outputs.tag }}"
+        git push origin HEAD:main

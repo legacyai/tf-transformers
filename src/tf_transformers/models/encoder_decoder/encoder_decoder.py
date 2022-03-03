@@ -384,6 +384,7 @@ class EncoderDecoder(LegacyLayer):
                                     sequence_length,
                                     attention_head_size)
 
+
         Returns:
             [dict of tf.Tensor]: Output from the model
 
@@ -393,6 +394,7 @@ class EncoderDecoder(LegacyLayer):
                                             from all layers)
             'all_layer_cls_output'       --> tf.float32 (List of (b x s)
                                             from all layers)
+
 
         """
         encoder_inputs = {

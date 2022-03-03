@@ -25,6 +25,7 @@ def get_activation(identifier):
             "hard_swish": activations.hard_swish,
             "identity": activations.identity,
             "relu": tf.keras.activations.relu,
+            "quick_gelu": activations.quick_gelu,
         }
         identifier = str(identifier).lower()
         if identifier in name_to_fn:

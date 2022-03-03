@@ -41,7 +41,6 @@ MODEL_TO_HF_URL = {
     'vit-base-patch16-224': "tftransformers/vit-base-patch16-224",
     'vit-large-patch32-224-in21k': "tftransformers/vit-large-patch32-224-in21k",
     'vit-base-patch32-224-in21k': "tftransformers/vit-base-patch32-224-in21k",
-
     'google/vit-large-patch32-384': "tftransformers/vit-large-patch32-384",
     'google/vit-base-patch32-384': "tftransformers/vit-base-patch32-384",
     'google/vit-large-patch16-224': "tftransformers/vit-large-patch16-224",
@@ -160,7 +159,7 @@ class ViTModel(ModelWrapper):
     @add_start_docstrings(
         "Bert Model Pretrained with example :",
         ENCODER_PRETRAINED_DOCSTRING.format(
-            "tf_transformers.models.BertModel", "tf_transformers.models.BertEncoder", "bert-base-uncased", code_example
+            "tf_transformers.models.ViTModel", "tf_transformers.models.ViTEncoder", "vit-base-patch16-224", code_example
         ),
     )
     def from_pretrained(

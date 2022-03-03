@@ -15,6 +15,7 @@
 # limitations under the License.
 # ==============================================================================
 import os
+import time
 from typing import Callable, List
 
 import tensorflow as tf
@@ -30,6 +31,29 @@ from tf_transformers.core.performance_utils import (
     set_mixed_precision_policy,
 )
 from tf_transformers.utils import tf_utils
+
+
+# COLORS
+class Color:
+    BLACK = 30
+    RED = 31
+    GREEN = 32
+    YELLOW = 33
+    BLUE = 34
+    MAGENTA = 35
+    CYAN = 36
+    WHITE = 37
+    RESET = 39
+
+
+def flat_callback_scores(callback_scores: List):
+    callback_scores_flatten = []
+    for item in callback_scores:
+        if all(v is None for v in item):
+            continue
+        callback_scores_flatten.append(item)
+
+    return callback_scores_flatten
 
 
 def flat_metric_dict(metric_dict):
@@ -115,21 +139,31 @@ def train_and_eval(
     model_checkpoint_dir,
     model_save_interval_steps,
     max_number_of_models,
+    clip_norm,
+    wandb,
+    ckpt_number,
 ):
     def save_model(checkpoint_manager, epoch_end=False):
         """Save model"""
         if checkpoint_manager is None:
             checkpoint_manager = save_model_checkpoints(
-                model, True, model_checkpoint_dir, max_number_of_models, opt=optimizer, step=tf.Variable(global_step)
+                model,
+                True,
+                model_checkpoint_dir,
+                max_number_of_models,
+                opt=optimizer,
+                step=tf.Variable(global_step, dtype=tf.int64),
             )
         if not epoch_end:
             if model_save_interval_steps:
                 if global_step % model_save_interval_steps == 0:
-                    checkpoint_manager.save()
-                    logging.info("Model saved at step {}".format(global_step))
+                    checkpoint_manager.save(checkpoint_number=epoch)
+                    logging.info(
+                        "Model saved at step {} at {}".format(global_step, checkpoint_manager.latest_checkpoint)
+                    )
         else:
-            checkpoint_manager.save()
-            logging.info("Model saved at epoch {}".format(epoch))
+            checkpoint_manager.save(checkpoint_number=epoch)
+            logging.info("Model saved at epoch {} at {}".format(epoch, checkpoint_manager.latest_checkpoint))
 
     def write_metrics(metric_dict, writer, step):
         """Write metrics here"""
@@ -142,6 +176,25 @@ def train_and_eval(
 
         _write(step)
         writer.flush()
+
+    def write_metrics_to_wandb(metric_dict, wandb_writer, step):
+        """Write metrics here"""
+        # Write if wandb is not None
+        if wandb:
+            wandb_writer.log(metric_dict, step=step)
+
+    def write_validation_metrics_to_wandb(metric_dict, wandb_writer, step):
+        """Write metrics here"""
+        # Write if wandb is not None
+        metric_dict_copy = {}
+        for k, v in metric_dict.items():
+            if k.startswith("val"):
+                metric_dict_copy[k] = v
+            else:
+                metric_dict_copy['val_' + k] = v
+
+        if wandb:
+            wandb_writer.log(metric_dict_copy, step=step)
 
     def compute_loss(batch_labels, model_outputs):
         """Loss computation which takes care of loss reduction based on GLOBAL_BATCH_SIZE"""
@@ -174,10 +227,12 @@ def train_and_eval(
                 # each callback can have separate interval steps
                 callback_scores = []
                 for callback, callback_steps in zip(callbacks, callbacks_interval_steps):
-                    if callback_steps and (global_step % callback_steps == 0):
+                    if callback_steps and global_step != 0 and (global_step % callback_steps == 0):
                         logging.info("Callbacks in progress at step {} . . . .".format(global_step))
+                        current_trainer_kwargs = locals()
+                        trainer_kwargs.update(current_trainer_kwargs)
                         score = callback(trainer_kwargs)
-                        logging.info("Call back score {}".format(score))
+                        logging.info("Callback score {} at step {}".format(score, global_step))
                         callback_scores.append(score)
                     else:
                         callback_scores.append(None)
@@ -188,71 +243,65 @@ def train_and_eval(
                 logging.info("Callbacks in progress at epoch end {} . . . .".format(epoch))
                 callback_scores = []
                 for callback in callbacks:
+                    current_trainer_kwargs = locals()
+                    trainer_kwargs.update(current_trainer_kwargs)
                     score = callback(trainer_kwargs)
                     callback_scores.append(score)
-                    logging.info("Call back score {}".format(score))
+                    logging.info("Callback score {} at epoch {}".format(score, epoch))
                     # Try to write a callback scores (only on epoch end)
                     # If we are returning a dict like {'exact_match': 81} or
-                    # {'rougue-1': 30} etc . . . .
+                    # {'rogue-1': 30} etc . . . .
                     if score and isinstance(score, dict):
+                        # Write to tensorboard
                         write_metrics(score, val_summary_writer, epoch)
+                        # Write to Wandb
+                        write_metrics_to_wandb(score, wandb, epoch)
             return callback_scores
 
-    # Validation
-    def do_validation(validation_dataset_distributed):
-        """Validation step"""
+    # Validation Functions
+    # Infer number of steps for validation data, otherwise
+    # it will run indefinitely inside tf.function
+    validation_steps = 0
+    if validation_dataset_distributed:
+        for _ in validation_dataset_distributed:
+            validation_steps += 1
 
-        @tf.function
-        def _validate_step(dist_inputs):
+    @tf.function
+    def _do_validation(dataset):
+        """The step function for one validation step"""
 
+        def validate_step(dist_inputs):
+            """The computation to run on each device."""
             batch_inputs, batch_labels = dist_inputs
             model_outputs = model(batch_inputs)
             loss = compute_loss_valid(batch_labels, model_outputs)
             return loss
 
-        if validation_dataset_distributed:
-            iterator = iter(validation_dataset_distributed)
+        for dist_inputs in dataset:
+            loss = strategy.run(validate_step, args=(dist_inputs,))
+            # strategy reduce (SUM) is important
+            # If not SUM, final loss might not be a good representative of global batch
+            loss = {
+                name: strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
+                for name, loss_value in loss.items()
+            }
+            for name, loss_value in loss.items():
+                # get loss metric object based on loss names ('loss', 'loss1' etc . . . .)
+                validation_loss_metric = validation_loss_dict_metric[name]
+                validation_loss_metric.update_state(loss_value)
 
-        if not epoch_end:
-            if (
-                validation_dataset_distributed
-                and validation_loss_fn
-                and validation_interval_steps
-                and (global_step % validation_interval_steps == 0)
-            ):
-                print(2 * "\n")
-                logging.info("Validation in progress at step {} . . . .".format(global_step))
-                with tqdm.tqdm(validation_dataset_distributed, unit=" Val batch ") as val_batches:
-                    for _ in val_batches:
-                        dist_inputs = next(iterator)
-                        loss = strategy.run(_validate_step, args=(dist_inputs,))
-                        for name, loss_value in loss.items():
-                            loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
-                            validation_loss = validation_loss_dict_metric[name]
-                            validation_loss.update_state(loss_value)
+    def do_validation(validation_dataset_distributed):
+        """Batch validation"""
+        with tqdm.trange(validation_steps, unit=" Validation batch ", colour='blue') as val_bar:
+            step_counter = 0
+            _do_validation(validation_dataset_distributed)
+            val_bar.set_description(
+                "Epoch {}/{} --- Val Step {}/{} ".format(epoch, epochs, step_counter, validation_steps)
+            )
 
-                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
-                logging.info("Validation result at step {}".format(validation_result))
-                validation_history[global_step] = validation_result
-                write_metrics(validation_result, val_summary_writer, global_step)
-                print("\n")
-        else:
-            if validation_dataset_distributed and validation_loss_fn:
-                logging.info("Validation in progress at epoch end {} . . . .".format(epoch))
-                with tqdm.tqdm(validation_dataset_distributed, unit=" Val batch ") as val_batches:
-                    for _ in val_batches:
-                        dist_inputs = next(iterator)
-                        loss = strategy.run(_validate_step, args=(dist_inputs,))
-                        for name, loss_value in loss.items():
-                            loss_value = strategy.reduce(tf.distribute.ReduceOp.SUM, loss_value, axis=None)
-                            validation_loss = validation_loss_dict_metric[name]
-                            validation_loss.update_state(loss_value)
-
-                validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
-                write_metrics(validation_result, val_summary_writer, global_step)
-                validation_history[global_step] = validation_result
-                logging.info("Validation result at epoch {} is {}".format(epoch, validation_result))
-                print(2 * "\n")
+            validation_result = get_and_reset_metric_from_dict(validation_loss_dict_metric)
+            val_bar.set_postfix(**validation_result)
+        return validation_result
 
     # Train Functions
     @tf.function
@@ -271,8 +320,14 @@ def train_and_eval(
                     loss_scaled = {name: optimizer.get_scaled_loss(loss_value) for name, loss_value in loss.items()}
                     scaled_gradients = tape.gradient(loss_scaled["loss"], model.trainable_variables)
                     grads = optimizer.get_unscaled_gradients(scaled_gradients)
+                    if clip_norm:
+                        # Apply some clipping
+                        grads, _ = tf.clip_by_global_norm(grads, clip_norm)
                 else:
                     grads = tape.gradient(loss["loss"], model.trainable_variables)
+                    if clip_norm:
+                        # Apply some clipping
+                        grads, _ = tf.clip_by_global_norm(grads, clip_norm)
                 # TODO
                 # Scales down the loss for gradients to be invariant from replicas.
                 # loss = loss / strategy.num_replicas_in_sync
@@ -293,7 +348,6 @@ def train_and_eval(
                 training_loss = training_loss_dict_metric[name]
                 training_loss.update_state(loss_value)
             # Get current learning rate
-            # Get current learning rate
             if isinstance(optimizer, tf.keras.mixed_precision.LossScaleOptimizer):
                 current_lr = optimizer._optimizer._decayed_lr(tf.float32)
             else:
@@ -310,9 +364,10 @@ def train_and_eval(
     total_examples_processed = 0
     checkpoint_manager = None  # Define it to be None here . Check save_model.
     STEPS = steps_per_epoch // steps_per_call
-    for epoch in range(1, epochs + 1):
-        # start_epoch_time = time.time()
-        with tqdm.trange(STEPS, unit="batch ") as tepoch:
+    epochs = epochs + ckpt_number
+    for epoch in range(ckpt_number, epochs):
+        # start_epoch_time = time.time() # TODO Check colors
+        with tqdm.trange(STEPS, unit="batch ", colour='green') as tepoch:
             for step in tepoch:
                 steps_covered = (step + 1) * steps_per_call
                 global_step += steps_per_call
@@ -326,7 +381,21 @@ def train_and_eval(
                 total_examples_processed += steps_per_call * GLOBAL_BATCH_SIZE
 
                 # Call Validation
-                do_validation(validation_dataset_distributed)
+                if not epoch_end:
+                    if (
+                        validation_dataset_distributed
+                        and validation_loss_fn
+                        and validation_interval_steps
+                        and (global_step % validation_interval_steps == 0)
+                    ):
+                        # Do validation and get result
+                        validation_result = do_validation(validation_dataset_distributed)
+                        # Add to history
+                        validation_history[global_step] = validation_result
+                        # Write to tensorboard
+                        write_metrics(validation_result, val_summary_writer, global_step)
+                        # Write to Wandb
+                        write_validation_metrics_to_wandb(validation_result, wandb, global_step)
 
                 # Call Callbacks
                 callback_scores = do_callbacks(callbacks)
@@ -334,10 +403,14 @@ def train_and_eval(
                     all_callback_scores.append(callback_scores)
 
                 # Train Metrics
+                # Do training and get result
                 training_result = get_and_reset_metric_from_dict(training_loss_dict_metric)
+                # Add to history
                 training_history[global_step] = training_result
-
+                # Write to tensorboard
                 write_metrics(training_result, train_summary_writer, global_step)
+                # Write to Wandb
+                write_metrics_to_wandb(training_result, wandb, global_step)
                 # training_result["learning_rate"] = learning_rate_holder.result().numpy()
                 # learning_rate_holder.reset_states()
                 tepoch.set_postfix(**training_result)
@@ -349,16 +422,37 @@ def train_and_eval(
         epoch_end = True
         save_model(checkpoint_manager, epoch_end)
         print()
-        do_validation(validation_dataset_distributed)
+        time.sleep(0.1)  # Sleep for 1 second, to make print neater
+
+        validation_result = None
+        if validation_dataset_distributed and validation_loss_fn:
+            # Do validation and get result
+            validation_result = do_validation(validation_dataset_distributed)
+            # Add to history
+            validation_history[global_step] = validation_result
+            # Write to tensorboard
+            write_metrics(validation_result, val_summary_writer, global_step)
+            # Write to Wandb
+            write_validation_metrics_to_wandb(validation_result, wandb, global_step)
+            logging.info(
+                "Validation result at epcoh {} and \
+                global step {} is {}".format(
+                    epoch, global_step, validation_result
+                )
+            )
         print()
+        time.sleep(0.1)  # Sleep for 1 second, to make print neater
         callback_scores = do_callbacks(callbacks)
         if callback_scores:
             all_callback_scores.append(callback_scores)
         epoch_end = False
+        print()
+        time.sleep(0.1)  # Sleep for 1 second, to make print neater
 
     # Flatten the results
     training_history = flat_metric_dict(training_history)
     validation_history = flat_metric_dict(validation_history)
+    all_callback_scores = flat_callback_scores(all_callback_scores)
     return training_history, validation_history, all_callback_scores
 
 
@@ -450,10 +544,12 @@ class Trainer:
         enable_xla: bool = False,
         callbacks: List = None,
         callbacks_interval_steps: List = None,
-        max_number_of_models: int = 10,
+        max_number_of_models: int = 100,
         model_save_interval_steps: bool = None,
         repeat_dataset: bool = True,
         latest_checkpoint: str = None,
+        clip_norm=None,
+        wandb=None,
     ):
 
         if steps_per_epoch:
@@ -470,7 +566,8 @@ class Trainer:
             keras_utils.set_session_config(enable_xla=enable_xla)
 
         # This should be outisde the distribution scope (important)
-        tf.keras.backend.clear_session()
+        # TODO: From 2.5 onwards this has to be disabled
+        # tf.keras.backend.clear_session()
 
         # Log info
         logging.info("Policy: ----> {}".format(keras_utils.get_policy_name()))
@@ -514,15 +611,24 @@ class Trainer:
                 checkpoint_dir=model_checkpoint_dir,
                 checkpoint_path=latest_checkpoint,
                 opt=optimizer,
-                step=tf.Variable(0),
+                step=tf.Variable(0, dtype=tf.int64),
             )
 
         # If checkpoint is not None, means its succesful
         global_step = 0
+        ckpt_number = 1
         if ckpt:
             global_step = ckpt.step.numpy()
             optimizer = ckpt.opt
             logging.info("Succesfully restored existing checkpoints from step {}".format(global_step))
+            # Extract number from latest checkpoint
+            if latest_checkpoint:
+                ckpt_number = int(latest_checkpoint.split("/")[-1].replace("ckpt-", "").strip())
+                ckpt_number += 1
+            else:
+                latest_checkpoint = tf.train.latest_checkpoint(model_checkpoint_dir)
+                ckpt_number = int(latest_checkpoint.split("/")[-1].replace("ckpt-", "").strip())
+                ckpt_number += 1
 
         # Distribute dataset
         if not repeat_dataset:
@@ -538,6 +644,7 @@ class Trainer:
             validation_dataset_distributed = self.distribution_strategy.experimental_distribute_dataset(
                 validation_dataset
             )
+
         # Make train dataset iterator
         train_dataset_distributed = iter(train_dataset_distributed)
 
@@ -570,9 +677,12 @@ class Trainer:
             model_checkpoint_dir,
             model_save_interval_steps,
             max_number_of_models,
+            clip_norm,
+            wandb,
+            ckpt_number,
         )
         history['training_history'] = training_history
-        history['validation_hsitory'] = validation_history
+        history['validation_history'] = validation_history
         history['callbacks'] = callback_scores
 
         # Save json

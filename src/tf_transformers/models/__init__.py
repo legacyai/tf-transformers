@@ -27,6 +27,15 @@ from tf_transformers.models.bigbird import (
     BigBirdRobertaTokenizerLayer,
     BigBirdRobertaTokenizerTFText,
 )
+from tf_transformers.models.clip import (
+    CLIPEncoder,
+    CLIPFeatureExtractorTF,
+    CLIPImageConfig,
+    CLIPImageEncoder,
+    CLIPModel,
+    CLIPTextConfig,
+    CLIPTextEncoder,
+)
 from tf_transformers.models.encoder_decoder import EncoderDecoder
 from tf_transformers.models.gpt2 import GPT2Config, GPT2Encoder, GPT2Model
 from tf_transformers.models.mt5 import MT5Config, MT5Encoder, MT5Model

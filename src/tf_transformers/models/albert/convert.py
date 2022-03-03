@@ -73,6 +73,10 @@ def convert_albert_pt(model, config, model_name):
         # LegacyLayer
         local_config = model._config_dict
     except Exception as e:
+        import traceback
+
+        print(traceback.format_exc())
+        logging.error(e)
         # LegacyModel
         local_config = model.model_config
 
@@ -335,6 +339,10 @@ def convert_albert_tf(model, config, model_name):
         local_config = model._config_dict
     except Exception as e:
         # LegacyModel
+        import traceback
+
+        print(traceback.format_exc())
+        logging.error(e)
         local_config = model.model_config
 
     if local_config['use_dropout']:

@@ -9,6 +9,7 @@ def patch(required_version):
     Write the new version to init and test file
     """
 
+    required_version = required_version.replace('v', '')  # Replace v1.0.0 to 1.0.0
     # Edit src
     with open('src/tf_transformers/__init__.py', 'w') as f:
         f.write('__version__ = "{}"\n'.format(required_version))

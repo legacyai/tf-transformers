@@ -22,6 +22,10 @@ def convert_t5_pt(model, config, model_name):
         local_config = model._config_dict['decoder']
     except Exception as e:
         # LegacyModel
+        import traceback
+
+        print(traceback.format_exc())
+        logging.error(e)
         local_config = model.model_config['decoder']
 
     if local_config['use_dropout']:
@@ -252,6 +256,10 @@ def convert_t5_tf(model, config, model_name):
         local_config = model._config_dict['decoder']
     except Exception as e:
         # LegacyModel
+        import traceback
+
+        print(traceback.format_exc())
+        logging.error(e)
         local_config = model.model_config['decoder']
 
     if local_config['use_dropout']:

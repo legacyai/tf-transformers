@@ -16,6 +16,7 @@
 # ==============================================================================
 from tf_transformers.layers.transformer.bart_transformer import TransformerBART
 from tf_transformers.layers.transformer.bert_transformer import TransformerBERT
+from tf_transformers.layers.transformer.clip_transformer import TransformerCLIP
 from tf_transformers.layers.transformer.gpt2_transformer import TransformerGPT2
 from tf_transformers.layers.transformer.mt5_transformer import TransformermT5
 from tf_transformers.layers.transformer.t5_transformer import TransformerT5

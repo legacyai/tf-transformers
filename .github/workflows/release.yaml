@@ -1,28 +1,48 @@
 name: Release
-on: 
-  release:
-    types: [published]
+on:
+  workflow_run:
+    workflows: [CI-CD]
+    types:
+      - completed
+  push:
+    branches: [ main ]
+    tags: '*'
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    # # Only run this job if new work is pushed to "main"
+    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Step 1. Set up operating system
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2
-    - name: Get tag
-      id: vars
-      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+    # Step 2. Set up Python 3.9
     - uses: actions/setup-python@v2
       with:
-        python-version: '3.9'
-    - name: Patch version and commit
+        python-version: 3.9
+    # Step 3. Check-out repository so we can access its contents
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    # Step 5. Publish to TestPyPI
+    - uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.TEST_PYPI_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
+        skip_existing: true
+    # Step 6. Test install from TestPyPI
+    - name: Test install from TestPyPI
       run: |
-        echo "Tag retrived is ${{ steps.vars.outputs.tag }}"
-        pip install poetry
-        poetry version ${{ steps.vars.outputs.tag }}
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        python patch_version.py ${{ steps.vars.outputs.tag }}
-        git add src/tf_transformers/__init__.py
-        git add tests/test_tf_transformers.py
-        git commit -m "Updated version to ${{ steps.vars.outputs.tag }}"
-        git push origin HEAD:main
+          pip install \
+          --index-url https://test.pypi.org/simple/ \
+          --extra-index-url https://pypi.org/simple \
+          tf-transformers
+    # Step 7. Publish to PyPI
+    - uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_TOKEN }}
+        skip_existing: true

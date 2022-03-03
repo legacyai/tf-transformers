@@ -1,8 +1,16 @@
 import tensorflow as tf
 import tensorflow_text as tf_text
 
+
 def dynamic_masking_from_features(
-    max_seq_len: int, max_predictions_per_batch: int, vocab_size: int, cls_id:int, sep_id: int, unk_id: int, pad_id, mask_id: int
+    max_seq_len: int,
+    max_predictions_per_batch: int,
+    vocab_size: int,
+    cls_id: int,
+    sep_id: int,
+    unk_id: int,
+    pad_id,
+    mask_id: int,
 ):
     """Dynamic Masking from input_ids (saved as tfrecord)
 
@@ -20,7 +28,7 @@ def dynamic_masking_from_features(
         Function which return Tuple (inputs, labels)
     """
     # Truncate inputs to a maximum length.
-    trimmer = tf_text.RoundRobinTrimmer(max_seq_length=max_seq_len-2)
+    trimmer = tf_text.RoundRobinTrimmer(max_seq_length=max_seq_len - 2)
 
     # Random Selector
     random_selector = tf_text.RandomItemSelector(
@@ -82,7 +90,9 @@ def dynamic_masking_from_features(
 def dynamic_prefix_lm_from_features(max_seq_len, cls_id, sep_id):
     """Prefix Causal LM"""
     import warnings
+
     warnings.warn("This function `dynamic_prefix_lm_from_features` will be deprecated soon.")
+
     def dynamic_map_prefix(item):
         input_ids = item['input_ids']
         input_ids = input_ids[: max_seq_len - 1]  # we need -2 for cls and sep, but in causal LM we shift one pos
