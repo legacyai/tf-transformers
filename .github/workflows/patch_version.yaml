@@ -1,5 +1,5 @@
 name: Patch version
-on: 
+on:
   release:
     types: [published]
 
