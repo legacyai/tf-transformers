@@ -1,4 +1,4 @@
-name: ci-cd
+name: CI-CD
 on:
   push:
     branches:
@@ -27,7 +27,7 @@ jobs:
         poetry install
     # Step 6. Run flake8 for tftransformers
     - name: Run flake8
-      run: poetry run flake8
+      run: poetry run flake8 src/
     # Step 5. Run tests for tftransformers
     - name: Test with pytest
       run: poetry run pytest tests/test_tf_transformers.py --cov-report=xml --cov=tests
