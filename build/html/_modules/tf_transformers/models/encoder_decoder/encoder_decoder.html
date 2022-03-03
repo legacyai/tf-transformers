@@ -19,6 +19,9 @@
         <script src="../../../../_static/doctools.js"></script>
         <script src="../../../../_static/clipboard.min.js"></script>
         <script src="../../../../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
         <script src="../../../../_static/togglebutton.js"></script>
         <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -495,6 +498,7 @@
 <span class="sd">                                    sequence_length,</span>
 <span class="sd">                                    attention_head_size)</span>
 
+
 <span class="sd">        Returns:</span>
 <span class="sd">            [dict of tf.Tensor]: Output from the model</span>
 
@@ -504,6 +508,7 @@
 <span class="sd">                                            from all layers)</span>
 <span class="sd">            &#39;all_layer_cls_output&#39;       --&gt; tf.float32 (List of (b x s)</span>
 <span class="sd">                                            from all layers)</span>
+
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">encoder_inputs</span> <span class="o">=</span> <span class="p">{</span>

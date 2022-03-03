@@ -19,6 +19,9 @@
         <script src="../../../../_static/doctools.js"></script>
         <script src="../../../../_static/clipboard.min.js"></script>
         <script src="../../../../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
         <script src="../../../../_static/togglebutton.js"></script>
         <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -226,7 +229,7 @@
         <span class="n">position_embedding_type</span><span class="o">=</span><span class="s2">&quot;relative&quot;</span><span class="p">,</span>
         <span class="n">bidirectional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">positional_buckets</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-        <span class="n">decoder_start_token_id</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">decoder_start_token_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">vocab_size</span><span class="o">=</span><span class="n">vocab_size</span><span class="p">,</span>
@@ -246,7 +249,7 @@
             <span class="n">position_embedding_type</span><span class="o">=</span><span class="n">position_embedding_type</span><span class="p">,</span>
             <span class="n">bidirectional</span><span class="o">=</span><span class="n">bidirectional</span><span class="p">,</span>
             <span class="n">positional_buckets</span><span class="o">=</span><span class="n">positional_buckets</span><span class="p">,</span>
-            <span class="n">decoder_start_token_id</span><span class="o">=</span><span class="n">decoder_start_token_id</span>
+            <span class="n">decoder_start_token_id</span><span class="o">=</span><span class="n">decoder_start_token_id</span><span class="p">,</span>
         <span class="p">)</span></div>
 </pre></div>
 

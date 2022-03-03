@@ -19,6 +19,9 @@
         <script src="../../../../_static/doctools.js"></script>
         <script src="../../../../_static/clipboard.min.js"></script>
         <script src="../../../../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
         <script src="../../../../_static/togglebutton.js"></script>
         <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -152,7 +155,6 @@
     <span class="s1">&#39;vit-base-patch16-224&#39;</span><span class="p">:</span> <span class="s2">&quot;tftransformers/vit-base-patch16-224&quot;</span><span class="p">,</span>
     <span class="s1">&#39;vit-large-patch32-224-in21k&#39;</span><span class="p">:</span> <span class="s2">&quot;tftransformers/vit-large-patch32-224-in21k&quot;</span><span class="p">,</span>
     <span class="s1">&#39;vit-base-patch32-224-in21k&#39;</span><span class="p">:</span> <span class="s2">&quot;tftransformers/vit-base-patch32-224-in21k&quot;</span><span class="p">,</span>
-
     <span class="s1">&#39;google/vit-large-patch32-384&#39;</span><span class="p">:</span> <span class="s2">&quot;tftransformers/vit-large-patch32-384&quot;</span><span class="p">,</span>
     <span class="s1">&#39;google/vit-base-patch32-384&#39;</span><span class="p">:</span> <span class="s2">&quot;tftransformers/vit-base-patch32-384&quot;</span><span class="p">,</span>
     <span class="s1">&#39;google/vit-large-patch16-224&#39;</span><span class="p">:</span> <span class="s2">&quot;tftransformers/vit-large-patch16-224&quot;</span><span class="p">,</span>
@@ -271,7 +273,7 @@
     <span class="nd">@add_start_docstrings</span><span class="p">(</span>
         <span class="s2">&quot;Bert Model Pretrained with example :&quot;</span><span class="p">,</span>
         <span class="n">ENCODER_PRETRAINED_DOCSTRING</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="s2">&quot;tf_transformers.models.BertModel&quot;</span><span class="p">,</span> <span class="s2">&quot;tf_transformers.models.BertEncoder&quot;</span><span class="p">,</span> <span class="s2">&quot;bert-base-uncased&quot;</span><span class="p">,</span> <span class="n">code_example</span>
+            <span class="s2">&quot;tf_transformers.models.ViTModel&quot;</span><span class="p">,</span> <span class="s2">&quot;tf_transformers.models.ViTEncoder&quot;</span><span class="p">,</span> <span class="s2">&quot;vit-base-patch16-224&quot;</span><span class="p">,</span> <span class="n">code_example</span>
         <span class="p">),</span>
     <span class="p">)</span>
     <span class="k">def</span> <span class="nf">from_pretrained</span><span class="p">(</span>

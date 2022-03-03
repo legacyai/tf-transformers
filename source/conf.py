@@ -73,7 +73,8 @@ extensions = [
 
 suppress_warnings = [
     'ref.citation',  # Many duplicated citations in numpy/scipy docstrings.
-    'ref.footnote',  # Many unreferenced footnotes in numpy/scipy docstrings
+    'ref.footnote',  # Many unreferenced footnotes in numpy/scipy docstrings,
+    "myst.header",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

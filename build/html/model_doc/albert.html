@@ -2,13 +2,19 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  <meta property="og:title" content="ALBERT" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="model_doc/albert.html" />
-  <meta property="og:description" content="Overview: The ALBERT model was proposed in ALBERT: A Lite BERT for Self-supervised Learning of Language Representations by Zhenzhong Lan, Mingda Chen, Sebast..." />
-  <meta property="og:image" content="png location" />
-  <meta property="og:image:alt" content="ALBERT" />
-  <meta name="twitter:image" content="png location">
+<meta property="og:title" content="ALBERT" />
+  
+<meta property="og:type" content="website" />
+  
+<meta property="og:url" content="model_doc/albert.html" />
+  
+<meta property="og:description" content="Overview: The ALBERT model was proposed in ALBERT: A Lite BERT for Self-supervised Learning of Language Representations by Zhenzhong Lan, Mingda Chen, Sebast..." />
+  
+<meta property="og:image" content="png location" />
+  
+<meta property="og:image:alt" content="ALBERT" />
+  
+<meta name="twitter:image" content="png location">
 <meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ALBERT &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
@@ -27,6 +33,9 @@
         <script src="../_static/doctools.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
         <script src="../_static/togglebutton.js"></script>
         <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="../_static/js/theme.js"></script>
@@ -344,9 +353,9 @@ the tensors in the first argument of the model call function: <code class="xref 
 <p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">prefix</span></code>: Casual LM masking but bidirectional to model inputs).</p>
 </p></li>
 <li><p><strong>name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Model name.</p></li>
-<li><p><strong>use_dropout</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – If True only dropout will be enabled.</p></li>
-<li><p><strong>is_training</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – This is used to mainly switch to auto regressive tasks.</p></li>
-<li><p><strong>use_decoder</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – If true we will use <a class="reference internal" href="#tf_transformers.models.AlbertEncoder.call_decoder" title="tf_transformers.models.AlbertEncoder.call_decoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder()</span></code></a> while <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True</span></code>.</p></li>
+<li><p><strong>use_dropout</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – If True only dropout will be enabled.</p></li>
+<li><p><strong>is_training</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – This is used to mainly switch to auto regressive tasks.</p></li>
+<li><p><strong>use_decoder</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – If true we will use <a class="reference internal" href="#tf_transformers.models.AlbertEncoder.call_decoder" title="tf_transformers.models.AlbertEncoder.call_decoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder()</span></code></a> while <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True</span></code>.</p></li>
 <li><p><strong>batch_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>) – Batch size.</p></li>
 <li><p><strong>sequence_length</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>) – If <code class="xref py py-obj docutils literal notranslate"><span class="pre">position_embedding_type='absolute'</span></code>, sequence length should be with in
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">tf_transformers.models.albert.AlbertConfig.max_position_embeddings</span></code> limit.</p></li>
