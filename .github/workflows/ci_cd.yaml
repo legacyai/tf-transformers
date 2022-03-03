@@ -25,10 +25,13 @@ jobs:
       run: |
         pip install poetry==1.1.12
         poetry install
-    # Step 6. Run tests for pycounts
+    # Step 6. Run flake8 for tftransformers
+    - name: Run flake8
+      run: poetry run flake8
+    # Step 5. Run tests for tftransformers
     - name: Test with pytest
       run: poetry run pytest tests/test_tf_transformers.py --cov-report=xml --cov=tests
-    # Step 7. Use Codecov to track coverage
+    # Step 6. Use Codecov to track coverage
     - uses: codecov/codecov-action@v2
       with:
         file: ./coverage.xml    # coverage report

@@ -187,7 +187,7 @@ CALL_ENCODER_DOCSTRING_IMAGE = r"""
             :obj:`"all_layer_cls_output": tf.float32 List[(batch_size x sequence_length)]`)
 
         """
-        
+
 CALL_ENCODER_DOCSTRING_CLIP = r"""
         An Encoder in general accepts :obj:`input_ids` and optional (:obj:`input_mask` and :obj:`input_type_ids`)
 
