@@ -224,7 +224,7 @@ CALL_ENCODER_DOCSTRING_CLIP = r"""
 
             (:obj:`"image_cls_output": tf.float32 (batch_size x sequence_length)`,
             :obj:`"image_features": tf.float32 (batch_size x sequence_length)`,
-            :obj:`"text_cls_output": tf.float32 (batch_size x sequence_length)`,       
+            :obj:`"text_cls_output": tf.float32 (batch_size x sequence_length),
             :obj:`"text_features": tf.float32 (batch_size x sequence_length)`,
             :obj:`"text_token_embeddings": tf.float32 (batch_size x sequence_length x embedding_size)`
             )
