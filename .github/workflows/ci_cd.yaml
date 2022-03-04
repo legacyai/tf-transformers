@@ -28,7 +28,7 @@ jobs:
     # Step 6. Run flake8 for tftransformers
     - name: Run flake8
       run: |
-        poetry install flake8
+        poetry add flake8
         poetry run flake8 src/
     # Step 5. Run tests for tftransformers
     - name: Test with pytest
