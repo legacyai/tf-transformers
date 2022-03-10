@@ -35,7 +35,9 @@ class CLIPEncoder(LegacyLayer):
         Returns:
             LegacyModel/LegacyLayer .
         """
-        super().__init__(name='tftransformers/clip', is_training=is_training, use_dropout=use_dropout, **kwargs)
+        super(CLIPEncoder, self).__init__(
+            name='tftransformers/clip', is_training=is_training, use_dropout=use_dropout, **kwargs
+        )
 
         assert isinstance(image_encoder, LegacyLayer)
         assert isinstance(text_encoder, LegacyLayer)
