@@ -16,9 +16,10 @@ def add_new_files_to_jupytext():
         if notebook_name not in all_md:
             notebook_list.append(notebook_name + '.ipynb')
 
+    subprocess.run(["jupytext --help"], shell=True)
     if notebook_list != []:
         for notebook in notebook_list:
-            subprocess.run(["jupytext --set-formats ipynb,md:myst", notebook])
+            subprocess.run(["jupytext --set-formats ipynb,md:myst {}".format(notebook)], shell=True)
 
 
 def move_to_docs():
@@ -29,5 +30,5 @@ def move_to_docs():
 
 
 if __name__ == '__main__':
-    add_new_files_to_jupytext() # Convert new notebooks to md using jupytext
-    move_to_docs # Move new tuorials to docs
+    add_new_files_to_jupytext()  # Convert new notebooks to md using jupytext
+    move_to_docs  # Move new tuorials to docs

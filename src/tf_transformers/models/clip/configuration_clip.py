@@ -218,23 +218,18 @@ class CLIPTextConfig(TransformerConfig):
     Examples::
 
         >>> from tf_transformers.models import CLIPImageConfig, CLIPImageEncoder
-        >>> # Initializing an 'google/vit-base-patch16-224' style configuration
+        >>> # Initializing an 'openai/clip-vit-base-patch32' style configuration
         >>> configuration = CLIPImageConfig()
 
-        >>> # Initializing an ViT different style configuration
-        >>> configuration_new = CLIPImageConfig(
-        ...      embedding_size=768,
-        ...      num_attention_heads=12,
-        ...      intermediate_size=3072,
-        ...  )
-
+        >>> vision_config = configuration['vision_config']
+        >>> text_config   = configuration['text_config]
         >>> # Initializing a model from the original configuration
-        >>> model = CLIPImageEncoder.from_config(configuration)
-
-        >>> # Accessing the model configuration
+        >>> vision_encoder = CLIPImageEncoder.from_config(vision_config)
+        >>> text_encoder = CLIPTextEncoder.from_config(text_config)
+        >>> model = CLIPEncoder(vision_encoder, text_encoder, is_training=False, use_dropout=False)
         >>> configuration = model._config_dict # This has more details than original configuration
 
-        >>> # To get a config
+        >>> # To get a model config
         >>> model_name = 'openai/clip-vit-base-patch32'
         >>> config = CLIPImage.get_config(model_name)
     """

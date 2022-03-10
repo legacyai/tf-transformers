@@ -50,10 +50,15 @@ code_example = r'''
 
         >>> from tf_transformers.models import  CLIPFeatureExtractorTF
         >>> from tf_transformers.models import  CLIPModel
-        >>> image_path_list = # List fo image paths
+        >>> image_path_list = tf.constant(['image1.jpg;, 'image2.jpg'])
         >>> model_name = 'openai/clip-base-patch16'
         >>> feature_extractor = CLIPFeatureExtractorTF(img_height=224, img_width=224)
+        >>> image_inputs = feature_extractor({'image': image_path_list})
+        >>> text_inputs = clip.tokenize(text) # batch_size x sequence_length
+                                            # use external clip tokenizer
+        >>> inputs = {'input_pixels': image_inputs, 'input_ids': text_inputs}
         >>> model = CLIPModel.from_pretrained(model_name)
+        >>> model_outputs = model(inputs)
 
 '''
 
