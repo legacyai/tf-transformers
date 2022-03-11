@@ -7,11 +7,12 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.13.5
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
+  language: python
   name: python3
 ---
 
-```{code-cell}
+```{code-cell} ipython3
 :id: jbxNfeNfhrIt
 
 
@@ -36,7 +37,7 @@ tokenizer from tf-transformers.
 
 If you're new to working with the C4 dataset, please see [C4](https://www.tensorflow.org/datasets/catalog/c4) for more details.
 
-```{code-cell}
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -56,7 +57,7 @@ outputId: 8a2dcfd7-1b69-4182-a24f-f533fb9c41b5
 !pip install datasets
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -82,9 +83,9 @@ from tf_transformers.text.lm_tasks import mlm_fn
 from tf_transformers.losses.loss_wrapper import get_lm_loss
 ```
 
-### Trainer has to be initialized before everything (sometimes).
+### Trainer has to be initialized before everything only in TPU (sometimes).
 
-```{code-cell}
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -100,7 +101,7 @@ trainer = Trainer(distribution_strategy='tpu', num_gpus=0, tpu_address='colab')
 
 Our Trainer expects ```model```, ```optimizer``` and ```loss``` to be a function.
 
-```{code-cell}
+```{code-cell} ipython3
 :id: JJ9KB3oCkAVP
 
 # Load Model
@@ -147,7 +148,7 @@ def get_trainer(distribution_strategy, num_gpus=0, tpu_address=None):
 We will make use of ```Tensorflow Text``` based tokenizer to do ```on-the-fly``` preprocessing, without having any
 overhead of pre prepapre the data in the form of ```pickle```, ```numpy``` or ```tfrecords```.
 
-```{code-cell}
+```{code-cell} ipython3
 :id: DPfht1IOklYA
 
 # Load dataset
@@ -187,7 +188,7 @@ def load_dataset(dataset, tokenizer_layer, max_seq_len, max_predictions_per_seq,
 2. Prepare ```train dataset```
 3. Load ```model```, ```optimizer```, ```loss``` and ```trainer```.
 
-```{code-cell}
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -239,7 +240,7 @@ loss_fn = get_lm_loss(loss_type=None)
 
 ### Wandb configuration
 
-```{code-cell}
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -252,13 +253,15 @@ display_name = "mlm_tpu"
 wandb.init(project=project, name=display_name)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :id: LKZugOHYUmC5
 
 
 ```
 
-```{code-cell}
+### Train :-)
+
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -282,7 +285,7 @@ history = trainer.run(
 
 ### Load the Model from checkpoint
 
-```{code-cell}
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -295,7 +298,7 @@ model = model_fn()
 model.load_checkpoint(model_checkpoint_dir)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :id: H8KYSFqqQcHV
 
 
@@ -308,7 +311,7 @@ model.load_checkpoint(model_checkpoint_dir)
 1. We can assess model performance by checking how it predicts masked word on sample sentences.
 2. As we see the following result, its clear that model starts learning.
 
-```{code-cell}
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -350,7 +353,7 @@ for i, logits in enumerate(outputs_tf['token_logits']):
     print()
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :id: 80Y0ipAP4K5k
 
 
