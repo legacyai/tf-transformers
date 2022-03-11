@@ -52,7 +52,6 @@ from tf_transformers.models.tasks import (
     MaskedLMModel,
     Similarity_Model,
     Span_Selection_Model,
-    Token_Classification_Model,
 )
 from tf_transformers.models.vit import (
     ViTConfig,
