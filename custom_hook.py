@@ -23,7 +23,7 @@ def add_new_files_to_jupytext():
 
 def move_to_docs():
     """Move tutorals to docs"""
-    print("Copying tutorials to docs")
+    print("Copying the tutorials to docs")
     import shutil
 
     shutil.copytree("tutorials", "docs/source/tutorials", dirs_exist_ok=True)
