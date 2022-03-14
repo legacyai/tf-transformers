@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+<meta property="og:title" content="Classify text (MRPC) with Albert" />
+  
+<meta property="og:type" content="website" />
+  
+<meta property="og:url" content="tutorials/2_text_classification_imdb_albert.html" />
+  
+<meta property="og:description" content="This tutorial contains complete code to fine-tune Albert to perform binary classification on (MRPC) dataset. In addition to training a model, you will learn ..." />
+  
+<meta property="og:image" content="png location" />
+  
+<meta property="og:image:alt" content="Classify text (MRPC) with Albert" />
+  
+<meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classify text (MRPC) with Albert &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Train (Masked Language Model) with tf-transformers in TPU" href="3_masked_lm_tpu.html" />
+    <link rel="prev" title="Writing and Reading TFRecords" href="1_read_write_tfrecords.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Classify text (MRPC) with Albert</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#load-model-optimizer-trainer">Load Model, Optimizer , Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-data-for-training">Prepare Data for Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-dataset">Prepare Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wandb-configuration">Wandb configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accuracy-callback">Accuracy Callback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#train">Train :-)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualize-tensorboard">Visualize Tensorboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-and-serialize-model">Save and Serialize Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-serialization-production">Model Serialization (Production)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-serialization-include-pre-processing-with-models">Advanced Serialization (Include pre-processing with models)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-the-model-check-accuracy">Load the model + Check Accuracy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="3_masked_lm_tpu.html">Train (Masked Language Model) with tf-transformers in TPU</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Classify text (MRPC) with Albert</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/2_text_classification_imdb_albert.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="tex2jax_ignore mathjax_ignore section" id="classify-text-mrpc-with-albert">
+<h1>Classify text (MRPC) with Albert<a class="headerlink" href="#classify-text-mrpc-with-albert" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial contains complete code to fine-tune Albert to perform binary classification on (MRPC) dataset.
+In addition to training a model, you will learn how to preprocess text into an appropriate format.</p>
+<p>In this notebook, you will:</p>
+<ul class="simple">
+<li><p>Load the MRPC dataset from HuggingFace</p></li>
+<li><p>Load Albert Model using tf-transformers</p></li>
+<li><p>Build train and validation dataset (on the fly) feature preparation using
+tokenizer from tf-transformers.</p></li>
+<li><p>Build your own model by combining Albert with a classifier</p></li>
+<li><p>Train your own model, fine-tuning Albert as part of that</p></li>
+<li><p>Save your model and use it to classify sentences</p></li>
+<li><p>Use the end-to-end (preprocessing + inference) in production setup</p></li>
+</ul>
+<p>If you’re new to working with the MNLI dataset, please see <a class="reference external" href="https://huggingface.co/datasets/glue/viewer/mrpc">MRPC</a> for more details.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+
+<span class="o">!</span>pip install sentencepiece
+
+<span class="o">!</span>pip install tensorflow-text
+
+<span class="o">!</span>pip install transformers
+
+<span class="o">!</span>pip install wandb
+
+<span class="o">!</span>pip install datasets
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TF_CPP_MIN_LOG_LEVEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span> <span class="c1"># Supper TF warnings</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow_text</span> <span class="k">as</span> <span class="nn">tf_text</span>
+<span class="kn">import</span> <span class="nn">datasets</span>
+<span class="kn">import</span> <span class="nn">wandb</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tensorflow version&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tensorflow text version&quot;</span><span class="p">,</span> <span class="n">tf_text</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Devices&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">list_physical_devices</span><span class="p">())</span>
+
+<span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">AlbertModel</span><span class="p">,</span> <span class="n">Classification_Model</span><span class="p">,</span> <span class="n">AlbertTokenizerTFText</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">Trainer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.optimization</span> <span class="kn">import</span> <span class="n">create_optimizer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.losses.loss_wrapper</span> <span class="kn">import</span> <span class="n">get_1d_classification_loss</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tensorflow version 2.7.0
+Tensorflow text version 2.7.3
+Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;CPU&#39;), PhysicalDevice(name=&#39;/physical_device:GPU:0&#39;, device_type=&#39;GPU&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="load-model-optimizer-trainer">
+<h2>Load Model, Optimizer , Trainer<a class="headerlink" href="#load-model-optimizer-trainer" title="Permalink to this headline">¶</a></h2>
+<p>Our Trainer expects <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> and <code class="docutils literal notranslate"><span class="pre">loss</span></code> to be a function.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Model</span>
+<span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">model_fn</span><span class="p">():</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">AlbertModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Classification_Model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="n">use_dropout</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">model_fn</span>
+
+<span class="c1"># Load Optimizer</span>
+<span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
+    <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">examples</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">num_train_steps</span> <span class="o">=</span> <span class="n">steps_per_epoch</span> <span class="o">*</span> <span class="n">epochs</span>
+    <span class="n">warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">num_train_steps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">optimizer_fn</span><span class="p">():</span>
+        <span class="n">optimizer</span><span class="p">,</span> <span class="n">learning_rate_fn</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">num_train_steps</span><span class="p">,</span> <span class="n">warmup_steps</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="n">use_constant_lr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">optimizer</span>
+
+    <span class="k">return</span> <span class="n">optimizer_fn</span>
+
+<span class="c1"># Load trainer</span>
+<span class="k">def</span> <span class="nf">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="n">num_gpus</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="n">tpu_address</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">trainer</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="prepare-data-for-training">
+<h2>Prepare Data for Training<a class="headerlink" href="#prepare-data-for-training" title="Permalink to this headline">¶</a></h2>
+<p>We will make use of <code class="docutils literal notranslate"><span class="pre">Tensorflow</span> <span class="pre">Text</span></code> based tokenizer to do <code class="docutils literal notranslate"><span class="pre">on-the-fly</span></code> preprocessing, without having any
+overhead of pre prepapre the data in the form of <code class="docutils literal notranslate"><span class="pre">pickle</span></code>, <code class="docutils literal notranslate"><span class="pre">numpy</span></code> or <code class="docutils literal notranslate"><span class="pre">tfrecords</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load dataset</span>
+<span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">      dataset; HuggingFace dataset</span>
+<span class="sd">      tokenizer_layer: tf-transformers tokenizer</span>
+<span class="sd">      max_seq_len: int (maximum sequence length of text)</span>
+<span class="sd">      batch_size: int (batch_size)</span>
+<span class="sd">      drop_remainder: bool (to drop remaining batch_size, when its uneven)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+        <span class="n">input_ids</span> <span class="o">=</span> <span class="n">tokenizer_layer</span><span class="p">({</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;sentence1&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;sentence2&#39;</span><span class="p">]})</span>
+        <span class="c1"># Truncate to max_seq_len-2 (2 is for CLS and SEP)</span>
+        <span class="n">input_ids</span> <span class="o">=</span> <span class="n">input_ids</span><span class="p">[:,</span> <span class="p">:</span><span class="n">max_seq_len</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="c1"># Add CLS and SEP</span>
+        <span class="n">input_ids</span> <span class="o">=</span> <span class="n">tf_text</span><span class="o">.</span><span class="n">combine_segments</span><span class="p">(</span>
+                      <span class="p">[</span><span class="n">input_ids</span><span class="p">],</span> <span class="n">start_of_sequence_id</span><span class="o">=</span><span class="n">tokenizer_layer</span><span class="o">.</span><span class="n">cls_token_id</span><span class="p">,</span> <span class="n">end_of_segment_id</span><span class="o">=</span><span class="n">tokenizer_layer</span><span class="o">.</span><span class="n">sep_token_id</span>
+                  <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">input_ids</span><span class="p">,</span> <span class="n">input_mask</span> <span class="o">=</span> <span class="n">tf_text</span><span class="o">.</span><span class="n">pad_model_inputs</span><span class="p">(</span><span class="n">input_ids</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="o">=</span><span class="n">max_seq_len</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_ids</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_mask</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_type_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">input_ids</span><span class="p">)</span>
+
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">labels</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">labels</span>
+
+    <span class="n">tfds_dict</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">(</span><span class="n">tfds_dict</span><span class="p">)</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tfdataset</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="n">drop_remainder</span><span class="p">)</span>
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tfdataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">parse</span><span class="p">,</span> <span class="n">num_parallel_calls</span> <span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">AUTOTUNE</span><span class="p">)</span>
+    
+    <span class="c1"># Shard</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Options</span><span class="p">()</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">experimental_distribute</span><span class="o">.</span><span class="n">auto_shard_policy</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">AutoShardPolicy</span><span class="o">.</span><span class="n">AUTO</span>
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tfdataset</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">tfdataset</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="prepare-dataset">
+<h2>Prepare Dataset<a class="headerlink" href="#prepare-dataset" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>Set necessay hyperparameters.</p></li>
+<li><p>Prepare <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">validation</span> <span class="pre">dataset</span></code>.</p></li>
+<li><p>Load <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Data configs</span>
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s1">&#39;mrpc&#39;</span>
+<span class="n">model_name</span>  <span class="o">=</span> <span class="s1">&#39;albert-base-v2&#39;</span>
+<span class="n">max_seq_len</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">batch_size</span>  <span class="o">=</span> <span class="mi">8</span>
+
+<span class="c1"># Model configs</span>
+<span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">1e-5</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">num_classes</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">model_checkpoint_dir</span> <span class="o">=</span> <span class="s1">&#39;MODELS/mrpc_albert_model&#39;</span>
+
+<span class="c1"># Load HF dataset</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="s1">&#39;glue&#39;</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+<span class="c1"># Load tokenizer from tf-transformers</span>
+<span class="n">tokenizer_layer</span> <span class="o">=</span> <span class="n">AlbertTokenizerTFText</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+<span class="c1"># Train Dataset</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Validation Dataset</span>
+<span class="n">validation_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;validation&#39;</span><span class="p">],</span> <span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Total train examples</span>
+<span class="n">total_train_examples</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">num_rows</span>
+<span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="n">total_train_examples</span> <span class="o">//</span> <span class="n">batch_size</span>
+
+<span class="c1"># model</span>
+<span class="n">model_fn</span> <span class="o">=</span>  <span class="n">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># optimizer</span>
+<span class="n">optimizer_fn</span> <span class="o">=</span> <span class="n">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">total_train_examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">)</span>
+<span class="c1"># trainer</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="o">=</span><span class="s1">&#39;mirrored&#39;</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1"># loss</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">get_1d_classification_loss</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "ebef5bec9f6d4fd98b6f4a30e7d56f23", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "5e4db260686a470188037bef58a050ec", "version_major": 2, "version_minor": 0}
+</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Downloading and preparing dataset glue/mrpc (download: 1.43 MiB, generated: 1.43 MiB, post-processed: Unknown size, total: 2.85 MiB) to /root/.cache/huggingface/datasets/glue/mrpc/1.0.0/dacbe3125aa31d7f70367a07a8a9e72a5a0bfeb5fc42e75c9db75b96da6053ad...
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "d08661620f894441b17a6be00b7bb92c", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "a1bfc36fdd3c4e11878a321ab15525cd", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "ae700d77887349838973277622f392c2", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "e768affcde1b485fa2871f68d4f6aa4d", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "89340f2e7a954a14be20ce6a0fca070f", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "f5ca6c4b408c41779cc402980f7762ae", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "e0bd643b987a41cf84ecb9aadf510e59", "version_major": 2, "version_minor": 0}
+</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Dataset glue downloaded and prepared to /root/.cache/huggingface/datasets/glue/mrpc/1.0.0/dacbe3125aa31d7f70367a07a8a9e72a5a0bfeb5fc42e75c9db75b96da6053ad. Subsequent calls will reuse this data.
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "649a98480b7a4bb29ab76af22ce72b28", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "b6e392807cf04130afd7fd83be88a9dd", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "dbb1ee14dea343a8844eaefa78131f03", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "f221a5cc0d214a26bebae13f3a06cdcb", "version_major": 2, "version_minor": 0}
+</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Saving albert-base-v2 tokenizer to /tmp/tftransformers_tokenizer_cache/albert-base-v2
+INFO:absl:Loading albert-base-v2 tokenizer to /tmp/tftransformers_tokenizer_cache/albert-base-v2/spiece.model
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Using MirroredStrategy with devices (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;,)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Using MirroredStrategy with devices (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;,)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="wandb-configuration">
+<h2>Wandb configuration<a class="headerlink" href="#wandb-configuration" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALS&quot;</span>
+<span class="n">display_name</span> <span class="o">=</span> <span class="s2">&quot;mrpc_albert_base_v2&quot;</span>
+<span class="n">wandb</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">display_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="accuracy-callback">
+<h2>Accuracy Callback<a class="headerlink" href="#accuracy-callback" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tqdm</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
+
+<span class="n">METRICS</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">Accuracy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">)]</span>
+
+
+<span class="k">class</span> <span class="nc">AccuracyCallback</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prediction_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_column</span> <span class="o">=</span> <span class="n">label_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prediction_column</span> <span class="o">=</span> <span class="n">prediction_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">METRICS</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainer_kwargs</span><span class="p">):</span>
+
+        <span class="n">validation_dataset_distributed</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+            <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;validation_dataset_distributed&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
+        <span class="n">wandb</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;wandb&quot;</span><span class="p">]</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;global_step&quot;</span><span class="p">]</span>
+        <span class="n">strategy</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;strategy&quot;</span><span class="p">]</span>
+        <span class="n">epoch</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">]</span>
+        <span class="n">epochs</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span>
+        <span class="n">validation_steps</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;validation_steps&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">validation_dataset_distributed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No validation dataset has been provided either in the trainer class, </span><span class="se">\</span>
+<span class="s2">                                 or when callback is initialized. Please provide a validation dataset&quot;</span>
+            <span class="p">)</span>
+
+        <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+        <span class="k">def</span> <span class="nf">validate_run</span><span class="p">(</span><span class="n">dist_inputs</span><span class="p">):</span>
+            <span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_labels</span> <span class="o">=</span> <span class="n">dist_inputs</span>
+            <span class="n">model_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">batch_inputs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span>
+                <span class="n">model_outputs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_column</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_max</span><span class="p">(</span><span class="n">model_outputs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_column</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">P_ids_flattened</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">O_ids_flattened</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># This is a hack to make tqdm to print colour bar</span>
+        <span class="c1"># TODO: fix it .</span>
+        <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">trange</span><span class="p">(</span><span class="n">validation_steps</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s2">&quot;magenta&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">step_counter</span> <span class="ow">in</span> <span class="n">pbar</span><span class="p">:</span>
+            <span class="n">dist_inputs</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">validation_dataset_distributed</span><span class="p">)</span>
+            <span class="n">predicted_ids</span><span class="p">,</span> <span class="n">predicted_probs</span> <span class="o">=</span> <span class="n">strategy</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                <span class="n">validate_run</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">dist_inputs</span><span class="p">,)</span>
+            <span class="p">)</span>
+            <span class="n">predicted_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="n">trainer</span><span class="o">.</span><span class="n">distribution_strategy</span><span class="o">.</span><span class="n">experimental_local_results</span><span class="p">(</span><span class="n">predicted_ids</span><span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">predicted_probs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="n">trainer</span><span class="o">.</span><span class="n">distribution_strategy</span><span class="o">.</span><span class="n">experimental_local_results</span><span class="p">(</span>
+                    <span class="n">predicted_probs</span>
+                <span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># 1 in tuple of dist_inputs</span>
+            <span class="n">batch_labels</span> <span class="o">=</span> <span class="n">dist_inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">original_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                    <span class="n">trainer</span><span class="o">.</span><span class="n">distribution_strategy</span><span class="o">.</span><span class="n">experimental_local_results</span><span class="p">(</span>
+                        <span class="n">batch_labels</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">label_column</span><span class="p">]</span>
+                    <span class="p">),</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">P_ids_flattened</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">predicted_ids</span><span class="p">)</span>
+            <span class="n">O_ids_flattened</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">original_ids</span><span class="p">)</span>
+            <span class="n">metric_result</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+                <span class="n">metric</span><span class="o">.</span><span class="n">update_state</span><span class="p">(</span><span class="n">original_ids</span><span class="p">,</span> <span class="n">predicted_ids</span><span class="p">)</span>
+                <span class="n">metric_result</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span>
+                <span class="s2">&quot;Callback: Epoch </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2"> --- Step </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">epoch</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">step_counter</span><span class="p">,</span> <span class="n">validation_steps</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">pbar</span><span class="o">.</span><span class="n">set_postfix</span><span class="p">(</span><span class="o">**</span><span class="n">metric_result</span><span class="p">)</span>
+        <span class="c1"># Result over whole dataset and reset</span>
+        <span class="n">metrics_result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+            <span class="n">metrics_result</span><span class="p">[</span><span class="n">metric</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">metric</span><span class="o">.</span><span class="n">reset_state</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">wandb</span><span class="p">:</span>
+            <span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">metrics_result</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+
+        <span class="n">metrics_result</span><span class="p">[</span><span class="s1">&#39;acc_sklearn&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">O_ids_flattened</span><span class="p">,</span> <span class="n">P_ids_flattened</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">metrics_result</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="train">
+<h2>Train :-)<a class="headerlink" href="#train" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">accuracy_callback</span> <span class="o">=</span> <span class="n">AccuracyCallback</span><span class="p">(</span><span class="n">label_column</span><span class="o">=</span><span class="s1">&#39;labels&#39;</span><span class="p">,</span> 
+                                    <span class="n">prediction_column</span><span class="o">=</span><span class="s1">&#39;class_logits&#39;</span><span class="p">)</span>
+<span class="n">history</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">model_fn</span><span class="o">=</span><span class="n">model_fn</span><span class="p">,</span>
+    <span class="n">optimizer_fn</span><span class="o">=</span><span class="n">optimizer_fn</span><span class="p">,</span>
+    <span class="n">train_dataset</span><span class="o">=</span><span class="n">train_dataset</span><span class="p">,</span>
+    <span class="n">train_loss_fn</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+    <span class="n">steps_per_epoch</span><span class="o">=</span><span class="n">steps_per_epoch</span><span class="p">,</span>
+    <span class="n">model_checkpoint_dir</span><span class="o">=</span><span class="n">model_checkpoint_dir</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+    <span class="n">validation_dataset</span><span class="o">=</span><span class="n">validation_dataset</span><span class="p">,</span>
+    <span class="n">validation_loss_fn</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">accuracy_callback</span><span class="p">],</span>
+    <span class="n">wandb</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.
+INFO:absl:Policy: ----&gt; float32
+INFO:absl:Strategy: ---&gt; &lt;tensorflow.python.distribute.mirrored_strategy.MirroredStrategy object at 0x7efd8496b650&gt;
+INFO:absl:Num GPU Devices: ---&gt; 1
+INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /root/.cache/huggingface/hub/tftransformers--albert-base-v2.main.999c3eeace9b4d2c3f2ad87aad4548b3b73ea3cc/ckpt-1
+INFO:absl:Successful ✅: Loaded model from tftransformers/albert-base-v2
+INFO:absl:Using linear optimization warmup
+INFO:absl:Using Adamw optimizer
+INFO:absl:No ❌❌ checkpoint found in MODELS/mrpc_albert_model
+Train: Epoch 1/5 --- Step 100/458 --- total examples 0:   0%|<span class=" -Color -Color-Green">          </span>| 0/4 [00:00&lt;?, ?batch /s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Gradients do not exist for variables [&#39;tf_transformers/albert/mlm/transform/dense/kernel:0&#39;, &#39;tf_transformers/albert/mlm/transform/dense/bias:0&#39;, &#39;tf_transformers/albert/mlm/transform/LayerNorm/gamma:0&#39;, &#39;tf_transformers/albert/mlm/transform/LayerNorm/beta:0&#39;, &#39;tf_transformers/albert/mlm/transform/bias:0&#39;] when minimizing the loss. If you&#39;re using `model.compile()`, did you forget to provide a `loss`argument?
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Gradients do not exist for variables [&#39;tf_transformers/albert/mlm/transform/dense/kernel:0&#39;, &#39;tf_transformers/albert/mlm/transform/dense/bias:0&#39;, &#39;tf_transformers/albert/mlm/transform/LayerNorm/gamma:0&#39;, &#39;tf_transformers/albert/mlm/transform/LayerNorm/beta:0&#39;, &#39;tf_transformers/albert/mlm/transform/bias:0&#39;] when minimizing the loss. If you&#39;re using `model.compile()`, did you forget to provide a `loss`argument?
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Gradients do not exist for variables [&#39;tf_transformers/albert/mlm/transform/dense/kernel:0&#39;, &#39;tf_transformers/albert/mlm/transform/dense/bias:0&#39;, &#39;tf_transformers/albert/mlm/transform/LayerNorm/gamma:0&#39;, &#39;tf_transformers/albert/mlm/transform/LayerNorm/beta:0&#39;, &#39;tf_transformers/albert/mlm/transform/bias:0&#39;] when minimizing the loss. If you&#39;re using `model.compile()`, did you forget to provide a `loss`argument?
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Gradients do not exist for variables [&#39;tf_transformers/albert/mlm/transform/dense/kernel:0&#39;, &#39;tf_transformers/albert/mlm/transform/dense/bias:0&#39;, &#39;tf_transformers/albert/mlm/transform/LayerNorm/gamma:0&#39;, &#39;tf_transformers/albert/mlm/transform/LayerNorm/beta:0&#39;, &#39;tf_transformers/albert/mlm/transform/bias:0&#39;] when minimizing the loss. If you&#39;re using `model.compile()`, did you forget to provide a `loss`argument?
+Train: Epoch 1/5 --- Step 400/458 --- total examples 2400: 100%|<span class=" -Color -Color-Green">██████████</span>| 4/4 [01:03&lt;00:00, 15.87s/batch , learning_rate=8.09e-6, loss=0.433]
+INFO:absl:Model saved at epoch 1 at MODELS/mrpc_albert_model/ckpt-1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Validation: Epoch 1/5 --- Step 50/51 : 100%|<span class=" -Color -Color-Blue">██████████</span>| 51/51 [00:05&lt;00:00,  9.61batch /s, loss=0.36]
+INFO:absl:Validation result at epcoh 1 and                 global step 400 is {&#39;loss&#39;: 0.35959065}
+INFO:absl:Callbacks in progress at epoch end 1 . . . .
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Callback: Epoch 1/4 --- Step 50/51 : 100%|<span class=" -Color -Color-Magenta">██████████</span>| 51/51 [00:05&lt;00:00,  9.52batch/s, accuracy=0.846]
+INFO:absl:Callback score {&#39;accuracy&#39;: 0.8455882, &#39;acc_sklearn&#39;: 0.8455882352941176} at epoch 1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 2/5 --- Step 400/458 --- total examples 5600: 100%|<span class=" -Color -Color-Green">██████████</span>| 4/4 [00:50&lt;00:00, 12.73s/batch , learning_rate=5.9e-6, loss=0.283]
+INFO:absl:Model saved at epoch 2 at MODELS/mrpc_albert_model/ckpt-2
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Validation: Epoch 2/5 --- Step 50/51 : 100%|<span class=" -Color -Color-Blue">██████████</span>| 51/51 [00:03&lt;00:00, 16.75batch /s, loss=0.782]
+INFO:absl:Validation result at epcoh 2 and                 global step 800 is {&#39;loss&#39;: 0.7824918}
+INFO:absl:Callbacks in progress at epoch end 2 . . . .
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Callback: Epoch 2/4 --- Step 50/51 : 100%|<span class=" -Color -Color-Magenta">██████████</span>| 51/51 [00:05&lt;00:00,  9.59batch/s, accuracy=0.799]
+INFO:absl:Callback score {&#39;accuracy&#39;: 0.79901963, &#39;acc_sklearn&#39;: 0.7990196078431373} at epoch 2
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 3/5 --- Step 400/458 --- total examples 8800: 100%|<span class=" -Color -Color-Green">██████████</span>| 4/4 [00:50&lt;00:00, 12.71s/batch , learning_rate=3.72e-6, loss=0.182]
+INFO:absl:Model saved at epoch 3 at MODELS/mrpc_albert_model/ckpt-3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Validation: Epoch 3/5 --- Step 50/51 : 100%|<span class=" -Color -Color-Blue">██████████</span>| 51/51 [00:03&lt;00:00, 16.90batch /s, loss=0.551]
+INFO:absl:Validation result at epcoh 3 and                 global step 1200 is {&#39;loss&#39;: 0.55097103}
+INFO:absl:Callbacks in progress at epoch end 3 . . . .
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Callback: Epoch 3/4 --- Step 50/51 : 100%|<span class=" -Color -Color-Magenta">██████████</span>| 51/51 [00:05&lt;00:00,  9.47batch/s, accuracy=0.873]
+INFO:absl:Callback score {&#39;accuracy&#39;: 0.872549, &#39;acc_sklearn&#39;: 0.8725490196078431} at epoch 3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 4/5 --- Step 400/458 --- total examples 12000: 100%|<span class=" -Color -Color-Green">██████████</span>| 4/4 [00:50&lt;00:00, 12.72s/batch , learning_rate=1.54e-6, loss=0.135]
+INFO:absl:Model saved at epoch 4 at MODELS/mrpc_albert_model/ckpt-4
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Validation: Epoch 4/5 --- Step 50/51 : 100%|<span class=" -Color -Color-Blue">██████████</span>| 51/51 [00:03&lt;00:00, 16.79batch /s, loss=0.659]
+INFO:absl:Validation result at epcoh 4 and                 global step 1600 is {&#39;loss&#39;: 0.65918666}
+INFO:absl:Callbacks in progress at epoch end 4 . . . .
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Callback: Epoch 4/4 --- Step 50/51 : 100%|<span class=" -Color -Color-Magenta">██████████</span>| 51/51 [00:05&lt;00:00,  9.60batch/s, accuracy=0.87]
+INFO:absl:Callback score {&#39;accuracy&#39;: 0.87009805, &#39;acc_sklearn&#39;: 0.8700980392156863} at epoch 4
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="visualize-tensorboard">
+<h2>Visualize Tensorboard<a class="headerlink" href="#visualize-tensorboard" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> tensorboard
+
+<span class="o">%</span><span class="k">tensorboard</span> --logdir MODELS/mrpc_albert_model/logs
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/javascript">
+        (async () => {
+            const url = new URL(await google.colab.kernel.proxyPort(6006, {'cache': true}));
+            url.searchParams.set('tensorboardColab', 'true');
+            const iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.setAttribute('width', '100%');
+            iframe.setAttribute('height', '800');
+            iframe.setAttribute('frameborder', 0);
+            document.body.appendChild(iframe);
+        })();
+    </script></div>
+</div>
+</div>
+<div class="section" id="save-and-serialize-model">
+<h2>Save and Serialize Model<a class="headerlink" href="#save-and-serialize-model" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save serialized version of the model</span>
+
+<span class="c1"># Note: Ignore checkpoint warnings, it is because we save optimizer with checkpoint</span>
+<span class="c1"># while we restoring, we take only model.</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">model_fn</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">)</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">save_transformers_serialized</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/saved_model/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="model-serialization-production">
+<h2>Model Serialization (Production)<a class="headerlink" href="#model-serialization-production" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load serialized model</span>
+
+<span class="n">loaded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">saved_model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/saved_model/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">))</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">signatures</span><span class="p">[</span><span class="s1">&#39;serving_default&#39;</span><span class="p">]</span>
+
+<span class="c1"># Lets evaluate accuracy and see whether it matches the callback</span>
+
+<span class="n">accuracy_metric</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">Accuracy</span><span class="p">(</span><span class="s1">&#39;accuracy&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_labels</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">validation_dataset</span><span class="p">):</span>
+  <span class="n">model_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">batch_inputs</span><span class="p">)</span>
+  <span class="n">predicted_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model_outputs</span><span class="p">[</span><span class="s1">&#39;class_logits&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">label_ids</span> <span class="o">=</span> <span class="n">batch_labels</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span>
+  <span class="n">accuracy_metric</span><span class="o">.</span><span class="n">update_state</span><span class="p">(</span><span class="n">label_ids</span><span class="p">,</span> <span class="n">predicted_ids</span><span class="p">)</span> 
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Validation Accuracy&quot;</span><span class="p">,</span> <span class="n">accuracy_metric</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>51it [00:02, 17.60it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Validation Accuracy 0.87009805
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="advanced-serialization-include-pre-processing-with-models">
+<h2>Advanced Serialization (Include pre-processing with models)<a class="headerlink" href="#advanced-serialization-include-pre-processing-with-models" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Advanced serialzation</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">ClassificationChainer</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">model_fn</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">)</span>
+
+<span class="c1"># Serialize tokenizer and model together</span>
+<span class="n">tokenizer_layer</span> <span class="o">=</span> <span class="n">AlbertTokenizerTFText</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+            <span class="n">model_name</span><span class="p">,</span> <span class="n">add_special_tokens</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_seq_len</span><span class="p">,</span> <span class="n">dynamic_padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">ClassificationChainer</span><span class="p">(</span><span class="n">tokenizer_layer</span><span class="o">.</span><span class="n">get_model</span><span class="p">(),</span> <span class="n">model</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span> <span class="c1"># get_model will return tf.keras.Model , nothing fancy</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">save_serialized</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/saved_model_text_model/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">))</span> <span class="c1"># Do not use `model_transformers_serialzed` here</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="load-the-model-check-accuracy">
+<h2>Load the model + Check Accuracy<a class="headerlink" href="#load-the-model-check-accuracy" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>The accuracy of the validation data matches, mean our pre-processing is right.</p></li>
+<li><p>This also avoids pre-processing skew and make deployment easier.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load jointly serialized model</span>
+
+<span class="n">loaded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">saved_model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/saved_model_text_model/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">))</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">signatures</span><span class="p">[</span><span class="s1">&#39;serving_default&#39;</span><span class="p">]</span>
+
+<span class="c1"># Now lets evaluate accuracy again</span>
+<span class="c1"># This time, we have to provide only raw text, model will be tokenizing it internally</span>
+
+<span class="c1"># Create a validation dataset</span>
+<span class="n">validation_text_dataset</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">validation_labels</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;validation&#39;</span><span class="p">]:</span>
+  <span class="n">validation_text_dataset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;sentence1&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;sentence2&#39;</span><span class="p">])</span>
+  <span class="n">validation_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+
+<span class="n">validation_text_dataset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">(({</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">validation_text_dataset</span><span class="p">},</span> 
+                                                             <span class="p">{</span><span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">validation_labels</span><span class="p">})</span>
+                                                             <span class="p">)</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+
+<span class="c1"># Evaluate accuracy</span>
+<span class="n">accuracy_metric</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">Accuracy</span><span class="p">(</span><span class="s1">&#39;accuracy&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_labels</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">validation_text_dataset</span><span class="p">):</span>
+  <span class="n">model_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">batch_inputs</span><span class="p">)</span>
+  <span class="n">predicted_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">model_outputs</span><span class="p">[</span><span class="s1">&#39;class_logits&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="n">label_ids</span> <span class="o">=</span> <span class="n">batch_labels</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span>
+  <span class="n">accuracy_metric</span><span class="o">.</span><span class="n">update_state</span><span class="p">(</span><span class="n">label_ids</span><span class="p">,</span> <span class="n">predicted_ids</span><span class="p">)</span> 
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Validation Accuracy&quot;</span><span class="p">,</span> <span class="n">accuracy_metric</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 51/51 [00:01&lt;00:00, 25.63it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Validation Accuracy 0.87009805
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="1_read_write_tfrecords.html" class="btn btn-neutral float-left" title="Writing and Reading TFRecords" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="3_masked_lm_tpu.html" class="btn btn-neutral float-right" title="Train (Masked Language Model) with tf-transformers in TPU" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

@@ -310,6 +310,10 @@ Flax), PyTorch, and/or TensorFlow.
     :caption: Tutorials
 
     tutorials/1_read_write_tfrecords
+    tutorials/2_text_classification_imdb_albert
+    tutorials/3_masked_lm_tpu
+
+
 
 .. toctree::
     :maxdepth: 2

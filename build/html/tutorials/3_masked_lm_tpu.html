@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+<meta property="og:title" content="Train (Masked Language Model) with tf-transformers in TPU" />
+  
+<meta property="og:type" content="website" />
+  
+<meta property="og:url" content="tutorials/3_masked_lm_tpu.html" />
+  
+<meta property="og:description" content="This tutorial contains complete code to train MLM model on C4 EN 10K dataset. In addition to training a model, you will learn how to preprocess text into an ..." />
+  
+<meta property="og:image" content="png location" />
+  
+<meta property="og:image:alt" content="Train (Masked Language Model) with tf-transformers in TPU" />
+  
+<meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Train (Masked Language Model) with tf-transformers in TPU &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ALBERT Tokenizer" href="../model_doc/albert_tokenizer.html" />
+    <link rel="prev" title="Classify text (MRPC) with Albert" href="2_text_classification_imdb_albert.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="2_text_classification_imdb_albert.html">Classify text (MRPC) with Albert</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Train (Masked Language Model) with tf-transformers in TPU</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#trainer-has-to-be-initialized-before-everything-only-in-tpu-sometimes">Trainer has to be initialized before everything only in TPU (sometimes).</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-model-optimizer-trainer">Load Model, Optimizer , Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-data-for-training">Prepare Data for Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-dataset">Prepare Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wandb-configuration">Wandb configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#train">Train :-)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-the-model-from-checkpoint">Load the Model from checkpoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-model-performance">Test Model performance</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Train (Masked Language Model) with tf-transformers in TPU</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/3_masked_lm_tpu.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="tex2jax_ignore mathjax_ignore section" id="train-masked-language-model-with-tf-transformers-in-tpu">
+<h1>Train (Masked Language Model) with tf-transformers in TPU<a class="headerlink" href="#train-masked-language-model-with-tf-transformers-in-tpu" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial contains complete code to train MLM model on C4 EN 10K dataset.
+In addition to training a model, you will learn how to preprocess text into an appropriate format.</p>
+<p>In this notebook, you will:</p>
+<ul class="simple">
+<li><p>Load the C4 (10k EN) dataset from HuggingFace</p></li>
+<li><p>Load GPT2 style (configuration) Model using tf-transformers</p></li>
+<li><p>Build train dataset (on the fly) feature preparation using
+tokenizer from tf-transformers.</p></li>
+<li><p>Build a masked LM Model from GPT2 style configuration</p></li>
+<li><p>Save your model</p></li>
+<li><p>Use the base model for further tasks</p></li>
+</ul>
+<p>If you’re new to working with the C4 dataset, please see <a class="reference external" href="https://www.tensorflow.org/datasets/catalog/c4">C4</a> for more details.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+
+<span class="o">!</span>pip install sentencepiece
+
+<span class="o">!</span>pip install tensorflow-text
+
+<span class="o">!</span>pip install transformers
+
+<span class="o">!</span>pip install wandb
+
+<span class="o">!</span>pip install datasets
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TF_CPP_MIN_LOG_LEVEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span> <span class="c1"># Supper TF warnings</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow_text</span> <span class="k">as</span> <span class="nn">tf_text</span>
+<span class="kn">import</span> <span class="nn">datasets</span>
+<span class="kn">import</span> <span class="nn">wandb</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tensorflow version&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tensorflow text version&quot;</span><span class="p">,</span> <span class="n">tf_text</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Devices&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">list_physical_devices</span><span class="p">())</span>
+
+<span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">GPT2Model</span><span class="p">,</span> <span class="n">MaskedLMModel</span><span class="p">,</span> <span class="n">AlbertTokenizerTFText</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">Trainer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.optimization</span> <span class="kn">import</span> <span class="n">create_optimizer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.text.lm_tasks</span> <span class="kn">import</span> <span class="n">mlm_fn</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.losses.loss_wrapper</span> <span class="kn">import</span> <span class="n">get_lm_loss</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tensorflow version 2.7.0
+Tensorflow text version 2.7.3
+Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;CPU&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="trainer-has-to-be-initialized-before-everything-only-in-tpu-sometimes">
+<h2>Trainer has to be initialized before everything only in TPU (sometimes).<a class="headerlink" href="#trainer-has-to-be-initialized-before-everything-only-in-tpu-sometimes" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="o">=</span><span class="s1">&#39;tpu&#39;</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="s1">&#39;colab&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Deallocate tpu buffers before initializing tpu system.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Deallocate tpu buffers before initializing tpu system.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:TPU system grpc://10.91.104.90:8470 has already been initialized. Reinitializing the TPU can cause previously created variables on TPU to be lost.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:TPU system grpc://10.91.104.90:8470 has already been initialized. Reinitializing the TPU can cause previously created variables on TPU to be lost.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Initializing the TPU system: grpc://10.91.104.90:8470
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Initializing the TPU system: grpc://10.91.104.90:8470
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Finished initializing TPU system.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Finished initializing TPU system.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Found TPU system:
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Found TPU system:
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Num TPU Cores: 8
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Num TPU Cores: 8
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Num TPU Workers: 1
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Num TPU Workers: 1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Num TPU Cores Per Worker: 8
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Num TPU Cores Per Worker: 8
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:localhost/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:localhost/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:CPU:0, CPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:0, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:0, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:1, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:1, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:2, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:2, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:3, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:3, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:4, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:4, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:5, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:5, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:6, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:6, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:7, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU:7, TPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU_SYSTEM:0, TPU_SYSTEM, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:TPU_SYSTEM:0, TPU_SYSTEM, 0, 0)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:XLA_CPU:0, XLA_CPU, 0, 0)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:*** Available Device: _DeviceAttributes(/job:worker/replica:0/task:0/device:XLA_CPU:0, XLA_CPU, 0, 0)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="load-model-optimizer-trainer">
+<h2>Load Model, Optimizer , Trainer<a class="headerlink" href="#load-model-optimizer-trainer" title="Permalink to this headline">¶</a></h2>
+<p>Our Trainer expects <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> and <code class="docutils literal notranslate"><span class="pre">loss</span></code> to be a function.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Model</span>
+<span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="p">,</span> <span class="n">num_hidden_layers</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">model_fn</span><span class="p">():</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">GPT2Model</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+    <span class="n">config</span><span class="p">[</span><span class="s1">&#39;vocab_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vocab_size</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">GPT2Model</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">mask_mode</span><span class="o">=</span><span class="s1">&#39;user_defined&#39;</span><span class="p">,</span> <span class="n">num_hidden_layers</span><span class="o">=</span><span class="n">num_hidden_layers</span><span class="p">,</span> <span class="n">return_layer</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">MaskedLMModel</span><span class="p">(</span>
+              <span class="n">model</span><span class="p">,</span>
+              <span class="n">use_extra_mlm_layer</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+              <span class="n">hidden_size</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;embedding_size&#39;</span><span class="p">],</span>
+              <span class="n">layer_norm_epsilon</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;layer_norm_epsilon&#39;</span><span class="p">],</span>
+          <span class="p">)</span>    
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">model_fn</span>
+
+<span class="c1"># Load Optimizer</span>
+<span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
+    <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">examples</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">num_train_steps</span> <span class="o">=</span> <span class="n">steps_per_epoch</span> <span class="o">*</span> <span class="n">epochs</span>
+    <span class="n">warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">num_train_steps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">optimizer_fn</span><span class="p">():</span>
+        <span class="n">optimizer</span><span class="p">,</span> <span class="n">learning_rate_fn</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">num_train_steps</span><span class="p">,</span> <span class="n">warmup_steps</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="n">use_constant_lr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">optimizer</span>
+
+    <span class="k">return</span> <span class="n">optimizer_fn</span>
+
+<span class="c1"># Load trainer</span>
+<span class="k">def</span> <span class="nf">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="n">num_gpus</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="n">tpu_address</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">trainer</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="prepare-data-for-training">
+<h2>Prepare Data for Training<a class="headerlink" href="#prepare-data-for-training" title="Permalink to this headline">¶</a></h2>
+<p>We will make use of <code class="docutils literal notranslate"><span class="pre">Tensorflow</span> <span class="pre">Text</span></code> based tokenizer to do <code class="docutils literal notranslate"><span class="pre">on-the-fly</span></code> preprocessing, without having any
+overhead of pre prepapre the data in the form of <code class="docutils literal notranslate"><span class="pre">pickle</span></code>, <code class="docutils literal notranslate"><span class="pre">numpy</span></code> or <code class="docutils literal notranslate"><span class="pre">tfrecords</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load dataset</span>
+<span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">max_predictions_per_seq</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">      dataset; HuggingFace dataset</span>
+<span class="sd">      tokenizer_layer: tf-transformers tokenizer</span>
+<span class="sd">      max_seq_len: int (maximum sequence length of text)</span>
+<span class="sd">      batch_size: int (batch_size)</span>
+<span class="sd">      max_predictions_per_seq: int (Maximum number of words to mask)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tfds_dict</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">(</span><span class="n">tfds_dict</span><span class="p">)</span>
+
+    <span class="c1"># MLM function</span>
+    <span class="n">masked_lm_map_fn</span> <span class="o">=</span> <span class="n">mlm_fn</span><span class="p">(</span><span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">max_predictions_per_seq</span><span class="p">)</span>
+
+    <span class="c1"># MLM</span>
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tfdataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">masked_lm_map_fn</span><span class="p">,</span> <span class="n">num_parallel_calls</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">AUTOTUNE</span><span class="p">)</span>
+    <span class="c1"># Batch</span>
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tfdataset</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+
+    <span class="c1"># Auto SHARD</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Options</span><span class="p">()</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">experimental_distribute</span><span class="o">.</span><span class="n">auto_shard_policy</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">AutoShardPolicy</span><span class="o">.</span><span class="n">AUTO</span>
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tfdataset</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">tfdataset</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="prepare-dataset">
+<h2>Prepare Dataset<a class="headerlink" href="#prepare-dataset" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>Set necessay hyperparameters.</p></li>
+<li><p>Prepare <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">dataset</span></code></p></li>
+<li><p>Load <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Data configs</span>
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s1">&#39;stas/c4-en-10k&#39;</span>
+<span class="n">model_name</span>  <span class="o">=</span> <span class="s1">&#39;gpt2&#39;</span>
+<span class="n">max_seq_len</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">max_predictions_per_seq</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">batch_size</span>  <span class="o">=</span> <span class="mi">128</span>
+
+<span class="c1"># Model configs</span>
+<span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.0005</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">model_checkpoint_dir</span> <span class="o">=</span> <span class="s1">&#39;gs://legacyai-bucket/sample_mlm_model&#39;</span> <span class="c1"># If using TPU, provide GCP bucket for </span>
+                                                        <span class="c1"># storing model checkpoints</span>
+
+<span class="c1"># Load HF dataset</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">)</span>
+<span class="c1"># Load tokenizer from tf-transformers</span>
+<span class="n">tokenizer_layer</span> <span class="o">=</span> <span class="n">AlbertTokenizerTFText</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;albert-base-v2&quot;</span><span class="p">)</span>
+<span class="c1"># Train Dataset</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">max_predictions_per_seq</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
+
+<span class="c1"># Total train examples</span>
+<span class="n">total_train_examples</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">num_rows</span>
+<span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="mi">5000</span>
+<span class="n">num_hidden_layers</span> <span class="o">=</span> <span class="mi">8</span>
+
+<span class="c1"># model</span>
+<span class="n">vocab_size</span> <span class="o">=</span> <span class="n">tokenizer_layer</span><span class="o">.</span><span class="n">vocab_size</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+<span class="n">model_fn</span> <span class="o">=</span>  <span class="n">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_hidden_layers</span><span class="o">=</span><span class="n">num_hidden_layers</span><span class="p">)</span>
+<span class="c1"># optimizer</span>
+<span class="n">optimizer_fn</span> <span class="o">=</span> <span class="n">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">total_train_examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># trainer</span>
+<span class="c1"># trainer = get_trainer(distribution_strategy=&#39;tpu&#39;, num_gpus=0, tpu_address=&#39;colab&#39;)</span>
+<span class="c1"># loss</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">get_lm_loss</span><span class="p">(</span><span class="n">loss_type</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:datasets.builder:Reusing dataset c4_en10k (/root/.cache/huggingface/datasets/stas___c4_en10k/plain_text/1.0.0/edbf1ff8b8ee35a9751a7752b5e93a4873cc7905ffae010ad334a2c96f81e1cd)
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "d5c1adfe09f7461c89e172b9743af081", "version_major": 2, "version_minor": 0}
+</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Loading albert-base-v2 tokenizer to /tmp/tftransformers_tokenizer_cache/albert-base-v2/spiece.model
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="wandb-configuration">
+<h2>Wandb configuration<a class="headerlink" href="#wandb-configuration" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALS&quot;</span>
+<span class="n">display_name</span> <span class="o">=</span> <span class="s2">&quot;mlm_tpu&quot;</span>
+<span class="n">wandb</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">display_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/javascript">
+        window._wandbApiKey = new Promise((resolve, reject) => {
+            function loadScript(url) {
+            return new Promise(function(resolve, reject) {
+                let newScript = document.createElement("script");
+                newScript.onerror = reject;
+                newScript.onload = resolve;
+                document.body.appendChild(newScript);
+                newScript.src = url;
+            });
+            }
+            loadScript("https://cdn.jsdelivr.net/npm/postmate/build/postmate.min.js").then(() => {
+            const iframe = document.createElement('iframe')
+            iframe.style.cssText = "width:0;height:0;border:none"
+            document.body.appendChild(iframe)
+            const handshake = new Postmate({
+                container: iframe,
+                url: 'https://wandb.ai/authorize'
+            });
+            const timeout = setTimeout(() => reject("Couldn't auto authenticate"), 5000)
+            handshake.then(function(child) {
+                child.on('authorize', data => {
+                    clearTimeout(timeout)
+                    resolve(data)
+                });
+            });
+            })
+        });
+    </script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold -Color-Bold-Blue">wandb</span>: You can find your API key in your browser here: https://wandb.ai/authorize
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>wandb: Paste an API key from your profile and hit enter, or press ctrl+c to quit: ··········
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span><span class=" -Color -Color-Bold -Color-Bold-Blue">wandb</span>: Appending key for api.wandb.ai to your netrc file: /root/.netrc
+</pre></div>
+</div>
+<div class="output text_html">
+Syncing run <strong><a href="https://wandb.ai/legacyai/TUTORIALS/runs/pofm3ng5" target="_blank">mlm_tpu</a></strong> to <a href="https://wandb.ai/legacyai/TUTORIALS" target="_blank">Weights & Biases</a> (<a href="https://docs.wandb.com/integrations/jupyter.html" target="_blank">docs</a>).<br/>
+
+</div><div class="output text_html"><button onClick="this.nextSibling.style.display='block';this.style.display='none';">Display W&B run</button><iframe src="https://wandb.ai/legacyai/TUTORIALS/runs/pofm3ng5?jupyter=true" style="border:none;width:100%;height:420px;display:none;"></iframe></div></div>
+</div>
+</div>
+<div class="section" id="train">
+<h2>Train :-)<a class="headerlink" href="#train" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">history</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">model_fn</span><span class="o">=</span><span class="n">model_fn</span><span class="p">,</span>
+    <span class="n">optimizer_fn</span><span class="o">=</span><span class="n">optimizer_fn</span><span class="p">,</span>
+    <span class="n">train_dataset</span><span class="o">=</span><span class="n">train_dataset</span><span class="p">,</span>
+    <span class="n">train_loss_fn</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+    <span class="n">steps_per_epoch</span><span class="o">=</span><span class="n">steps_per_epoch</span><span class="p">,</span>
+    <span class="n">model_checkpoint_dir</span><span class="o">=</span><span class="n">model_checkpoint_dir</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+    <span class="n">wandb</span><span class="o">=</span><span class="n">wandb</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.
+INFO:absl:Policy: ----&gt; float32
+INFO:absl:Strategy: ---&gt; &lt;tensorflow.python.distribute.tpu_strategy.TPUStrategyV2 object at 0x7fab94155e10&gt;
+INFO:absl:Num TPU Devices: ---&gt; 8
+INFO:absl:Create model from config
+INFO:absl:Using Constant learning rate
+INFO:absl:Using Adamw optimizer
+INFO:absl:No ❌❌ checkpoint found in gs://legacyai-bucket/sample_mlm_model
+Train: Epoch 1/4 --- Step 100/5000 --- total examples 0:   0%|<span class=" -Color -Color-Green">          </span>| 0/50 [00:00&lt;?, ?batch /s]/usr/local/lib/python3.7/dist-packages/keras/engine/functional.py:559: UserWarning: Input dict contained keys [&#39;input_type_ids&#39;] which did not match any model input. They will be ignored by the model.
+  inputs = self._flatten_to_reference_inputs(inputs)
+Train: Epoch 1/4 --- Step 5000/5000 --- total examples 627200: 100%|<span class=" -Color -Color-Green">██████████</span>| 50/50 [07:02&lt;00:00,  8.44s/batch , learning_rate=0.0005, loss=3.11]
+INFO:absl:Model saved at epoch 1 at gs://legacyai-bucket/sample_mlm_model/ckpt-1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 2/4 --- Step 5000/5000 --- total examples 1267200: 100%|<span class=" -Color -Color-Green">██████████</span>| 50/50 [06:28&lt;00:00,  7.77s/batch , learning_rate=0.0005, loss=1.33]
+INFO:absl:Model saved at epoch 2 at gs://legacyai-bucket/sample_mlm_model/ckpt-2
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 3/4 --- Step 5000/5000 --- total examples 1907200: 100%|<span class=" -Color -Color-Green">██████████</span>| 50/50 [06:29&lt;00:00,  7.78s/batch , learning_rate=0.0005, loss=0.785]
+INFO:absl:Model saved at epoch 3 at gs://legacyai-bucket/sample_mlm_model/ckpt-3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="load-the-model-from-checkpoint">
+<h2>Load the Model from checkpoint<a class="headerlink" href="#load-the-model-from-checkpoint" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_fn</span> <span class="o">=</span>  <span class="n">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_hidden_layers</span><span class="o">=</span><span class="n">num_hidden_layers</span><span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">model_fn</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Create model from config
+INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from gs://legacyai-bucket/sample_mlm_model/ckpt-3
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tensorflow.python.training.tracking.util.Checkpoint at 0x7fab8fd104d0&gt;
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="test-model-performance">
+<h2>Test Model performance<a class="headerlink" href="#test-model-performance" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>We can assess model performance by checking how it predicts masked word on sample sentences.</p></li>
+<li><p>As we see the following result, its clear that model starts learning.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AlbertTokenizer</span>
+<span class="n">tokenizer_hf</span> <span class="o">=</span> <span class="n">AlbertTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;albert-base-v2&quot;</span><span class="p">)</span>
+
+<span class="n">validation_sentences</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;Read the rest of this [MASK] to understand things in more detail.&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;I want to buy the [MASK] because it is so cheap.&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;The [MASK] was amazing.&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Sachin Tendulkar is one of the [MASK] palyers in the world.&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;[MASK] is the capital of France.&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Machine Learning requires [MASK]&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;He is working as a [MASK]&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;She is working as a [MASK]&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">tokenizer_hf</span><span class="p">(</span><span class="n">validation_sentences</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;tf&quot;</span><span class="p">)</span>
+
+<span class="n">inputs_tf</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">inputs_tf</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">]</span>
+<span class="n">inputs_tf</span><span class="p">[</span><span class="s2">&quot;input_mask&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s2">&quot;attention_mask&quot;</span><span class="p">]</span>
+<span class="n">seq_length</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">inputs_tf</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">inputs_tf</span><span class="p">[</span><span class="s1">&#39;masked_lm_positions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">inputs_tf</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">seq_length</span><span class="p">)</span>
+
+
+<span class="n">top_k</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1"># topk similar words</span>
+<span class="n">outputs_tf</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">inputs_tf</span><span class="p">)</span>
+<span class="c1"># Get masked positions from each sentence</span>
+<span class="n">masked_positions</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="n">inputs_tf</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">],</span> <span class="n">tokenizer_hf</span><span class="o">.</span><span class="n">mask_token_id</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">logits</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">outputs_tf</span><span class="p">[</span><span class="s1">&#39;token_logits&#39;</span><span class="p">]):</span>
+    <span class="n">mask_token_logits</span> <span class="o">=</span> <span class="n">logits</span><span class="p">[</span><span class="n">masked_positions</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+    <span class="c1"># 0 for probs and 1 for indexes from tf.nn.top_k</span>
+    <span class="n">top_words</span> <span class="o">=</span> <span class="n">tokenizer_hf</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">top_k</span><span class="p">(</span><span class="n">mask_token_logits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">top_k</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Input ----&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">validation_sentences</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted words ----&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">top_words</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+    <span class="nb">print</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Input ----&gt; Read the rest of this [MASK] to understand things in more detail.
+Predicted words ----&gt; [&#39;page&#39;, &#39;continent&#39;, &#39;means&#39;, &#39;window&#39;, &#39;website&#39;, &#39;post&#39;, &#39;tool&#39;, &#39;is&#39;, &#39;book&#39;, &#39;world&#39;]
+
+Input ----&gt; I want to buy the [MASK] because it is so cheap.
+Predicted words ----&gt; [&#39;door&#39;, &#39;quote&#39;, &#39;electronics&#39;, &#39;house&#39;, &#39;review&#39;, &#39;website&#39;, &#39;graphics&#39;, &#39;property&#39;, &#39;doors&#39;, &#39;item&#39;]
+
+Input ----&gt; The [MASK] was amazing.
+Predicted words ----&gt; [&#39;boys&#39;, &#39;turkey&#39;, &#39;epilogue&#39;, &#39;idea&#39;, &#39;project&#39;, &#39;answer&#39;, &#39;food&#39;, &#39;website&#39;, &#39;show&#39;, &#39;weather&#39;]
+
+Input ----&gt; Sachin Tendulkar is one of the [MASK] palyers in the world.
+Predicted words ----&gt; [&#39;busiest&#39;, &#39;leading&#39;, &#39;english&#39;, &#39;latest&#39;, &#39;northern&#39;, &#39;coordinates&#39;, &#39;largest&#39;, &#39;international&#39;, &#39;state&#39;, &#39;registered&#39;]
+
+Input ----&gt; [MASK] is the capital of France.
+Predicted words ----&gt; [&#39;this&#39;, &#39;there&#39;, &#39;india&#39;, &#39;it&#39;, &#39;what&#39;, &#39;here&#39;, &#39;below&#39;, &#39;he&#39;, &#39;france&#39;, &#39;that&#39;]
+
+Input ----&gt; Machine Learning requires [MASK]
+Predicted words ----&gt; [&#39;.&#39;, &#39;the&#39;, &#39;that&#39;, &#39;for&#39;, &#39;a,&#39;, &#39;an&#39;, &#39;you&#39;, &#39;and&#39;, &#39;your&#39;]
+
+Input ----&gt; He is working as a [MASK]
+Predicted words ----&gt; [&#39;field&#39;, &#39;real&#39;, &#39;great&#39;, &#39;chance&#39;, &#39;regular&#39;, &#39;business&#39;, &#39;team&#39;, &#39;facebook&#39;, &#39;freelance&#39;, &#39;sport&#39;]
+
+Input ----&gt; She is working as a [MASK]
+Predicted words ----&gt; [&#39;field&#39;, &#39;real&#39;, &#39;path&#39;, &#39;facebook&#39;, &#39;chance&#39;, &#39;trip&#39;, &#39;strategic&#39;, &#39;great&#39;, &#39;regular&#39;, &#39;lot&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="2_text_classification_imdb_albert.html" class="btn btn-neutral float-left" title="Classify text (MRPC) with Albert" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../model_doc/albert_tokenizer.html" class="btn btn-neutral float-right" title="ALBERT Tokenizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
