@@ -4,7 +4,7 @@ sphinx >=3, <4
 sphinx_rtd_theme
 sphinx-autodoc-typehints==1.11.1
 jupyter-sphinx>=0.3.2
-myst-nb
+myst-nb==v0.12.0
 
 # Packages as per HuggingFace extensions
 sphinx_rtd_theme
