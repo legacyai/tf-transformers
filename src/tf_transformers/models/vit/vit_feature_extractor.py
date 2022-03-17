@@ -94,7 +94,7 @@ class ViTFeatureExtractorTF(LegacyLayer):
     def read_process_resize(self, image_path: str):
         """Read, decode and process"""
         img = tf.io.read_file(image_path)
-        img = tf.io.decode_jpeg(img, channels=self.num_channels)
+        img = tf.io.decode_image(img, channels=self.num_channels)
         img = tf.image.resize(img, [self.img_height, self.img_width])
         return img
 
