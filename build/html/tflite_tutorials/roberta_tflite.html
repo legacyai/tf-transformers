@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+<meta property="og:title" content="Convert a Model to TFlite" />
+  
+<meta property="og:type" content="website" />
+  
+<meta property="og:url" content="tflite_tutorials/roberta_tflite.html" />
+  
+<meta property="og:description" content="The most important thing to notice here is that, if we want to convert a model to tflite, we have to ensure that inputs to the model are deterministic, which..." />
+  
+<meta property="og:image" content="png location" />
+  
+<meta property="og:image:alt" content="Convert a Model to TFlite" />
+  
+<meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Convert a Model to TFlite &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/2_text_classification_imdb_albert.html">Classify text (MRPC) with Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/3_masked_lm_tpu.html">Train (Masked Language Model) with tf-transformers in TPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Convert a Model to TFlite</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tflite_tutorials/roberta_tflite.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+
+<span class="o">!</span>pip install sentencepiece
+
+<span class="o">!</span>pip install tensorflow-text
+
+<span class="o">!</span>pip install transformers
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TF_CPP_MIN_LOG_LEVEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span> <span class="c1"># Supper TF warnings</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tensorflow version&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">RobertaModel</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tensorflow version 2.7.0
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="convert-a-model-to-tflite">
+<h1>Convert a Model to TFlite<a class="headerlink" href="#convert-a-model-to-tflite" title="Permalink to this headline">¶</a></h1>
+<p>The most important thing to notice here is that, if we want to convert a model to <code class="docutils literal notranslate"><span class="pre">tflite</span></code>, we have to ensure that <code class="docutils literal notranslate"><span class="pre">inputs</span></code> to the model are <strong>deterministic</strong>, which means inputs should not be dynamic. We have to fix  <strong>batch_size</strong>, <strong>sequence_length</strong> and other related input constraints depends on the model of interest.</p>
+<div class="section" id="load-roberta-model">
+<h2>Load Roberta Model<a class="headerlink" href="#load-roberta-model" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>Fix the inputs</p></li>
+<li><p>We can always check the <code class="docutils literal notranslate"><span class="pre">model</span></code> <strong>inputs</strong> and <strong>output</strong> by using <code class="docutils literal notranslate"><span class="pre">model.input</span></code> and <code class="docutils literal notranslate"><span class="pre">model.output</span></code>.</p></li>
+<li><p>We use <code class="docutils literal notranslate"><span class="pre">batch_size=1</span></code> and <code class="docutils literal notranslate"><span class="pre">sequence_length=64</span></code>.)</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;roberta-base&#39;</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">sequence_length</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">RobertaModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">sequence_length</span><span class="o">=</span><span class="n">sequence_length</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "648c083eda83425893800f7bb7eb1c7d", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "1c26c357f40f422ebd355af346d5a870", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "c9d915d484584e7f911af2e84eb33392", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "f98d141b7cae45f8abeccb76ea408099", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "6f073c18415940358f72122ac1cbdc23", "version_major": 2, "version_minor": 0}
+</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /root/.cache/huggingface/hub/tftransformers--roberta-base-no-mlm.main.9e4aa91ba5936c6ac98586f85c152831e421d0ec/ckpt-1
+INFO:absl:Successful ✅: Loaded model from tftransformers/roberta-base-no-mlm
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="verify-models-inputs-and-outputs">
+<h1>Verify Models inputs and outputs<a class="headerlink" href="#verify-models-inputs-and-outputs" title="Permalink to this headline">¶</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model inputs&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">input</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model outputs&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Model inputs {&#39;input_ids&#39;: &lt;KerasTensor: shape=(1, 64) dtype=int32 (created by layer &#39;input_ids&#39;)&gt;, &#39;input_mask&#39;: &lt;KerasTensor: shape=(1, 64) dtype=int32 (created by layer &#39;input_mask&#39;)&gt;, &#39;input_type_ids&#39;: &lt;KerasTensor: shape=(1, 64) dtype=int32 (created by layer &#39;input_type_ids&#39;)&gt;}
+Model outputs {&#39;cls_output&#39;: &lt;KerasTensor: shape=(1, 768) dtype=float32 (created by layer &#39;tf_transformers/roberta&#39;)&gt;, &#39;token_embeddings&#39;: &lt;KerasTensor: shape=(1, 64, 768) dtype=float32 (created by layer &#39;tf_transformers/roberta&#39;)&gt;, &#39;token_logits&#39;: &lt;KerasTensor: shape=(1, 64, 50265) dtype=float32 (created by layer &#39;tf_transformers/roberta&#39;)&gt;, &#39;last_token_logits&#39;: &lt;KerasTensor: shape=(1, 50265) dtype=float32 (created by layer &#39;tf_transformers/roberta&#39;)&gt;}
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="save-model-as-serialized-version">
+<h1>Save Model as Serialized Version<a class="headerlink" href="#save-model-as-serialized-version" title="Permalink to this headline">¶</a></h1>
+<p>We have to save the model using <code class="docutils literal notranslate"><span class="pre">model.save</span></code>. We use the <code class="docutils literal notranslate"><span class="pre">SavedModel</span></code> for converting it to <code class="docutils literal notranslate"><span class="pre">tflite</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/saved_model&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_name</span><span class="p">),</span> <span class="n">save_format</span><span class="o">=</span><span class="s1">&#39;tf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+WARNING:absl:Found untraced functions such as word_embeddings_layer_call_fn, word_embeddings_layer_call_and_return_conditional_losses, type_embeddings_layer_call_fn, type_embeddings_layer_call_and_return_conditional_losses, positional_embeddings_layer_call_fn while saving (showing 5 of 870). These functions will not be directly callable after loading.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Assets written to: roberta-base/saved_model/assets
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Assets written to: roberta-base/saved_model/assets
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7edda72790&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7edda3f490&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7edd7c8d10&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7edd969e10&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7edd9c5a50&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7edd86da10&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7edda6cd90&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7edda5db90&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7eddab7910&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7eddbd2950&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7eddb13c50&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttention object at 0x7f7edd8f9850&gt; has the same name &#39;MultiHeadAttention&#39; as a built-in Keras object. Consider renaming &lt;class &#39;tf_transformers.layers.attention.bert_attention.MultiHeadAttention&#39;&gt; to avoid naming conflicts when loading with `tf.keras.models.load_model`. If renaming is not possible, pass the object in the `custom_objects` parameter of the load function.
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="convert-savedmodel-to-tflite">
+<h1>Convert SavedModel to TFlite<a class="headerlink" href="#convert-savedmodel-to-tflite" title="Permalink to this headline">¶</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">converter</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">lite</span><span class="o">.</span><span class="n">TFLiteConverter</span><span class="o">.</span><span class="n">from_saved_model</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/saved_model&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_name</span><span class="p">))</span> <span class="c1"># path to the SavedModel directory</span>
+<span class="n">converter</span><span class="o">.</span><span class="n">experimental_new_converter</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="n">tflite_model</span> <span class="o">=</span> <span class="n">converter</span><span class="o">.</span><span class="n">convert</span><span class="p">()</span>
+
+<span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/saved_model.tflite&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_name</span><span class="p">),</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tflite_model</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TFlite conversion succesful&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:absl:Buffer deduplication procedure will be skipped when flatbuffer library is not properly loaded
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>TFlite conversion succesful
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="load-tflite-model">
+<h1>Load TFlite Model<a class="headerlink" href="#load-tflite-model" title="Permalink to this headline">¶</a></h1>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the TFLite model and allocate tensors.</span>
+<span class="n">interpreter</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">lite</span><span class="o">.</span><span class="n">Interpreter</span><span class="p">(</span><span class="n">model_path</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/saved_model.tflite&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_name</span><span class="p">))</span>
+<span class="n">interpreter</span><span class="o">.</span><span class="n">allocate_tensors</span><span class="p">()</span>
+
+<span class="c1"># Get input and output tensors.</span>
+<span class="n">input_details</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">get_input_details</span><span class="p">()</span>
+<span class="n">output_details</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">get_output_details</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="assert-tflite-model-and-keras-model-outputs">
+<h1>Assert TFlite Model and Keras Model outputs<a class="headerlink" href="#assert-tflite-model-and-keras-model-outputs" title="Permalink to this headline">¶</a></h1>
+<p>After conversion we have to assert the model outputs using
+<code class="docutils literal notranslate"><span class="pre">tflite</span></code> and <code class="docutils literal notranslate"><span class="pre">Keras</span></code> model, to ensure proper conversion.</p>
+<ol class="simple">
+<li><p>Create examples using <code class="docutils literal notranslate"><span class="pre">tf.random.uniform</span></code>.</p></li>
+<li><p>Check outputs using both models.</p></li>
+<li><p>Note: We need slightly higher <code class="docutils literal notranslate"><span class="pre">rtol</span></code> here to assert.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Dummy Examples </span>
+<span class="n">input_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">minval</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">sequence_length</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+<span class="n">input_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">input_ids</span><span class="p">)</span>
+<span class="n">input_type_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">input_ids</span><span class="p">)</span>
+
+
+<span class="c1"># input type ids</span>
+<span class="n">interpreter</span><span class="o">.</span><span class="n">set_tensor</span><span class="p">(</span>
+    <span class="n">input_details</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">],</span>
+    <span class="n">input_type_ids</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># input_mask</span>
+<span class="n">interpreter</span><span class="o">.</span><span class="n">set_tensor</span><span class="p">(</span><span class="n">input_details</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">],</span> <span class="n">input_mask</span><span class="p">)</span>
+
+<span class="c1"># input ids</span>
+<span class="n">interpreter</span><span class="o">.</span><span class="n">set_tensor</span><span class="p">(</span>
+    <span class="n">input_details</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">],</span>
+    <span class="n">input_ids</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Invoke inputs</span>
+<span class="n">interpreter</span><span class="o">.</span><span class="n">invoke</span><span class="p">()</span>
+<span class="c1"># Take last output</span>
+<span class="n">tflite_output</span> <span class="o">=</span> <span class="n">interpreter</span><span class="o">.</span><span class="n">get_tensor</span><span class="p">(</span><span class="n">output_details</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">])</span>
+
+<span class="c1"># Keras Model outputs .</span>
+<span class="n">model_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;input_ids&#39;</span><span class="p">:</span> <span class="n">input_ids</span><span class="p">,</span> <span class="s1">&#39;input_mask&#39;</span><span class="p">:</span> <span class="n">input_mask</span><span class="p">,</span> <span class="s1">&#39;input_type_ids&#39;</span><span class="p">:</span> <span class="n">input_type_ids</span><span class="p">}</span>
+<span class="n">model_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">model_inputs</span><span class="p">)</span>
+
+<span class="c1"># We need a slightly higher rtol here to assert :-)</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">debugging</span><span class="o">.</span><span class="n">assert_near</span><span class="p">(</span><span class="n">tflite_output</span><span class="p">,</span> <span class="n">model_outputs</span><span class="p">[</span><span class="s1">&#39;token_embeddings&#39;</span><span class="p">],</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputs asserted and succesful:  ✅&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Outputs asserted and succesful:  ✅
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

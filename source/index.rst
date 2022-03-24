@@ -313,6 +313,14 @@ Flax), PyTorch, and/or TensorFlow.
     tutorials/2_text_classification_imdb_albert
     tutorials/3_masked_lm_tpu
     tutorials/4_image_classification_vit_multi_gpu
+    tutorials/5_sentence_embedding_roberta_quora_zeroshot
+
+.. toctree::
+    :maxdepth: 2
+    :caption: TFLite Tutorials
+    tflite_tutorials/albert_tflite
+    tflite_tutorials/bert_tflite
+    tflite_tutorials/roberta_tflite
 
 
 

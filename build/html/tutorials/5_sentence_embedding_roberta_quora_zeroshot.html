@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+<meta property="og:title" content="Create Sentence Embedding Roberta Model + Zeroshot from Scratch" />
+  
+<meta property="og:type" content="website" />
+  
+<meta property="og:url" content="tutorials/5_sentence_embedding_roberta_quora_zeroshot.html" />
+  
+<meta property="og:description" content="This tutorial contains complete code to fine-tune Roberta to build meaningful sentence transformers using Quora Dataset from HuggingFace. In addition to trai..." />
+  
+<meta property="og:image" content="png location" />
+  
+<meta property="og:image:alt" content="Create Sentence Embedding Roberta Model + Zeroshot from Scratch" />
+  
+<meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Sentence Embedding Roberta Model + Zeroshot from Scratch &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ALBERT Tokenizer" href="../model_doc/albert_tokenizer.html" />
+    <link rel="prev" title="Classify Flowers (Image Classification) with ViT using multi-GPU" href="4_image_classification_vit_multi_gpu.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="2_text_classification_imdb_albert.html">Classify text (MRPC) with Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="3_masked_lm_tpu.html">Train (Masked Language Model) with tf-transformers in TPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-training-tfrecords-using-quora">Prepare Training TFRecords using Quora</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-validation-tfrecords-using-sts-b">Prepare Validation TFRecords using STS-b</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-training-and-validation-dataset-from-tfrecords">Prepare  Training and Validation Dataset from TFRecords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-sentence-transformer-model">Build Sentence Transformer Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-model-optimizer-trainer">Load Model, Optimizer , Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wandb-configuration">Wandb Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#zero-shot-on-sts-before-training">Zero-Shot on STS before Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-hyperparameters-and-configs">Set Hyperparameters and Configs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#train">Train :-)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualize-the-tensorboard">Visualize the Tensorboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-trained-model-for-testing-and-save-it-as-serialzed-model">Load Trained Model for Testing and Save it as serialzed model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-serialization-production">Model Serialization (Production)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quora-sentence-embeddings">Quora Sentence Embeddings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#most-similar-sentences">Most Similar Sentences</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Create Sentence Embedding Roberta Model + Zeroshot from Scratch</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/5_sentence_embedding_roberta_quora_zeroshot.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="tex2jax_ignore mathjax_ignore section" id="create-sentence-embedding-roberta-model-zeroshot-from-scratch">
+<h1>Create Sentence Embedding Roberta Model + Zeroshot from Scratch<a class="headerlink" href="#create-sentence-embedding-roberta-model-zeroshot-from-scratch" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial contains complete code to fine-tune Roberta to build meaningful sentence transformers using Quora Dataset from HuggingFace.
+In addition to training a model, you will learn how to preprocess text into an appropriate format.</p>
+<p>In this notebook, you will:</p>
+<ul class="simple">
+<li><p>Load the Quora dataset from HuggingFace</p></li>
+<li><p>Load Roberta Model using tf-transformers</p></li>
+<li><p>Build train and validation dataset  feature preparation using
+tokenizer from transformers.</p></li>
+<li><p>Build your own model by combining Roberta with a CustomWrapper</p></li>
+<li><p>Train your own model, fine-tuning Roberta as part of that</p></li>
+<li><p>Save your model and use it to extract sentence embeddings</p></li>
+<li><p>Use the end-to-end (inference) in production setup</p></li>
+</ul>
+<p>If you’re new to working with the Quora dataset, please see <a class="reference external" href="https://huggingface.co/datasets/quora">QUORA</a> for more details.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+
+<span class="o">!</span>pip install transformers
+
+<span class="o">!</span>pip install wandb
+
+<span class="o">!</span>pip install datasets
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">wandb</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">tqdm</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tensorflow version&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Devices&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">list_physical_devices</span><span class="p">())</span>
+
+<span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">RobertaModel</span><span class="p">,</span> <span class="n">Classification_Model</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">Trainer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.optimization</span> <span class="kn">import</span> <span class="n">create_optimizer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.data</span> <span class="kn">import</span> <span class="n">TFWriter</span><span class="p">,</span> <span class="n">TFReader</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.losses</span> <span class="kn">import</span> <span class="n">cross_entropy_loss_for_classification</span>
+
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">RobertaTokenizer</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tensorflow version 2.7.0
+Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;CPU&#39;), PhysicalDevice(name=&#39;/physical_device:GPU:0&#39;, device_type=&#39;GPU&#39;), PhysicalDevice(name=&#39;/physical_device:GPU:1&#39;, device_type=&#39;GPU&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Dataset</span>
+<span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;roberta-base&#39;</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;quora&quot;</span><span class="p">)</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">RobertaTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+
+<span class="c1"># Load validation dataset</span>
+<span class="n">sts_b</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;stsb_multi_mt&quot;</span><span class="p">,</span> <span class="s1">&#39;en&#39;</span><span class="p">)</span>
+
+<span class="c1"># Define length for examples</span>
+<span class="n">max_sequence_length</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">128</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Using custom data configuration default
+Reusing dataset quora (/home/jovyan/.cache/huggingface/datasets/quora/default/0.0.0/36ba4cd42107f051a158016f1bea6ae3f4685c5df843529108a54e42d86c1e04)
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "629843610aa143b5844179e02574e5f6", "version_major": 2, "version_minor": 0}
+</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reusing dataset stsb_multi_mt (/home/jovyan/.cache/huggingface/datasets/stsb_multi_mt/en/1.0.0/a5d260e4b7aa82d1ab7379523a005a366d9b124c76a5a5cf0c4c5365458b0ba9)
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "b30cba25a78b4b0c9428d646f905f55c", "version_major": 2, "version_minor": 0}
+</script></div>
+</div>
+<div class="section" id="prepare-training-tfrecords-using-quora">
+<h2>Prepare Training TFRecords using Quora<a class="headerlink" href="#prepare-training-tfrecords-using-quora" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><ol class="simple">
+<li><p>Download Quora dataset.</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>We will take only those row where <code class="docutils literal notranslate"><span class="pre">is_duplicate=True</span></code>. The model will be trained using <code class="docutils literal notranslate"><span class="pre">in-batch</span></code> negative loss.</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>Example data looks like a pair of sentences
+<code class="docutils literal notranslate"><span class="pre">sentence1</span> <span class="pre">(left</span> <span class="pre">sentence):</span> <span class="pre">What</span> <span class="pre">is</span> <span class="pre">the</span> <span class="pre">best</span> <span class="pre">Android</span> <span class="pre">smartphone?,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">sentence2</span> <span class="pre">(right</span> <span class="pre">sentence):</span> <span class="pre">What</span> <span class="pre">is</span> <span class="pre">the</span> <span class="pre">best</span> <span class="pre">Android</span> <span class="pre">smartphone</span> <span class="pre">ever?</span></code></p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_train</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_passage_length</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to parse examples which are is_duplicate=1</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (:obj:`dataet`): HF dataset</span>
+<span class="sd">        tokenizer (:obj:`tokenizer`): HF Tokenizer</span>
+<span class="sd">        max_passage_length (:obj:`int`): Passage Length</span>
+<span class="sd">        key (:obj:`str`): Key of dataset (`train`, `validation` etc)</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+       
+        <span class="n">question_left</span> <span class="p">,</span> <span class="n">question_right</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;questions&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>
+        <span class="n">question_left_input_ids</span> <span class="o">=</span>  <span class="n">tokenizer</span><span class="p">(</span><span class="n">question_left</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_passage_length</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span> 
+        <span class="n">question_right_input_ids</span>  <span class="o">=</span>  <span class="n">tokenizer</span><span class="p">(</span><span class="n">question_right</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_passage_length</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>
+        
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_ids_left&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">question_left_input_ids</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_ids_right&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">question_right_input_ids</span>
+        
+        <span class="k">yield</span> <span class="n">result</span>
+        
+<span class="c1"># Write using TF Writer</span>
+<span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;input_ids_left&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;input_ids_right&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">)</span>
+    
+<span class="p">}</span>
+
+<span class="n">tfrecord_train_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+<span class="n">tfrecord_filename</span> <span class="o">=</span> <span class="s1">&#39;quora&#39;</span>
+
+<span class="n">tfwriter</span> <span class="o">=</span> <span class="n">TFWriter</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span> 
+                    <span class="n">file_name</span><span class="o">=</span><span class="n">tfrecord_filename</span><span class="p">,</span> 
+                    <span class="n">model_dir</span><span class="o">=</span><span class="n">tfrecord_train_dir</span><span class="p">,</span>
+                    <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;train&#39;</span><span class="p">,</span>
+                    <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+
+<span class="c1"># Train dataset</span>
+<span class="n">train_parser_fn</span> <span class="o">=</span> <span class="n">parse_train</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_sequence_length</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;train&#39;</span><span class="p">)</span>
+<span class="n">tfwriter</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">parse_fn</span><span class="o">=</span><span class="n">train_parser_fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Total individual observations/examples written is 404290 in 276.39959359169006 seconds
+INFO:absl:All writer objects closed
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="prepare-validation-tfrecords-using-sts-b">
+<h2>Prepare Validation TFRecords using STS-b<a class="headerlink" href="#prepare-validation-tfrecords-using-sts-b" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>Download STS dataset.</p></li>
+<li><p>We will use this dataset to measure sentence embeddings by measuring the correlation</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_dev</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_passage_length</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to parse examples which are is_duplicate=1</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (:obj:`dataet`): HF dataset</span>
+<span class="sd">        tokenizer (:obj:`tokenizer`): HF Tokenizer</span>
+<span class="sd">        max_passage_length (:obj:`int`): Passage Length</span>
+<span class="sd">        key (:obj:`str`): Key of dataset (`train`, `validation` etc)</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">max_score</span> <span class="o">=</span> <span class="mf">5.0</span>
+    <span class="n">min_score</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+        
+        <span class="n">question_left</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;sentence1&#39;</span><span class="p">]</span>
+        <span class="n">question_right</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;sentence2&#39;</span><span class="p">]</span>
+        <span class="n">question_left_input_ids</span> <span class="o">=</span>  <span class="n">tokenizer</span><span class="p">(</span><span class="n">question_left</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_passage_length</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span> 
+        <span class="n">question_right_input_ids</span>  <span class="o">=</span>  <span class="n">tokenizer</span><span class="p">(</span><span class="n">question_right</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_passage_length</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>
+        
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_ids_left&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">question_left_input_ids</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_ids_right&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">question_right_input_ids</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;similarity_score&#39;</span><span class="p">]</span>
+        <span class="c1"># Normalize scores</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">score</span> <span class="o">-</span> <span class="n">min_score</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">max_score</span> <span class="o">-</span> <span class="n">min_score</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">result</span>
+        
+<span class="c1"># Write using TF Writer</span>
+<span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;input_ids_left&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;input_ids_right&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;float&quot;</span><span class="p">)</span>
+    
+<span class="p">}</span>
+
+<span class="n">tfrecord_validation_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+<span class="n">tfrecord_validation_filename</span> <span class="o">=</span> <span class="s1">&#39;sts&#39;</span>
+
+<span class="n">tfwriter</span> <span class="o">=</span> <span class="n">TFWriter</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span> 
+                    <span class="n">file_name</span><span class="o">=</span><span class="n">tfrecord_validation_filename</span><span class="p">,</span> 
+                    <span class="n">model_dir</span><span class="o">=</span><span class="n">tfrecord_validation_dir</span><span class="p">,</span>
+                    <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;eval&#39;</span><span class="p">,</span>
+                    <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+
+<span class="c1"># Train dataset</span>
+<span class="n">dev_parser_fn</span> <span class="o">=</span> <span class="n">parse_dev</span><span class="p">(</span><span class="n">sts_b</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_sequence_length</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;dev&#39;</span><span class="p">)</span>
+<span class="n">tfwriter</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">parse_fn</span><span class="o">=</span><span class="n">dev_parser_fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Total individual observations/examples written is 1500 in 1.0107736587524414 seconds
+INFO:absl:All writer objects closed
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="prepare-training-and-validation-dataset-from-tfrecords">
+<h2>Prepare  Training and Validation Dataset from TFRecords<a class="headerlink" href="#prepare-training-and-validation-dataset-from-tfrecords" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read TFRecord</span>
+
+<span class="k">def</span> <span class="nf">add_mask_type_ids</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+    
+    <span class="n">item</span><span class="p">[</span><span class="s1">&#39;input_mask_left&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;input_ids_left&#39;</span><span class="p">])</span>
+    <span class="n">item</span><span class="p">[</span><span class="s1">&#39;input_type_ids_left&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;input_ids_left&#39;</span><span class="p">])</span>
+    <span class="n">item</span><span class="p">[</span><span class="s1">&#39;input_mask_right&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;input_ids_right&#39;</span><span class="p">])</span>
+    <span class="n">item</span><span class="p">[</span><span class="s1">&#39;input_type_ids_right&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;input_ids_right&#39;</span><span class="p">])</span>
+    
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="s1">&#39;score&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]}</span>
+        <span class="k">del</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">item</span><span class="p">,</span> <span class="n">labels</span>
+
+<span class="c1"># Train dataset</span>
+<span class="n">schema</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/schema.json&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_train_dir</span><span class="p">)))</span>
+<span class="n">total_train_examples</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/stats.json&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_train_dir</span><span class="p">)))[</span><span class="s1">&#39;total_records&#39;</span><span class="p">]</span>
+
+
+<span class="n">all_files</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">gfile</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/*.tfrecord&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_train_dir</span><span class="p">))</span>
+<span class="n">tf_reader</span> <span class="o">=</span> <span class="n">TFReader</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span> 
+                    <span class="n">tfrecord_files</span><span class="o">=</span><span class="n">all_files</span><span class="p">)</span>
+
+<span class="n">x_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;input_ids_left&#39;</span><span class="p">,</span> <span class="s1">&#39;input_ids_right&#39;</span><span class="p">]</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">tf_reader</span><span class="o">.</span><span class="n">read_record</span><span class="p">(</span><span class="n">auto_batch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                                   <span class="n">keys</span><span class="o">=</span><span class="n">x_keys</span><span class="p">,</span>
+                                   <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> 
+                                   <span class="n">x_keys</span> <span class="o">=</span> <span class="n">x_keys</span><span class="p">,</span> 
+                                   <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
+                                  <span class="p">)</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">train_dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">add_mask_type_ids</span><span class="p">,</span> <span class="n">num_parallel_calls</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">AUTOTUNE</span><span class="p">)</span><span class="o">.</span><span class="n">padded_batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="c1"># Validation dataset</span>
+<span class="n">val_schema</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/schema.json&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_validation_dir</span><span class="p">)))</span>
+<span class="n">all_val_files</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">gfile</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/*.tfrecord&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_validation_dir</span><span class="p">))</span>
+<span class="n">tf_reader_val</span> <span class="o">=</span> <span class="n">TFReader</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">val_schema</span><span class="p">,</span> 
+                    <span class="n">tfrecord_files</span><span class="o">=</span><span class="n">all_val_files</span><span class="p">)</span>
+
+<span class="n">x_keys_val</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;input_ids_left&#39;</span><span class="p">,</span> <span class="s1">&#39;input_ids_right&#39;</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">]</span>
+<span class="n">validation_dataset</span> <span class="o">=</span> <span class="n">tf_reader_val</span><span class="o">.</span><span class="n">read_record</span><span class="p">(</span><span class="n">auto_batch</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                                   <span class="n">keys</span><span class="o">=</span><span class="n">x_keys_val</span><span class="p">,</span>
+                                   <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> 
+                                   <span class="n">x_keys</span> <span class="o">=</span> <span class="n">x_keys_val</span><span class="p">,</span> 
+                                   <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
+                                  <span class="p">)</span>
+
+<span class="c1"># Static shapes makes things faster inside tf.function</span>
+<span class="c1"># Especially for validation as we are passing batch examples to tf.function</span>
+<span class="n">padded_shapes</span> <span class="o">=</span> <span class="p">({</span><span class="s1">&#39;input_ids_left&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">max_sequence_length</span><span class="p">,],</span> 
+                 <span class="s1">&#39;input_mask_left&#39;</span><span class="p">:[</span><span class="n">max_sequence_length</span><span class="p">,],</span>
+                 <span class="s1">&#39;input_type_ids_left&#39;</span><span class="p">:[</span><span class="n">max_sequence_length</span><span class="p">,],</span>
+                 <span class="s1">&#39;input_ids_right&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">max_sequence_length</span><span class="p">,],</span>
+                 <span class="s1">&#39;input_mask_right&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">max_sequence_length</span><span class="p">,],</span>
+                 <span class="s1">&#39;input_type_ids_right&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">max_sequence_length</span><span class="p">,]</span>
+                <span class="p">},</span> 
+                 <span class="p">{</span><span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,]})</span>
+<span class="n">validation_dataset</span> <span class="o">=</span> <span class="n">validation_dataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">add_mask_type_ids</span><span class="p">,</span>
+                                            <span class="n">num_parallel_calls</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">AUTOTUNE</span><span class="p">)</span><span class="o">.</span><span class="n">padded_batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span>
+                                                                                              <span class="n">drop_remainder</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                                                              <span class="n">padded_shapes</span><span class="o">=</span><span class="n">padded_shapes</span>
+                                                                                              <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2022-03-23 01:10:07.501286: I tensorflow/core/platform/cpu_feature_guard.cc:151] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2022-03-23 01:10:08.934282: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1525] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 30945 MB memory:  -&gt; device: 0, name: Tesla V100-SXM2-32GB, pci bus id: 0000:07:00.0, compute capability: 7.0
+2022-03-23 01:10:08.938622: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1525] Created device /job:localhost/replica:0/task:0/device:GPU:1 with 30945 MB memory:  -&gt; device: 1, name: Tesla V100-SXM2-32GB, pci bus id: 0000:86:00.0, compute capability: 7.0
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="build-sentence-transformer-model">
+<h2>Build Sentence Transformer Model<a class="headerlink" href="#build-sentence-transformer-model" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">LegacyLayer</span><span class="p">,</span> <span class="n">LegacyModel</span>
+
+
+<span class="k">class</span> <span class="nc">Sentence_Embedding_Model</span><span class="p">(</span><span class="n">LegacyLayer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">is_training</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">use_dropout</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Simple Sentence Embedding using Keras Layer</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (:obj:`LegacyLayer/LegacyModel`):</span>
+<span class="sd">                Model.</span>
+<span class="sd">                Eg:`~tf_transformers.model.BertModel`.</span>
+<span class="sd">            is_training (:obj:`bool`, `optional`, defaults to False): To train</span>
+<span class="sd">            use_dropout (:obj:`bool`, `optional`, defaults to False): Use dropout</span>
+<span class="sd">            use_bias (:obj:`bool`, `optional`, defaults to True): use bias</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Sentence_Embedding_Model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">is_training</span><span class="o">=</span><span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="n">use_dropout</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">LegacyModel</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_config</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Layer</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_config_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_training</span> <span class="o">=</span> <span class="n">is_training</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_dropout</span> <span class="o">=</span> <span class="n">use_dropout</span>
+
+        <span class="c1"># Initialize model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">initialize_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">get_mean_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_embeddings</span><span class="p">,</span> <span class="n">input_mask</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mean embeddings</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cls_embeddings</span> <span class="o">=</span> <span class="n">token_embeddings</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="c1"># 0 is CLS (&lt;s&gt;)</span>
+        <span class="c1"># mask PAD tokens</span>
+        <span class="n">token_emb_masked</span> <span class="o">=</span> <span class="n">token_embeddings</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">input_mask</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">total_non_padded_tokens_per_batch</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">input_mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="c1"># Convert to 2D</span>
+        <span class="n">total_non_padded_tokens_per_batch</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">total_non_padded_tokens_per_batch</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">mean_embeddings</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">token_emb_masked</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span> <span class="n">total_non_padded_tokens_per_batch</span>
+        <span class="k">return</span> <span class="n">mean_embeddings</span>
+
+    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Call&quot;&quot;&quot;</span>
+        
+        <span class="c1"># Extract left and right input pairs</span>
+        <span class="n">left_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_left&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;left&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">}</span>
+        <span class="n">right_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_right&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;right&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">}</span>
+        <span class="n">model_outputs_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">left_inputs</span><span class="p">)</span>
+        <span class="n">model_outputs_right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">right_inputs</span><span class="p">)</span>
+        
+        <span class="n">left_cls</span> <span class="o">=</span> <span class="n">model_outputs_left</span><span class="p">[</span><span class="s1">&#39;cls_output&#39;</span><span class="p">]</span>
+        <span class="n">right_cls</span> <span class="o">=</span> <span class="n">model_outputs_right</span><span class="p">[</span><span class="s1">&#39;cls_output&#39;</span><span class="p">]</span>        
+
+        <span class="n">left_mean_embeddings</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mean_embeddings</span><span class="p">(</span><span class="n">model_outputs_left</span><span class="p">[</span><span class="s1">&#39;token_embeddings&#39;</span><span class="p">],</span> <span class="n">left_inputs</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">])</span>
+        <span class="n">right_mean_embeddings</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mean_embeddings</span><span class="p">(</span><span class="n">model_outputs_right</span><span class="p">[</span><span class="s1">&#39;token_embeddings&#39;</span><span class="p">],</span> <span class="n">right_inputs</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">])</span>
+        
+        <span class="n">cls_logits</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">left_cls</span><span class="p">,</span> <span class="n">right_cls</span><span class="p">,</span> <span class="n">transpose_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">mean_logits</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">left_mean_embeddings</span><span class="p">,</span> <span class="n">right_mean_embeddings</span><span class="p">,</span> <span class="n">transpose_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;left_cls_output&#39;</span><span class="p">:</span> <span class="n">left_cls</span><span class="p">,</span> 
+                   <span class="s1">&#39;right_cls_output&#39;</span><span class="p">:</span> <span class="n">right_cls</span><span class="p">,</span> 
+                   <span class="s1">&#39;left_mean_embeddings&#39;</span><span class="p">:</span> <span class="n">left_mean_embeddings</span><span class="p">,</span>
+                   <span class="s1">&#39;right_mean_embeddings&#39;</span><span class="p">:</span> <span class="n">right_mean_embeddings</span><span class="p">,</span>
+                   <span class="s1">&#39;cls_logits&#39;</span><span class="p">:</span> <span class="n">cls_logits</span><span class="p">,</span> 
+                   <span class="s1">&#39;mean_logits&#39;</span><span class="p">:</span> <span class="n">mean_logits</span><span class="p">}</span>
+        
+        <span class="k">return</span> <span class="n">results</span>
+        
+
+    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialize_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get model&quot;&quot;&quot;</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input</span>
+        <span class="c1"># Left and Right inputs</span>
+        <span class="n">main_inputs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">main_inputs</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;_left&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+                            <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;_left&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">dtype</span>
+                        <span class="p">)</span>
+            
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">main_inputs</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;_right&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+                            <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="s1">&#39;_right&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">dtype</span>
+                        <span class="p">)</span>        
+        <span class="n">layer_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">main_inputs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initialize_only</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">main_inputs</span><span class="p">,</span> <span class="n">layer_outputs</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">LegacyModel</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">main_inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">layer_outputs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;sentence_embedding_model&quot;</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">model_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_config</span>
+        <span class="k">return</span> <span class="n">model</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="load-model-optimizer-trainer">
+<h2>Load Model, Optimizer , Trainer<a class="headerlink" href="#load-model-optimizer-trainer" title="Permalink to this headline">¶</a></h2>
+<p>Our Trainer expects <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> and <code class="docutils literal notranslate"><span class="pre">loss</span></code> to be a function.</p>
+<ul class="simple">
+<li><ol class="simple">
+<li><p>We will use <code class="docutils literal notranslate"><span class="pre">Roberta</span></code> as the base model and pass it to <code class="docutils literal notranslate"><span class="pre">Sentence_Embedding_Model</span></code>, layer we built</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>We will use <code class="docutils literal notranslate"><span class="pre">in-batch</span></code> loss as the loss function, where every diagonal entry in the output is positive
+and rest is negative</p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Model</span>
+<span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">model_fn</span><span class="p">():</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">RobertaModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+        <span class="n">sentence_transformers_model</span> <span class="o">=</span> <span class="n">Sentence_Embedding_Model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">sentence_transformers_model</span> <span class="o">=</span> <span class="n">sentence_transformers_model</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">sentence_transformers_model</span>
+    <span class="k">return</span> <span class="n">model_fn</span>
+
+<span class="c1"># Load Optimizer</span>
+<span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
+    <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">examples</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">num_train_steps</span> <span class="o">=</span> <span class="n">steps_per_epoch</span> <span class="o">*</span> <span class="n">epochs</span>
+    <span class="n">warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">num_train_steps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">optimizer_fn</span><span class="p">():</span>
+        <span class="n">optimizer</span><span class="p">,</span> <span class="n">learning_rate_fn</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">num_train_steps</span><span class="p">,</span> <span class="n">warmup_steps</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="n">use_constant_lr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">optimizer</span>
+
+    <span class="k">return</span> <span class="n">optimizer_fn</span>
+
+<span class="c1"># Load trainer</span>
+<span class="k">def</span> <span class="nf">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="n">num_gpus</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="n">tpu_address</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">trainer</span>
+
+<span class="c1"># Create loss</span>
+<span class="k">def</span> <span class="nf">in_batch_negative_loss</span><span class="p">():</span>
+    
+    <span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">y_true_dict</span><span class="p">,</span> <span class="n">y_pred_dict</span><span class="p">):</span>
+        
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">y_pred_dict</span><span class="p">[</span><span class="s1">&#39;cls_logits&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">cls_loss</span>  <span class="o">=</span> <span class="n">cross_entropy_loss_for_classification</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">logits</span><span class="o">=</span><span class="n">y_pred_dict</span><span class="p">[</span><span class="s1">&#39;cls_logits&#39;</span><span class="p">])</span>
+        <span class="n">mean_loss</span> <span class="o">=</span> <span class="n">cross_entropy_loss_for_classification</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">logits</span><span class="o">=</span><span class="n">y_pred_dict</span><span class="p">[</span><span class="s1">&#39;mean_logits&#39;</span><span class="p">])</span>
+        
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;cls_loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls_loss</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;mean_loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mean_loss</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cls_loss</span> <span class="o">+</span> <span class="n">mean_loss</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="k">return</span> <span class="n">loss_fn</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="wandb-configuration">
+<h2>Wandb Configuration<a class="headerlink" href="#wandb-configuration" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALS&quot;</span>
+<span class="n">display_name</span> <span class="o">=</span> <span class="s2">&quot;roberta_quora_sentence_embedding&quot;</span>
+<span class="n">wandb</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">display_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="zero-shot-on-sts-before-training">
+<h2>Zero-Shot on STS before Training<a class="headerlink" href="#zero-shot-on-sts-before-training" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><ol class="simple">
+<li><p>Lets evaluate how good <code class="docutils literal notranslate"><span class="pre">Roberta</span></code> is to capture sentence embeddings before <code class="docutils literal notranslate"><span class="pre">fine-tuning</span></code> with Quora.</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>This gives us an indication whether the model is learning something or not on downstream fine-tuning.</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>We use <code class="docutils literal notranslate"><span class="pre">CLS_OUTPUT</span></code>, pooler output of <code class="docutils literal notranslate"><span class="pre">Roberta</span></code> model as sentence embedding and evaluate using
+<code class="docutils literal notranslate"><span class="pre">pearson</span></code> and <code class="docutils literal notranslate"><span class="pre">spearman</span></code> correlation.</p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">paired_cosine_distances</span><span class="p">,</span> <span class="n">paired_euclidean_distances</span><span class="p">,</span> <span class="n">paired_manhattan_distances</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">spearmanr</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">RobertaModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+
+<span class="n">sentence1_embeddings</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">sentence2_embeddings</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">sts_labels</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_labels</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">validation_dataset</span><span class="p">):</span>
+    <span class="n">left_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_left&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">batch_inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;left&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">}</span>
+    <span class="n">right_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_right&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">batch_inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;right&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">}</span>
+    <span class="n">left_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">left_inputs</span><span class="p">)</span>
+    <span class="n">right_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">right_inputs</span><span class="p">)</span>
+    
+    <span class="c1"># sentence 1 embeddings</span>
+    <span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">left_outputs</span><span class="p">[</span><span class="s1">&#39;cls_output&#39;</span><span class="p">])</span>
+    <span class="c1"># sentence 2 embeddings</span>
+    <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">right_outputs</span><span class="p">[</span><span class="s1">&#39;cls_output&#39;</span><span class="p">])</span>
+    <span class="n">sts_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch_labels</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">])</span>
+    
+<span class="n">sts_labels</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">sentence1_embeddings</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sentence2_embeddings</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sentence2_embeddings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">cosine_scores</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">paired_cosine_distances</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">()))</span>
+<span class="n">manhattan_distances</span> <span class="o">=</span> <span class="o">-</span><span class="n">paired_manhattan_distances</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+<span class="n">euclidean_distances</span> <span class="o">=</span> <span class="o">-</span><span class="n">paired_euclidean_distances</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+<span class="n">dot_products</span>        <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">emb1</span><span class="p">,</span> <span class="n">emb2</span><span class="p">)</span> <span class="k">for</span> <span class="n">emb1</span><span class="p">,</span> <span class="n">emb2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">())]</span>
+
+
+<span class="n">eval_pearson_cosine</span><span class="p">,</span> <span class="n">_</span>    <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">cosine_scores</span><span class="p">)</span>
+<span class="n">eval_spearman_cosine</span><span class="p">,</span> <span class="n">_</span>   <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">cosine_scores</span><span class="p">)</span>
+
+<span class="n">eval_pearson_manhattan</span><span class="p">,</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">manhattan_distances</span><span class="p">)</span>
+<span class="n">eval_spearman_manhattan</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">manhattan_distances</span><span class="p">)</span>
+
+<span class="n">eval_pearson_euclidean</span><span class="p">,</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">euclidean_distances</span><span class="p">)</span>
+<span class="n">eval_spearman_euclidean</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">euclidean_distances</span><span class="p">)</span>
+
+<span class="n">eval_pearson_dot</span><span class="p">,</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">dot_products</span><span class="p">)</span>
+<span class="n">eval_spearman_dot</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">dot_products</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cosine-Similarity :</span><span class="se">\t</span><span class="s2">Pearson: </span><span class="si">{:.4f}</span><span class="se">\t</span><span class="s2">Spearman: </span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="n">eval_pearson_cosine</span><span class="p">,</span> <span class="n">eval_spearman_cosine</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Manhattan-Distance:</span><span class="se">\t</span><span class="s2">Pearson: </span><span class="si">{:.4f}</span><span class="se">\t</span><span class="s2">Spearman: </span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="n">eval_pearson_manhattan</span><span class="p">,</span> <span class="n">eval_spearman_manhattan</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Euclidean-Distance:</span><span class="se">\t</span><span class="s2">Pearson: </span><span class="si">{:.4f}</span><span class="se">\t</span><span class="s2">Spearman: </span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="n">eval_pearson_euclidean</span><span class="p">,</span> <span class="n">eval_spearman_euclidean</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dot-Product-Similarity:</span><span class="se">\t</span><span class="s2">Pearson: </span><span class="si">{:.4f}</span><span class="se">\t</span><span class="s2">Spearman: </span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="n">eval_pearson_dot</span><span class="p">,</span> <span class="n">eval_spearman_dot</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /home/jovyan/.cache/huggingface/hub/tftransformers__roberta-base-no-mlm.main.9e4aa91ba5936c6ac98586f85c152831e421d0ec/ckpt-1
+INFO:absl:Successful ✅: Loaded model from tftransformers/roberta-base-no-mlm
+12it [00:12,  1.08s/it]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cosine-Similarity :	Pearson: 0.4278	Spearman: 0.5293
+Manhattan-Distance:	Pearson: 0.4329	Spearman: 0.5120
+Euclidean-Distance:	Pearson: 0.4365	Spearman: 0.5125
+Dot-Product-Similarity:	Pearson: -0.0079	Spearman: -0.0050
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tqdm</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">paired_cosine_distances</span><span class="p">,</span> <span class="n">paired_euclidean_distances</span><span class="p">,</span> <span class="n">paired_manhattan_distances</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">spearmanr</span>
+
+<span class="k">class</span> <span class="nc">STSEvaluationCallback</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trainer_kwargs</span><span class="p">):</span>
+
+        <span class="n">validation_dataset_distributed</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span>
+            <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;validation_dataset_distributed&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
+        <span class="n">wandb</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;wandb&quot;</span><span class="p">]</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;global_step&quot;</span><span class="p">]</span>
+        <span class="n">strategy</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;strategy&quot;</span><span class="p">]</span>
+        <span class="n">epoch</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">]</span>
+        <span class="n">epochs</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span>
+        <span class="n">validation_steps</span> <span class="o">=</span> <span class="n">trainer_kwargs</span><span class="p">[</span><span class="s2">&quot;validation_steps&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">validation_dataset_distributed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No validation dataset has been provided either in the trainer class, </span><span class="se">\</span>
+<span class="s2">                                 or when callback is initialized. Please provide a validation dataset&quot;</span>
+            <span class="p">)</span>
+
+        <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+        <span class="k">def</span> <span class="nf">validate_run</span><span class="p">(</span><span class="n">dist_inputs</span><span class="p">):</span>
+            <span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_labels</span> <span class="o">=</span> <span class="n">dist_inputs</span>
+            <span class="n">model_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">batch_inputs</span><span class="p">)</span>
+            <span class="n">s1_cls</span> <span class="o">=</span> <span class="n">model_outputs</span><span class="p">[</span><span class="s1">&#39;left_cls_output&#39;</span><span class="p">]</span>
+            <span class="n">s2_cls</span> <span class="o">=</span> <span class="n">model_outputs</span><span class="p">[</span><span class="s1">&#39;right_cls_output&#39;</span><span class="p">]</span>
+            
+            <span class="n">s1_mean</span> <span class="o">=</span> <span class="n">model_outputs</span><span class="p">[</span><span class="s1">&#39;left_mean_embeddings&#39;</span><span class="p">]</span>
+            <span class="n">s2_mean</span> <span class="o">=</span> <span class="n">model_outputs</span><span class="p">[</span><span class="s1">&#39;right_mean_embeddings&#39;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">s1_cls</span><span class="p">,</span> <span class="n">s2_cls</span><span class="p">,</span> <span class="n">s1_mean</span><span class="p">,</span> <span class="n">s2_mean</span><span class="p">,</span> <span class="n">batch_labels</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span>
+        
+        <span class="n">S1_cls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">S2_cls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">S1_mean</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">S2_mean</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sts_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># This is a hack to make tqdm to print colour bar</span>
+        <span class="c1"># TODO: fix it .</span>
+        <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">trange</span><span class="p">(</span><span class="n">validation_steps</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s2">&quot;magenta&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">step_counter</span> <span class="ow">in</span> <span class="n">pbar</span><span class="p">:</span>
+            <span class="n">dist_inputs</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">validation_dataset_distributed</span><span class="p">)</span>
+            <span class="n">s1_cls</span><span class="p">,</span> <span class="n">s2_cls</span><span class="p">,</span> <span class="n">s1_mean</span><span class="p">,</span> <span class="n">s2_mean</span><span class="p">,</span> <span class="n">batch_scores</span> <span class="o">=</span> <span class="n">strategy</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                <span class="n">validate_run</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">dist_inputs</span><span class="p">,)</span>
+            <span class="p">)</span>
+            <span class="n">s1_cls</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="n">trainer</span><span class="o">.</span><span class="n">distribution_strategy</span><span class="o">.</span><span class="n">experimental_local_results</span><span class="p">(</span><span class="n">s1_cls</span><span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">s2_cls</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                            <span class="n">trainer</span><span class="o">.</span><span class="n">distribution_strategy</span><span class="o">.</span><span class="n">experimental_local_results</span><span class="p">(</span><span class="n">s2_cls</span><span class="p">),</span>
+                            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="p">)</span>
+            <span class="n">s1_mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                            <span class="n">trainer</span><span class="o">.</span><span class="n">distribution_strategy</span><span class="o">.</span><span class="n">experimental_local_results</span><span class="p">(</span><span class="n">s1_mean</span><span class="p">),</span>
+                            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="p">)</span>
+            <span class="n">s2_mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                                <span class="n">trainer</span><span class="o">.</span><span class="n">distribution_strategy</span><span class="o">.</span><span class="n">experimental_local_results</span><span class="p">(</span><span class="n">s2_mean</span><span class="p">),</span>
+                                        <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                    <span class="p">)</span>
+            
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="n">trainer</span><span class="o">.</span><span class="n">distribution_strategy</span><span class="o">.</span><span class="n">experimental_local_results</span><span class="p">(</span>
+                    <span class="n">batch_scores</span>
+                <span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">S1_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s1_cls</span><span class="p">)</span>
+            <span class="n">S2_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s2_cls</span><span class="p">)</span>
+            <span class="n">S1_mean</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s1_mean</span><span class="p">)</span>
+            <span class="n">S2_mean</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s2_mean</span><span class="p">)</span>
+            <span class="n">sts_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+            <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span>
+                <span class="s2">&quot;Callback: Epoch </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2"> --- Step </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">epoch</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">step_counter</span><span class="p">,</span> <span class="n">validation_steps</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            
+            
+        <span class="n">sts_labels</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">sentence1_embeddings</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">S1_cls</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">sentence2_embeddings</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">S2_cls</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">cosine_scores</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">paired_cosine_distances</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">()))</span>
+        <span class="n">manhattan_distances</span> <span class="o">=</span> <span class="o">-</span><span class="n">paired_manhattan_distances</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="n">euclidean_distances</span> <span class="o">=</span> <span class="o">-</span><span class="n">paired_euclidean_distances</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="n">dot_products</span>        <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">emb1</span><span class="p">,</span> <span class="n">emb2</span><span class="p">)</span> <span class="k">for</span> <span class="n">emb1</span><span class="p">,</span> <span class="n">emb2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">())]</span>
+
+
+        <span class="n">eval_pearson_cosine</span><span class="p">,</span> <span class="n">_</span>    <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">cosine_scores</span><span class="p">)</span>
+        <span class="n">eval_spearman_cosine</span><span class="p">,</span> <span class="n">_</span>   <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">cosine_scores</span><span class="p">)</span>
+
+        <span class="n">eval_pearson_manhattan</span><span class="p">,</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">manhattan_distances</span><span class="p">)</span>
+        <span class="n">eval_spearman_manhattan</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">manhattan_distances</span><span class="p">)</span>
+
+        <span class="n">eval_pearson_euclidean</span><span class="p">,</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">euclidean_distances</span><span class="p">)</span>
+        <span class="n">eval_spearman_euclidean</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">euclidean_distances</span><span class="p">)</span>
+
+        <span class="n">eval_pearson_dot</span><span class="p">,</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">dot_products</span><span class="p">)</span>
+        <span class="n">eval_spearman_dot</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">dot_products</span><span class="p">)</span>
+
+        <span class="n">metrics_result</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;pearson_cosine_cls&#39;</span><span class="p">:</span> <span class="n">eval_pearson_cosine</span><span class="p">,</span>
+                          <span class="s1">&#39;spearman_cosine_cls&#39;</span><span class="p">:</span> <span class="n">eval_spearman_cosine</span><span class="p">,</span>
+                          <span class="s1">&#39;pearson_manhattan_cls&#39;</span><span class="p">:</span> <span class="n">eval_pearson_manhattan</span><span class="p">,</span> 
+                          <span class="s1">&#39;spearman_manhattan_cls&#39;</span><span class="p">:</span> <span class="n">eval_spearman_manhattan</span><span class="p">,</span> 
+                          <span class="s1">&#39;pearson_euclidean_cls&#39;</span><span class="p">:</span> <span class="n">eval_pearson_euclidean</span><span class="p">,</span> 
+                          <span class="s1">&#39;spearman_euclidean_cls&#39;</span><span class="p">:</span> <span class="n">eval_spearman_euclidean</span><span class="p">,</span> 
+                          <span class="s1">&#39;pearson_dot_cls&#39;</span><span class="p">:</span> <span class="n">eval_pearson_dot</span><span class="p">,</span> 
+                          <span class="s1">&#39;spearman_dot_cls&#39;</span><span class="p">:</span> <span class="n">eval_spearman_dot</span><span class="p">}</span>
+        
+        <span class="n">sentence1_embeddings</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">S1_mean</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">sentence2_embeddings</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">S2_mean</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">cosine_scores</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">paired_cosine_distances</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">()))</span>
+        <span class="n">manhattan_distances</span> <span class="o">=</span> <span class="o">-</span><span class="n">paired_manhattan_distances</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="n">euclidean_distances</span> <span class="o">=</span> <span class="o">-</span><span class="n">paired_euclidean_distances</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="n">dot_products</span>        <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">emb1</span><span class="p">,</span> <span class="n">emb2</span><span class="p">)</span> <span class="k">for</span> <span class="n">emb1</span><span class="p">,</span> <span class="n">emb2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sentence1_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">sentence2_embeddings</span><span class="o">.</span><span class="n">numpy</span><span class="p">())]</span>
+
+
+        <span class="n">eval_pearson_cosine</span><span class="p">,</span> <span class="n">_</span>    <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">cosine_scores</span><span class="p">)</span>
+        <span class="n">eval_spearman_cosine</span><span class="p">,</span> <span class="n">_</span>   <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">cosine_scores</span><span class="p">)</span>
+
+        <span class="n">eval_pearson_manhattan</span><span class="p">,</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">manhattan_distances</span><span class="p">)</span>
+        <span class="n">eval_spearman_manhattan</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">manhattan_distances</span><span class="p">)</span>
+
+        <span class="n">eval_pearson_euclidean</span><span class="p">,</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">euclidean_distances</span><span class="p">)</span>
+        <span class="n">eval_spearman_euclidean</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">euclidean_distances</span><span class="p">)</span>
+
+        <span class="n">eval_pearson_dot</span><span class="p">,</span> <span class="n">_</span>  <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">dot_products</span><span class="p">)</span>
+        <span class="n">eval_spearman_dot</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">spearmanr</span><span class="p">(</span><span class="n">sts_labels</span><span class="p">,</span> <span class="n">dot_products</span><span class="p">)</span>
+        
+        <span class="n">metrics_result_mean</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;pearson_cosine_mean&#39;</span><span class="p">:</span> <span class="n">eval_pearson_cosine</span><span class="p">,</span>
+                          <span class="s1">&#39;spearman_cosine_mean&#39;</span><span class="p">:</span> <span class="n">eval_spearman_cosine</span><span class="p">,</span>
+                          <span class="s1">&#39;pearson_manhattan_mean&#39;</span><span class="p">:</span> <span class="n">eval_pearson_manhattan</span><span class="p">,</span> 
+                          <span class="s1">&#39;spearman_manhattan_mean&#39;</span><span class="p">:</span> <span class="n">eval_spearman_manhattan</span><span class="p">,</span> 
+                          <span class="s1">&#39;pearson_euclidean_mean&#39;</span><span class="p">:</span> <span class="n">eval_pearson_euclidean</span><span class="p">,</span> 
+                          <span class="s1">&#39;spearman_euclidean_mean&#39;</span><span class="p">:</span> <span class="n">eval_spearman_euclidean</span><span class="p">,</span> 
+                          <span class="s1">&#39;pearson_dot_mean&#39;</span><span class="p">:</span> <span class="n">eval_pearson_dot</span><span class="p">,</span> 
+                          <span class="s1">&#39;spearman_dot_mean&#39;</span><span class="p">:</span> <span class="n">eval_spearman_dot</span><span class="p">}</span>
+        
+        <span class="n">metrics_result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">metrics_result_mean</span><span class="p">)</span>
+        <span class="n">pbar</span><span class="o">.</span><span class="n">set_postfix</span><span class="p">(</span><span class="o">**</span><span class="n">metrics_result</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">wandb</span><span class="p">:</span>
+            <span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">metrics_result</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">metrics_result</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="set-hyperparameters-and-configs">
+<h2>Set Hyperparameters and Configs<a class="headerlink" href="#set-hyperparameters-and-configs" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>Set necessay hyperparameters.</p></li>
+<li><p>Prepare <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">validation</span> <span class="pre">dataset</span></code>.</p></li>
+<li><p>Load <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Model configs</span>
+<span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">2e-5</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">model_checkpoint_dir</span> <span class="o">=</span> <span class="s1">&#39;MODELS/roberta_quora_embeddings&#39;</span>
+
+
+<span class="c1"># Total train examples</span>
+<span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="n">total_train_examples</span> <span class="o">//</span> <span class="n">batch_size</span>
+
+<span class="c1"># model</span>
+<span class="n">model_fn</span> <span class="o">=</span>  <span class="n">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># optimizer</span>
+<span class="n">optimizer_fn</span> <span class="o">=</span> <span class="n">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">total_train_examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">)</span>
+<span class="c1"># trainer (multi gpu strategy)</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="o">=</span><span class="s1">&#39;mirrored&#39;</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># loss</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">in_batch_negative_loss</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Using MirroredStrategy with devices (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Using MirroredStrategy with devices (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="train">
+<h2>Train :-)<a class="headerlink" href="#train" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><ol class="simple">
+<li><p>Loss is coming down in epoch 1 itself.</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>Zershot evaluation after <code class="docutils literal notranslate"><span class="pre">epoch</span> <span class="pre">1</span></code> shows that, <code class="docutils literal notranslate"><span class="pre">pearson</span></code> and <code class="docutils literal notranslate"><span class="pre">spearman</span></code> correlation increases to
+<code class="docutils literal notranslate"><span class="pre">0.80</span></code>, which is significant improvemnet over <code class="docutils literal notranslate"><span class="pre">Roberta</span></code> base model, where we got <code class="docutils literal notranslate"><span class="pre">0.43</span></code>.</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>Without training on <code class="docutils literal notranslate"><span class="pre">STS-B</span></code>, we got a good evaluation score on <code class="docutils literal notranslate"><span class="pre">STS-B</span> <span class="pre">dev</span></code> using Zeroshot.</p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sts_callback</span> <span class="o">=</span> <span class="n">STSEvaluationCallback</span><span class="p">()</span>
+<span class="n">history</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">model_fn</span><span class="o">=</span><span class="n">model_fn</span><span class="p">,</span>
+    <span class="n">optimizer_fn</span><span class="o">=</span><span class="n">optimizer_fn</span><span class="p">,</span>
+    <span class="n">train_dataset</span><span class="o">=</span><span class="n">train_dataset</span><span class="p">,</span>
+    <span class="n">train_loss_fn</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+    <span class="n">steps_per_epoch</span><span class="o">=</span><span class="n">steps_per_epoch</span><span class="p">,</span>
+    <span class="n">model_checkpoint_dir</span><span class="o">=</span><span class="n">model_checkpoint_dir</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+    <span class="n">validation_dataset</span><span class="o">=</span><span class="n">validation_dataset</span><span class="p">,</span>
+    <span class="n">validation_loss_fn</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span>
+    <span class="n">training_loss_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cls_loss&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_loss&#39;</span><span class="p">],</span>
+    <span class="n">validation_loss_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cls_loss&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_loss&#39;</span><span class="p">],</span>
+    <span class="n">steps_per_call</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">sts_callback</span><span class="p">],</span>
+    <span class="n">wandb</span><span class="o">=</span><span class="n">wandb</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.
+INFO:absl:Policy: ----&gt; float32
+INFO:absl:Strategy: ---&gt; &lt;tensorflow.python.distribute.mirrored_strategy.MirroredStrategy object at 0x7f0b5c0287d0&gt;
+INFO:absl:Num GPU Devices: ---&gt; 2
+INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /home/jovyan/.cache/huggingface/hub/tftransformers__roberta-base-no-mlm.main.9e4aa91ba5936c6ac98586f85c152831e421d0ec/ckpt-1
+INFO:absl:Successful ✅: Loaded model from tftransformers/roberta-base-no-mlm
+INFO:absl:Using linear optimization warmup
+INFO:absl:Using Adamw optimizer
+INFO:absl:No ❌❌ checkpoint found in MODELS/roberta_quora_embeddings
+Train: Epoch 1/4 --- Step 10/3158 --- total examples 0 , trainable variables 199:   0%|<span class=" -Color -Color-Green">          </span>| 0/315 [00:00&lt;?, ?batch /s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:batch_all_reduce: 198 all-reduces with algorithm = nccl, num_packs = 1
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:batch_all_reduce: 198 all-reduces with algorithm = nccl, num_packs = 1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Efficient allreduce is not supported for 1 IndexedSlices
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Efficient allreduce is not supported for 1 IndexedSlices
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:GPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:GPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:batch_all_reduce: 198 all-reduces with algorithm = nccl, num_packs = 1
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:batch_all_reduce: 198 all-reduces with algorithm = nccl, num_packs = 1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Efficient allreduce is not supported for 1 IndexedSlices
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Efficient allreduce is not supported for 1 IndexedSlices
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:GPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:GPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+Train: Epoch 1/4 --- Step 3150/3158 --- total examples 401920 , trainable variables 199: 100%|<span class=" -Color -Color-Green">██████████</span>| 315/315 [27:15&lt;00:00,  5.19s/batch , _runtime=1803, _timestamp=1.65e+9, cls_loss=0.504, learning_rate=1.34e-5, loss=0.493, mean_loss=0.482]
+INFO:absl:Model saved at epoch 1 at MODELS/roberta_quora_embeddings/ckpt-1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|<span class=" -Color -Color-Blue">          </span>| 0/12 [00:00&lt;?, ?batch /s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+Validation: Epoch 1/4 --- Step 0/12 :   8%|<span class=" -Color -Color-Blue">▊         </span>| 1/12 [00:11&lt;02:07, 11.57s/batch , cls_loss=2.63, loss=2.8, mean_loss=2.96]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+Validation: Epoch 1/4 --- Step 11/12 : 100%|<span class=" -Color -Color-Blue">██████████</span>| 12/12 [00:24&lt;00:00,  2.07s/batch , cls_loss=1.62, loss=1.65, mean_loss=1.68]
+INFO:absl:Validation result at epcoh 1 and                 global step 3150 is {&#39;cls_loss&#39;: 1.6162163, &#39;mean_loss&#39;: 1.6796235, &#39;loss&#39;: 1.6479198}
+INFO:absl:Callbacks in progress at epoch end 1 . . . .
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Callback: Epoch 1/3 --- Step 11/12 : 100%|<span class=" -Color -Color-Magenta">██████████</span>| 12/12 [00:21&lt;00:00,  1.76s/batch]
+INFO:absl:Callback score {&#39;pearson_cosine_cls&#39;: 0.8199941582015672, &#39;spearman_cosine_cls&#39;: 0.8220972132455343, &#39;pearson_manhattan_cls&#39;: 0.8184392097896854, &#39;spearman_manhattan_cls&#39;: 0.8164570492108482, &#39;pearson_euclidean_cls&#39;: 0.8190927383440411, &#39;spearman_euclidean_cls&#39;: 0.8172409394315345, &#39;pearson_dot_cls&#39;: 0.7828011052166998, &#39;spearman_dot_cls&#39;: 0.7807641366784325, &#39;pearson_cosine_mean&#39;: 0.8151801531088095, &#39;spearman_cosine_mean&#39;: 0.8162854946579012, &#39;pearson_manhattan_mean&#39;: 0.8145520799669964, &#39;spearman_manhattan_mean&#39;: 0.8123405339144811, &#39;pearson_euclidean_mean&#39;: 0.8148764479876582, &#39;spearman_euclidean_mean&#39;: 0.8132354135356057, &#39;pearson_dot_mean&#39;: 0.7381403305760383, &#39;spearman_dot_mean&#39;: 0.7337835384203213, &#39;_timestamp&#39;: 1647999708, &#39;_runtime&#39;: 1854} at epoch 1
+<span class=" -Color -Color-Bold -Color-Bold-Blue">wandb</span>: <span class=" -Color -Color-Yellow">WARNING</span> Step must only increase in log calls.  Step 1 &lt; 3150; dropping {&#39;pearson_cosine_cls&#39;: 0.8199941582015672, &#39;spearman_cosine_cls&#39;: 0.8220972132455343, &#39;pearson_manhattan_cls&#39;: 0.8184392097896854, &#39;spearman_manhattan_cls&#39;: 0.8164570492108482, &#39;pearson_euclidean_cls&#39;: 0.8190927383440411, &#39;spearman_euclidean_cls&#39;: 0.8172409394315345, &#39;pearson_dot_cls&#39;: 0.7828011052166998, &#39;spearman_dot_cls&#39;: 0.7807641366784325, &#39;pearson_cosine_mean&#39;: 0.8151801531088095, &#39;spearman_cosine_mean&#39;: 0.8162854946579012, &#39;pearson_manhattan_mean&#39;: 0.8145520799669964, &#39;spearman_manhattan_mean&#39;: 0.8123405339144811, &#39;pearson_euclidean_mean&#39;: 0.8148764479876582, &#39;spearman_euclidean_mean&#39;: 0.8132354135356057, &#39;pearson_dot_mean&#39;: 0.7381403305760383, &#39;spearman_dot_mean&#39;: 0.7337835384203213, &#39;_timestamp&#39;: 1647999708, &#39;_runtime&#39;: 1854}.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 2/4 --- Step 3150/3158 --- total examples 805120 , trainable variables 199: 100%|<span class=" -Color -Color-Green">██████████</span>| 315/315 [26:13&lt;00:00,  5.00s/batch , _runtime=3428, _timestamp=1.65e+9, cls_loss=0.304, learning_rate=6.71e-6, loss=0.305, mean_loss=0.305]
+INFO:absl:Model saved at epoch 2 at MODELS/roberta_quora_embeddings/ckpt-2
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Validation: Epoch 2/4 --- Step 11/12 : 100%|<span class=" -Color -Color-Blue">██████████</span>| 12/12 [00:05&lt;00:00,  2.27batch /s, cls_loss=1.78, loss=1.82, mean_loss=1.85]
+INFO:absl:Validation result at epcoh 2 and                 global step 6300 is {&#39;cls_loss&#39;: 1.778288, &#39;mean_loss&#39;: 1.8532048, &#39;loss&#39;: 1.8157464}
+INFO:absl:Callbacks in progress at epoch end 2 . . . .
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Callback: Epoch 2/3 --- Step 11/12 : 100%|<span class=" -Color -Color-Magenta">██████████</span>| 12/12 [00:19&lt;00:00,  1.61s/batch]
+INFO:absl:Callback score {&#39;pearson_cosine_cls&#39;: 0.8082112012752523, &#39;spearman_cosine_cls&#39;: 0.8088788767212841, &#39;pearson_manhattan_cls&#39;: 0.7977193919551161, &#39;spearman_manhattan_cls&#39;: 0.79662337716043, &#39;pearson_euclidean_cls&#39;: 0.7982407615058535, &#39;spearman_euclidean_cls&#39;: 0.7970524557483568, &#39;pearson_dot_cls&#39;: 0.7645641878510724, &#39;spearman_dot_cls&#39;: 0.7678639160320804, &#39;pearson_cosine_mean&#39;: 0.8030011391493671, &#39;spearman_cosine_mean&#39;: 0.8044760711917577, &#39;pearson_manhattan_mean&#39;: 0.7959895612836713, &#39;spearman_manhattan_mean&#39;: 0.7952571982816723, &#39;pearson_euclidean_mean&#39;: 0.7974056893147314, &#39;spearman_euclidean_mean&#39;: 0.7970287600024667, &#39;pearson_dot_mean&#39;: 0.7324014153178778, &#39;spearman_dot_mean&#39;: 0.7335963354441554, &#39;_timestamp&#39;: 1648001312, &#39;_runtime&#39;: 3458} at epoch 2
+<span class=" -Color -Color-Bold -Color-Bold-Blue">wandb</span>: <span class=" -Color -Color-Yellow">WARNING</span> Step must only increase in log calls.  Step 2 &lt; 6300; dropping {&#39;pearson_cosine_cls&#39;: 0.8082112012752523, &#39;spearman_cosine_cls&#39;: 0.8088788767212841, &#39;pearson_manhattan_cls&#39;: 0.7977193919551161, &#39;spearman_manhattan_cls&#39;: 0.79662337716043, &#39;pearson_euclidean_cls&#39;: 0.7982407615058535, &#39;spearman_euclidean_cls&#39;: 0.7970524557483568, &#39;pearson_dot_cls&#39;: 0.7645641878510724, &#39;spearman_dot_cls&#39;: 0.7678639160320804, &#39;pearson_cosine_mean&#39;: 0.8030011391493671, &#39;spearman_cosine_mean&#39;: 0.8044760711917577, &#39;pearson_manhattan_mean&#39;: 0.7959895612836713, &#39;spearman_manhattan_mean&#39;: 0.7952571982816723, &#39;pearson_euclidean_mean&#39;: 0.7974056893147314, &#39;spearman_euclidean_mean&#39;: 0.7970287600024667, &#39;pearson_dot_mean&#39;: 0.7324014153178778, &#39;spearman_dot_mean&#39;: 0.7335963354441554, &#39;_timestamp&#39;: 1648001312, &#39;_runtime&#39;: 3458}.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 3/4 --- Step 3150/3158 --- total examples 1208320 , trainable variables 199: 100%|<span class=" -Color -Color-Green">██████████</span>| 315/315 [26:08&lt;00:00,  4.98s/batch , _runtime=5027, _timestamp=1.65e+9, cls_loss=0.275, learning_rate=6.02e-8, loss=0.278, mean_loss=0.282]
+INFO:absl:Model saved at epoch 3 at MODELS/roberta_quora_embeddings/ckpt-3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Validation: Epoch 3/4 --- Step 11/12 : 100%|<span class=" -Color -Color-Blue">██████████</span>| 12/12 [00:05&lt;00:00,  2.27batch /s, cls_loss=2.3, loss=2.29, mean_loss=2.28] 
+INFO:absl:Validation result at epcoh 3 and                 global step 9450 is {&#39;cls_loss&#39;: 2.2950742, &#39;mean_loss&#39;: 2.2835078, &#39;loss&#39;: 2.2892911}
+INFO:absl:Callbacks in progress at epoch end 3 . . . .
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Callback: Epoch 3/3 --- Step 11/12 : 100%|<span class=" -Color -Color-Magenta">██████████</span>| 12/12 [00:18&lt;00:00,  1.56s/batch]
+INFO:absl:Callback score {&#39;pearson_cosine_cls&#39;: 0.8118276970012877, &#39;spearman_cosine_cls&#39;: 0.8110754654257855, &#39;pearson_manhattan_cls&#39;: 0.7893045752002403, &#39;spearman_manhattan_cls&#39;: 0.7901086696302247, &#39;pearson_euclidean_cls&#39;: 0.789695365243242, &#39;spearman_euclidean_cls&#39;: 0.7900715861621009, &#39;pearson_dot_cls&#39;: 0.7764208929832053, &#39;spearman_dot_cls&#39;: 0.7831285760325771, &#39;pearson_cosine_mean&#39;: 0.8074910790403766, &#39;spearman_cosine_mean&#39;: 0.8084473888790257, &#39;pearson_manhattan_mean&#39;: 0.792546459118103, &#39;spearman_manhattan_mean&#39;: 0.794987013041834, &#39;pearson_euclidean_mean&#39;: 0.7943711503130662, &#39;spearman_euclidean_mean&#39;: 0.7970291923871069, &#39;pearson_dot_mean&#39;: 0.7619295041302732, &#39;spearman_dot_mean&#39;: 0.7644860560497375, &#39;_timestamp&#39;: 1648002910, &#39;_runtime&#39;: 5056} at epoch 3
+<span class=" -Color -Color-Bold -Color-Bold-Blue">wandb</span>: <span class=" -Color -Color-Yellow">WARNING</span> Step must only increase in log calls.  Step 3 &lt; 9450; dropping {&#39;pearson_cosine_cls&#39;: 0.8118276970012877, &#39;spearman_cosine_cls&#39;: 0.8110754654257855, &#39;pearson_manhattan_cls&#39;: 0.7893045752002403, &#39;spearman_manhattan_cls&#39;: 0.7901086696302247, &#39;pearson_euclidean_cls&#39;: 0.789695365243242, &#39;spearman_euclidean_cls&#39;: 0.7900715861621009, &#39;pearson_dot_cls&#39;: 0.7764208929832053, &#39;spearman_dot_cls&#39;: 0.7831285760325771, &#39;pearson_cosine_mean&#39;: 0.8074910790403766, &#39;spearman_cosine_mean&#39;: 0.8084473888790257, &#39;pearson_manhattan_mean&#39;: 0.792546459118103, &#39;spearman_manhattan_mean&#39;: 0.794987013041834, &#39;pearson_euclidean_mean&#39;: 0.7943711503130662, &#39;spearman_euclidean_mean&#39;: 0.7970291923871069, &#39;pearson_dot_mean&#39;: 0.7619295041302732, &#39;spearman_dot_mean&#39;: 0.7644860560497375, &#39;_timestamp&#39;: 1648002910, &#39;_runtime&#39;: 5056}.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="visualize-the-tensorboard">
+<h2>Visualize the Tensorboard<a class="headerlink" href="#visualize-the-tensorboard" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> tensorboard
+
+<span class="o">%</span><span class="k">tensorboard</span> --logdir MODELS/roberta_quora_embeddings/logs
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="load-trained-model-for-testing-and-save-it-as-serialzed-model">
+<h2>Load Trained Model for Testing and Save it as serialzed model<a class="headerlink" href="#load-trained-model-for-testing-and-save-it-as-serialzed-model" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><ol class="simple">
+<li><p>To get good sentence embedding , we need only <code class="docutils literal notranslate"><span class="pre">Roberta</span></code> model, which has been used as the <code class="docutils literal notranslate"><span class="pre">base</span></code> for
+<code class="docutils literal notranslate"><span class="pre">Sentence_Embedding_Model</span></code> .</p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save serialized version of the model</span>
+
+<span class="c1"># Note: Ignore checkpoint warnings, it is because we save optimizer with checkpoint</span>
+<span class="c1"># while we restoring, we take only model.</span>
+
+
+<span class="n">model_fn</span> <span class="o">=</span>  <span class="n">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">model_fn</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">)</span>
+
+<span class="c1"># Roberta base (model.layers[-1] is Sentence_Embedding_Model )</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">model</span>
+<span class="n">model</span><span class="o">.</span><span class="n">save_transformers_serialized</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/saved_model/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:absl:Found untraced functions such as word_embeddings_layer_call_fn, word_embeddings_layer_call_and_return_conditional_losses, type_embeddings_layer_call_fn, type_embeddings_layer_call_and_return_conditional_losses, positional_embeddings_layer_call_fn while saving (showing 5 of 870). These functions will not be directly callable after loading.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Assets written to: MODELS/roberta_quora_embeddings/saved_model/assets
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Assets written to: MODELS/roberta_quora_embeddings/saved_model/assets
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="model-serialization-production">
+<h2>Model Serialization (Production)<a class="headerlink" href="#model-serialization-production" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><ol class="simple">
+<li><p>Lets see how we can use this model to extract sentence embeddings</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>Print top K similar sentences from our embeddings from Quora Dataset</p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load serialized model</span>
+
+<span class="n">loaded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">saved_model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/saved_model/&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">))</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">signatures</span><span class="p">[</span><span class="s1">&#39;serving_default&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Take 100000 sentences from Quora and calculate embeddings of that</span>
+<span class="n">quora_questions</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]:</span>
+    <span class="n">quora_questions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;questions&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
+    
+<span class="n">quora_questions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">quora_questions</span><span class="p">))</span>
+<span class="n">quora_questions</span> <span class="o">=</span> <span class="n">quora_questions</span><span class="p">[:</span><span class="mi">100000</span><span class="p">]</span> <span class="c1"># Take 100000</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total sentences </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">quora_questions</span><span class="p">)))</span>
+
+<span class="c1"># Prepare Dataset</span>
+<span class="n">quora_dataset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">({</span><span class="s1">&#39;questions&#39;</span><span class="p">:</span> <span class="n">quora_questions</span><span class="p">})</span>
+<span class="n">quora_dataset</span> <span class="o">=</span> <span class="n">quora_dataset</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Total sentences 100000
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="quora-sentence-embeddings">
+<h2>Quora Sentence Embeddings<a class="headerlink" href="#quora-sentence-embeddings" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">quora_sentence_embeddings</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">batch_questions</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">quora_dataset</span><span class="p">):</span>
+    <span class="n">batch_questions</span> <span class="o">=</span> <span class="n">batch_questions</span><span class="p">[</span><span class="s1">&#39;questions&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">batch_questions</span> <span class="o">=</span> <span class="p">[</span><span class="n">q</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">batch_questions</span><span class="p">]</span>
+    
+    <span class="c1"># Tokenize</span>
+    <span class="n">quora_inputs</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">batch_questions</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_sequence_length</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">&#39;tf&#39;</span><span class="p">)</span>
+    <span class="n">quora_inputs</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">quora_inputs</span><span class="p">[</span><span class="s1">&#39;attention_mask&#39;</span><span class="p">]</span>
+    <span class="n">quora_inputs</span><span class="p">[</span><span class="s1">&#39;input_type_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">quora_inputs</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])</span>
+    <span class="k">del</span> <span class="n">quora_inputs</span><span class="p">[</span><span class="s1">&#39;attention_mask&#39;</span><span class="p">]</span> <span class="c1"># we dont want this</span>
+
+    <span class="n">model_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">quora_inputs</span><span class="p">)</span>
+    <span class="n">quora_sentence_embeddings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_outputs</span><span class="p">[</span><span class="s1">&#39;cls_output&#39;</span><span class="p">])</span>
+    
+<span class="c1"># Pack and Normalize</span>
+<span class="n">quora_sentence_embeddings</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">l2_normalize</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">quora_sentence_embeddings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 782/782 [03:30&lt;00:00,  3.71it/s]
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="most-similar-sentences">
+<h2>Most Similar Sentences<a class="headerlink" href="#most-similar-sentences" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">most_similar</span><span class="p">(</span><span class="n">input_question</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">quora_inputs</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">([</span><span class="n">input_question</span><span class="p">],</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_sequence_length</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">&#39;tf&#39;</span><span class="p">)</span>
+    <span class="n">quora_inputs</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">quora_inputs</span><span class="p">[</span><span class="s1">&#39;attention_mask&#39;</span><span class="p">]</span>
+    <span class="n">quora_inputs</span><span class="p">[</span><span class="s1">&#39;input_type_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">quora_inputs</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">])</span>
+    <span class="k">del</span> <span class="n">quora_inputs</span><span class="p">[</span><span class="s1">&#39;attention_mask&#39;</span><span class="p">]</span> <span class="c1"># we dont want this</span>
+    <span class="n">model_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">quora_inputs</span><span class="p">)</span>
+    <span class="n">query_vector</span> <span class="o">=</span> <span class="n">model_outputs</span><span class="p">[</span><span class="s1">&#39;cls_output&#39;</span><span class="p">]</span>
+    <span class="n">query_vector</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">l2_normalize</span><span class="p">(</span><span class="n">query_vector</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">query_vector</span><span class="p">,</span> <span class="n">quora_sentence_embeddings</span><span class="p">,</span> <span class="n">transpose_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">top_k_values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">top_k</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">top_k</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">top_k</span><span class="p">):</span>
+        <span class="n">best_index</span> <span class="o">=</span> <span class="n">top_k_values</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">best_prob</span> <span class="o">=</span> <span class="n">top_k_values</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">quora_questions</span><span class="p">[</span><span class="n">best_index</span><span class="p">],</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span> <span class="n">best_prob</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">input_question</span> <span class="o">=</span> <span class="s1">&#39;What is the best way to propose a girl?&#39;</span>
+<span class="n">most_similar</span><span class="p">(</span><span class="n">input_question</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>How should I propose a girl? --&gt; 0.9225553
+How do I propose to a girl? --&gt; 0.8723614
+Which is the most romantic way to propose a girl? --&gt; 0.8557819
+How do I propose a girl for sex? --&gt; 0.80544627
+How did you propose your girlfriend? --&gt; 0.69494146
+What are some of the best and unique ways to propose marriage? --&gt; 0.6611091
+How can I propose to my crush? --&gt; 0.64724606
+If I want to propose to a girl should I give her hints in advance? --&gt; 0.6309003
+What doesit take for a man to propose? --&gt; 0.6253518
+What is the right time to propose someone ? --&gt; 0.5932445
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">input_question</span> <span class="o">=</span> <span class="s1">&#39;How can I start learning Deep Learning?&#39;</span>
+<span class="n">most_similar</span><span class="p">(</span><span class="n">input_question</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>What&#39;s the most effective way to get started with Deep Learning? --&gt; 0.83670104
+How do I learn deep learning in 1 month? --&gt; 0.7423597
+Why is deep learning so important in machine learning? --&gt; 0.7327932
+Does Quora use Deep Learning? --&gt; 0.7260519
+Should a machine learning beginner go straight for deep learning? --&gt; 0.719143
+Where should I start for machine learning? --&gt; 0.71324116
+How do i get started on machine learning? --&gt; 0.7123989
+I am New to Deep Learning. How do I start with Python? --&gt; 0.710938
+How do I start learning machine learning? --&gt; 0.7106862
+What is deep learning? How is related to AI and machine learning? --&gt; 0.70124084
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">input_question</span> <span class="o">=</span> <span class="s1">&#39;Best tourist destinations in India&#39;</span>
+<span class="n">most_similar</span><span class="p">(</span><span class="n">input_question</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>What are the must-visit and affordable tourist destinations in India? --&gt; 0.8237094
+What is the most overrated tourist destination in India? --&gt; 0.7374817
+What is the best sex tourism destination in India? --&gt; 0.73366314
+What are the most popular tourist destinations? --&gt; 0.7160436
+What are the best destination for a solo traveler in India? --&gt; 0.7078299
+What is the best holiday destination? --&gt; 0.675949
+Which places I should not visit in India as a Indian? --&gt; 0.6656152
+What are the best places to go as a tourist? --&gt; 0.66551954
+Which are some best places to visit in India? --&gt; 0.66457677
+Which is your best holiday destination? --&gt; 0.6640895
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">input_question</span> <span class="o">=</span> <span class="s1">&#39;Why classical music is so relaxing?&#39;</span>
+<span class="n">most_similar</span><span class="p">(</span><span class="n">input_question</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>What is your favourite piece of classical music and why? --&gt; 0.75282526
+What are the benefits of listening to classical music? --&gt; 0.7361862
+Why do some people only listen to classical music? --&gt; 0.7289536
+Which music is the best for relaxation? --&gt; 0.6762159
+Why is classical music better than most pop music? --&gt; 0.6651089
+What are some classical and operant conditioning in education? --&gt; 0.64240026
+Classical music in movies? --&gt; 0.6344438
+Which classic music is this? --&gt; 0.59156764
+Which ones are some of the most soothing tunes composed on a piano? --&gt; 0.57644486
+What are the differences between Hindustani classical music and Carnatic music? --&gt; 0.57415533
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="4_image_classification_vit_multi_gpu.html" class="btn btn-neutral float-left" title="Classify Flowers (Image Classification) with ViT using multi-GPU" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../model_doc/albert_tokenizer.html" class="btn btn-neutral float-right" title="ALBERT Tokenizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
