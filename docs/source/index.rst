@@ -317,12 +317,11 @@ Flax), PyTorch, and/or TensorFlow.
 
 .. toctree::
     :maxdepth: 2
-    :caption: TFLite Tutorials
+    :caption: TFLite
+
     tflite_tutorials/albert_tflite
     tflite_tutorials/bert_tflite
     tflite_tutorials/roberta_tflite
-
-
 
 .. toctree::
     :maxdepth: 2

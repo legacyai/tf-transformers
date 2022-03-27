@@ -12,13 +12,15 @@ kernelspec:
   name: python3
 ---
 
++++ {"colab": {"base_uri": "https://localhost:8080/"}, "id": "qjUYDME9kgWS", "outputId": "ee5a458d-cc2e-4ed4-bf32-077fecb227d6"}
+
+# Albert TFlite
+
 ```{code-cell} ipython3
----
-colab:
-  base_uri: https://localhost:8080/
-id: qjUYDME9kgWS
-outputId: ee5a458d-cc2e-4ed4-bf32-077fecb227d6
----
+
+```
+
+```{code-cell} ipython3
 !pip install tf-transformers
 
 !pip install sentencepiece
@@ -26,10 +28,6 @@ outputId: ee5a458d-cc2e-4ed4-bf32-077fecb227d6
 !pip install tensorflow-text
 
 !pip install transformers
-```
-
-```{code-cell} ipython3
-
 ```
 
 ```{code-cell} ipython3
@@ -56,7 +54,7 @@ from tf_transformers.models import AlbertModel
 
 +++ {"id": "P89IVu5JlREX"}
 
-## Convert a Model to TFlite
+### Convert a Model to TFlite
 
 The most important thing to notice here is that, if we want to convert a model to ```tflite```, we have to ensure that ```inputs``` to the model are **deterministic**, which means inputs should not be dynamic. We have to fix  **batch_size**, **sequence_length** and other related input constraints depends on the model of interest.
 
