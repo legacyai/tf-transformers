@@ -158,6 +158,10 @@ We have covered tutorials covering pre-training, finetuning, classfication, QA, 
 - [Image Classification ViT multi GPU mirrored](https://github.com/legacyai/tf-transformers/blob/main/tutorials/4_image_classification_vit_multi_gpu.ipynb)
 - [Sentence Embedding train from scratch using Quoara on Roberta + Zeroshot STS-B](https://github.com/legacyai/tf-transformers/blob/main/tutorials/5_sentence_embedding_roberta_quora_zeroshot.ipynb)
 
+## Model usage
+- [Text Generation using GPT2](https://github.com/legacyai/tf-transformers/blob/main/docs/source/model_usage/text_generation_using_gpt2.ipynb)
+- [Text Generation using T5](https://github.com/legacyai/tf-transformers/blob/main/docs/source/model_usage/text_generation_using_t5.ipynb)
+- [Sentence Transformers](https://github.com/legacyai/tf-transformers/blob/main/docs/source/model_usage/sentence_transformers.ipynb)
 ## TFlite Tutorials
 - [Albert TFlite](https://github.com/legacyai/tf-transformers/blob/main/docs/source/tflite_tutorials/albert_tflite.ipynb)
 - [Bert TFlite](https://github.com/legacyai/tf-transformers/blob/main/docs/source/tflite_tutorials/bert_tflite.ipynb)
