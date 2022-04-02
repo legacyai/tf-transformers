@@ -283,7 +283,7 @@ class TextDecoderSeq2Seq(object):
         return {
             "iterations": i + 1,  # scalar
             "input_ids": input_ids_original,  # 2D batch_size x seq_length
-            "predicted_ids": all_predictions,  # 3D batch_size x 1 x decoded_length
+            "predicted_ids": tf.cast(all_predictions, tf.int32),  # 3D batch_size x 1 x decoded_length
             "matched_eos_pos": matched_positions,  # 1D (batch_size,)
             "prediction_probs": all_prediction_probs,  # 2D (batch_size x decoded_length)
         }

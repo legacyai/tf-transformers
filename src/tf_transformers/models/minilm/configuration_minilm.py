@@ -18,7 +18,7 @@
 from tf_transformers.core import TransformerConfig
 
 
-class BertConfig(TransformerConfig):
+class MiniLMConfig(TransformerConfig):
     r"""
     This is the configuration class to store the configuration of a :class:`~tf_transformers.models.BertModel`.
     It is used to instantiate an BERT model according to the specified arguments, defining the model architecture.
@@ -95,10 +95,10 @@ class BertConfig(TransformerConfig):
     def __init__(
         self,
         vocab_size=30522,
-        embedding_size=768,
+        embedding_size=384,
         num_hidden_layers=12,
         num_attention_heads=12,
-        attention_head_size=64,
+        attention_head_size=32,
         intermediate_size=3072,
         hidden_act="gelu",
         intermediate_act="gelu",

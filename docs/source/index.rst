@@ -325,6 +325,14 @@ Flax), PyTorch, and/or TensorFlow.
 
 .. toctree::
     :maxdepth: 2
+    :caption: Model Usage
+
+    model_usage/text_generation_using_gpt2
+    model_usage/text_generation_using_t5
+    model_usage/sentence_transformers
+
+.. toctree::
+    :maxdepth: 2
     :caption: Tokenizers
 
     model_doc/albert_tokenizer

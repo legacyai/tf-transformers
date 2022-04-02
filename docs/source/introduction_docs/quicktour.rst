@@ -13,7 +13,7 @@
 Quick tour
 =======================================================================================================================
 
-Let's have a quick look at the 🤗 tf-transformers library features. The library downloads pretrained models for Natural
+Let's have a quick look at the tf-transformers library features. The library downloads pretrained models for Natural
 Language Understanding (NLU) tasks, such as analyzing the sentiment of a text, and Natural Language Generation (NLG),
 such as completing a prompt with new text or translating in another language.
 
@@ -25,7 +25,7 @@ such as completing a prompt with new text or translating in another language.
     **PyTorch** models.
 
 
-🤗 Transformers provides the following tasks out of the box:
+tf-transformers provides the following tasks out of the box:
 
 - Text Classification
 - Text generation , Summarization, NLG: provide a prompt and the model will generate what follows.

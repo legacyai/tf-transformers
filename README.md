@@ -38,9 +38,9 @@ limitations under the License.
 <b>Tensorflow Transformers</b>
 </h1>
 
-<h3 align="center">
-<p>https://legacyai.github.io/tf-transformers/build/html/index.html</p>
-</h3>
+<h5 align="center">
+<p>Website: https://legacyai.github.io/tf-transformers</p>
+</h5>
 
 <h3 align="center">
 <p>tf-transformers: faster and easier state-of-the-art Transformer in TensorFlow 2.0
@@ -130,7 +130,6 @@ tf-transformers API is very simple and minimalistic.
 ```
 For text-generation, it is very important to add :obj:`use_auto_regressive=True`. This is required for all the models.
 ```python
-if you are planning to do text generation or auto regressive tasks:
 
 >>> from tf_transformers.models import GPT2Model
 >>> model = GPT2Model.from_pretrained('gpt2', use_auto_regressive=True)
@@ -142,13 +141,12 @@ To serialize save and load model
 >>> model = GPT2Model.from_pretrained('gpt2')
 >>> model.save_transformers_serialized("/tmp/gpt2_serialized/")
 
-To load a serialized models for inference in prodcution:
+# To load a serialized models for inference in prodcution:
 
 >>> import tensorflow as tf
 >>> loaded = tf.saved_model.load("/tmp/gpt2_serialized/")
 >>> model  = loaded.signatures['serving_default']
 ```
-
 ## Tutorials
 
 We have covered tutorials covering pre-training, finetuning, classfication, QA, NER so much more.
@@ -156,10 +154,14 @@ We have covered tutorials covering pre-training, finetuning, classfication, QA, 
 
 - [Read and Write TFRecords using tft](https://github.com/legacyai/tf-transformers/blob/main/tutorials/1_read_write_tfrecords.ipynb)
 - [Text Classification using Albert](https://github.com/legacyai/tf-transformers/blob/main/tutorials/2_text_classification_imdb_albert.ipynb)
-- [Dynamic on the fly MLM in TPU](https://github.com/legacyai/tf-transformers/blob/main/tutorials/3_masked_lm_tpu.ipynb)
+- [Dynamic MLM (on the fly pre-processing using tf-text) in TPU](https://github.com/legacyai/tf-transformers/blob/main/tutorials/3_masked_lm_tpu.ipynb)
 - [Image Classification ViT multi GPU mirrored](https://github.com/legacyai/tf-transformers/blob/main/tutorials/4_image_classification_vit_multi_gpu.ipynb)
-- [Sentence Embdding using Roberta + Zeroshot](https://github.com/legacyai/tf-transformers/blob/main/tutorials/5_sentence_embedding_roberta_quora_zeroshot.ipynb)
+- [Sentence Embedding train from scratch using Quoara on Roberta + Zeroshot STS-B](https://github.com/legacyai/tf-transformers/blob/main/tutorials/5_sentence_embedding_roberta_quora_zeroshot.ipynb)
 
+## Model usage
+- [Text Generation using GPT2](https://github.com/legacyai/tf-transformers/blob/main/docs/source/model_usage/text_generation_using_gpt2.ipynb)
+- [Text Generation using T5](https://github.com/legacyai/tf-transformers/blob/main/docs/source/model_usage/text_generation_using_t5.ipynb)
+- [Sentence Transformers](https://github.com/legacyai/tf-transformers/blob/main/docs/source/model_usage/sentence_transformers.ipynb)
 ## TFlite Tutorials
 - [Albert TFlite](https://github.com/legacyai/tf-transformers/blob/main/docs/source/tflite_tutorials/albert_tflite.ipynb)
 - [Bert TFlite](https://github.com/legacyai/tf-transformers/blob/main/docs/source/tflite_tutorials/bert_tflite.ipynb)
@@ -189,7 +191,7 @@ those, but it serves as a purpose for practioners to start or modifying what we 
 
 ## Contributions
 
-### Joint Albert (Smallest and best Transformer based model ever) on GLUE.
+### **Joint Albert** *(Smallest and best Transformer based model ever) on GLUE*.
 We have conducted few experiments to squeeze the power of **Albert base** models ( concept is applicable to any models and in tf-transformers, it is out of the box.)
 
 The idea is minimize the loss for specified task in each layer of your model and check predictions at each layer. as per our experiments, we are able to get the best smaller model (thanks to **Albert**), and from **layer 4** onwards we beat all the smaller model in **GLUE** benchmark. By **layer 6**, we got a **GLUE** score of **81.0**, which is **4** points ahead of **Distillbert** with GLUE score of **77** and **MobileBert** GLUE score of **78**.
@@ -198,13 +200,19 @@ The **Albert** model has **14 million** parameters, and by using **layer 6**, we
 
 The concept is applicable to all the models and tasks.
 
-[Codes + Docs](https://legacyai.github.io/tf-transformers/build/html/research/glue.html)
+[Codes + Read More](https://legacyai.github.io/tf-transformers/build/html/research/glue.html)
 
-### Long Block Sequence Transformer
+### **Long Block Sequence Transformer**
 By splitting input sequence into block attention and merge using FFN layer we have shown that, smaller machines will be able to perform sequence processing up to 4096 tokens in a single V100 GPU machine.
 The model has outperforms ```Pegasus Base (128 million)``` in ```PubMed``` summarisation despite being ```60 million``` parameter.
 
-[Codes + Docs](https://legacyai.github.io/tf-transformers/build/html/research/long_block_sequencer.html)
+<p align="centre">
+    <br>
+    <img src="docs/source/imgs/long_block_sequencer.gif" width="900"/>
+    <br>
+<p>
+
+[Codes + Read More](https://legacyai.github.io/tf-transformers/build/html/research/long_block_sequencer.html)
 
 ## Supported Models architectures
 

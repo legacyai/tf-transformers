@@ -36,10 +36,13 @@ from tf_transformers.models.clip import (
     CLIPTextConfig,
     CLIPTextEncoder,
 )
+from tf_transformers.models.distilbert import DistilBertConfig, DistilBertModel
 from tf_transformers.models.encoder_decoder import EncoderDecoder
 from tf_transformers.models.gpt2 import GPT2Config, GPT2Encoder, GPT2Model
+from tf_transformers.models.minilm import MiniLMConfig, MiniLMModel
 from tf_transformers.models.mt5 import MT5Config, MT5Encoder, MT5Model
 from tf_transformers.models.roberta import RobertaConfig, RobertaEncoder, RobertaModel
+from tf_transformers.models.sentence_transformers import SentenceTransformer
 from tf_transformers.models.t5 import (
     T5Config,
     T5Encoder,
