@@ -18,7 +18,7 @@
 from tf_transformers.core import TransformerConfig
 
 
-class BertConfig(TransformerConfig):
+class DistilBertConfig(TransformerConfig):
     r"""
     This is the configuration class to store the configuration of a :class:`~tf_transformers.models.BertModel`.
     It is used to instantiate an BERT model according to the specified arguments, defining the model architecture.
@@ -105,7 +105,7 @@ class BertConfig(TransformerConfig):
         hidden_dropout_prob=0,
         attention_probs_dropout_prob=0,
         max_position_embeddings=512,
-        type_vocab_size=2,
+        type_vocab_size=-1,
         initializer_range=0.02,
         layer_norm_epsilon=1e-12,
         position_embedding_type="absolute",

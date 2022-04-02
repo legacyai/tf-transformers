@@ -39,7 +39,7 @@ limitations under the License.
 </h1>
 
 <h5 align="center">
-<p>https://legacyai.github.io/tf-transformers/build/html/index.html</p>
+<p>Website: https://legacyai.github.io/tf-transformers</p>
 </h5>
 
 <h3 align="center">
@@ -147,7 +147,6 @@ To serialize save and load model
 >>> loaded = tf.saved_model.load("/tmp/gpt2_serialized/")
 >>> model  = loaded.signatures['serving_default']
 ```
-
 ## Tutorials
 
 We have covered tutorials covering pre-training, finetuning, classfication, QA, NER so much more.
