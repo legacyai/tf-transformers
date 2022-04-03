@@ -16,7 +16,7 @@ limitations under the License.
 
 # Installation
 
-tf-ransformers is tested on Python 3.8+, and TensorFlow 2.5.0+.
+tf-ransformers is tested on Python 3.8+, and TensorFlow 2.7.1+.
 
 You should install tf-ransformers in a [virtual environment](https://docs.python.org/3/library/venv.html). If you're
 unfamiliar with Python virtual environments, check out the [user guide](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/). Create a virtual environment with the version of Python you're going
@@ -33,7 +33,7 @@ Please refer to [TensorFlow installation page](https://www.tensorflow.org/instal
 [PyTorch installation page](https://pytorch.org/get-started/locally/#start-locally) and/or
 regarding the specific install command for your platform.
 
-When TensorFlow 2.0 and/or PyTorch has been installed, tf-ransformers can be installed using pip as follows:
+When TensorFlow 2.7.1 (CPU or GPU) has been installed, tf-ransformers can be installed using pip as follows:
 
 ```bash
 pip install tf-transformers

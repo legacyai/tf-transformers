@@ -12,13 +12,13 @@ kernelspec:
   name: python3
 ---
 
++++ {"colab": {"base_uri": "https://localhost:8080/"}, "id": "qjUYDME9kgWS", "outputId": "6390e343-f1b1-4ff1-e302-5603f6aab874"}
+
+# Roberta TFLite
+
 ```{code-cell} ipython3
----
-colab:
-  base_uri: https://localhost:8080/
-id: qjUYDME9kgWS
-outputId: 6390e343-f1b1-4ff1-e302-5603f6aab874
----
+:id: CV0Bh-eFlEot
+
 !pip install tf-transformers
 
 !pip install sentencepiece
@@ -29,8 +29,6 @@ outputId: 6390e343-f1b1-4ff1-e302-5603f6aab874
 ```
 
 ```{code-cell} ipython3
-:id: CV0Bh-eFlEot
-
 
 ```
 

@@ -77,6 +77,8 @@
 <li class="toctree-l1"><a class="reference internal" href="model_doc/mt5.html">MT5</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model_doc/roberta.html">RoBERTa</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/clip.html">CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/sentence_transformer.html">Sentence Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model_doc/parallelism.html">Model Parallelism</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
@@ -87,11 +89,25 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
 </ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tflite_tutorials/albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tflite_tutorials/bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tflite_tutorials/roberta_tflite.html">Roberta TFLite</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="model_usage/text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_usage/text_generation_using_t5.html">Text Generation using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_usage/sentence_transformers.html">Sentence Transformer in tf-transformers</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Tokenizers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/vit_feature_extractor.html">ViT Feature Extractor</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Research</span></p>
 <ul>
@@ -797,6 +813,22 @@ Flax), PyTorch, and/or TensorFlow.</p>
 <li class="toctree-l2"><a class="reference internal" href="model_doc/vit.html#vitencoder">ViTEncoder</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/clip.html">CLIP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/clip.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/clip.html#cliptextconfig">CLIPTextConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/clip.html#clipimageconfig">CLIPImageConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/clip.html#clipmodel">CLIPModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/clip.html#clipencoder">CLIPEncoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/clip.html#clipimageencoder">CLIPImageEncoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/clip.html#cliptextencoder">CLIPTextEncoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/clip.html#clipfeatureextractortf">CLIPFeatureExtractorTF</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/sentence_transformer.html">Sentence Transformer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/sentence_transformer.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/sentence_transformer.html#sentencetransformer">SentenceTransformer</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="model_doc/parallelism.html">Model Parallelism</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#parallelism-overview">Parallelism overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="model_doc/parallelism.html#concepts">Concepts</a></li>
@@ -886,6 +918,72 @@ Flax), PyTorch, and/or TensorFlow.</p>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tflite_tutorials/albert_tflite.html">Albert TFlite</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/albert_tflite.html#convert-a-model-to-tflite">Convert a Model to TFlite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/albert_tflite.html#load-albert-model">Load Albert Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/albert_tflite.html#verify-models-inputs-and-outputs">Verify Models inputs and outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/albert_tflite.html#save-model-as-serialized-version">Save Model as Serialized Version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/albert_tflite.html#convert-savedmodel-to-tflite">Convert SavedModel to TFlite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/albert_tflite.html#load-tflite-model">Load TFlite Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/albert_tflite.html#assert-tflite-model-and-keras-model-outputs">Assert TFlite Model and Keras Model outputs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tflite_tutorials/bert_tflite.html">Bert TFLite</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/bert_tflite.html#convert-a-model-to-tflite">Convert a Model to TFlite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/bert_tflite.html#verify-models-inputs-and-outputs">Verify Models inputs and outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/bert_tflite.html#save-model-as-serialized-version">Save Model as Serialized Version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/bert_tflite.html#convert-savedmodel-to-tflite">Convert SavedModel to TFlite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/bert_tflite.html#load-tflite-model">Load TFlite Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/bert_tflite.html#assert-tflite-model-and-keras-model-outputs">Assert TFlite Model and Keras Model outputs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tflite_tutorials/roberta_tflite.html">Roberta TFLite</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/roberta_tflite.html#convert-a-model-to-tflite">Convert a Model to TFlite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/roberta_tflite.html#verify-models-inputs-and-outputs">Verify Models inputs and outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/roberta_tflite.html#save-model-as-serialized-version">Save Model as Serialized Version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/roberta_tflite.html#convert-savedmodel-to-tflite">Convert SavedModel to TFlite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/roberta_tflite.html#load-tflite-model">Load TFlite Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tflite_tutorials/roberta_tflite.html#assert-tflite-model-and-keras-model-outputs">Assert TFlite Model and Keras Model outputs</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="model_usage/text_generation_using_gpt2.html">Text Generation using GPT2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_gpt2.html#load-gpt2-model">Load GPT2 Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_gpt2.html#serialize-and-load">Serialize and load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_gpt2.html#text-generation">Text-Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_gpt2.html#greedy-decoding">Greedy Decoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_gpt2.html#beam-decoding">Beam Decoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_gpt2.html#top-k-nucleus-sampling">Top K Nucleus Sampling</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_usage/text_generation_using_t5.html">Text Generation using T5</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_t5.html#load-t5-model">Load T5 Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_t5.html#serialize-and-load">Serialize and load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_t5.html#text-generation">Text-Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_t5.html#greedy-decoding">Greedy Decoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_t5.html#beam-decoding">Beam Decoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_t5.html#top-k-nucleus-sampling">Top K Nucleus Sampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_t5.html#advanced-serialization-include-preprocessing-decoding-together">Advanced Serialization (include preprocessing + Decoding Together)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/text_generation_using_t5.html#load-advanced-model-and-generate-text">Load Advanced Model and Generate text</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_usage/sentence_transformers.html">Sentence Transformer in tf-transformers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/sentence_transformers.html#load-sentence-t5-model">Load Sentence-t5 model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/sentence_transformers.html#whats-my-model-input">Whats my model input?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/sentence_transformers.html#whats-my-model-output">Whats my model output?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/sentence_transformers.html#sentence-vectors">Sentence vectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_usage/sentence_transformers.html#serialize-as-usual-and-load-it">Serialize as usual and load it</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Tokenizers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="model_doc/albert_tokenizer.html">ALBERT Tokenizer</a><ul>
@@ -904,6 +1002,16 @@ Flax), PyTorch, and/or TensorFlow.</p>
 <li class="toctree-l2"><a class="reference internal" href="model_doc/t5_tokenizer.html#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="model_doc/t5_tokenizer.html#t5tokenizertftext">T5TokenizerTFText</a></li>
 <li class="toctree-l2"><a class="reference internal" href="model_doc/t5_tokenizer.html#t5tokenizerlayer">T5TokenizerLayer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/clip_feature_extractor.html">CLIP Feature Extractor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/clip_feature_extractor.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/clip_feature_extractor.html#clipfeatureextractortf">CLIPFeatureExtractorTF</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_doc/vit_feature_extractor.html">ViT Feature Extractor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/vit_feature_extractor.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model_doc/vit_feature_extractor.html#vitfeatureextractortf">ViTFeatureExtractorTF</a></li>
 </ul>
 </li>
 </ul>

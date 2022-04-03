@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+<meta property="og:title" content="Text Generation using T5" />
+  
+<meta property="og:type" content="website" />
+  
+<meta property="og:url" content="model_usage/text_generation_using_t5.html" />
+  
+<meta property="og:description" content="This tutorial is intended to provide, a familiarity in how to use T5 for text-generation tasks., No training is involved in this.. Load T5 Model:- Note use_a..." />
+  
+<meta property="og:image" content="png location" />
+  
+<meta property="og:image:alt" content="Text Generation using T5" />
+  
+<meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Text Generation using T5 &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Sentence Transformer in tf-transformers" href="sentence_transformers.html" />
+    <link rel="prev" title="Text Generation using GPT2" href="text_generation_using_gpt2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/clip.html">CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/sentence_transformer.html">Sentence Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/2_text_classification_imdb_albert.html">Classify text (MRPC) with Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/3_masked_lm_tpu.html">Train (Masked Language Model) with tf-transformers in TPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
+</ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/roberta_tflite.html">Roberta TFLite</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Text Generation using T5</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#load-t5-model">Load T5 Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#serialize-and-load">Serialize and load</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#text-generation">Text-Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#greedy-decoding">Greedy Decoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#beam-decoding">Beam Decoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#top-k-nucleus-sampling">Top K Nucleus Sampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-serialization-include-preprocessing-decoding-together">Advanced Serialization (include preprocessing + Decoding Together)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-advanced-model-and-generate-text">Load Advanced Model and Generate text</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sentence_transformers.html">Sentence Transformer in tf-transformers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit_feature_extractor.html">ViT Feature Extractor</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Text Generation using T5</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/model_usage/text_generation_using_t5.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="tex2jax_ignore mathjax_ignore section" id="text-generation-using-t5">
+<h1>Text Generation using T5<a class="headerlink" href="#text-generation-using-t5" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p>This tutorial is intended to provide, a familiarity in how to use <code class="docutils literal notranslate"><span class="pre">T5</span></code> for text-generation tasks.</p></li>
+<li><p>No training is involved in this.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+
+<span class="o">!</span>pip install transformers
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TF_CPP_MIN_LOG_LEVEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span> <span class="c1"># Supper TF warnings</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tensorflow version&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Devices&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">list_physical_devices</span><span class="p">())</span>
+
+<span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">T5Model</span><span class="p">,</span> <span class="n">T5TokenizerTFText</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">TextGenerationChainer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.text</span> <span class="kn">import</span> <span class="n">TextDecoder</span><span class="p">,</span> <span class="n">TextDecoderSerializable</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tensorflow version 2.7.0
+Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;CPU&#39;), PhysicalDevice(name=&#39;/physical_device:GPU:0&#39;, device_type=&#39;GPU&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="load-t5-model">
+<h2>Load T5 Model<a class="headerlink" href="#load-t5-model" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><ol class="simple">
+<li><p>Note <code class="docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code>, argument. This is required for any models to enable text-generation.</p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;t5-small&#39;</span>
+
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">T5TokenizerTFText</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">dynamic_padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">T5Model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">use_auto_regressive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "2bf18e0b91af4b5984a0bc1412960cf2", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "f34463285e0545ea881fae01b53ed1f3", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "aa40618dc2194e4f8ea78d368527ef01", "version_major": 2, "version_minor": 0}
+</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Saving t5-small tokenizer to /var/folders/vq/4fxns8l55gq8_msgygbyb51h0000gn/T/tftransformers_tokenizer_cache/t5-small
+INFO:absl:Loading t5-small tokenizer to /var/folders/vq/4fxns8l55gq8_msgygbyb51h0000gn/T/tftransformers_tokenizer_cache/t5-small/spiece.model
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Metal device set to: Apple M1
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "409e6c62a0d84661a64547ba48f5a844", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "1c71328a883d44289bc3a541f751f644", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "d03a8ca4ffbe4d49b698337ea9f6942e", "version_major": 2, "version_minor": 0}
+</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Inconsistent references when loading the checkpoint into this object graph. Either the Trackable object references in the Python program have changed in an incompatible way, or the checkpoint was generated in an incompatible program.
+
+Two checkpoint references resolved to different objects (&lt;tf_transformers.models.encoder_decoder.encoder_decoder.EncoderDecoder object at 0x17b752e20&gt; and &lt;keras.engine.input_layer.InputLayer object at 0x17b752340&gt;).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Inconsistent references when loading the checkpoint into this object graph. Either the Trackable object references in the Python program have changed in an incompatible way, or the checkpoint was generated in an incompatible program.
+
+Two checkpoint references resolved to different objects (&lt;tf_transformers.models.encoder_decoder.encoder_decoder.EncoderDecoder object at 0x17b752e20&gt; and &lt;keras.engine.input_layer.InputLayer object at 0x17b752340&gt;).
+INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /Users/sarathrnair/.cache/huggingface/hub/tftransformers__t5-small.main.699b12fe9601feda4892ca82c07e800f3c1da440/ckpt-1
+INFO:absl:Successful ✅: Loaded model from tftransformers/t5-small
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="serialize-and-load">
+<h2>Serialize and load<a class="headerlink" href="#serialize-and-load" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>The most recommended way of using a Tensorflow model is to load it after serializing.</p></li>
+<li><p>The speedup, especially for text generation is up to 50x times.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save as serialized</span>
+<span class="n">model_dir</span> <span class="o">=</span> <span class="s1">&#39;MODELS/t5&#39;</span>
+<span class="n">model</span><span class="o">.</span><span class="n">save_transformers_serialized</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+
+<span class="c1"># Load</span>
+<span class="n">loaded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">saved_model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Metal device set to: Apple M1
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="text-generation">
+<h2>Text-Generation<a class="headerlink" href="#text-generation" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>. We can pass <code class="docutils literal notranslate"><span class="pre">tf.keras.Model</span></code> also to <code class="docutils literal notranslate"><span class="pre">TextDecoder</span></code>, but <code class="docutils literal notranslate"><span class="pre">SavedModel</span></code> this is recommended</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">decoder</span> <span class="o">=</span> <span class="n">TextDecoder</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">loaded</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="greedy-decoding">
+<h2>Greedy Decoding<a class="headerlink" href="#greedy-decoding" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;translate English to German: The house is wonderful and we wish to be here :)&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;translate English to French: She is beautiful&#39;</span><span class="p">]</span>
+
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">({</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">texts</span><span class="p">)})</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> 
+                             <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;greedy&#39;</span><span class="p">,</span> 
+                             <span class="n">max_iterations</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> 
+                             <span class="n">eos_id</span><span class="o">=</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token_id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">detokenize</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;predicted_ids&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tf.Tensor(
+[b&#39;Das Haus ist wunderbar und wir m\xc3\xb6chten hier sein :)&#39;
+ b&#39;Elle est belle::::&#39;], shape=(2,), dtype=string)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="beam-decoding">
+<h2>Beam Decoding<a class="headerlink" href="#beam-decoding" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> 
+                             <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;beam&#39;</span><span class="p">,</span>
+                             <span class="n">num_beams</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                             <span class="n">max_iterations</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+                             <span class="n">eos_id</span><span class="o">=</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token_id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">detokenize</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;predicted_ids&#39;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tf.Tensor(
+[b&#39;Das Haus ist wunderbar und wir m\xc3\xb6chten hier sein :)&#39;
+ b&#39;Elle est belle::::&#39;], shape=(2,), dtype=string)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="top-k-nucleus-sampling">
+<h2>Top K Nucleus Sampling<a class="headerlink" href="#top-k-nucleus-sampling" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">predictions</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> 
+                             <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;top_k_top_p&#39;</span><span class="p">,</span>
+                             <span class="n">top_k</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                             <span class="n">top_p</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+                             <span class="n">num_return_sequences</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                             <span class="n">max_iterations</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+                             <span class="n">eos_id</span><span class="o">=</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token_id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">detokenize</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;predicted_ids&#39;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tf.Tensor(
+[b&#39;Das Haus ist wunderbar und wir m\xc3\xb6chten hier sein :)&#39;
+ b&#39;Elle est belle::::&#39;], shape=(2,), dtype=string)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="advanced-serialization-include-preprocessing-decoding-together">
+<h2>Advanced Serialization (include preprocessing + Decoding Together)<a class="headerlink" href="#advanced-serialization-include-preprocessing-decoding-together" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>What if we can bundle all this into a single model and serialize it ?</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_dir</span> <span class="o">=</span> <span class="s1">&#39;MODELS/t5_serialized/&#39;</span>
+<span class="c1"># Load Auto Regressive Version</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">T5Model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">use_auto_regressive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Assume we are doing beam decoding</span>
+<span class="n">text_generation_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="s1">&#39;beam&#39;</span><span class="p">,</span> 
+                         <span class="s1">&#39;num_beams&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                          <span class="s1">&#39;max_iterations&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+                          <span class="s1">&#39;eos_id&#39;</span><span class="p">:</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">eos_token_id</span>
+                         <span class="p">}</span>
+<span class="c1"># TextDecoderSerializable - makes decoding serializable</span>
+<span class="n">decoder</span> <span class="o">=</span> <span class="n">TextDecoderSerializable</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="o">**</span><span class="n">text_generation_kwargs</span><span class="p">)</span>
+<span class="c1"># TextGenerationChainer - joins tokenizer + TextDecoderSerializable</span>
+<span class="n">model_fully_serialized</span> <span class="o">=</span> <span class="n">TextGenerationChainer</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">get_model</span><span class="p">(),</span> <span class="n">decoder</span><span class="p">)</span>
+<span class="n">model_fully_serialized</span> <span class="o">=</span> <span class="n">model_fully_serialized</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span>
+<span class="c1"># Save as saved_model</span>
+<span class="n">model_fully_serialized</span><span class="o">.</span><span class="n">save_serialized</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Inconsistent references when loading the checkpoint into this object graph. Either the Trackable object references in the Python program have changed in an incompatible way, or the checkpoint was generated in an incompatible program.
+
+Two checkpoint references resolved to different objects (&lt;tf_transformers.models.encoder_decoder.encoder_decoder.EncoderDecoder object at 0x38790b400&gt; and &lt;keras.engine.input_layer.InputLayer object at 0x3827cc880&gt;).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Inconsistent references when loading the checkpoint into this object graph. Either the Trackable object references in the Python program have changed in an incompatible way, or the checkpoint was generated in an incompatible program.
+
+Two checkpoint references resolved to different objects (&lt;tf_transformers.models.encoder_decoder.encoder_decoder.EncoderDecoder object at 0x38790b400&gt; and &lt;keras.engine.input_layer.InputLayer object at 0x3827cc880&gt;).
+INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /Users/sarathrnair/.cache/huggingface/hub/tftransformers__t5-small.main.699b12fe9601feda4892ca82c07e800f3c1da440/ckpt-1
+INFO:absl:Successful ✅: Loaded model from tftransformers/t5-small
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Using default `decoder_start_token_id` 0 from the model
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:absl:Found untraced functions such as tf_transformers/t5_encoder_layer_call_fn, tf_transformers/t5_encoder_layer_call_and_return_conditional_losses, tf_transformers/t5_decoder_layer_call_fn, tf_transformers/t5_decoder_layer_call_and_return_conditional_losses, word_embeddings_layer_call_fn while saving (showing 5 of 1140). These functions will not be directly callable after loading.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Assets written to: MODELS/t5_serialized/assets
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Assets written to: MODELS/t5_serialized/assets
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="load-advanced-model-and-generate-text">
+<h2>Load Advanced Model and Generate text<a class="headerlink" href="#load-advanced-model-and-generate-text" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>How nice is it? All done by model, no overhead of anything (tokenization, decoding, generating)</p></li>
+<li><ol class="simple">
+<li><p>TextDecoderSerializable - very advances serializable decoder written in pure tensorflow ops</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>TextGenerationChainer -  very simple <code class="docutils literal notranslate"><span class="pre">tf.keras.layers.Layer</span></code> wrapper.</p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">loaded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">saved_model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">signatures</span><span class="p">[</span><span class="s1">&#39;serving_default&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;translate English to German: The house is wonderful and we wish to be here :)&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;translate English to French: She is beautiful&#39;</span><span class="p">]</span>
+
+<span class="n">predictions</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">texts</span><span class="p">)})</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;decoded_text&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>tf.Tensor(
+[b&#39;Das Haus ist wunderbar und wir m\xc3\xb6chten hier sein :)&#39;
+ b&#39;Elle est belle::::&#39;], shape=(2,), dtype=string)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="text_generation_using_gpt2.html" class="btn btn-neutral float-left" title="Text Generation using GPT2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sentence_transformers.html" class="btn btn-neutral float-right" title="Sentence Transformer in tf-transformers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

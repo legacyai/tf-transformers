@@ -42,7 +42,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="BigBird Roberta Tokenizer" href="bigbird_tokenizer.html" />
-    <link rel="prev" title="Create Sentence Embedding Roberta Model + Zeroshot from Scratch" href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html" /> 
+    <link rel="prev" title="Sentence Transformer in tf-transformers" href="../model_usage/sentence_transformers.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -78,6 +78,8 @@
 <li class="toctree-l1"><a class="reference internal" href="mt5.html">MT5</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roberta.html">RoBERTa</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clip.html">CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sentence_transformer.html">Sentence Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parallelism.html">Model Parallelism</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
@@ -87,6 +89,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/3_masked_lm_tpu.html">Train (Masked Language Model) with tf-transformers in TPU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
+</ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/roberta_tflite.html">Roberta TFLite</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_t5.html">Text Generation using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/sentence_transformers.html">Sentence Transformer in tf-transformers</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tokenizers</span></p>
 <ul class="current">
@@ -98,6 +112,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vit_feature_extractor.html">ViT Feature Extractor</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Research</span></p>
 <ul>
@@ -181,6 +197,22 @@ This tokenizer works in sync with <code class="xref py py-class docutils literal
 <dt id="tf_transformers.models.AlbertTokenizerTFText.from_pretrained">
 <em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_pretrained</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">tf.int32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_special_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pack_model_inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamic_padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/albert/tokenizer_albert.html#AlbertTokenizerTFText.from_pretrained"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.AlbertTokenizerTFText.from_pretrained" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load HuggingFace tokenizer and pass to TFtext</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Name of the model</p></li>
+<li><p><strong>out_type</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">tf.dtype</span></code>) – Return type . default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">tf.int32</span></code>).</p></li>
+<li><p><strong>max_length</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Max length of tokenizer (<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>).</p></li>
+<li><p><strong>add_special_tokens</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Add special tokens or not.</p></li>
+<li><p><strong>pack_model_inputs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Pack into proper tensor, useful for padding in TPU.</p></li>
+<li><p><strong>dynamic_padding</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Dynamic padding.</p></li>
+<li><p><strong>truncate</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Truncate inputs or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tokenizer layer.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -191,10 +223,80 @@ This tokenizer works in sync with <code class="xref py py-class docutils literal
 <dl class="py class">
 <dt id="tf_transformers.models.AlbertTokenizerLayer">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">AlbertTokenizerLayer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_case</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_serialized_proto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">tf.int32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenize_with_offsets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbest_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strip_diacritics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls_token_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep_token_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bos_token_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eos_token_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoder_start_token_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unk_token_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_token_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_token_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_special_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pack_model_inputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamic_padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/albert/tokenizer_albert.html#AlbertTokenizerLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.AlbertTokenizerLayer" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>Initializes a SentencepieceTokenizer layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lower_case</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – A Python boolean indicating whether to lowercase the string
+before tokenization. NOTE: New models are encouraged to build <cite>*_cf</cite>
+(case folding) normalization into the Sentencepiece model itself and
+avoid this extra step.</p></li>
+<li><p><strong>special_tokens</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – A list of special tokens , must present in model. If not pass None.
+model_file_path: A Python string with the path of the sentencepiece model.
+Exactly one of <cite>model_file_path</cite> and <cite>model_serialized_proto</cite> can be
+specified. In either case, the Keras model config for this layer will
+store the actual proto (not a filename passed here).
+model_serialized_proto: The sentencepiece model serialized proto string.</p></li>
+<li><p><strong>add_cls_sep</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To add [CLS] and [SEP] with the tokenized text</p></li>
+<li><p><strong>cls_token</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – cls token string</p></li>
+<li><p><strong>sep_token</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – sep token string</p></li>
+<li><p><strong>tokenize_with_offsets</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – A Python boolean. If true, this layer calls
+<cite>SentencepieceTokenizer.tokenize_with_offsets()</cite> instead of
+plain <cite>.tokenize()</cite> and outputs a triple of
+<cite>(tokens, start_offsets, limit_offsets)</cite> insead of just tokens.
+Note that when following <cite>strip_diacritics</cite> is set to True, returning
+offsets is not supported now.</p></li>
+<li><p><strong>nbest_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – A scalar for sampling:</p></li>
+<li><p><strong>= {0</strong> (<em>nbest_size</em>) – No sampling is performed. (default)</p></li>
+<li><p><strong>1}</strong> – No sampling is performed. (default)</p></li>
+<li><p><strong>&gt; 1</strong> (<em>nbest_size</em>) – samples from the nbest_size results.</p></li>
+<li><p><strong>&lt; 0</strong> (<em>nbest_size</em>) – assuming that nbest_size is infinite and samples
+from the all hypothesis (lattice) using
+forward-filtering-and-backward-sampling algorithm.</p></li>
+<li><p><strong>alpha</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – A scalar for a smoothing parameter. Inverse temperature for
+probability rescaling.</p></li>
+<li><p><strong>strip_diacritics</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to strip diacritics or not. Note that stripping
+diacritics requires additional text normalization and dropping bytes,
+which makes it impossible to keep track of the offsets now. Hence
+when <cite>strip_diacritics</cite> is set to True, we don’t yet support
+<cite>tokenize_with_offsets</cite>. NOTE: New models are encouraged to put this
+into custom normalization rules for the Sentencepiece model itself to
+avoid this extra step and the limitation regarding offsets.</p></li>
+<li><p><strong>add_special_tokens</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – If True: Add special tokens CLS and SEP.</p></li>
+<li><p><strong>pack_model_inputs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Static Padding to max_length</p></li>
+<li><p><strong>dynamic_padding</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Dynamic Padding to max_length of the batch</p></li>
+<li><p><strong>truncate</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To enable truncate</p></li>
+<li><p><strong>**kwargs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">Any]</span></code>) – standard arguments to <cite>Layer()</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ImportError</strong> – if importing tensorflow_text failed.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>RaggedTensor
+if dynamic_padding or bert_pack_inputs: dict of tf.Tensor</p>
+</dd>
+</dl>
+<dl class="py method">
 <dt id="tf_transformers.models.AlbertTokenizerLayer.bert_pack_inputs">
 <code class="sig-name descname"><span class="pre">bert_pack_inputs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_of_sequence_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_of_segment_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_special_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'round_robin'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/albert/tokenizer_albert.html#AlbertTokenizerLayer.bert_pack_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.AlbertTokenizerLayer.bert_pack_inputs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Freestanding equivalent of the BertPackInputs layer.</p>
+<dd><p>Pad tokenized inputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">tf.RaggedTensor</span></code>) – Tokenized inputs.</p></li>
+<li><p><strong>seq_length</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Sequence length</p></li>
+<li><p><strong>start_of_sequence_id</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – CLS token id.</p></li>
+<li><p><strong>end_of_segment_id</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – SEP token id.</p></li>
+<li><p><strong>padding_id</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – PAD token id.</p></li>
+<li><p><strong>num_special_tokens</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – 2</p></li>
+<li><p><strong>truncator</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Default (round_robin)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dict of padded inputs.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -218,12 +320,21 @@ This tokenizer works in sync with <code class="xref py py-class docutils literal
 <dl class="py method">
 <dt id="tf_transformers.models.AlbertTokenizerLayer.encode">
 <code class="sig-name descname"><span class="pre">encode</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_special_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_pad_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_tensors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ragged'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/albert/tokenizer_albert.html#AlbertTokenizerLayer.encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.AlbertTokenizerLayer.encode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calls <cite>text.SentencepieceTokenizer</cite> on inputs.
-:type inputs: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]
-:param inputs: A string Tensor of shape <cite>(batch_size,)</cite>.</p>
+<dd><p>Calls <cite>text.SentencepieceTokenizer</cite> on inputs.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>One or three of RaggedTensors if tokenize_with_offsets is False or True,
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – A string Tensor of shape <cite>(batch_size,)</cite>.</p></li>
+<li><p><strong>add_special_tokens</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – If True: Add special tokens CLS and SEP.</p></li>
+<li><p><strong>pack_model_inputs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Static Padding to max_length</p></li>
+<li><p><strong>padding</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Dynamic Padding to max_length of the batch</p></li>
+<li><p><strong>truncate</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To enable truncate</p></li>
+<li><p><strong>max_length</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Max length of tokenizer</p></li>
+<li><p><strong>return_tensors</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – defaults to <cite>ragged</cite>. Accepts [<cite>ragged</cite>, <cite>tf</cite>]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>One or three of RaggedTensors if tokenize_with_offsets is False or True,
 respectively. These are
 tokens: A RaggedTensor of shape <cite>[batch_size, (pieces)]</cite> and type <cite>int32</cite>.
 <cite>tokens[i,j]</cite> contains the j-th piece in the i-th input.
@@ -283,7 +394,7 @@ if they want to modify it.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html" class="btn btn-neutral float-left" title="Create Sentence Embedding Roberta Model + Zeroshot from Scratch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../model_usage/sentence_transformers.html" class="btn btn-neutral float-left" title="Sentence Transformer in tf-transformers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="bigbird_tokenizer.html" class="btn btn-neutral float-right" title="BigBird Roberta Tokenizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

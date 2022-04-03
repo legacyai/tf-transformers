@@ -2,20 +2,22 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-<meta property="og:title" content="<no title>" />
+<meta property="og:title" content="CLIP" />
   
 <meta property="og:type" content="website" />
   
 <meta property="og:url" content="model_doc/clip.html" />
   
+<meta property="og:description" content="Overview: The CLIP model was proposed in [Learning Transferable Visual Models From Natural Language Supervision]( https://arxiv.org/abs/2103.00020) by Alec R..." />
+  
 <meta property="og:image" content="png location" />
   
-<meta property="og:image:alt" content="<no title>" />
+<meta property="og:image:alt" content="CLIP" />
   
 <meta name="twitter:image" content="png location">
 <meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&lt;no title&gt; &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>CLIP &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -38,7 +40,9 @@
         <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Sentence Transformer" href="sentence_transformer.html" />
+    <link rel="prev" title="Vision Transformer (ViT)" href="vit.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -66,7 +70,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Models</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="albert.html">ALBERT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bert.html">BERT</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpt2.html">OpenAI GPT2</a></li>
@@ -74,6 +78,18 @@
 <li class="toctree-l1"><a class="reference internal" href="mt5.html">MT5</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roberta.html">RoBERTa</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CLIP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cliptextconfig">CLIPTextConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clipimageconfig">CLIPImageConfig</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clipmodel">CLIPModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clipencoder">CLIPEncoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clipimageencoder">CLIPImageEncoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cliptextencoder">CLIPTextEncoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clipfeatureextractortf">CLIPFeatureExtractorTF</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sentence_transformer.html">Sentence Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parallelism.html">Model Parallelism</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
@@ -84,11 +100,25 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
 </ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/roberta_tflite.html">Roberta TFLite</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_t5.html">Text Generation using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/sentence_transformers.html">Sentence Transformer in tf-transformers</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Tokenizers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="albert_tokenizer.html">ALBERT Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vit_feature_extractor.html">ViT Feature Extractor</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Research</span></p>
 <ul>
@@ -117,7 +147,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>&lt;no title&gt;</li>
+      <li>CLIP</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/model_doc/clip.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -127,11 +157,981 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
+  <div class="section" id="clip">
+<h1>CLIP<a class="headerlink" href="#clip" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The CLIP model was proposed in [Learning Transferable Visual Models From Natural Language Supervision](<a class="reference external" href="https://arxiv.org/abs/2103.00020">https://arxiv.org/abs/2103.00020</a>) by Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh,
+Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, Ilya Sutskever. CLIP
+(Contrastive Language-Image Pre-Training) is a neural network trained on a variety of (image, text) pairs. It can be
+instructed in natural language to predict the most relevant text snippet, given an image, without directly optimizing
+for the task, similarly to the zero-shot capabilities of GPT-2 and 3.</p>
+<p>The abstract from the paper is the following:</p>
+<p><em>State-of-the-art computer vision systems are trained to predict a fixed set of predetermined object categories. This
+restricted form of supervision limits their generality and usability since additional labeled data is needed to specify
+any other visual concept. Learning directly from raw text about images is a promising alternative which leverages a
+much broader source of supervision. We demonstrate that the simple pre-training task of predicting which caption goes
+with which image is an efficient and scalable way to learn SOTA image representations from scratch on a dataset of 400
+million (image, text) pairs collected from the internet. After pre-training, natural language is used to reference
+learned visual concepts (or describe new ones) enabling zero-shot transfer of the model to downstream tasks. We study
+the performance of this approach by benchmarking on over 30 different existing computer vision datasets, spanning tasks
+such as OCR, action recognition in videos, geo-localization, and many types of fine-grained object classification. The
+model transfers non-trivially to most tasks and is often competitive with a fully supervised baseline without the need
+for any dataset specific training. For instance, we match the accuracy of the original ResNet-50 on ImageNet zero-shot
+without needing to use any of the 1.28 million training examples it was trained on. We release our code and pre-trained
+model weights at this https URL.</em></p>
+<p>CLIP is a multi-modal vision and language model. It can be used for image-text similarity and for zero-shot image
+classification. CLIP uses a ViT like transformer to get visual features and a causal language model to get the text
+features. Both the text and visual features are then projected to a latent space with identical dimension. The dot
+product between the projected image and text features is then used as a similar score.</p>
+<p><a class="reference external" href="https://arxiv.org/abs/2103.00020">Paper👆</a>
+<a class="reference external" href="https://github.com/openai/CLIP">Official Code👆</a></p>
+</div>
+<div class="section" id="cliptextconfig">
+<h2>CLIPTextConfig<a class="headerlink" href="#cliptextconfig" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.clip.CLIPTextConfig">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.clip.</span></code><code class="sig-name descname"><span class="pre">CLIPTextConfig</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">49408</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_hidden_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_head_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2048</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_act</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'quick_gelu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_act</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'quick_gelu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_probs_dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_position_embeddings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">77</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_norm_epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_embedding_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'absolute'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/configuration_clip.html#CLIPTextConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.clip.CLIPTextConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the configuration class to store the configuration of a <a class="reference internal" href="vit.html#tf_transformers.models.ViTModel" title="tf_transformers.models.ViTModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ViTModel</span></code></a>.
+It is used to instantiate an ViT model according to the specified arguments, defining the model architecture. Instantiating a
+configuration with the defaults will yield a similar configuration to that of the ViT <a class="reference external" href="https://huggingface.co/google/vit-base-patch16-224">google/vit-base-patch16-224</a> architecture.</p>
+<p>Configuration objects inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerConfig</span></code> and can be used to control the model
+outputs. Read the documentation from <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerConfig</span></code> for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vocab_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 30522) – Vocabulary size of the ALBERT model. Defines the number of different tokens that can be represented by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">inputs_ids</span></code> passed when calling <code class="xref py py-class docutils literal notranslate"><span class="pre">BertModel</span></code> or
+<a class="reference internal" href="bert.html#tf_transformers.models.BertEncoder" title="tf_transformers.models.BertEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BertEncoder</span></code></a>.</p></li>
+<li><p><strong>embedding_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 128) – Dimensionality of vocabulary embeddings.</p></li>
+<li><p><strong>embedding_projection_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Dimensionality of the encoder layers and the pooler layer. Useful for Bert.</p></li>
+<li><p><strong>num_hidden_layers</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 12) – Number of hidden layers in the Transformer encoder.</p></li>
+<li><p><strong>num_attention_heads</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 12) – Number of attention heads for each attention layer in the Transformer encoder.</p></li>
+<li><p><strong>attention_head_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Size of attention heads in each layer. Normally (embedding_size//num_attention_heads).</p></li>
+<li><p><strong>intermediate_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 3072) – The dimensionality of the “intermediate” (often named feed-forward) layer in the Transformer encoder.</p></li>
+<li><p><strong>hidden_act</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">Callable</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;gelu&quot;</span></code>) – The non-linear activation function (function or string) in the encoder and pooler. If string,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;gelu&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relu&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;silu&quot;</span></code> and many are supported.</p></li>
+<li><p><strong>hidden_dropout_prob</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 0) – The dropout probability for all fully connected layers in the embeddings, encoder, and pooler.</p></li>
+<li><p><strong>max_position_embeddings</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 512) – The maximum sequence length that this model might ever be used with. Typically set this to something large
+(e.g., 512 or 1024 or 2048).</p></li>
+<li><p><strong>type_vocab_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 2) – The vocabulary size of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">token_type_ids</span></code> passed when calling <code class="xref py py-class docutils literal notranslate"><span class="pre">BertModel</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TFBertModel</span></code>.</p></li>
+<li><p><strong>initializer_range</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 0.02) – The standard deviation of the truncated_normal_initializer for initializing all weight matrices.</p></li>
+<li><p><strong>layer_norm_epsilon</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 1e-12) – The epsilon used by the layer normalization layers.</p></li>
+<li><p><strong>classifier_dropout_prob</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 0.1) – The dropout ratio for attached classifiers.</p></li>
+<li><p><strong>position_embedding_type</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code>) – Type of position embedding. Choose one of <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key&quot;</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key_query&quot;</span></code>. For positional embeddings use <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code>. For more information on
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key&quot;</span></code>, please refer to <a class="reference external" href="https://arxiv.org/abs/1803.02155">Self-Attention with Relative Position Representations (Shaw et al.)</a>. For more information on <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key_query&quot;</span></code>, please refer to
+<cite>Method 4</cite> in <a class="reference external" href="https://arxiv.org/abs/2009.13658">Improve Transformer Models with Better Relative Position Embeddings (Huang et al.)</a>.</p></li>
+<li><p><strong>num_hidden_groups</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 1) – Number of groups for the hidden layers, parameters in the same group are shared.</p></li>
+<li><p><strong>image_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">224</span></code>) – The size (resolution) of each image.</p></li>
+<li><p><strong>patch_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">16</span></code>) – The size (resolution) of each patch.</p></li>
+<li><p><strong>num_channels</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">3</span></code>) – The number of input channels.</p></li>
+<li><p><strong>num_labels</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">1000</span></code>) – Total number of labels by which model has been pre-trained</p></li>
+</ul>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">CLIPImageConfig</span><span class="p">,</span> <span class="n">CLIPImageEncoder</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initializing an &#39;openai/clip-vit-base-patch32&#39; style configuration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">configuration</span> <span class="o">=</span> <span class="n">CLIPImageConfig</span><span class="p">()</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vision_config</span> <span class="o">=</span> <span class="n">configuration</span><span class="p">[</span><span class="s1">&#39;vision_config&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text_config</span>   <span class="o">=</span> <span class="n">configuration</span><span class="p">[</span><span class="s1">&#39;text_config]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initializing a model from the original configuration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vision_encoder</span> <span class="o">=</span> <span class="n">CLIPImageEncoder</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">vision_config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text_encoder</span> <span class="o">=</span> <span class="n">CLIPTextEncoder</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">text_config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">CLIPEncoder</span><span class="p">(</span><span class="n">vision_encoder</span><span class="p">,</span> <span class="n">text_encoder</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">configuration</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_config_dict</span> <span class="c1"># This has more details than original configuration</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To get a model config</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;openai/clip-vit-base-patch32&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">CLIPImage</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="clipimageconfig">
+<h2>CLIPImageConfig<a class="headerlink" href="#clipimageconfig" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.clip.CLIPImageConfig">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.clip.</span></code><code class="sig-name descname"><span class="pre">CLIPImageConfig</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_hidden_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_head_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3072</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_act</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'quick_gelu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_act</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'quick_gelu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_probs_dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_position_embeddings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_norm_epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_embedding_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'absolute'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">224</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/configuration_clip.html#CLIPImageConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.clip.CLIPImageConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the configuration class to store the configuration of a <a class="reference internal" href="vit.html#tf_transformers.models.ViTModel" title="tf_transformers.models.ViTModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ViTModel</span></code></a>.
+It is used to instantiate an ViT model according to the specified arguments, defining the model architecture. Instantiating a
+configuration with the defaults will yield a similar configuration to that of the ViT <a class="reference external" href="https://huggingface.co/google/vit-base-patch16-224">google/vit-base-patch16-224</a> architecture.</p>
+<p>Configuration objects inherit from <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerConfig</span></code> and can be used to control the model
+outputs. Read the documentation from <code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerConfig</span></code> for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vocab_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 30522) – Vocabulary size of the ALBERT model. Defines the number of different tokens that can be represented by the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">inputs_ids</span></code> passed when calling <code class="xref py py-class docutils literal notranslate"><span class="pre">BertModel</span></code> or
+<a class="reference internal" href="bert.html#tf_transformers.models.BertEncoder" title="tf_transformers.models.BertEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">BertEncoder</span></code></a>.</p></li>
+<li><p><strong>embedding_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 128) – Dimensionality of vocabulary embeddings.</p></li>
+<li><p><strong>embedding_projection_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Dimensionality of the encoder layers and the pooler layer. Useful for Bert.</p></li>
+<li><p><strong>num_hidden_layers</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 12) – Number of hidden layers in the Transformer encoder.</p></li>
+<li><p><strong>num_attention_heads</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 12) – Number of attention heads for each attention layer in the Transformer encoder.</p></li>
+<li><p><strong>attention_head_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Size of attention heads in each layer. Normally (embedding_size//num_attention_heads).</p></li>
+<li><p><strong>intermediate_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 3072) – The dimensionality of the “intermediate” (often named feed-forward) layer in the Transformer encoder.</p></li>
+<li><p><strong>hidden_act</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">Callable</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;gelu&quot;</span></code>) – The non-linear activation function (function or string) in the encoder and pooler. If string,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;gelu&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relu&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;silu&quot;</span></code> and many are supported.</p></li>
+<li><p><strong>hidden_dropout_prob</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 0) – The dropout probability for all fully connected layers in the embeddings, encoder, and pooler.</p></li>
+<li><p><strong>max_position_embeddings</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 512) – The maximum sequence length that this model might ever be used with. Typically set this to something large
+(e.g., 512 or 1024 or 2048).</p></li>
+<li><p><strong>type_vocab_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 2) – The vocabulary size of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">token_type_ids</span></code> passed when calling <code class="xref py py-class docutils literal notranslate"><span class="pre">BertModel</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TFBertModel</span></code>.</p></li>
+<li><p><strong>initializer_range</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 0.02) – The standard deviation of the truncated_normal_initializer for initializing all weight matrices.</p></li>
+<li><p><strong>layer_norm_epsilon</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 1e-12) – The epsilon used by the layer normalization layers.</p></li>
+<li><p><strong>classifier_dropout_prob</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, <cite>optional</cite>, defaults to 0.1) – The dropout ratio for attached classifiers.</p></li>
+<li><p><strong>position_embedding_type</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code>) – Type of position embedding. Choose one of <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key&quot;</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key_query&quot;</span></code>. For positional embeddings use <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;absolute&quot;</span></code>. For more information on
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key&quot;</span></code>, please refer to <a class="reference external" href="https://arxiv.org/abs/1803.02155">Self-Attention with Relative Position Representations (Shaw et al.)</a>. For more information on <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;relative_key_query&quot;</span></code>, please refer to
+<cite>Method 4</cite> in <a class="reference external" href="https://arxiv.org/abs/2009.13658">Improve Transformer Models with Better Relative Position Embeddings (Huang et al.)</a>.</p></li>
+<li><p><strong>num_hidden_groups</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to 1) – Number of groups for the hidden layers, parameters in the same group are shared.</p></li>
+<li><p><strong>image_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">224</span></code>) – The size (resolution) of each image.</p></li>
+<li><p><strong>patch_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">16</span></code>) – The size (resolution) of each patch.</p></li>
+<li><p><strong>num_channels</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">3</span></code>) – The number of input channels.</p></li>
+<li><p><strong>num_labels</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">1000</span></code>) – Total number of labels by which model has been pre-trained</p></li>
+</ul>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">CLIPImageConfig</span><span class="p">,</span> <span class="n">CLIPImageEncoder</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initializing an &#39;google/vit-base-patch16-224&#39; style configuration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">configuration</span> <span class="o">=</span> <span class="n">CLIPImageConfig</span><span class="p">()</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initializing an ViT different style configuration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">configuration_new</span> <span class="o">=</span> <span class="n">CLIPImageConfig</span><span class="p">(</span>
+<span class="gp">... </span>     <span class="n">embedding_size</span><span class="o">=</span><span class="mi">768</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="n">num_attention_heads</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="n">intermediate_size</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span>
+<span class="gp">... </span> <span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initializing a model from the original configuration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">CLIPImageEncoder</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Accessing the model configuration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">configuration</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_config_dict</span> <span class="c1"># This has more details than original configuration</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To get a config</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;openai/clip-vit-base-patch32&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="n">CLIPImage</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="clipmodel">
+<h2>CLIPModel<a class="headerlink" href="#clipmodel" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.CLIPModel">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">CLIPModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'clip'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_model.html#CLIPModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLIP Encoder Wrapper</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Name of the model</p></li>
+<li><p><strong>cache_dir</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Directory to where model caches. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>).</p></li>
+<li><p><strong>save_checkpoint_cache</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To save model or not.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPModel.from_pretrained">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_pretrained</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_checkpoint_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_from_hf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convert_fn_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vision_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_from_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_hub</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_training</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_model.html#CLIPModel.from_pretrained"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPModel.from_pretrained" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLIP Model Pretrained with example :
+(<a class="reference internal" href="#tf_transformers.models.CLIPModel" title="tf_transformers.models.CLIPModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">tf_transformers.models.CLIPModel</span></code></a>) is a wrapper around (<a class="reference internal" href="#tf_transformers.models.CLIPEncoder" title="tf_transformers.models.CLIPEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">tf_transformers.models.CLIPEncoder</span></code></a>).</p>
+<p>Instantiates a <a class="reference internal" href="#tf_transformers.models.CLIPEncoder" title="tf_transformers.models.CLIPEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLIPEncoder</span></code></a> from a <code class="xref py py-obj docutils literal notranslate"><span class="pre">model_name</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Name of the model as in HuggingFace Transformers. eg: (<code class="xref py py-obj docutils literal notranslate"><span class="pre">clip-base-patch16</span></code>)</p></li>
+<li><p><strong>cache_dir</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Where model will be saved after conversion: If None for Linux based machine
+the directory will be (<code class="xref py py-obj docutils literal notranslate"><span class="pre">/tmp/tf_transformers_cache</span></code>)</p></li>
+<li><p><strong>model_checkpoint_dir</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Model checkpoint directory. If provided, we won’t convert from HF,
+rather, we try to load it from it.</p></li>
+<li><p><strong>convert_from_hf</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Whether we need to convert from HF to TFT(tensorflow transformers).
+default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+<li><p><strong>return_layer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to return tf.keras.layers.Layer/LegacyLayer.</p></li>
+<li><p><strong>return_config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to return TransformerConfig.</p></li>
+<li><p><strong>convert_fn_type</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – It will accept either of 3 values <code class="xref py py-obj docutils literal notranslate"><span class="pre">('tf',</span> <span class="pre">'pt',</span> <span class="pre">'both')</span></code>.
+default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">both</span></code>).</p></li>
+<li><p><strong>save_checkpoint_cache</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Do we need to save the checkpoints to cache directory.</p></li>
+<li><p><strong>load_from_cache</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Do we need to load the checkpoints from :obj:(<cite>cache_dir</cite>), if exists.</p></li>
+<li><p><strong>kwargs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">Any]</span></code>) – Additional parameters required to pass to the <a class="reference internal" href="#tf_transformers.models.CLIPEncoder" title="tf_transformers.models.CLIPEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLIPEncoder</span></code></a>
+like: <code class="xref py py-obj docutils literal notranslate"><span class="pre">mask_mode</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_dropout</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_auto_regressive</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">batch_size</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">sequence_length</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_mlm_layer</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_masked_lm_positions</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">return_all_layer_outputs</span></code> etc. For more details please refer
+<a class="reference internal" href="#tf_transformers.models.CLIPEncoder" title="tf_transformers.models.CLIPEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">CLIPEncoder</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>LegacyModel/LegacyLayer with or without config.</p>
+</dd>
+</dl>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span>  <span class="n">CLIPFeatureExtractorTF</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span>  <span class="n">CLIPModel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path_list</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="s1">&#39;image1.jpg;, &#39;</span><span class="n">image2</span><span class="o">.</span><span class="n">jpg</span><span class="s1">&#39;])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;openai/clip-base-patch16&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feature_extractor</span> <span class="o">=</span> <span class="n">CLIPFeatureExtractorTF</span><span class="p">(</span><span class="n">img_height</span><span class="o">=</span><span class="mi">224</span><span class="p">,</span> <span class="n">img_width</span><span class="o">=</span><span class="mi">224</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_inputs</span> <span class="o">=</span> <span class="n">feature_extractor</span><span class="p">({</span><span class="s1">&#39;image&#39;</span><span class="p">:</span> <span class="n">image_path_list</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text_inputs</span> <span class="o">=</span> <span class="n">clip</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="c1"># batch_size x sequence_length</span>
+</pre></div>
+</div>
+<blockquote>
+<div><p># use external clip tokenizer</p>
+</div></blockquote>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;input_pixels&#39;</span><span class="p">:</span> <span class="n">image_inputs</span><span class="p">,</span> <span class="s1">&#39;input_ids&#39;</span><span class="p">:</span> <span class="n">text_inputs</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">CLIPModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model_outputs</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPModel.get_config">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">get_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_model.html#CLIPModel.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPModel.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get config from model name.
+:type model_name: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
+:param model_name: Name of the model
+:type model_name: <code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Config (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPModel.update_config">
+<code class="sig-name descname"><span class="pre">update_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tft_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hf_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_model.html#CLIPModel.update_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPModel.update_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update tft config with hf config</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tft_config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary of tft model config</p></li>
+<li><p><strong>hf_config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary of hf model config</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="clipencoder">
+<h2>CLIPEncoder<a class="headerlink" href="#clipencoder" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.CLIPEncoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">CLIPEncoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip.html#CLIPEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="tf_transformers.models.CLIPEncoder.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip.html#CLIPEncoder.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPEncoder.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of CLIP :
+An Encoder in general accepts <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_ids</span></code> and optional (<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="loweralpha simple">
+<li><p><strong>Inputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models accepts input formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all inputs as dict .</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code>
+- 1 for tokens that are <strong>not masked</strong>,
+- 0 for tokens that are <strong>masked</strong>.</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>
+- 0 for tokens that are <strong>Sentence A</strong>,
+- 1 for tokens that are <strong>Sentence B</strong>. (Not applicable to all. <strong>Roberta</strong> has only <strong>0</strong>.)</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors.</p>
+<ol class="loweralpha simple" start="2">
+<li><p><strong>Outputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models returns output formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all outputs as dict .</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> – Dict of tf.Tensor (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_pixels&quot;:</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_ids&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_mask&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dict of tf.Tensor.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;image_cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;image_features&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;text_cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length),</span>
+<span class="pre">:obj:</span></code>”text_features”: tf.float32 (batch_size x sequence_length)`,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;text_token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)</span></code>
+)</p>
+<p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">return_all_layers=True</span></code>:</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)]</span></code>)</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+<p>Call</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPEncoder.get_model">
+<code class="sig-name descname"><span class="pre">get_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialize_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip.html#CLIPEncoder.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPEncoder.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
+:param self: model (tf.keras.Layer) instance
+:param initialize_only: bool</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="clipimageencoder">
+<h2>CLIPImageEncoder<a class="headerlink" href="#clipimageencoder" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.CLIPImageEncoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">CLIPImageEncoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'user_defined'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'clip_image'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_training</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_auto_regressive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_decoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classification_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_all_layer_outputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_image_encoder.html#CLIPImageEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPImageEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLIP Image Model :</p>
+<p>This model inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyLayer</span></code>. Check the superclass documentation details
+and design inspiration of LegacyLayer.
+This model is also a <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers">tf.keras.layers.Layer</a> subclass. Use
+it as a regular TF 2.0 Keras layer and refer to the TF 2.0 documentation for all matter related to general usage
+and behavior.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>TF 2.0 models accepts input formats as Dict:
+- having all inputs as dict .</p>
+<p>This is recommended and useful when using <code class="xref py py-meth docutils literal notranslate"><span class="pre">tf.keras.Model.fit()</span></code> method which currently requires having all
+the tensors in the first argument of the model call function: <code class="xref py py-obj docutils literal notranslate"><span class="pre">model(inputs)</span></code>.</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors associated to the input names given in the docstring:
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">model({&quot;input_ids&quot;:</span> <span class="pre">input_ids,&quot;input_mask&quot;:</span> <span class="pre">input_mask,</span> <span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">input_type_ids})</span></code>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerConfig</span></code>) – Model configuration.</p></li>
+<li><p><strong>mask_mode</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – <p>Mask Mode defines the type of mask used in the architecture.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">causal</span></code>: Casual LM masking with masking upper triangular matrix eg: GPT2).</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">user_defined</span></code>: User defined LM masking eg: Bert, Albert, Roberta etc).</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">prefix</span></code>: Casual LM masking but bidirectional to model inputs).</p>
+</p></li>
+<li><p><strong>name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Model name.</p></li>
+<li><p><strong>use_dropout</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – If True only dropout will be enabled.</p></li>
+<li><p><strong>is_training</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – This is used to mainly switch to auto regressive tasks.</p></li>
+<li><p><strong>use_decoder</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – If true we will use <a class="reference internal" href="#tf_transformers.models.CLIPImageEncoder.call_decoder" title="tf_transformers.models.CLIPImageEncoder.call_decoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder()</span></code></a> while <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True</span></code>.</p></li>
+<li><p><strong>batch_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>) – Batch size.</p></li>
+<li><p><strong>sequence_length</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>) – If <code class="xref py py-obj docutils literal notranslate"><span class="pre">position_embedding_type='absolute'</span></code>, sequence length should be with in
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">tf_transformers.models.clip.CLIPImageConfig.max_position_embeddings</span></code> limit.</p></li>
+<li><p><strong>use_mlm_layer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>) – If True, we will add
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">tf.keras.layers.Layer()</span></code> head as in case of Bert, Albert etc.</p></li>
+<li><p><strong>use_masked_lm_positions</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>) – If training
+an <cite>MLM Language Model</cite>, set <cite>use_masked_lm_positions=True</cite>. If it is True,
+inputs should have <code class="xref py py-obj docutils literal notranslate"><span class="pre">masked_lm_positions</span></code> in inputs . <cite>(batch_size x masked_labels_length)</cite>.</p></li>
+<li><p><strong>return_all_layer_outputs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>) – If True,
+outputs from all layers will be returned to the model.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPImageEncoder.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_image_encoder.html#CLIPImageEncoder.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPImageEncoder.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLIP Image Call method :
+All calls to the model will be routed from here. This routing is more of like a <code class="xref py py-obj docutils literal notranslate"><span class="pre">Factory</span></code> concept.
+This routing will be decided, when the model is initialized. This cannot be changed dynamically.
+For more details, check <code class="xref py py-class docutils literal notranslate"><span class="pre">get_call_method</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A call cannot be changed <strong>dynamically</strong>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True/False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=True</span></code>:  return <a class="reference internal" href="#tf_transformers.models.CLIPImageEncoder.call_decoder" title="tf_transformers.models.CLIPImageEncoder.call_decoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder()</span></code></a>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True/False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=False</span></code>: return <a class="reference internal" href="#tf_transformers.models.CLIPImageEncoder.call_encoder" title="tf_transformers.models.CLIPImageEncoder.call_encoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_encoder()</span></code></a>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=True</span></code> and if
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code>: return <a class="reference internal" href="#tf_transformers.models.CLIPImageEncoder.call_decoder_auto_regressive" title="tf_transformers.models.CLIPImageEncoder.call_decoder_auto_regressive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder_auto_regressive()</span></code></a>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=False</span></code> and if
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code>: return <a class="reference internal" href="#tf_transformers.models.CLIPImageEncoder.call_encoder_auto_regressive" title="tf_transformers.models.CLIPImageEncoder.call_encoder_auto_regressive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_encoder_auto_regressive()</span></code></a>.</p>
+</div>
+<p>Call method</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPImageEncoder.call_decoder">
+<code class="sig-name descname"><span class="pre">call_decoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_image_encoder.html#CLIPImageEncoder.call_decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPImageEncoder.call_decoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward Pass of Decoders (Decoder for T5, BART etc)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>NotImplementedError</strong> – Must implement in corresponding models.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPImageEncoder.call_decoder_auto_regressive">
+<code class="sig-name descname"><span class="pre">call_decoder_auto_regressive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_image_encoder.html#CLIPImageEncoder.call_decoder_auto_regressive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPImageEncoder.call_decoder_auto_regressive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward Pass of Decoders in Auto Regressive mode:
+(T5, BART etc)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>NotImplementedError</strong> – Must implement in corresponding models.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPImageEncoder.call_encoder">
+<code class="sig-name descname"><span class="pre">call_encoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_image_encoder.html#CLIPImageEncoder.call_encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPImageEncoder.call_encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of CLIP :
+An Encoder in general accepts <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_ids</span></code> and optional (<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="loweralpha simple">
+<li><p><strong>Inputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models accepts input formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all inputs as dict .</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code>
+- 1 for tokens that are <strong>not masked</strong>,
+- 0 for tokens that are <strong>masked</strong>.</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>
+- 0 for tokens that are <strong>Sentence A</strong>,
+- 1 for tokens that are <strong>Sentence B</strong>. (Not applicable to all. <strong>Roberta</strong> has only <strong>0</strong>.)</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors.</p>
+<ol class="loweralpha simple" start="2">
+<li><p><strong>Outputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models returns output formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all outputs as dict .</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Input</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Dict of tf.Tensor (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_pixels&quot;:</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_mask&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dict of tf.Tensor.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)</span></code>)</p>
+<p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">return_all_layers=True</span></code>:</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)]</span></code>)</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPImageEncoder.call_encoder_auto_regressive">
+<code class="sig-name descname"><span class="pre">call_encoder_auto_regressive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_image_encoder.html#CLIPImageEncoder.call_encoder_auto_regressive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPImageEncoder.call_encoder_auto_regressive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward Pass of Encoders in Auto Regressive mode:
+(GPT2, BERT etc)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>NotImplementedError</strong> – Must implement in corresponding models.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPImageEncoder.from_config">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_objects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_image_encoder.html#CLIPImageEncoder.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPImageEncoder.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a layer from its config.</p>
+<p>This method is the reverse of <cite>get_config</cite>,
+capable of instantiating the same layer from the config
+dictionary. It does not handle layer connectivity
+(handled by Network), nor weights (handled by <cite>set_weights</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the
+output of get_config.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A layer instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPImageEncoder.get_config">
+<code class="sig-name descname"><span class="pre">get_config</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_image_encoder.html#CLIPImageEncoder.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPImageEncoder.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the config of the layer.</p>
+<p>A layer config is a Python dictionary (serializable)
+containing the configuration of a layer.
+The same layer can be reinstantiated later
+(without its trained weights) from this configuration.</p>
+<p>The config of a layer does not include connectivity
+information, nor the layer class name. These are handled
+by <cite>Network</cite> (one layer of abstraction above).</p>
+<p>Note that <cite>get_config()</cite> does not guarantee to return a fresh copy of dict
+every time it is called. The callers should make a copy of the returned dict
+if they want to modify it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Python dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPImageEncoder.get_model">
+<code class="sig-name descname"><span class="pre">get_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialize_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_image_encoder.html#CLIPImageEncoder.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPImageEncoder.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
+:param self: model (tf.keras.Layer) instance
+:param initialize_only: If False, model (LegacyModel) wont be returned.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPImageEncoder.transformer_layers">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">transformer_layers</span></code><a class="headerlink" href="#tf_transformers.models.CLIPImageEncoder.transformer_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of Transformer layers in the encoder.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="cliptextencoder">
+<h2>CLIPTextEncoder<a class="headerlink" href="#cliptextencoder" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.CLIPTextEncoder">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">CLIPTextEncoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'causal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'clip_text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_training</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_auto_regressive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_decoder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_all_layer_outputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_first_token_as_cls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_text_encoder.html#CLIPTextEncoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clip Text Model :</p>
+<p>This model inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyLayer</span></code>. Check the superclass documentation details
+and design inspiration of LegacyLayer.
+This model is also a <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/layers">tf.keras.layers.Layer</a> subclass. Use
+it as a regular TF 2.0 Keras layer and refer to the TF 2.0 documentation for all matter related to general usage
+and behavior.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>TF 2.0 models accepts input formats as Dict:
+- having all inputs as dict .</p>
+<p>This is recommended and useful when using <code class="xref py py-meth docutils literal notranslate"><span class="pre">tf.keras.Model.fit()</span></code> method which currently requires having all
+the tensors in the first argument of the model call function: <code class="xref py py-obj docutils literal notranslate"><span class="pre">model(inputs)</span></code>.</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors associated to the input names given in the docstring:
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">model({&quot;input_ids&quot;:</span> <span class="pre">input_ids,&quot;input_mask&quot;:</span> <span class="pre">input_mask,</span> <span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">input_type_ids})</span></code>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TransformerConfig</span></code>) – Model configuration.</p></li>
+<li><p><strong>mask_mode</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – <p>Mask Mode defines the type of mask used in the architecture.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">causal</span></code>: Casual LM masking with masking upper triangular matrix eg: GPT2).</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">user_defined</span></code>: User defined LM masking eg: Bert, Albert, Roberta etc).</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">prefix</span></code>: Casual LM masking but bidirectional to model inputs).</p>
+</p></li>
+<li><p><strong>name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Model name.</p></li>
+<li><p><strong>use_dropout</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – If True only dropout will be enabled.</p></li>
+<li><p><strong>is_training</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – This is used to mainly switch to auto regressive tasks.</p></li>
+<li><p><strong>use_decoder</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – If true we will use <a class="reference internal" href="#tf_transformers.models.CLIPTextEncoder.call_decoder" title="tf_transformers.models.CLIPTextEncoder.call_decoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder()</span></code></a> while <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True</span></code>.</p></li>
+<li><p><strong>batch_size</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>) – Batch size.</p></li>
+<li><p><strong>sequence_length</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>) – If <code class="xref py py-obj docutils literal notranslate"><span class="pre">position_embedding_type='absolute'</span></code>, sequence length should be with in
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">tf_transformers.models.clip.CLIPTextConfig.max_position_embeddings</span></code> limit.</p></li>
+<li><p><strong>use_mlm_layer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>) – If True, we will add
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">tf.keras.layers.Layer()</span></code> head as in case of Bert, Albert etc.</p></li>
+<li><p><strong>use_masked_lm_positions</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>) – If training
+an <cite>MLM Language Model</cite>, set <cite>use_masked_lm_positions=True</cite>. If it is True,
+inputs should have <code class="xref py py-obj docutils literal notranslate"><span class="pre">masked_lm_positions</span></code> in inputs . <cite>(batch_size x masked_labels_length)</cite>.</p></li>
+<li><p><strong>return_all_layer_outputs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, <cite>optional</cite>, defaults to <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>) – If True,
+outputs from all layers will be returned to the model.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPTextEncoder.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_text_encoder.html#CLIPTextEncoder.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLIP Text Call method :
+All calls to the model will be routed from here. This routing is more of like a <code class="xref py py-obj docutils literal notranslate"><span class="pre">Factory</span></code> concept.
+This routing will be decided, when the model is initialized. This cannot be changed dynamically.
+For more details, check <code class="xref py py-class docutils literal notranslate"><span class="pre">get_call_method</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A call cannot be changed <strong>dynamically</strong>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True/False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=True</span></code>:  return <a class="reference internal" href="#tf_transformers.models.CLIPTextEncoder.call_decoder" title="tf_transformers.models.CLIPTextEncoder.call_decoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder()</span></code></a>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=True/False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=False</span></code>: return <a class="reference internal" href="#tf_transformers.models.CLIPTextEncoder.call_encoder" title="tf_transformers.models.CLIPTextEncoder.call_encoder"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_encoder()</span></code></a>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=True</span></code> and if
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code>: return <a class="reference internal" href="#tf_transformers.models.CLIPTextEncoder.call_decoder_auto_regressive" title="tf_transformers.models.CLIPTextEncoder.call_decoder_auto_regressive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_decoder_auto_regressive()</span></code></a>.</p>
+<p>if <code class="xref py py-obj docutils literal notranslate"><span class="pre">is_training=False</span></code> and if <code class="xref py py-obj docutils literal notranslate"><span class="pre">use_decoder=False</span></code> and if
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code>: return <a class="reference internal" href="#tf_transformers.models.CLIPTextEncoder.call_encoder_auto_regressive" title="tf_transformers.models.CLIPTextEncoder.call_encoder_auto_regressive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call_encoder_auto_regressive()</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPTextEncoder.call_decoder">
+<code class="sig-name descname"><span class="pre">call_decoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_text_encoder.html#CLIPTextEncoder.call_decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder.call_decoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of CLIP Text Decoder :
+An Encoder in general accepts <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_ids</span></code> and optional (<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="loweralpha simple">
+<li><p><strong>Inputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models accepts input formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all inputs as dict .</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors.</p>
+<p>Note: <code class="xref py py-obj docutils literal notranslate"><span class="pre">decoder_encoder_mask</span></code>, will be created automatically inside.</p>
+<ol class="loweralpha simple" start="2">
+<li><p><strong>Outputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models returns output formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all outputs as dict .</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Input</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Dict of tf.Tensor (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_ids&quot;:</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">decoder_sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span>
+<span class="pre">decoder_sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_mask&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">decoder_sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;encoder_hidden_states&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span>
+<span class="pre">encoder_sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size),</span>
+<span class="pre">:obj:</span></code>”decoder_encoder_mask”: tf.float32 (batch_size x
+encoder_sequence_length x decoder_sequence_length))</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dict of tf.Tensor.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)</span></code>)</p>
+<p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">return_all_layers=True</span></code>:</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)]</span></code>)</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPTextEncoder.call_decoder_auto_regressive">
+<code class="sig-name descname"><span class="pre">call_decoder_auto_regressive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_text_encoder.html#CLIPTextEncoder.call_decoder_auto_regressive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder.call_decoder_auto_regressive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of CLIP Text Decoder Auto Regressive/ Text Generation :
+A Decoder Auto Regressive model in general accepts <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_ids</span></code>, optional (<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>), <code class="xref py py-obj docutils literal notranslate"><span class="pre">all_cache_key</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">all_cache_value</span></code>.</p>
+<p>This is required for caching. But a user need not to be worry about this, as this will be
+encapsulated/abstracted inside <code class="xref py py-class docutils literal notranslate"><span class="pre">TextDecoder</span></code>. The main difference between Encoder Auto Regressive
+is, here no need of obj:<cite>past_length</cite>, as variable sequence length is not an issue.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="loweralpha simple">
+<li><p><strong>Inputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models accepts input formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all inputs as dict .</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors.</p>
+<ol class="loweralpha simple" start="2">
+<li><p><strong>Outputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models returns output formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all outputs as dict .</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Input</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Dict of tf.Tensor (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_ids&quot;:</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_mask&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dict of tf.Tensor.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;last_token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span>&#160; <span class="pre">vocab_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>
+)</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPTextEncoder.call_encoder">
+<code class="sig-name descname"><span class="pre">call_encoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_text_encoder.html#CLIPTextEncoder.call_encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder.call_encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of CLIP Text :
+An Encoder in general accepts <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_ids</span></code> and optional (<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="loweralpha simple">
+<li><p><strong>Inputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models accepts input formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all inputs as dict .</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code>
+- 1 for tokens that are <strong>not masked</strong>,
+- 0 for tokens that are <strong>masked</strong>.</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>
+- 0 for tokens that are <strong>Sentence A</strong>,
+- 1 for tokens that are <strong>Sentence B</strong>. (Not applicable to all. <strong>Roberta</strong> has only <strong>0</strong>.)</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors.</p>
+<ol class="loweralpha simple" start="2">
+<li><p><strong>Outputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models returns output formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all outputs as dict .</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Input</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Dict of tf.Tensor (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_ids&quot;:</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_mask&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dict of tf.Tensor.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)</span></code>)</p>
+<p>If <code class="xref py py-obj docutils literal notranslate"><span class="pre">return_all_layers=True</span></code>:</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">vocab_size)]</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_layer_cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">List[(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)]</span></code>)</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPTextEncoder.call_encoder_auto_regressive">
+<code class="sig-name descname"><span class="pre">call_encoder_auto_regressive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_text_encoder.html#CLIPTextEncoder.call_encoder_auto_regressive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder.call_encoder_auto_regressive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward pass of CLIP text Auto Regressive/ Text Generation :
+An Encoder Auto Regressive model in general accepts <code class="xref py py-obj docutils literal notranslate"><span class="pre">input_ids</span></code>, optional (<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_mask</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">input_type_ids</span></code>), <code class="xref py py-obj docutils literal notranslate"><span class="pre">all_cache_key</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">all_cache_value</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">past_length</span></code>.</p>
+<p>This is required for caching. But a user need not to be worry about this, as this will be
+encapsulated/abstracted inside <code class="xref py py-class docutils literal notranslate"><span class="pre">TextDecoder</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ol class="loweralpha simple">
+<li><p><strong>Inputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models accepts input formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all inputs as dict .</p>
+<p>Encoder Only Models like Bert, Albert, Roberta, GPT2 etc requires inputs in following format:
+- a dictionary with one or several input Tensors.</p>
+<ol class="loweralpha simple" start="2">
+<li><p><strong>Outputs</strong>.</p></li>
+</ol>
+<p>TF 2.0 models returns output formats as <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dict</span></code>:
+- having all outputs as dict .</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inputs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Input</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Dict of tf.Tensor (<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_ids&quot;:</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_type_ids&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;input_mask&quot;:</span> <span class="pre">Optional.</span> <span class="pre">tf.int32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;past_length&quot;:</span> <span class="pre">tf.int32</span> <span class="pre">(1</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>Dict of tf.Tensor.</p>
+<p>(<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;cls_output&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;token_embeddings&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span> <span class="pre">sequence_length</span> <span class="pre">x</span> <span class="pre">embedding_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;last_token_logits&quot;:</span> <span class="pre">tf.float32</span> <span class="pre">(batch_size</span> <span class="pre">x</span>&#160; <span class="pre">vocab_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all_cache_key&quot;:</span> <span class="pre">tf.float32</span>
+<span class="pre">(num_hidden_layers</span> <span class="pre">,</span>
+<span class="pre">batch_size</span> <span class="pre">,</span>
+<span class="pre">num_attention_heads</span> <span class="pre">,</span>
+<span class="pre">sequence_length,</span>
+<span class="pre">attention_head_size)</span></code>
+)</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>result</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPTextEncoder.from_config">
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_objects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_text_encoder.html#CLIPTextEncoder.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a layer from its config.</p>
+<p>This method is the reverse of <cite>get_config</cite>,
+capable of instantiating the same layer from the config
+dictionary. It does not handle layer connectivity
+(handled by Network), nor weights (handled by <cite>set_weights</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the
+output of get_config.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A layer instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPTextEncoder.get_config">
+<code class="sig-name descname"><span class="pre">get_config</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_text_encoder.html#CLIPTextEncoder.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Configuration dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPTextEncoder.get_embedding_table">
+<code class="sig-name descname"><span class="pre">get_embedding_table</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_text_encoder.html#CLIPTextEncoder.get_embedding_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder.get_embedding_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Embedding Table</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPTextEncoder.get_model">
+<code class="sig-name descname"><span class="pre">get_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialize_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_text_encoder.html#CLIPTextEncoder.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
+:type self: <code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyLayer</span></code>
+:param self: Model layer
+:type initialize_only: <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>
+:param initialize_only: If False, model (LegacyModel) wont be returned.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPTextEncoder.transformer_layers">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">transformer_layers</span></code><a class="headerlink" href="#tf_transformers.models.CLIPTextEncoder.transformer_layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of Transformer layers in the encoder.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="clipfeatureextractortf">
+<h2>CLIPFeatureExtractorTF<a class="headerlink" href="#clipfeatureextractortf" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.CLIPFeatureExtractorTF">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">CLIPFeatureExtractorTF</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_feature_extractor.html#CLIPFeatureExtractorTF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPFeatureExtractorTF" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLIPFeatureExtractor using Tensorflow Ops, which allows complete serialization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_height</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Image Height to resize.</p></li>
+<li><p><strong>img_width</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Image Width to resize.</p></li>
+<li><p><strong>num_channels</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Number of image channels.</p></li>
+<li><p><strong>centre_crop</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To centre_crop the image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+<li><p><strong>rescale</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To rescale the image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+<li><p><strong>normalize</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To normalize the image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+<li><p><strong>return_layer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to return tf.keras.layers.Layer/LegacyLayer.</p></li>
+<li><p><strong>scale_value</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Used for rescaling image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">1.0/255.0</span></code>).</p></li>
+<li><p><strong>mean</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Used for normalize image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">0.5</span></code>).</p></li>
+<li><p><strong>variance</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Used for normalize image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">0.5</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>LegacyModel/LegacyLayer.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPFeatureExtractorTF.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_feature_extractor.html#CLIPFeatureExtractorTF.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPFeatureExtractorTF.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main call</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPFeatureExtractorTF.get_config">
+<code class="sig-name descname"><span class="pre">get_config</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_feature_extractor.html#CLIPFeatureExtractorTF.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPFeatureExtractorTF.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return config</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPFeatureExtractorTF.get_model">
+<code class="sig-name descname"><span class="pre">get_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialize_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_feature_extractor.html#CLIPFeatureExtractorTF.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPFeatureExtractorTF.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
+:param initialize_only [bool]: If True, just initialize the model, but wont return model object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.CLIPFeatureExtractorTF.read_process_resize">
+<code class="sig-name descname"><span class="pre">read_process_resize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_feature_extractor.html#CLIPFeatureExtractorTF.read_process_resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPFeatureExtractorTF.read_process_resize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read, decode and process</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="vit.html" class="btn btn-neutral float-left" title="Vision Transformer (ViT)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sentence_transformer.html" class="btn btn-neutral float-right" title="Sentence Transformer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

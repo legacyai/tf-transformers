@@ -41,7 +41,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Model Parallelism" href="parallelism.html" />
+    <link rel="next" title="CLIP" href="clip.html" />
     <link rel="prev" title="RoBERTa" href="roberta.html" /> 
 </head>
 
@@ -84,6 +84,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#vitencoder">ViTEncoder</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="clip.html">CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sentence_transformer.html">Sentence Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parallelism.html">Model Parallelism</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
@@ -94,11 +96,25 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
 </ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/roberta_tflite.html">Roberta TFLite</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_t5.html">Text Generation using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/sentence_transformers.html">Sentence Transformer in tf-transformers</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Tokenizers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="albert_tokenizer.html">ALBERT Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vit_feature_extractor.html">ViT Feature Extractor</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Research</span></p>
 <ul>
@@ -261,7 +277,16 @@ outputs. Read the documentation from <code class="xref py py-class docutils lite
 <dl class="py class">
 <dt id="tf_transformers.models.ViTModel">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">ViTModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'vit'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/vit/vit_model.html#ViTModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.ViTModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>vit Encoder Wrapper</p>
+<dd><p>ViT Encoder Wrapper</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Name of the model</p></li>
+<li><p><strong>cache_dir</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Directory to where model caches. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>).</p></li>
+<li><p><strong>save_checkpoint_cache</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To save model or not.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="tf_transformers.models.ViTModel.from_config">
 <em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/vit/vit_model.html#ViTModel.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.ViTModel.from_config" title="Permalink to this definition">¶</a></dt>
@@ -333,21 +358,30 @@ like: <code class="xref py py-obj docutils literal notranslate"><span class="pre
 <dl class="py method">
 <dt id="tf_transformers.models.ViTModel.get_config">
 <em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">get_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/vit/vit_model.html#ViTModel.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.ViTModel.get_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a config from Huggingface hub if present</p>
+<dd><p>Get config from model name.
+:type model_name: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
+:param model_name: Name of the model
+:type model_name: <code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Config (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tf_transformers.models.ViTModel.update_config">
 <code class="sig-name descname"><span class="pre">update_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tft_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hf_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/vit/vit_model.html#ViTModel.update_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.ViTModel.update_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update tft config with hf config.</p>
+<dd><p>Update tft config with hf config</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>tft_config</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
-<li><p><strong>hf_config</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p></li>
+<li><p><strong>tft_config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary of tft model config</p></li>
+<li><p><strong>hf_config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary of hf model config</p></li>
 </ul>
 </dd>
 </dl>
+<p>Returns:</p>
 </dd></dl>
 
 </dd></dl>
@@ -568,7 +602,7 @@ if they want to modify it.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="roberta.html" class="btn btn-neutral float-left" title="RoBERTa" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="parallelism.html" class="btn btn-neutral float-right" title="Model Parallelism" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="clip.html" class="btn btn-neutral float-right" title="CLIP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

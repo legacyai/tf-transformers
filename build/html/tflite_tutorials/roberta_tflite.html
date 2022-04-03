@@ -2,22 +2,22 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-<meta property="og:title" content="Convert a Model to TFlite" />
+<meta property="og:title" content="Roberta TFLite" />
   
 <meta property="og:type" content="website" />
   
 <meta property="og:url" content="tflite_tutorials/roberta_tflite.html" />
   
-<meta property="og:description" content="The most important thing to notice here is that, if we want to convert a model to tflite, we have to ensure that inputs to the model are deterministic, which..." />
+<meta property="og:description" content="Convert a Model to TFlite: The most important thing to notice here is that, if we want to convert a model to tflite, we have to ensure that inputs to the mod..." />
   
 <meta property="og:image" content="png location" />
   
-<meta property="og:image:alt" content="Convert a Model to TFlite" />
+<meta property="og:image:alt" content="Roberta TFLite" />
   
 <meta name="twitter:image" content="png location">
 <meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Convert a Model to TFlite &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Roberta TFLite &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -40,7 +40,9 @@
         <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Text Generation using GPT2" href="../model_usage/text_generation_using_gpt2.html" />
+    <link rel="prev" title="Bert TFLite" href="bert_tflite.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -76,6 +78,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/clip.html">CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/sentence_transformer.html">Sentence Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
@@ -86,11 +90,36 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
 </ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Roberta TFLite</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#convert-a-model-to-tflite">Convert a Model to TFlite</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#load-roberta-model">Load Roberta Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#verify-models-inputs-and-outputs">Verify Models inputs and outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-model-as-serialized-version">Save Model as Serialized Version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#convert-savedmodel-to-tflite">Convert SavedModel to TFlite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-tflite-model">Load TFlite Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#assert-tflite-model-and-keras-model-outputs">Assert TFlite Model and Keras Model outputs</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_t5.html">Text Generation using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/sentence_transformers.html">Sentence Transformer in tf-transformers</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Tokenizers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit_feature_extractor.html">ViT Feature Extractor</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Research</span></p>
 <ul>
@@ -119,7 +148,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Convert a Model to TFlite</li>
+      <li>Roberta TFLite</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/tflite_tutorials/roberta_tflite.ipynb.txt" rel="nofollow"> View page source</a>
       </li>
@@ -129,7 +158,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="cell docutils container">
+  <div class="tex2jax_ignore mathjax_ignore section" id="roberta-tflite">
+<h1>Roberta TFLite<a class="headerlink" href="#roberta-tflite" title="Permalink to this headline">¶</a></h1>
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
 
@@ -161,10 +192,10 @@
 </div>
 </div>
 <div class="section" id="convert-a-model-to-tflite">
-<h1>Convert a Model to TFlite<a class="headerlink" href="#convert-a-model-to-tflite" title="Permalink to this headline">¶</a></h1>
+<h2>Convert a Model to TFlite<a class="headerlink" href="#convert-a-model-to-tflite" title="Permalink to this headline">¶</a></h2>
 <p>The most important thing to notice here is that, if we want to convert a model to <code class="docutils literal notranslate"><span class="pre">tflite</span></code>, we have to ensure that <code class="docutils literal notranslate"><span class="pre">inputs</span></code> to the model are <strong>deterministic</strong>, which means inputs should not be dynamic. We have to fix  <strong>batch_size</strong>, <strong>sequence_length</strong> and other related input constraints depends on the model of interest.</p>
 <div class="section" id="load-roberta-model">
-<h2>Load Roberta Model<a class="headerlink" href="#load-roberta-model" title="Permalink to this headline">¶</a></h2>
+<h3>Load Roberta Model<a class="headerlink" href="#load-roberta-model" title="Permalink to this headline">¶</a></h3>
 <ol class="simple">
 <li><p>Fix the inputs</p></li>
 <li><p>We can always check the <code class="docutils literal notranslate"><span class="pre">model</span></code> <strong>inputs</strong> and <strong>output</strong> by using <code class="docutils literal notranslate"><span class="pre">model.input</span></code> and <code class="docutils literal notranslate"><span class="pre">model.output</span></code>.</p></li>
@@ -199,7 +230,7 @@ INFO:absl:Successful ✅: Loaded model from tftransformers/roberta-base-no-mlm
 </div>
 </div>
 <div class="section" id="verify-models-inputs-and-outputs">
-<h1>Verify Models inputs and outputs<a class="headerlink" href="#verify-models-inputs-and-outputs" title="Permalink to this headline">¶</a></h1>
+<h2>Verify Models inputs and outputs<a class="headerlink" href="#verify-models-inputs-and-outputs" title="Permalink to this headline">¶</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model inputs&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">input</span><span class="p">)</span>
@@ -216,7 +247,7 @@ Model outputs {&#39;cls_output&#39;: &lt;KerasTensor: shape=(1, 768) dtype=float
 </div>
 </div>
 <div class="section" id="save-model-as-serialized-version">
-<h1>Save Model as Serialized Version<a class="headerlink" href="#save-model-as-serialized-version" title="Permalink to this headline">¶</a></h1>
+<h2>Save Model as Serialized Version<a class="headerlink" href="#save-model-as-serialized-version" title="Permalink to this headline">¶</a></h2>
 <p>We have to save the model using <code class="docutils literal notranslate"><span class="pre">model.save</span></code>. We use the <code class="docutils literal notranslate"><span class="pre">SavedModel</span></code> for converting it to <code class="docutils literal notranslate"><span class="pre">tflite</span></code>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -254,7 +285,7 @@ WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttent
 </div>
 </div>
 <div class="section" id="convert-savedmodel-to-tflite">
-<h1>Convert SavedModel to TFlite<a class="headerlink" href="#convert-savedmodel-to-tflite" title="Permalink to this headline">¶</a></h1>
+<h2>Convert SavedModel to TFlite<a class="headerlink" href="#convert-savedmodel-to-tflite" title="Permalink to this headline">¶</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">converter</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">lite</span><span class="o">.</span><span class="n">TFLiteConverter</span><span class="o">.</span><span class="n">from_saved_model</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/saved_model&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_name</span><span class="p">))</span> <span class="c1"># path to the SavedModel directory</span>
@@ -278,7 +309,7 @@ WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttent
 </div>
 </div>
 <div class="section" id="load-tflite-model">
-<h1>Load TFlite Model<a class="headerlink" href="#load-tflite-model" title="Permalink to this headline">¶</a></h1>
+<h2>Load TFlite Model<a class="headerlink" href="#load-tflite-model" title="Permalink to this headline">¶</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load the TFLite model and allocate tensors.</span>
@@ -294,7 +325,7 @@ WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttent
 </div>
 </div>
 <div class="section" id="assert-tflite-model-and-keras-model-outputs">
-<h1>Assert TFlite Model and Keras Model outputs<a class="headerlink" href="#assert-tflite-model-and-keras-model-outputs" title="Permalink to this headline">¶</a></h1>
+<h2>Assert TFlite Model and Keras Model outputs<a class="headerlink" href="#assert-tflite-model-and-keras-model-outputs" title="Permalink to this headline">¶</a></h2>
 <p>After conversion we have to assert the model outputs using
 <code class="docutils literal notranslate"><span class="pre">tflite</span></code> and <code class="docutils literal notranslate"><span class="pre">Keras</span></code> model, to ensure proper conversion.</p>
 <ol class="simple">
@@ -346,11 +377,15 @@ WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttent
 </div>
 </div>
 </div>
+</div>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bert_tflite.html" class="btn btn-neutral float-left" title="Bert TFLite" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../model_usage/text_generation_using_gpt2.html" class="btn btn-neutral float-right" title="Text Generation using GPT2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

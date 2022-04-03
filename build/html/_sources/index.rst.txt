@@ -303,6 +303,8 @@ Flax), PyTorch, and/or TensorFlow.
     model_doc/mt5.rst
     model_doc/roberta.rst
     model_doc/vit.rst
+    model_doc/clip.rst
+    model_doc/sentence_transformer.rst
     model_doc/parallelism
 
 .. toctree::
@@ -317,12 +319,19 @@ Flax), PyTorch, and/or TensorFlow.
 
 .. toctree::
     :maxdepth: 2
-    :caption: TFLite Tutorials
+    :caption: TFLite
+
     tflite_tutorials/albert_tflite
     tflite_tutorials/bert_tflite
     tflite_tutorials/roberta_tflite
 
+.. toctree::
+    :maxdepth: 2
+    :caption: Model Usage
 
+    model_usage/text_generation_using_gpt2
+    model_usage/text_generation_using_t5
+    model_usage/sentence_transformers
 
 .. toctree::
     :maxdepth: 2
@@ -331,6 +340,8 @@ Flax), PyTorch, and/or TensorFlow.
     model_doc/albert_tokenizer
     model_doc/bigbird_tokenizer
     model_doc/t5_tokenizer
+    model_doc/clip_feature_extractor
+    model_doc/vit_feature_extractor
 
 
 .. toctree::

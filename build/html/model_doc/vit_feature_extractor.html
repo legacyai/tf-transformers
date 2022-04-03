@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+<meta property="og:title" content="ViT Feature Extractor" />
+  
+<meta property="og:type" content="website" />
+  
+<meta property="og:url" content="model_doc/vit_feature_extractor.html" />
+  
+<meta property="og:description" content="Overview: This page includes information about how to use ViTFeatureExtractorTF with tensorflow-ops. This feature extractors works in sync with Dataset and s..." />
+  
+<meta property="og:image" content="png location" />
+  
+<meta property="og:image:alt" content="ViT Feature Extractor" />
+  
+<meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ViT Feature Extractor &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Glue Model Evaluation" href="../research/glue.html" />
+    <link rel="prev" title="CLIP Feature Extractor" href="clip_feature_extractor.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clip.html">CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sentence_transformer.html">Sentence Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/2_text_classification_imdb_albert.html">Classify text (MRPC) with Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/3_masked_lm_tpu.html">Train (Masked Language Model) with tf-transformers in TPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
+</ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/roberta_tflite.html">Roberta TFLite</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_t5.html">Text Generation using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/sentence_transformers.html">Sentence Transformer in tf-transformers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ViT Feature Extractor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vitfeatureextractortf">ViTFeatureExtractorTF</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>ViT Feature Extractor</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/model_doc/vit_feature_extractor.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="vit-feature-extractor">
+<h1>ViT Feature Extractor<a class="headerlink" href="#vit-feature-extractor" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This page includes information about how to use ViTFeatureExtractorTF with tensorflow-ops.
+This feature extractors works in sync with <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code> and so is useful for on the fly preprocessing.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span>  <span class="n">ViTFeatureExtractorTF</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path_list</span> <span class="o">=</span> <span class="c1"># List fo image paths</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vit_feature_extractor_tf</span> <span class="o">=</span> <span class="n">ViTFeatureExtractorTF</span><span class="p">(</span><span class="n">img_height</span><span class="o">=</span><span class="mi">224</span><span class="p">,</span> <span class="n">img_width</span><span class="o">=</span><span class="mi">224</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outputs</span> <span class="o">=</span> <span class="n">vit_feature_extractor_tf</span><span class="p">({</span><span class="s1">&#39;image&#39;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">image_path_list</span><span class="p">)})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="vitfeatureextractortf">
+<h2>ViTFeatureExtractorTF<a class="headerlink" href="#vitfeatureextractortf" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="tf_transformers.models.ViTFeatureExtractorTF">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">ViTFeatureExtractorTF</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/vit/vit_feature_extractor.html#ViTFeatureExtractorTF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.ViTFeatureExtractorTF" title="Permalink to this definition">¶</a></dt>
+<dd><p>VitFeatureExtractor using Tensorflow Ops, which allows complete serialization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_height</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Image Height to resize.</p></li>
+<li><p><strong>img_width</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Image Width to resize.</p></li>
+<li><p><strong>num_channels</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Number of image channels.</p></li>
+<li><p><strong>rescale</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To rescale the image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+<li><p><strong>normalize</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To normalize the image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
+<li><p><strong>return_layer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to return tf.keras.layers.Layer/LegacyLayer.</p></li>
+<li><p><strong>scale_value</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Used for rescaling image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">1.0/255.0</span></code>).</p></li>
+<li><p><strong>mean</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Used for normalize image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">0.5</span></code>).</p></li>
+<li><p><strong>variance</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Used for normalize image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">0.5</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>LegacyModel/LegacyLayer.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tf_transformers.models.ViTFeatureExtractorTF.call">
+<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/vit/vit_feature_extractor.html#ViTFeatureExtractorTF.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.ViTFeatureExtractorTF.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main call</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.ViTFeatureExtractorTF.get_config">
+<code class="sig-name descname"><span class="pre">get_config</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/vit/vit_feature_extractor.html#ViTFeatureExtractorTF.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.ViTFeatureExtractorTF.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return config</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.ViTFeatureExtractorTF.get_model">
+<code class="sig-name descname"><span class="pre">get_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialize_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/vit/vit_feature_extractor.html#ViTFeatureExtractorTF.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.ViTFeatureExtractorTF.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
+:param initialize_only [bool]: If True, just initialize the model, but wont return model object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tf_transformers.models.ViTFeatureExtractorTF.read_process_resize">
+<code class="sig-name descname"><span class="pre">read_process_resize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/vit/vit_feature_extractor.html#ViTFeatureExtractorTF.read_process_resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.ViTFeatureExtractorTF.read_process_resize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read, decode and process</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="clip_feature_extractor.html" class="btn btn-neutral float-left" title="CLIP Feature Extractor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../research/glue.html" class="btn btn-neutral float-right" title="Glue Model Evaluation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

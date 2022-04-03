@@ -84,6 +84,8 @@
 <li class="toctree-l1"><a class="reference internal" href="mt5.html">MT5</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roberta.html">RoBERTa</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clip.html">CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sentence_transformer.html">Sentence Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parallelism.html">Model Parallelism</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
@@ -94,11 +96,25 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
 </ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/roberta_tflite.html">Roberta TFLite</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_t5.html">Text Generation using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/sentence_transformers.html">Sentence Transformer in tf-transformers</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Tokenizers</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="albert_tokenizer.html">ALBERT Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vit_feature_extractor.html">ViT Feature Extractor</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Research</span></p>
 <ul>
@@ -169,7 +185,7 @@ efficient at predicting masked tokens and at NLU in general, but is not optimal 
 <h2>BertConfig<a class="headerlink" href="#bertconfig" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="tf_transformers.models.bert.BertConfig">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.bert.</span></code><code class="sig-name descname"><span class="pre">BertConfig</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30522</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_hidden_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_head_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3072</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_act</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gelu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_act</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gelu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_probs_dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_position_embeddings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_norm_epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_embedding_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'absolute'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/bert/configuration_bert.html#BertConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.bert.BertConfig" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.bert.</span></code><code class="sig-name descname"><span class="pre">BertConfig</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30522</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_hidden_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_attention_heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_head_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3072</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_act</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gelu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_act</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gelu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attention_probs_dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_position_embeddings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_vocab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_norm_epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position_embedding_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'absolute'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/bert/configuration_bert.html#BertConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.bert.BertConfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the configuration class to store the configuration of a <a class="reference internal" href="#tf_transformers.models.BertModel" title="tf_transformers.models.BertModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BertModel</span></code></a>.
 It is used to instantiate an BERT model according to the specified arguments, defining the model architecture.
 Instantiating a configuration with the defaults will yield a similar configuration to that of the
@@ -234,6 +250,15 @@ outputs. Read the documentation from <code class="xref py py-class docutils lite
 <dt id="tf_transformers.models.BertModel">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">BertModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bert'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_checkpoint_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/bert/bert_model.html#BertModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.BertModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bert Encoder Wrapper</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Name of the model</p></li>
+<li><p><strong>cache_dir</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – Directory to where model caches. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>).</p></li>
+<li><p><strong>save_checkpoint_cache</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To save model or not.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt id="tf_transformers.models.BertModel.from_config">
 <em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">from_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_mlm_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/bert/bert_model.html#BertModel.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.BertModel.from_config" title="Permalink to this definition">¶</a></dt>
@@ -305,17 +330,30 @@ like: <code class="xref py py-obj docutils literal notranslate"><span class="pre
 <dl class="py method">
 <dt id="tf_transformers.models.BertModel.get_config">
 <em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">get_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/bert/bert_model.html#BertModel.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.BertModel.get_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a config from Huggingface hub if present</p>
+<dd><p>Get config from model name.
+:type model_name: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>
+:param model_name: Name of the model
+:type model_name: <code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Config (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tf_transformers.models.BertModel.update_config">
 <code class="sig-name descname"><span class="pre">update_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tft_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hf_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/bert/bert_model.html#BertModel.update_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.BertModel.update_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update tft config with hf config. Useful while converting.
-:type tft_config: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>
-:param tft_config: Dict of TFT configuration.
-:type hf_config: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>
-:param hf_config: Dict of HF configuration.</p>
+<dd><p>Update tft config with hf config</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tft_config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary of tft model config</p></li>
+<li><p><strong>hf_config</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary of hf model config</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
 </dd></dl>
 
 </dd></dl>

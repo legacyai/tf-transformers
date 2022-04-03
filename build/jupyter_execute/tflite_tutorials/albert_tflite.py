@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# # Albert TFlite
+
+# In[ ]:
+
+
+
+
+
 # In[ ]:
 
 
@@ -11,12 +19,6 @@ get_ipython().system('pip install sentencepiece')
 get_ipython().system('pip install tensorflow-text')
 
 get_ipython().system('pip install transformers')
-
-
-# In[ ]:
-
-
-
 
 
 # In[7]:
@@ -37,7 +39,7 @@ from tf_transformers.models import AlbertModel
 
 
 
-# ## Convert a Model to TFlite
+# ### Convert a Model to TFlite
 # 
 # The most important thing to notice here is that, if we want to convert a model to ```tflite```, we have to ensure that ```inputs``` to the model are **deterministic**, which means inputs should not be dynamic. We have to fix  **batch_size**, **sequence_length** and other related input constraints depends on the model of interest.
 # 

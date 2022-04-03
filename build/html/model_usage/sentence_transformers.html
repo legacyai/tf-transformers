@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+<meta property="og:title" content="Sentence Transformer in tf-transformers" />
+  
+<meta property="og:type" content="website" />
+  
+<meta property="og:url" content="model_usage/sentence_transformers.html" />
+  
+<meta property="og:description" content="This is a simple tutorial to demonstrate how SentenceTransformer models has been integrated to tf-transformers and how to use it, The following tutorial is a..." />
+  
+<meta property="og:image" content="png location" />
+  
+<meta property="og:image:alt" content="Sentence Transformer in tf-transformers" />
+  
+<meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sentence Transformer in tf-transformers &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ALBERT Tokenizer" href="../model_doc/albert_tokenizer.html" />
+    <link rel="prev" title="Text Generation using T5" href="text_generation_using_t5.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/clip.html">CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/sentence_transformer.html">Sentence Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/2_text_classification_imdb_albert.html">Classify text (MRPC) with Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/3_masked_lm_tpu.html">Train (Masked Language Model) with tf-transformers in TPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
+</ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/roberta_tflite.html">Roberta TFLite</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="text_generation_using_t5.html">Text Generation using T5</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Sentence Transformer in tf-transformers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#load-sentence-t5-model">Load Sentence-t5 model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#whats-my-model-input">Whats my model input?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#whats-my-model-output">Whats my model output?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sentence-vectors">Sentence vectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#serialize-as-usual-and-load-it">Serialize as usual and load it</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit_feature_extractor.html">ViT Feature Extractor</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Sentence Transformer in tf-transformers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/model_usage/sentence_transformers.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="tex2jax_ignore mathjax_ignore section" id="sentence-transformer-in-tf-transformers">
+<h1>Sentence Transformer in tf-transformers<a class="headerlink" href="#sentence-transformer-in-tf-transformers" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p>This is a simple tutorial to demonstrate how <code class="docutils literal notranslate"><span class="pre">SentenceTransformer</span></code> models has been integrated
+to <code class="docutils literal notranslate"><span class="pre">tf-transformers</span></code> and how to use it</p></li>
+<li><p>The following tutorial is applicable to all supported <code class="docutils literal notranslate"><span class="pre">SentenceTransformer</span></code> models.</p></li>
+</ul>
+<div class="section" id="load-sentence-t5-model">
+<h2>Load Sentence-t5 model<a class="headerlink" href="#load-sentence-t5-model" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">SentenceTransformer</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;sentence-transformers/sentence-t5-base&#39;</span> <span class="c1"># Load any sentencetransformer model here</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">SentenceTransformer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "4ac56f7c27b74d998861500c3f5a25d4", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "4af58daaf13f41c5bfca9a4213603aad", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "437daa4c17b4423e84701c1dfd27cb02", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "47f641e08c7b47a79a0512aff1d57774", "version_major": 2, "version_minor": 0}
+</script><script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "f054f95265394c08947729893e50b204", "version_major": 2, "version_minor": 0}
+</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Metal device set to: Apple M1
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2022-04-02 17:00:46.902688: I tensorflow/core/common_runtime/pluggable_device/pluggable_device_factory.cc:305] Could not identify NUMA node of platform GPU ID 0, defaulting to 0. Your kernel may not have been built with NUMA support.
+2022-04-02 17:00:46.902786: I tensorflow/core/common_runtime/pluggable_device/pluggable_device_factory.cc:271] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 0 MB memory) -&gt; physical PluggableDevice (device: 0, name: METAL, pci bus id: &lt;undefined&gt;)
+INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /Users/sarathrnair/.cache/huggingface/hub/tftransformers__sentence-t5-base-sentence-transformers.main.d64dbdc4c8c15637da4215b81f38af99d48a586c/ckpt-1
+INFO:absl:Successful ✅: Loaded model from tftransformers/sentence-t5-base-sentence-transformers
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="whats-my-model-input">
+<h2>Whats my model input?<a class="headerlink" href="#whats-my-model-input" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>All models in <code class="docutils literal notranslate"><span class="pre">tf-transformers</span></code> are designed with full connections. All you need is <code class="docutils literal notranslate"><span class="pre">model.input</span></code> if its a <code class="docutils literal notranslate"><span class="pre">LegacyModel/tf.keras.Model</span></code> or <code class="docutils literal notranslate"><span class="pre">model.model_inputs</span></code> if its a <code class="docutils literal notranslate"><span class="pre">LegacyLayer/tf.keras.layers.Layer</span></code></p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">input</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;input_ids&#39;: &lt;KerasTensor: shape=(None, None) dtype=int32 (created by layer &#39;input_ids&#39;)&gt;,
+ &#39;input_mask&#39;: &lt;KerasTensor: shape=(None, None) dtype=int32 (created by layer &#39;input_mask&#39;)&gt;}
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="whats-my-model-output">
+<h2>Whats my model output?<a class="headerlink" href="#whats-my-model-output" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>All models in <code class="docutils literal notranslate"><span class="pre">tf-transformers</span></code> are designed with full connections. All you need is <code class="docutils literal notranslate"><span class="pre">model.output</span></code> if its a <code class="docutils literal notranslate"><span class="pre">LegacyModel/tf.keras.Model</span></code> or <code class="docutils literal notranslate"><span class="pre">model.model_outputs</span></code> if its a <code class="docutils literal notranslate"><span class="pre">LegacyLayer/tf.keras.layers.Layer</span></code></p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">output</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;sentence_vector&#39;: &lt;KerasTensor: shape=(None, 768) dtype=float32 (created by layer &#39;tf_transformers/t5_encoder&#39;)&gt;}
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="sentence-vectors">
+<h2>Sentence vectors<a class="headerlink" href="#sentence-vectors" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span>
+
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+
+<span class="n">text</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;This is a sentence to get vector&#39;</span><span class="p">,</span> <span class="s1">&#39;This one too&#39;</span><span class="p">]</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">return_tensors</span><span class="o">=</span><span class="s1">&#39;tf&#39;</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">inputs_tf</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;input_ids&#39;</span><span class="p">:</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">],</span> <span class="s1">&#39;input_mask&#39;</span><span class="p">:</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;attention_mask&#39;</span><span class="p">]}</span>
+<span class="n">outputs_tf</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">inputs_tf</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sentence vector&quot;</span><span class="p">,</span> <span class="n">outputs_tf</span><span class="p">[</span><span class="s1">&#39;sentence_vector&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sentence vector (2, 768)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="serialize-as-usual-and-load-it">
+<h2>Serialize as usual and load it<a class="headerlink" href="#serialize-as-usual-and-load-it" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Serialize, load and assert outputs with non serialized <code class="docutils literal notranslate"><span class="pre">(</span></code>tf.keras.Model<code class="docutils literal notranslate"><span class="pre">)</span></code></p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_dir</span> <span class="o">=</span> <span class="s1">&#39;MODELS/sentence_t5&#39;</span>
+<span class="n">model</span><span class="o">.</span><span class="n">save_transformers_serialized</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+
+<span class="n">loaded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">saved_model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">loaded</span><span class="o">.</span><span class="n">signatures</span><span class="p">[</span><span class="s1">&#39;serving_default&#39;</span><span class="p">]</span>
+
+<span class="n">outputs_tf_serialized</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">inputs_tf</span><span class="p">)</span>
+
+<span class="n">tf</span><span class="o">.</span><span class="n">debugging</span><span class="o">.</span><span class="n">assert_near</span><span class="p">(</span><span class="n">outputs_tf</span><span class="p">[</span><span class="s1">&#39;sentence_vector&#39;</span><span class="p">],</span> <span class="n">outputs_tf_serialized</span><span class="p">[</span><span class="s1">&#39;sentence_vector&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2022-04-02 17:09:27.002497: W tensorflow/python/util/util.cc:368] Sets are not currently considered sequences, but this may change in the future, so consider avoiding using them.
+WARNING:absl:Found untraced functions such as tf_transformers/t5_encoder_layer_call_fn, tf_transformers/t5_encoder_layer_call_and_return_conditional_losses, grt5_dense_layer_layer_call_fn, grt5_dense_layer_layer_call_and_return_conditional_losses, dropout_2_layer_call_fn while saving (showing 5 of 880). These functions will not be directly callable after loading.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Assets written to: MODELS/sentence_t5/assets
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Assets written to: MODELS/sentence_t5/assets
+2022-04-02 17:09:32.964144: W tensorflow/core/platform/profile_utils/cpu_utils.cc:128] Failed to get CPU frequency: 0 Hz
+2022-04-02 17:09:32.965446: I tensorflow/core/grappler/optimizers/custom_graph_optimizer_registry.cc:112] Plugin optimizer for device_type GPU is enabled.
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="text_generation_using_t5.html" class="btn btn-neutral float-left" title="Text Generation using T5" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../model_doc/albert_tokenizer.html" class="btn btn-neutral float-right" title="ALBERT Tokenizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
