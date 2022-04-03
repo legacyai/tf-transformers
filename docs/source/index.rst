@@ -303,6 +303,8 @@ Flax), PyTorch, and/or TensorFlow.
     model_doc/mt5.rst
     model_doc/roberta.rst
     model_doc/vit.rst
+    model_doc/clip.rst
+    model_doc/sentence_transformer.rst
     model_doc/parallelism
 
 .. toctree::
@@ -338,6 +340,8 @@ Flax), PyTorch, and/or TensorFlow.
     model_doc/albert_tokenizer
     model_doc/bigbird_tokenizer
     model_doc/t5_tokenizer
+    model_doc/clip_feature_extractor
+    model_doc/vit_feature_extractor
 
 
 .. toctree::

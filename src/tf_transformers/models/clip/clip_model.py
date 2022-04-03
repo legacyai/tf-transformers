@@ -64,26 +64,32 @@ code_example = r'''
 
 
 class CLIPModel(ModelWrapper):
-    """CLIP Encoder Wrapper"""
+    """CLIP Encoder Wrapper
+
+    Args:
+        model_name (:obj:`str`): Name of the model
+        cache_dir  (:obj:`str`): Directory to where model caches. default (:obj:`None`).
+        save_checkpoint_cache  (:obj:`bool`): To save model or not.
+
+    """
 
     def __init__(
         self, model_name: str = 'clip', cache_dir: Union[str, None] = None, save_checkpoint_cache: bool = True
     ):
-        """
-        Args:
-            model_name (str): Model name
-            cache_dir (str): cache dir to save the mode checkpoints
-        """
+
         super(CLIPModel, self).__init__(
             model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=save_checkpoint_cache
         )
 
     def update_config(self, tft_config, hf_config):
-        """Update tft config with hf config.
+        r"""
+        Update tft config with hf config
 
         Args:
-            tft_config ([type]): [description]
-            hf_config ([type]): [description]
+            tft_config (:obj:`dict`): Dictionary of tft model config
+            hf_config  (:obj:`dict`): Dictionary of hf model config
+        Returns:
+
         """
         # Add Vision config
         clip_config_hf_image = hf_config['vision_config']
@@ -123,8 +129,14 @@ class CLIPModel(ModelWrapper):
 
     @classmethod
     def get_config(cls, model_name: str):
-        """Get a config from Huggingface hub if present"""
+        r"""
+        Get config from model name.
+        Args:
+            model_name (:obj:`str`): Name of the model
+        Returns:
+            Config (:obj:`dict`)
 
+        """
         # Check if it is under tf_transformers
         if model_name in MODEL_TO_HF_URL:
             URL = MODEL_TO_HF_URL[model_name]
