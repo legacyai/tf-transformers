@@ -58,23 +58,30 @@ code_example = r'''
 
 
 class T5Model(ModelWrapper):
-    """T5 Encoder Wrapper"""
+    r"""T5 Encoder Wrapper
+
+    Args:
+        model_name (:obj:`str`): Name of the model
+        cache_dir  (:obj:`str`): Directory to where model caches. default (:obj:`None`).
+        save_checkpoint_cache  (:obj:`bool`): To save model or not.
+
+    """
 
     def __init__(self, model_name='t5', cache_dir=None, save_checkpoint_cache=True):
-        """
-        Args:
-            model_name (str): Model name
-            cache_dir (str): cache dir to save the mode checkpoints
-        """
+
         super(T5Model, self).__init__(
             model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=save_checkpoint_cache
         )
 
     def update_config(self, tft_config: Dict, hf_config: Dict):
-        """Update tft config with hf config. Useful while converting.
+        r"""
+        Update tft config with hf config
+
         Args:
-            tft_config: Dict of TFT configuration.
-            hf_config: Dict of HF configuration.
+            tft_config (:obj:`dict`): Dictionary of tft model config
+            hf_config  (:obj:`dict`): Dictionary of hf model config
+        Returns:
+
         """
         tft_config["vocab_size"] = hf_config["vocab_size"]
         tft_config["embedding_size"] = hf_config["d_model"]
@@ -91,8 +98,14 @@ class T5Model(ModelWrapper):
 
     @classmethod
     def get_config(cls, model_name: str):
-        """Get a config from Huggingface hub if present"""
+        r"""
+        Get config from model name.
+        Args:
+            model_name (:obj:`str`): Name of the model
+        Returns:
+            Config (:obj:`dict`)
 
+        """
         # Check if it is under tf_transformers
         if model_name in MODEL_TO_HF_URL:
             URL = MODEL_TO_HF_URL[model_name]

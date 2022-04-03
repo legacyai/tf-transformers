@@ -73,6 +73,58 @@ def get_vocab(model_proto):
 
 
 class BigBirdRobertaTokenizerLayer(tf.keras.layers.Layer):
+    r"""
+    Initializes a SentencepieceTokenizer layer.
+
+    Args:
+        lower_case (:obj:`bool`): A Python boolean indicating whether to lowercase the string
+                before tokenization. NOTE: New models are encouraged to build `*_cf`
+                (case folding) normalization into the Sentencepiece model itself and
+                avoid this extra step.
+        special_tokens (:obj:`list`): A list of special tokens , must present in model. If not pass None.
+                model_file_path: A Python string with the path of the sentencepiece model.
+                Exactly one of `model_file_path` and `model_serialized_proto` can be
+                specified. In either case, the Keras model config for this layer will
+                store the actual proto (not a filename passed here).
+                model_serialized_proto: The sentencepiece model serialized proto string.
+        add_cls_sep (:obj:`bool`): To add [CLS] and [SEP] with the tokenized text
+        cls_token (:obj:`str`): cls token string
+        sep_token (:obj:`str`): sep token string
+        tokenize_with_offsets (:obj:`bool`): A Python boolean. If true, this layer calls
+                `SentencepieceTokenizer.tokenize_with_offsets()` instead of
+                plain `.tokenize()` and outputs a triple of
+                `(tokens, start_offsets, limit_offsets)` insead of just tokens.
+                Note that when following `strip_diacritics` is set to True, returning
+                offsets is not supported now.
+        nbest_size (:obj:`int`): A scalar for sampling:
+        nbest_size = {0,1}: No sampling is performed. (default)
+        nbest_size > 1: samples from the nbest_size results.
+        nbest_size < 0: assuming that nbest_size is infinite and samples
+                from the all hypothesis (lattice) using
+                forward-filtering-and-backward-sampling algorithm.
+        alpha (:obj:`float`): A scalar for a smoothing parameter. Inverse temperature for
+                probability rescaling.
+        strip_diacritics (:obj:`bool`): Whether to strip diacritics or not. Note that stripping
+                diacritics requires additional text normalization and dropping bytes,
+                which makes it impossible to keep track of the offsets now. Hence
+                when `strip_diacritics` is set to True, we don't yet support
+                `tokenize_with_offsets`. NOTE: New models are encouraged to put this
+                into custom normalization rules for the Sentencepiece model itself to
+                avoid this extra step and the limitation regarding offsets.
+        add_special_tokens (:obj:`bool`): If True: Add special tokens CLS and SEP.
+        pack_model_inputs (:obj:`bool`): Static Padding to max_length
+        dynamic_padding (:obj:`bool`): Dynamic Padding to max_length of the batch
+        truncate (:obj:`bool`): To enable truncate
+        **kwargs (:obj:`Dict[str, Any]`): standard arguments to `Layer()`.
+
+    Raises:
+        ImportError: if importing tensorflow_text failed.
+
+    Returns:
+        RaggedTensor
+        if dynamic_padding or bert_pack_inputs: dict of tf.Tensor
+    """
+
     def __init__(
         self,
         *,
@@ -99,57 +151,6 @@ class BigBirdRobertaTokenizerLayer(tf.keras.layers.Layer):
         truncate=False,
         **kwargs,
     ):
-        """Initializes a SentencepieceTokenizer layer.
-        Args:
-            lower_case: A Python boolean indicating whether to lowercase the string
-                    before tokenization. NOTE: New models are encouraged to build `*_cf`
-                    (case folding) normalization into the Sentencepiece model itself and
-                    avoid this extra step.
-            special_tokens: A list of special tokens , must present in model. If not pass None.
-                    model_file_path: A Python string with the path of the sentencepiece model.
-                    Exactly one of `model_file_path` and `model_serialized_proto` can be
-                    specified. In either case, the Keras model config for this layer will
-                    store the actual proto (not a filename passed here).
-                    model_serialized_proto: The sentencepiece model serialized proto string.
-            add_cls_sep: To add [CLS] and [SEP] with the tokenized text
-            cls_token: cls token string
-            sep_token: sep token string
-            tokenize_with_offsets: A Python boolean. If true, this layer calls
-                    `SentencepieceTokenizer.tokenize_with_offsets()` instead of
-                    plain `.tokenize()` and outputs a triple of
-                    `(tokens, start_offsets, limit_offsets)` insead of just tokens.
-                    Note that when following `strip_diacritics` is set to True, returning
-                    offsets is not supported now.
-            nbest_size: A scalar for sampling:
-            nbest_size = {0,1}: No sampling is performed. (default)
-            nbest_size > 1: samples from the nbest_size results.
-            nbest_size < 0: assuming that nbest_size is infinite and samples
-                    from the all hypothesis (lattice) using
-                    forward-filtering-and-backward-sampling algorithm.
-            alpha: A scalar for a smoothing parameter. Inverse temperature for
-                    probability rescaling.
-            strip_diacritics: Whether to strip diacritics or not. Note that stripping
-                    diacritics requires additional text normalization and dropping bytes,
-                    which makes it impossible to keep track of the offsets now. Hence
-                    when `strip_diacritics` is set to True, we don't yet support
-                    `tokenize_with_offsets`. NOTE: New models are encouraged to put this
-                    into custom normalization rules for the Sentencepiece model itself to
-                    avoid this extra step and the limitation regarding offsets.
-            **kwargs: standard arguments to `Layer()`.
-            add_special_tokens: If True: Add special tokens CLS and SEP.
-            pack_model_inputs: Static Padding to max_length
-            dynamic_padding: Dynamic Padding to max_length of the batch
-            truncate: To enable truncate
-
-        Raises:
-            ImportError: if importing tensorflow_text failed.
-
-        Returns:
-            Default: RaggedTensor
-            if dynamic_padding or bert_pack_inputs: dict of tf.Tensor
-
-
-        """
 
         super().__init__(**kwargs)
         if bool(model_file_path) == bool(model_serialized_proto):
@@ -491,7 +492,21 @@ class BigBirdRobertaTokenizerTFText:
         dynamic_padding=False,
         truncate=False,
     ):
-        """Load HuggingFace tokenizer and pass to TFtext"""
+        r"""
+        Load HuggingFace tokenizer and pass to TFtext
+
+        Args:
+            model_name (:obj:`str`): Name of the model
+            out_type (:obj:`tf.dtype`): Return type . default (:obj:`tf.int32`).
+            max_length (:obj:`int`): Max length of tokenizer (:obj:`None`).
+            add_special_tokens (:obj:`bool`): Add special tokens or not.
+            pack_model_inputs (:obj:`bool`): Pack into proper tensor, useful for padding in TPU.
+            dynamic_padding (:obj:`bool`): Dynamic padding.
+            truncate (:obj:`bool`): Truncate inputs or not.
+
+        Returns:
+            Tokenizer layer.
+        """
         cache_dir = tempfile.gettempdir()
         cache_dir = Path(cache_dir, _PREFIX_DIR)
         create_cache_dir(cache_dir)

@@ -66,24 +66,30 @@ code_example = r'''
 
 
 class ViTModel(ModelWrapper):
-    """vit Encoder Wrapper"""
+    r"""ViT Encoder Wrapper
+
+    Args:
+        model_name (:obj:`str`): Name of the model
+        cache_dir  (:obj:`str`): Directory to where model caches. default (:obj:`None`).
+        save_checkpoint_cache  (:obj:`bool`): To save model or not.
+
+    """
 
     def __init__(self, model_name: str = 'vit', cache_dir: Union[str, None] = None, save_checkpoint_cache: bool = True):
-        """
-        Args:
-            model_name (str): Model name
-            cache_dir (str): cache dir to save the mode checkpoints
-        """
+
         super(ViTModel, self).__init__(
             model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=save_checkpoint_cache
         )
 
     def update_config(self, tft_config, hf_config):
-        """Update tft config with hf config.
+        r"""
+        Update tft config with hf config
 
         Args:
-            tft_config ([type]): [description]
-            hf_config ([type]): [description]
+            tft_config (:obj:`dict`): Dictionary of tft model config
+            hf_config  (:obj:`dict`): Dictionary of hf model config
+        Returns:
+
         """
         tft_config["image_size"] = hf_config["image_size"]
         tft_config["patch_size"] = hf_config["patch_size"]
@@ -103,8 +109,14 @@ class ViTModel(ModelWrapper):
 
     @classmethod
     def get_config(cls, model_name: str):
-        """Get a config from Huggingface hub if present"""
+        r"""
+        Get config from model name.
+        Args:
+            model_name (:obj:`str`): Name of the model
+        Returns:
+            Config (:obj:`dict`)
 
+        """
         # Check if it is under tf_transformers
         if model_name in MODEL_TO_HF_URL:
             URL = MODEL_TO_HF_URL[model_name]

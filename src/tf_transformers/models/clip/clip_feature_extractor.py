@@ -32,6 +32,25 @@ code_example = r'''
 
 
 class CLIPFeatureExtractorTF(LegacyLayer):
+    """
+    CLIPFeatureExtractor using Tensorflow Ops, which allows complete serialization
+
+    Args:
+        img_height (:obj:`int`): Image Height to resize.
+        img_width  (:obj:`int`): Image Width to resize.
+        num_channels (:obj:`int`): Number of image channels.
+        centre_crop (:obj:`bool`): To centre_crop the image. default (:obj:`True`).
+        rescale (:obj:`bool`): To rescale the image. default (:obj:`True`).
+        normalize (:obj:`bool`): To normalize the image. default (:obj:`True`).
+        return_layer (:obj:`bool`): Whether to return tf.keras.layers.Layer/LegacyLayer.
+        scale_value (:obj:`float`): Used for rescaling image. default (:obj:`1.0/255.0`).
+        mean (:obj:`float`): Used for normalize image. default (:obj:`0.5`).
+        variance (:obj:`float`): Used for normalize image. default (:obj:`0.5`).
+    Returns:
+        LegacyModel/LegacyLayer.
+
+    """
+
     def __init__(
         self,
         img_height,
@@ -48,28 +67,6 @@ class CLIPFeatureExtractorTF(LegacyLayer):
         **kwargs,
     ):
 
-        """
-        CLIPFeatureExtractor using Tensorflow Ops, which allows complete serialization
-
-            Args:
-                img_height (:obj:`int`): Image Height to resize.
-                img_width  (:obj:`int`): Image Width to resize.
-                num_channels (:obj:`int`): Number of image channels.
-                centre_crop (:obj:`bool`): To centre_crop the image. default (:obj:`True`).
-                rescale (:obj:`bool`): To rescale the image. default (:obj:`True`).
-                normalize (:obj:`bool`): To normalize the image. default (:obj:`True`).
-                return_layer (:obj:`bool`): Whether to return tf.keras.layers.Layer/LegacyLayer.
-                scale_value (:obj:`float`): Used for rescaling image. default (:obj:`1.0/255.0`).
-                mean (:obj:`float`): Used for normalize image. default (:obj:`0.5`).
-                variance (:obj:`float`): Used for normalize image. default (:obj:`0.5`).
-            Returns:
-                LegacyModel/LegacyLayer.
-
-            Examples::
-
-                {3}
-
-        """
         super(CLIPFeatureExtractorTF, self).__init__(
             is_training=is_training, use_dropout=use_dropout, name="CLIP_feature_extractor", **kwargs
         )
