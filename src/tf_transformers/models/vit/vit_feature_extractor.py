@@ -47,7 +47,7 @@ class ViTFeatureExtractorTF(LegacyLayer):
         **kwargs,
     ):
 
-        r"""
+        """
         VitFeatureExtractor using Tensorflow Ops, which allows complete serialization
 
             Args:

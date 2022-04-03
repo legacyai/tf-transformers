@@ -48,7 +48,7 @@ class CLIPFeatureExtractorTF(LegacyLayer):
         **kwargs,
     ):
 
-        r"""
+        """
         CLIPFeatureExtractor using Tensorflow Ops, which allows complete serialization
 
             Args:

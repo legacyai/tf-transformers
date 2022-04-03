@@ -54,8 +54,7 @@ These models can be applied on:
 * 📝 Text, for tasks like text classification, information extraction, question answering, summarization, translation, text generation, in over 100 languages.
 * 🖼️ Images, for tasks like image classification, object detection, and segmentation.
 * 🗣️ Audio, for tasks like speech recognition and audio classification. (Coming Soon)
-## Version
-version: v1.0.8
+
 ## Unique Features
 - **Faster AutoReggressive Decoding**
 - **TFlite** support
