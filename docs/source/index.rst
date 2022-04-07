@@ -318,7 +318,7 @@ Flax), PyTorch, and/or TensorFlow.
     tutorials/5_sentence_embedding_roberta_quora_zeroshot
     tutorials/6_prompt_engineering_clip
     tutorials/7_gpt2_question_answering_squad
-    tutorials/8_code_to_code_java_to_csharp_t5
+    tutorials/8_code_code_java_to_csharp_t5
 
 .. toctree::
     :maxdepth: 2
