@@ -359,3 +359,4 @@ Flax), PyTorch, and/or TensorFlow.
     benchmarks/t5
     benchmarks/albert
     benchmarks/vit
+    benchmarks/imagenet_clip_benchmark
