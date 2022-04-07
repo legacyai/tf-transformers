@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+<meta property="og:title" content="Code Java to C# using T5" />
+  
+<meta property="og:type" content="website" />
+  
+<meta property="og:url" content="tutorials/8_code_code_java_to_csharp_t5.html" />
+  
+<meta property="og:description" content="This tutorial contains complete code to fine-tune T5 to perform Seq2Seq on CodexGLUE Code to Code dataset. In addition to training a model, you will learn ho..." />
+  
+<meta property="og:image" content="png location" />
+  
+<meta property="og:image:alt" content="Code Java to C# using T5" />
+  
+<meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Java to C# using T5 &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Albert TFlite" href="../tflite_tutorials/albert_tflite.html" />
+    <link rel="prev" title="GPT2 for QA using Squad V1 ( Causal LM )" href="7_gpt2_question_answering_squad.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/clip.html">CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/sentence_transformer.html">Sentence Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="2_text_classification_imdb_albert.html">Classify text (MRPC) with Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="3_masked_lm_tpu.html">Train (Masked Language Model) with tf-transformers in TPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Code Java to C# using T5</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#load-model-optimizer-trainer">Load Model, Optimizer , Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-data-for-training">Prepare Data for Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-dataset">Prepare Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wandb-configuration">Wandb Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#train">Train :-)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-and-serialize-model-for-text-generation">Load and Serialize Model for Text Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#evaluate-on-test-bleu-score">Evaluate on Test ( BLEU ) score</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/roberta_tflite.html">Roberta TFLite</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_t5.html">Text Generation using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/sentence_transformers.html">Sentence Transformer in tf-transformers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit_feature_extractor.html">ViT Feature Extractor</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/imagenet_clip_benchmark.html">CLIP Benchmark</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Code Java to C# using T5</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/8_code_code_java_to_csharp_t5.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="tex2jax_ignore mathjax_ignore section" id="code-java-to-c-using-t5">
+<h1>Code Java to C# using T5<a class="headerlink" href="#code-java-to-c-using-t5" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial contains complete code to fine-tune T5 to perform Seq2Seq on CodexGLUE Code to Code dataset.
+In addition to training a model, you will learn how to preprocess text into an appropriate format.</p>
+<p>In this notebook, you will:</p>
+<ul class="simple">
+<li><p>Load the CodexGLUE code to code dataset from HuggingFace</p></li>
+<li><p>Load T5 Model using tf-transformers</p></li>
+<li><p>Build train and validation dataset (on the fly) feature preparation using
+tokenizer from tf-transformers.</p></li>
+<li><p>Train your own model, fine-tuning T5 as part of that</p></li>
+<li><p>Evaluate BLEU on the generated text</p></li>
+<li><p>Save your model and use it to convert Java to C# sentences</p></li>
+<li><p>Use the end-to-end (preprocessing + inference) in production setup</p></li>
+</ul>
+<p>If you’re new to working with the CodexGLUE dataset, please see <a class="reference external" href="https://huggingface.co/datasets/code_x_glue_cc_code_to_code_trans">CodexGLUE</a> for more details.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+
+<span class="o">!</span>pip install sentencepiece
+
+<span class="o">!</span>pip install tensorflow-text
+
+<span class="o">!</span>pip install transformers
+
+<span class="o">!</span>pip install wandb
+
+<span class="o">!</span>pip install datasets
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;TF_CPP_MIN_LOG_LEVEL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;3&#39;</span> <span class="c1"># Supper TF warnings</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">tensorflow_text</span> <span class="k">as</span> <span class="nn">tf_text</span>
+<span class="kn">import</span> <span class="nn">datasets</span>
+<span class="kn">import</span> <span class="nn">tqdm</span>
+<span class="kn">import</span> <span class="nn">wandb</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tensorflow version&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tensorflow text version&quot;</span><span class="p">,</span> <span class="n">tf_text</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Devices&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">list_physical_devices</span><span class="p">())</span>
+
+<span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">T5Model</span><span class="p">,</span> <span class="n">T5TokenizerTFText</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">Trainer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.optimization</span> <span class="kn">import</span> <span class="n">create_optimizer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.losses</span> <span class="kn">import</span> <span class="n">cross_entropy_loss_label_smoothing</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.text</span> <span class="kn">import</span> <span class="n">TextDecoder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tensorflow version 2.7.0
+Tensorflow text version 2.7.0
+Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;CPU&#39;), PhysicalDevice(name=&#39;/physical_device:GPU:0&#39;, device_type=&#39;GPU&#39;), PhysicalDevice(name=&#39;/physical_device:GPU:1&#39;, device_type=&#39;GPU&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="load-model-optimizer-trainer">
+<h2>Load Model, Optimizer , Trainer<a class="headerlink" href="#load-model-optimizer-trainer" title="Permalink to this headline">¶</a></h2>
+<p>Our Trainer expects <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> and <code class="docutils literal notranslate"><span class="pre">loss</span></code> to be a function.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Model</span>
+<span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">model_fn</span><span class="p">():</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">T5Model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
+  <span class="k">return</span> <span class="n">model_fn</span>
+
+<span class="c1"># Load Optimizer</span>
+<span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
+    <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">examples</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">num_train_steps</span> <span class="o">=</span> <span class="n">steps_per_epoch</span> <span class="o">*</span> <span class="n">epochs</span>
+    <span class="n">warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">num_train_steps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">optimizer_fn</span><span class="p">():</span>
+        <span class="n">optimizer</span><span class="p">,</span> <span class="n">learning_rate_fn</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">num_train_steps</span><span class="p">,</span> <span class="n">warmup_steps</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="n">use_constant_lr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">optimizer</span>
+
+    <span class="k">return</span> <span class="n">optimizer_fn</span>
+
+<span class="c1"># Load trainer</span>
+<span class="k">def</span> <span class="nf">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="n">num_gpus</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="n">tpu_address</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">trainer</span>
+
+<span class="c1"># Load loss</span>
+<span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">y_true_dict</span><span class="p">,</span> <span class="n">y_pred_dict</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">cross_entropy_loss_label_smoothing</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="n">y_true_dict</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">],</span> 
+                                   <span class="n">logits</span><span class="o">=</span><span class="n">y_pred_dict</span><span class="p">[</span><span class="s1">&#39;token_logits&#39;</span><span class="p">],</span>
+                                   <span class="n">smoothing</span><span class="o">=</span><span class="n">smoothing</span><span class="p">,</span>
+                                      <span class="n">label_weights</span><span class="o">=</span><span class="n">y_true_dict</span><span class="p">[</span><span class="s1">&#39;labels_mask&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="prepare-data-for-training">
+<h2>Prepare Data for Training<a class="headerlink" href="#prepare-data-for-training" title="Permalink to this headline">¶</a></h2>
+<p>We will make use of <code class="docutils literal notranslate"><span class="pre">Tensorflow</span> <span class="pre">Text</span></code> based tokenizer to do <code class="docutils literal notranslate"><span class="pre">on-the-fly</span></code> preprocessing, without having any
+overhead of pre prepapre the data in the form of <code class="docutils literal notranslate"><span class="pre">pickle</span></code>, <code class="docutils literal notranslate"><span class="pre">numpy</span></code> or <code class="docutils literal notranslate"><span class="pre">tfrecords</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load dataset</span>
+<span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">      dataset; HuggingFace dataset</span>
+<span class="sd">      tokenizer_layer: tf-transformers tokenizer</span>
+<span class="sd">      max_seq_len: int (maximum sequence length of text)</span>
+<span class="sd">      batch_size: int (batch_size)</span>
+<span class="sd">      drop_remainder: bool (to drop remaining batch_size, when its uneven)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+        <span class="c1"># Encoder inputs</span>
+        <span class="n">encoder_input_ids</span> <span class="o">=</span> <span class="n">tokenizer_layer</span><span class="p">({</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;java&#39;</span><span class="p">]]})</span>
+        <span class="n">encoder_input_ids</span> <span class="o">=</span> <span class="n">encoder_input_ids</span><span class="o">.</span><span class="n">merge_dims</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">encoder_input_ids</span> <span class="o">=</span> <span class="n">encoder_input_ids</span><span class="p">[:</span><span class="n">max_seq_len</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">encoder_input_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">encoder_input_ids</span><span class="p">,</span> <span class="p">[</span><span class="n">tokenizer_layer</span><span class="o">.</span><span class="n">eos_token_id</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Decoder inputs</span>
+        <span class="n">decoder_input_ids</span> <span class="o">=</span> <span class="n">tokenizer_layer</span><span class="p">({</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;cs&#39;</span><span class="p">]]})</span>
+        <span class="n">decoder_input_ids</span> <span class="o">=</span> <span class="n">decoder_input_ids</span><span class="o">.</span><span class="n">merge_dims</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">decoder_input_ids</span> <span class="o">=</span> <span class="n">decoder_input_ids</span><span class="p">[:</span><span class="n">max_seq_len</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">decoder_input_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([[</span><span class="n">tokenizer_layer</span><span class="o">.</span><span class="n">pad_token_id</span><span class="p">]</span> <span class="p">,</span> <span class="n">decoder_input_ids</span><span class="p">,</span> <span class="p">[</span><span class="n">tokenizer_layer</span><span class="o">.</span><span class="n">eos_token_id</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+
+        <span class="n">encoder_input_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">encoder_input_ids</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">decoder_input_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">labels_mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">decoder_input_ids</span> <span class="o">=</span> <span class="n">decoder_input_ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;encoder_input_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder_input_ids</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;encoder_input_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoder_input_mask</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;decoder_input_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decoder_input_ids</span>
+
+        <span class="n">labels_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">labels_dict</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels</span>
+        <span class="n">labels_dict</span><span class="p">[</span><span class="s1">&#39;labels_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels_mask</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">labels_dict</span>
+
+    <span class="n">tfds_dict</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">(</span><span class="n">tfds_dict</span><span class="p">)</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tfdataset</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">parse</span><span class="p">,</span> <span class="n">num_parallel_calls</span> <span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">AUTOTUNE</span><span class="p">)</span>
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tfdataset</span><span class="o">.</span><span class="n">padded_batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="n">drop_remainder</span><span class="p">)</span>
+
+    <span class="c1"># Shard</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Options</span><span class="p">()</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">experimental_distribute</span><span class="o">.</span><span class="n">auto_shard_policy</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">AutoShardPolicy</span><span class="o">.</span><span class="n">AUTO</span>
+    <span class="n">tfdataset</span> <span class="o">=</span> <span class="n">tfdataset</span><span class="o">.</span><span class="n">with_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">tfdataset</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="prepare-dataset">
+<h2>Prepare Dataset<a class="headerlink" href="#prepare-dataset" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>Set necessay hyperparameters.</p></li>
+<li><p>Prepare <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">validation</span> <span class="pre">dataset</span></code>.</p></li>
+<li><p>Load <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Data configs</span>
+<span class="n">dataset_name</span> <span class="o">=</span> <span class="s1">&#39;code_x_glue_cc_code_to_code_trans&#39;</span>
+<span class="n">model_name</span>  <span class="o">=</span> <span class="s1">&#39;t5-small&#39;</span>
+<span class="n">max_seq_len</span> <span class="o">=</span> <span class="mi">256</span>
+<span class="n">batch_size</span>  <span class="o">=</span> <span class="mi">32</span>
+
+<span class="c1"># Model configs</span>
+<span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">1e-4</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">model_checkpoint_dir</span> <span class="o">=</span> <span class="s1">&#39;MODELS/t5_code_to_code&#39;</span>
+
+<span class="c1"># Load HF dataset</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">)</span>
+<span class="c1"># Load tokenizer from tf-transformers</span>
+<span class="n">tokenizer_layer</span> <span class="o">=</span> <span class="n">T5TokenizerTFText</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+<span class="c1"># Train Dataset</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">],</span> <span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Validation Dataset</span>
+<span class="n">validation_dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">],</span> <span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Total train examples</span>
+<span class="n">total_train_examples</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">num_rows</span>
+<span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="n">total_train_examples</span> <span class="o">//</span> <span class="n">batch_size</span>
+
+<span class="c1"># model</span>
+<span class="n">model_fn</span> <span class="o">=</span>  <span class="n">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># optimizer</span>
+<span class="n">optimizer_fn</span> <span class="o">=</span> <span class="n">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">total_train_examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># trainer</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="o">=</span><span class="s1">&#39;mirrored&#39;</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:datasets.builder:Reusing dataset code_x_glue_cc_code_to_code_trans (/home/jovyan/.cache/huggingface/datasets/code_x_glue_cc_code_to_code_trans/default/0.0.0/86dd57d2b1e88c6e589646133b76f2fef9d56c82e933d7f276e8a5b60ab18c34)
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id": "bab78b75b8534d8f8e5ab85ecf18f10f", "version_major": 2, "version_minor": 0}
+</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Loading t5-small tokenizer to /tmp/tftransformers_tokenizer_cache/t5-small/spiece.model
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Using MirroredStrategy with devices (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;,)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Using MirroredStrategy with devices (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;,)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="wandb-configuration">
+<h2>Wandb Configuration<a class="headerlink" href="#wandb-configuration" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALS&quot;</span>
+<span class="n">display_name</span> <span class="o">=</span> <span class="s2">&quot;t5_code_to_code&quot;</span>
+<span class="n">wandb</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">display_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="train">
+<h2>Train :-)<a class="headerlink" href="#train" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">history</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">model_fn</span><span class="o">=</span><span class="n">model_fn</span><span class="p">,</span>
+    <span class="n">optimizer_fn</span><span class="o">=</span><span class="n">optimizer_fn</span><span class="p">,</span>
+    <span class="n">train_dataset</span><span class="o">=</span><span class="n">train_dataset</span><span class="p">,</span>
+    <span class="n">train_loss_fn</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+    <span class="n">steps_per_epoch</span><span class="o">=</span><span class="n">steps_per_epoch</span><span class="p">,</span>
+    <span class="n">model_checkpoint_dir</span><span class="o">=</span><span class="n">model_checkpoint_dir</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+    <span class="n">wandb</span><span class="o">=</span><span class="n">wandb</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.
+INFO:absl:Policy: ----&gt; float32
+INFO:absl:Strategy: ---&gt; &lt;tensorflow.python.distribute.mirrored_strategy.MirroredStrategy object at 0x7f9d941a1810&gt;
+INFO:absl:Num GPU Devices: ---&gt; 1
+INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /home/jovyan/.cache/huggingface/hub/tftransformers__t5-small.main.699b12fe9601feda4892ca82c07e800f3c1da440/ckpt-1
+INFO:absl:Successful ✅: Loaded model from tftransformers/t5-small
+INFO:absl:Using Constant learning rate
+INFO:absl:Using Adamw optimizer
+INFO:absl:No ❌❌ checkpoint found in MODELS/t5_code_to_code
+Train: Epoch 1/11 --- Step 300/321 --- total examples 6400 , trainable variables 132: 100%|<span class=" -Color -Color-Green">██████████</span>| 3/3 [02:17&lt;00:00, 45.81s/batch , _runtime=365, _timestamp=1.65e+9, learning_rate=0.0001, loss=2.17]
+INFO:absl:Model saved at epoch 1 at MODELS/t5_code_to_code/ckpt-1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 2/11 --- Step 300/321 --- total examples 16000 , trainable variables 132: 100%|<span class=" -Color -Color-Green">██████████</span>| 3/3 [02:02&lt;00:00, 40.96s/batch , _runtime=490, _timestamp=1.65e+9, learning_rate=0.0001, loss=0.926]
+INFO:absl:Model saved at epoch 2 at MODELS/t5_code_to_code/ckpt-2
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 3/11 --- Step 300/321 --- total examples 25600 , trainable variables 132: 100%|<span class=" -Color -Color-Green">██████████</span>| 3/3 [02:03&lt;00:00, 41.18s/batch , _runtime=616, _timestamp=1.65e+9, learning_rate=0.0001, loss=0.691]
+INFO:absl:Model saved at epoch 3 at MODELS/t5_code_to_code/ckpt-3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 4/11 --- Step 300/321 --- total examples 35200 , trainable variables 132: 100%|<span class=" -Color -Color-Green">██████████</span>| 3/3 [02:02&lt;00:00, 40.97s/batch , _runtime=742, _timestamp=1.65e+9, learning_rate=0.0001, loss=0.575]
+INFO:absl:Model saved at epoch 4 at MODELS/t5_code_to_code/ckpt-4
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 5/11 --- Step 300/321 --- total examples 44800 , trainable variables 132: 100%|<span class=" -Color -Color-Green">██████████</span>| 3/3 [02:02&lt;00:00, 40.68s/batch , _runtime=866, _timestamp=1.65e+9, learning_rate=0.0001, loss=0.51] 
+INFO:absl:Model saved at epoch 5 at MODELS/t5_code_to_code/ckpt-5
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 6/11 --- Step 300/321 --- total examples 54400 , trainable variables 132: 100%|<span class=" -Color -Color-Green">██████████</span>| 3/3 [02:03&lt;00:00, 41.23s/batch , _runtime=992, _timestamp=1.65e+9, learning_rate=0.0001, loss=0.462]
+INFO:absl:Model saved at epoch 6 at MODELS/t5_code_to_code/ckpt-6
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 7/11 --- Step 300/321 --- total examples 64000 , trainable variables 132: 100%|<span class=" -Color -Color-Green">██████████</span>| 3/3 [02:03&lt;00:00, 41.30s/batch , _runtime=1118, _timestamp=1.65e+9, learning_rate=0.0001, loss=0.418]
+INFO:absl:Model saved at epoch 7 at MODELS/t5_code_to_code/ckpt-7
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 8/11 --- Step 300/321 --- total examples 73600 , trainable variables 132: 100%|<span class=" -Color -Color-Green">██████████</span>| 3/3 [02:03&lt;00:00, 41.03s/batch , _runtime=1243, _timestamp=1.65e+9, learning_rate=0.0001, loss=0.391]
+INFO:absl:Model saved at epoch 8 at MODELS/t5_code_to_code/ckpt-8
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 9/11 --- Step 300/321 --- total examples 83200 , trainable variables 132: 100%|<span class=" -Color -Color-Green">██████████</span>| 3/3 [02:02&lt;00:00, 40.91s/batch , _runtime=1368, _timestamp=1.65e+9, learning_rate=0.0001, loss=0.368]
+INFO:absl:Model saved at epoch 9 at MODELS/t5_code_to_code/ckpt-9
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 10/11 --- Step 300/321 --- total examples 92800 , trainable variables 132: 100%|<span class=" -Color -Color-Green">██████████</span>| 3/3 [02:03&lt;00:00, 41.30s/batch , _runtime=1495, _timestamp=1.65e+9, learning_rate=0.0001, loss=0.348]
+INFO:absl:Model saved at epoch 10 at MODELS/t5_code_to_code/ckpt-10
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="load-and-serialize-model-for-text-generation">
+<h2>Load and Serialize Model for Text Generation<a class="headerlink" href="#load-and-serialize-model-for-text-generation" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><ol class="simple">
+<li><p>Load T5Model with <code class="docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code></p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load T5 for Auto Regressive</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">T5Model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">use_auto_regressive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Load from checkpoint dir</span>
+<span class="n">model</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">)</span>
+<span class="c1"># Save and serialize</span>
+<span class="n">model</span><span class="o">.</span><span class="n">save_transformers_serialized</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/saved_model&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">),</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># Load model</span>
+<span class="n">loaded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">saved_model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/saved_model&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="evaluate-on-test-bleu-score">
+<h2>Evaluate on Test ( BLEU ) score<a class="headerlink" href="#evaluate-on-test-bleu-score" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load decoder</span>
+<span class="n">decoder</span> <span class="o">=</span> <span class="n">TextDecoder</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">loaded</span><span class="p">)</span>
+
+<span class="c1"># greedy decoding</span>
+<span class="n">predicted_text</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">original_text</span>  <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_labels</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">validation_dataset</span><span class="p">):</span>
+    
+    <span class="n">decoder_input_ids</span> <span class="o">=</span> <span class="n">batch_inputs</span><span class="p">[</span><span class="s1">&#39;decoder_input_ids&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># While decoding we do not need this, decoder_start_token_id will be automatically taken from saved model</span>
+    <span class="k">del</span> <span class="n">batch_inputs</span><span class="p">[</span><span class="s1">&#39;decoder_input_ids&#39;</span><span class="p">]</span>
+    
+    <span class="n">predictions</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">batch_inputs</span><span class="p">,</span> 
+                             <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;greedy&#39;</span><span class="p">,</span> 
+                             <span class="n">max_iterations</span><span class="o">=</span><span class="n">max_seq_len</span><span class="p">,</span> 
+                             <span class="n">eos_id</span><span class="o">=</span><span class="n">tokenizer_layer</span><span class="o">.</span><span class="n">eos_token_id</span><span class="p">)</span>
+    <span class="c1"># Decode predictions</span>
+    <span class="n">predicted_text_batch</span> <span class="o">=</span> <span class="n">tokenizer_layer</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">detokenize</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;predicted_ids&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span>
+    <span class="n">predicted_text_batch</span> <span class="o">=</span> <span class="p">[</span><span class="n">text</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">predicted_text_batch</span><span class="p">]</span>
+    <span class="n">predicted_text</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">predicted_text_batch</span><span class="p">)</span>
+    
+    <span class="c1"># Decoder original text</span>
+    <span class="n">original_text_batch</span> <span class="o">=</span> <span class="n">tokenizer_layer</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">detokenize</span><span class="p">(</span><span class="n">decoder_input_ids</span><span class="p">)</span>
+    <span class="n">original_text_batch</span> <span class="o">=</span> <span class="p">[</span><span class="n">text</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">original_text_batch</span><span class="p">]</span>
+    <span class="n">original_text</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">original_text_batch</span><span class="p">)</span>
+    
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████| 32/32 [02:19&lt;00:00,  4.36s/it]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sacrebleu</span>
+<span class="kn">from</span> <span class="nn">sacremoses</span> <span class="kn">import</span> <span class="n">MosesDetokenizer</span>
+<span class="c1"># Calculate and print the BLEU score</span>
+<span class="n">bleu</span> <span class="o">=</span> <span class="n">sacrebleu</span><span class="o">.</span><span class="n">corpus_bleu</span><span class="p">(</span><span class="n">predicted_text</span><span class="p">,</span> <span class="p">[</span><span class="n">original_text</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BLEU: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bleu</span><span class="o">.</span><span class="n">score</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>BLEU: 40.06566362514778
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="7_gpt2_question_answering_squad.html" class="btn btn-neutral float-left" title="GPT2 for QA using Squad V1 ( Causal LM )" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tflite_tutorials/albert_tflite.html" class="btn btn-neutral float-right" title="Albert TFlite" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>

@@ -88,6 +88,9 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorials/3_masked_lm_tpu.html">Train (Masked Language Model) with tf-transformers in TPU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials/4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorials/5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -120,6 +123,7 @@
 <li class="toctree-l1"><a class="reference internal" href="benchmarks/t5.html">Benchmark T5</a></li>
 <li class="toctree-l1"><a class="reference internal" href="benchmarks/albert.html">Benchmark Albert</a></li>
 <li class="toctree-l1"><a class="reference internal" href="benchmarks/vit.html">Benchmark ViT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/imagenet_clip_benchmark.html">CLIP Benchmark</a></li>
 </ul>
 
         </div>
@@ -915,6 +919,36 @@ Flax), PyTorch, and/or TensorFlow.</p>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/5_sentence_embedding_roberta_quora_zeroshot.html#most-similar-sentences">Most Similar Sentences</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/6_prompt_engineering_clip.html#load-model-tokenizer-preprocessor">Load Model, Tokenizer, Preprocessor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/6_prompt_engineering_clip.html#preparing-imagenet-labels-and-prompts">Preparing ImageNet labels and prompts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/6_prompt_engineering_clip.html#prepare-text-embeddings">Prepare text embeddings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/6_prompt_engineering_clip.html#loading-the-images">Loading the Images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/6_prompt_engineering_clip.html#calculate-top-k-accuracy">Calculate top-k accuracy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html#load-data-tokenizer">Load Data, Tokenizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html#prepare-training-tfrecords-and-validation-tfrecords-using-squad-causal-and-prefix">Prepare Training TFRecords and Validation TFRecords using Squad ( causal and prefix )</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html#prepare-validation-tfrecords">Prepare Validation TFRecords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html#wandb-configuration">Wandb Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html#load-model-optimizer-trainer">Load Model, Optimizer , Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html#set-hyperparameters-and-configs">Set Hyperparameters and Configs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html#train-gpt2-causal">Train GPT2 Causal :-)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html#evaluation-script-squad-v1-exact-match-f1-score">Evaluation Script (Squad V1) - Exact match, F1 score</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/7_gpt2_question_answering_squad.html#evaluate-exact-match-and-f1-score-on-all-checkpoints-gpt2-causal">Evaluate ( exact match and F1 score ) on all checkpoints - GPT2 Causal</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/8_code_code_java_to_csharp_t5.html#load-model-optimizer-trainer">Load Model, Optimizer , Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/8_code_code_java_to_csharp_t5.html#prepare-data-for-training">Prepare Data for Training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/8_code_code_java_to_csharp_t5.html#prepare-dataset">Prepare Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/8_code_code_java_to_csharp_t5.html#wandb-configuration">Wandb Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/8_code_code_java_to_csharp_t5.html#train">Train :-)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/8_code_code_java_to_csharp_t5.html#load-and-serialize-model-for-text-generation">Load and Serialize Model for Text Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/8_code_code_java_to_csharp_t5.html#evaluate-on-test-bleu-score">Evaluate on Test ( BLEU ) score</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
@@ -1077,6 +1111,13 @@ Flax), PyTorch, and/or TensorFlow.</p>
 <li class="toctree-l2"><a class="reference internal" href="benchmarks/vit.html#huggingface-tensorflow-hf-tf">HuggingFace-Tensorflow. (hf-tf)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="benchmarks/vit.html#huggingface-pytorch-hf-pt">HuggingFace-PyTorch. (hf-pt)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="benchmarks/vit.html#official-benchmarks-on-keras-flowed-dataset-5000-samples">Official Benchmarks on Keras Flowed dataset (5000 samples)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks/imagenet_clip_benchmark.html">CLIP Benchmark</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/imagenet_clip_benchmark.html#pytorch-clip-model">PyTorch CLIP Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/imagenet_clip_benchmark.html#load-clip-model-tf-transformers">Load CLIP Model tf-transformers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/imagenet_clip_benchmark.html#tf-with-clip-preprocess-pt-to-tf-data">TF with clip preprocess (pt to tf data)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks/imagenet_clip_benchmark.html#tf-with-tf-io-preprocess-preprocess-on-the-fly">TF with tf.io preprocess (Preprocess on the fly)</a></li>
 </ul>
 </li>
 </ul>

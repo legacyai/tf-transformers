@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+<meta property="og:title" content="GPT2 for QA using Squad V1 ( Causal LM )" />
+  
+<meta property="og:type" content="website" />
+  
+<meta property="og:url" content="tutorials/7_gpt2_question_answering_squad.html" />
+  
+<meta property="og:description" content="This tutorial contains complete code to fine-tune GPT2 to finetune for Question Answering using Squad V1 data. In addition to training a model, you will lear..." />
+  
+<meta property="og:image" content="png location" />
+  
+<meta property="og:image:alt" content="GPT2 for QA using Squad V1 ( Causal LM )" />
+  
+<meta name="twitter:image" content="png location">
+<meta name="twitter:description" content="State-of-the-art Faster Transformer (NLP,CV,Audio) Based models in Tensorflow 2.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPT2 for QA using Squad V1 ( Causal LM ) &mdash; TF Transformers   documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+        <script >let toggleHintShow = 'Click to show';</script>
+        <script >let toggleHintHide = 'Click to hide';</script>
+        <script >let toggleOpenOnPrint = 'true';</script>
+        <script src="../_static/togglebutton.js"></script>
+        <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Code Java to C# using T5" href="8_code_code_java_to_csharp_t5.html" />
+    <link rel="prev" title="Prompt Engineering using CLIP" href="6_prompt_engineering_clip.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/transformers_mix.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                 
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/quicktour.html">Quick tour</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction_docs/philosophy.html">Philosophy</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Models</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert.html">ALBERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bert.html">BERT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/gpt2.html">OpenAI GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5.html">T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/mt5.html">MT5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/roberta.html">RoBERTa</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit.html">Vision Transformer (ViT)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/clip.html">CLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/sentence_transformer.html">Sentence Transformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/parallelism.html">Model Parallelism</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="1_read_write_tfrecords.html">Writing and Reading TFRecords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="2_text_classification_imdb_albert.html">Classify text (MRPC) with Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="3_masked_lm_tpu.html">Train (Masked Language Model) with tf-transformers in TPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="4_image_classification_vit_multi_gpu.html">Classify Flowers (Image Classification) with ViT using multi-GPU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="5_sentence_embedding_roberta_quora_zeroshot.html">Create Sentence Embedding Roberta Model + Zeroshot from Scratch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GPT2 for QA using Squad V1 ( Causal LM )</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#load-data-tokenizer">Load Data, Tokenizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-training-tfrecords-and-validation-tfrecords-using-squad-causal-and-prefix">Prepare Training TFRecords and Validation TFRecords using Squad ( causal and prefix )</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-validation-tfrecords">Prepare Validation TFRecords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wandb-configuration">Wandb Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-model-optimizer-trainer">Load Model, Optimizer , Trainer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-hyperparameters-and-configs">Set Hyperparameters and Configs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#train-gpt2-causal">Train GPT2 Causal :-)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#evaluation-script-squad-v1-exact-match-f1-score">Evaluation Script (Squad V1) - Exact match, F1 score</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#evaluate-exact-match-and-f1-score-on-all-checkpoints-gpt2-causal">Evaluate ( exact match and F1 score ) on all checkpoints - GPT2 Causal</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+</ul>
+<p class="caption"><span class="caption-text">TFLite</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/albert_tflite.html">Albert TFlite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/bert_tflite.html">Bert TFLite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tflite_tutorials/roberta_tflite.html">Roberta TFLite</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Model Usage</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_gpt2.html">Text Generation using GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/text_generation_using_t5.html">Text Generation using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_usage/sentence_transformers.html">Sentence Transformer in tf-transformers</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tokenizers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/albert_tokenizer.html">ALBERT Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/bigbird_tokenizer.html">BigBird Roberta Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/t5_tokenizer.html">T5 Tokenizer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/clip_feature_extractor.html">CLIP Feature Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_doc/vit_feature_extractor.html">ViT Feature Extractor</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Research</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../research/glue.html">Glue Model Evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../research/long_block_sequencer.html">Long Block Sequencer</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Benchmarks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/gpt2.html">Benchmark GPT2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/t5.html">Benchmark T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/albert.html">Benchmark Albert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/vit.html">Benchmark ViT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../benchmarks/imagenet_clip_benchmark.html">CLIP Benchmark</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TF Transformers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>GPT2 for QA using Squad V1 ( Causal LM )</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/7_gpt2_question_answering_squad.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="tex2jax_ignore mathjax_ignore section" id="gpt2-for-qa-using-squad-v1-causal-lm">
+<h1>GPT2 for QA using Squad V1 ( Causal LM )<a class="headerlink" href="#gpt2-for-qa-using-squad-v1-causal-lm" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial contains complete code to fine-tune GPT2 to finetune for Question Answering using Squad V1 data.
+In addition to training a model, you will learn how to preprocess text into an appropriate format.</p>
+<p>In this notebook, you will:</p>
+<ul class="simple">
+<li><p>Load the Squad v1 dataset from HuggingFace</p></li>
+<li><p>Load GPT2 Model using tf-transformers</p></li>
+<li><p>Build model using <code class="docutils literal notranslate"><span class="pre">causal</span></code> (default) and <code class="docutils literal notranslate"><span class="pre">prefix</span></code> masking.</p></li>
+<li><p>Build train and validation dataset  feature preparation using
+tokenizer from transformers.</p></li>
+<li><p>Train your own model, fine-tuning GPT2</p></li>
+<li><p>Save your model and use it to for QA</p></li>
+<li><p>Use the end-to-end (inference) in production setup</p></li>
+</ul>
+<p>If you’re new to working with the Quora dataset, please see <a class="reference external" href="https://huggingface.co/datasets/squad">SQUAD</a> for more details.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+
+<span class="o">!</span>pip install transformers
+
+<span class="o">!</span>pip install wandb
+
+<span class="o">!</span>pip install datasets
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">wandb</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">tqdm</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tensorflow version&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Devices&quot;</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">list_physical_devices</span><span class="p">())</span>
+
+<span class="kn">from</span> <span class="nn">tf_transformers.models</span> <span class="kn">import</span> <span class="n">GPT2Model</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">Trainer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.optimization</span> <span class="kn">import</span> <span class="n">create_optimizer</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.data</span> <span class="kn">import</span> <span class="n">TFWriter</span><span class="p">,</span> <span class="n">TFReader</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.losses.loss_wrapper</span> <span class="kn">import</span> <span class="n">get_lm_loss</span>
+<span class="kn">from</span> <span class="nn">tf_transformers.text</span> <span class="kn">import</span> <span class="n">TextDecoder</span>
+
+
+<span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
+
+
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">GPT2Tokenizer</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Tensorflow version 2.7.0
+Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;CPU&#39;), PhysicalDevice(name=&#39;/physical_device:GPU:0&#39;, device_type=&#39;GPU&#39;), PhysicalDevice(name=&#39;/physical_device:GPU:1&#39;, device_type=&#39;GPU&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="load-data-tokenizer">
+<h2>Load Data, Tokenizer<a class="headerlink" href="#load-data-tokenizer" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;gpt2&#39;</span>
+
+<span class="c1"># Load Dataset</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;squad&quot;</span><span class="p">)</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">GPT2Tokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+
+<span class="c1"># Define length for examples</span>
+<span class="n">max_sequence_length</span> <span class="o">=</span> <span class="mi">384</span>
+<span class="n">max_question_length</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">max_answer_length</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="prepare-training-tfrecords-and-validation-tfrecords-using-squad-causal-and-prefix">
+<h2>Prepare Training TFRecords and Validation TFRecords using Squad ( causal and prefix )<a class="headerlink" href="#prepare-training-tfrecords-and-validation-tfrecords-using-squad-causal-and-prefix" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><ol class="simple">
+<li><p>We combine <code class="docutils literal notranslate"><span class="pre">(question</span> <span class="pre">+</span> <span class="pre">context</span> <span class="pre">+</span> <span class="pre">answer)</span></code></p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>For <code class="docutils literal notranslate"><span class="pre">mask_mode=causal</span></code>, we don’t need any mask. For <code class="docutils literal notranslate"><span class="pre">mask_mode=prefix</span></code>, we need <code class="docutils literal notranslate"><span class="pre">input_mask</span></code>.</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>For <code class="docutils literal notranslate"><span class="pre">prefix</span></code>, we will mask only <code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">+</span> <span class="pre">context</span></code>, as <code class="docutils literal notranslate"><span class="pre">answer</span></code> is supposed to be generated, we shouldn’t mask it, means its causal.</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>Note how <code class="docutils literal notranslate"><span class="pre">labels_mask</span></code> is prepared and how it is different from <code class="docutils literal notranslate"><span class="pre">input_mask</span></code>.</p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_train</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_question_length</span><span class="p">,</span> <span class="n">max_passage_length</span><span class="p">,</span> <span class="n">max_answer_length</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to parse examples which are is_duplicate=1</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (:obj:`dataet`): HF dataset</span>
+<span class="sd">        tokenizer (:obj:`tokenizer`): HF Tokenizer</span>
+<span class="sd">        max_question_length (:obj:`int`): Question Length</span>
+<span class="sd">        max_passage_length (:obj:`int`): Passage Length</span>
+<span class="sd">        max_answer_length (:obj:`int`): Answer Length</span>
+<span class="sd">        key (:obj:`str`): Key of dataset (`train`, `validation` etc)</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+        
+        <span class="n">question_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="s1">&#39;Question: &#39;</span> <span class="o">+</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;question&#39;</span><span class="p">],</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_question_length</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>
+        <span class="n">context_ids</span>  <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="s1">&#39;Context: &#39;</span> <span class="o">+</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;context&#39;</span><span class="p">],</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_passage_length</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>
+        <span class="n">answer_ids</span>   <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="s1">&#39;answer: &#39;</span> <span class="o">+</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;answers&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_answer_length</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>
+        <span class="c1"># add EOS</span>
+        <span class="n">context_ids</span> <span class="o">=</span> <span class="n">context_ids</span> <span class="o">+</span> <span class="p">[</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">bos_token_id</span><span class="p">]</span>
+        <span class="n">answer_ids</span>  <span class="o">=</span> <span class="n">answer_ids</span> <span class="o">+</span> <span class="p">[</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">bos_token_id</span><span class="p">]</span> <span class="c1"># EOS token</span>
+        
+        <span class="c1"># input_ids</span>
+        <span class="n">input_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">question_ids</span> <span class="o">+</span> <span class="n">context_ids</span> <span class="o">+</span> <span class="n">answer_ids</span><span class="p">)</span>
+        
+        <span class="c1"># input_mask</span>
+        <span class="n">input_mask</span> <span class="o">=</span> <span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">question_ids</span><span class="p">))</span> <span class="o">+</span> <span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">context_ids</span><span class="p">))</span> <span class="o">+</span> <span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">answer_ids</span><span class="p">))</span>
+        <span class="c1"># labels mask is opposite to input_mask, as we need to find loss only on answerids</span>
+        <span class="n">labels_mask</span> <span class="o">=</span> <span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">question_ids</span><span class="p">))</span> <span class="o">+</span> <span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">context_ids</span><span class="p">))</span> <span class="o">+</span> <span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">answer_ids</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Except last word</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_ids</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_mask</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        
+        <span class="c1"># Shift one word next</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;labels_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels_mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        
+        <span class="k">yield</span> <span class="n">result</span>
+        
+<span class="c1"># Write using TF Writer</span>
+<span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;input_mask&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;labels_mask&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">)</span>
+    
+<span class="p">}</span>
+
+<span class="n">tfrecord_train_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+<span class="n">tfrecord_filename</span> <span class="o">=</span> <span class="s1">&#39;squad&#39;</span>
+
+<span class="n">tfwriter</span> <span class="o">=</span> <span class="n">TFWriter</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span> 
+                    <span class="n">file_name</span><span class="o">=</span><span class="n">tfrecord_filename</span><span class="p">,</span> 
+                    <span class="n">model_dir</span><span class="o">=</span><span class="n">tfrecord_train_dir</span><span class="p">,</span>
+                    <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;train&#39;</span><span class="p">,</span>
+                    <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+
+<span class="c1"># Train dataset</span>
+<span class="n">train_parser_fn</span> <span class="o">=</span> <span class="n">parse_train</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_question_length</span><span class="p">,</span> <span class="n">max_sequence_length</span><span class="p">,</span> <span class="n">max_answer_length</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;train&#39;</span><span class="p">)</span>
+<span class="n">tfwriter</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">parse_fn</span><span class="o">=</span><span class="n">train_parser_fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Total individual observations/examples written is 87599 in 173.0701344013214 seconds
+INFO:absl:All writer objects closed
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="prepare-validation-tfrecords">
+<h2>Prepare Validation TFRecords<a class="headerlink" href="#prepare-validation-tfrecords" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_dev</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_question_length</span><span class="p">,</span> <span class="n">max_passage_length</span><span class="p">,</span> <span class="n">max_answer_length</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to parse examples</span>
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (:obj:`dataet`): HF dataset</span>
+<span class="sd">        tokenizer (:obj:`tokenizer`): HF Tokenizer</span>
+<span class="sd">        max_question_length (:obj:`int`): Question Length</span>
+<span class="sd">        max_passage_length (:obj:`int`): Passage Length</span>
+<span class="sd">        max_answer_length (:obj:`int`): Answer Length</span>
+<span class="sd">        key (:obj:`str`): Key of dataset (`train`, `validation` etc)</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+        
+        <span class="n">question_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="s1">&#39;Question: &#39;</span> <span class="o">+</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;question&#39;</span><span class="p">],</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_question_length</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>
+        <span class="n">context_ids</span>  <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="s1">&#39;Context: &#39;</span> <span class="o">+</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;context&#39;</span><span class="p">],</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_passage_length</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>
+        <span class="n">answer_ids</span>   <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="s1">&#39;answer: &#39;</span> <span class="o">+</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;answers&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_length</span><span class="o">=</span><span class="n">max_answer_length</span><span class="p">,</span> <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>
+        <span class="c1"># add EOS</span>
+        <span class="n">context_ids</span> <span class="o">=</span> <span class="n">context_ids</span> <span class="o">+</span> <span class="p">[</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">bos_token_id</span><span class="p">]</span>
+        
+        <span class="c1"># input_ids</span>
+        <span class="n">input_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">question_ids</span> <span class="o">+</span> <span class="n">context_ids</span><span class="p">)</span>
+        
+        <span class="c1"># input_mask</span>
+        <span class="n">input_mask</span> <span class="o">=</span> <span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">question_ids</span><span class="p">))</span> <span class="o">+</span> <span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">context_ids</span><span class="p">))</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_ids</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;input_mask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_mask</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;original_answer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;answers&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="k">yield</span> <span class="n">result</span>
+        
+<span class="n">tfrecord_validation_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+<span class="n">tfrecord_validation_filename</span> <span class="o">=</span> <span class="s1">&#39;squad&#39;</span>
+
+<span class="n">validation_schema</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;input_mask&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">),</span>
+    <span class="s2">&quot;original_answer&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;var_len&quot;</span><span class="p">,</span> <span class="s2">&quot;bytes&quot;</span><span class="p">)</span>
+    
+<span class="p">}</span>
+<span class="n">tfwriter</span> <span class="o">=</span> <span class="n">TFWriter</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">validation_schema</span><span class="p">,</span> 
+                    <span class="n">file_name</span><span class="o">=</span><span class="n">tfrecord_validation_filename</span><span class="p">,</span> 
+                    <span class="n">model_dir</span><span class="o">=</span><span class="n">tfrecord_validation_dir</span><span class="p">,</span>
+                    <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;eval&#39;</span><span class="p">,</span>
+                    <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+
+<span class="c1"># Validation dataset</span>
+<span class="n">validation_parser_fn</span> <span class="o">=</span> <span class="n">parse_dev</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_question_length</span><span class="p">,</span> <span class="n">max_sequence_length</span><span class="p">,</span> <span class="n">max_answer_length</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;validation&#39;</span><span class="p">)</span>
+<span class="n">tfwriter</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">parse_fn</span><span class="o">=</span><span class="n">validation_parser_fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Total individual observations/examples written is 10570 in 19.614187002182007 seconds
+INFO:absl:All writer objects closed
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="wandb-configuration">
+<h2>Wandb Configuration<a class="headerlink" href="#wandb-configuration" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALS&quot;</span>
+<span class="n">display_name</span> <span class="o">=</span> <span class="s1">&#39;causal_mask&#39;</span>
+<span class="n">wandb</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="n">project</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">display_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="load-model-optimizer-trainer">
+<h2>Load Model, Optimizer , Trainer<a class="headerlink" href="#load-model-optimizer-trainer" title="Permalink to this headline">¶</a></h2>
+<p>Our Trainer expects <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> and <code class="docutils literal notranslate"><span class="pre">loss</span></code> to be a function.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Model</span>
+<span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="p">,</span> <span class="n">mask_mode</span><span class="o">=</span><span class="s1">&#39;causal&#39;</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">model_fn</span><span class="p">():</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">GPT2Model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">mask_mode</span><span class="o">=</span><span class="n">mask_mode</span><span class="p">)</span> <span class="c1">#causal by default</span>
+    <span class="k">return</span> <span class="n">model</span>
+  <span class="k">return</span> <span class="n">model_fn</span>
+
+<span class="c1"># Load Optimizer</span>
+<span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
+    <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">examples</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">num_train_steps</span> <span class="o">=</span> <span class="n">steps_per_epoch</span> <span class="o">*</span> <span class="n">epochs</span>
+    <span class="n">warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">num_train_steps</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">optimizer_fn</span><span class="p">():</span>
+        <span class="n">optimizer</span><span class="p">,</span> <span class="n">learning_rate_fn</span> <span class="o">=</span> <span class="n">create_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">num_train_steps</span><span class="p">,</span> <span class="n">warmup_steps</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="n">use_constant_lr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">optimizer</span>
+
+    <span class="k">return</span> <span class="n">optimizer_fn</span>
+
+<span class="c1"># Load trainer</span>
+<span class="k">def</span> <span class="nf">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
+    <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="n">num_gpus</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="n">tpu_address</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">trainer</span>
+
+<span class="c1"># Load loss fn</span>
+<span class="k">def</span> <span class="nf">get_loss</span><span class="p">():</span>
+    <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">get_lm_loss</span><span class="p">(</span><span class="n">label_column</span><span class="o">=</span><span class="s1">&#39;labels&#39;</span><span class="p">,</span> 
+                          <span class="n">label_weights_column</span><span class="o">=</span><span class="s1">&#39;labels_mask&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loss_fn</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="set-hyperparameters-and-configs">
+<h2>Set Hyperparameters and Configs<a class="headerlink" href="#set-hyperparameters-and-configs" title="Permalink to this headline">¶</a></h2>
+<ol class="simple">
+<li><p>Set necessay hyperparameters.</p></li>
+<li><p>Prepare <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">validation</span> <span class="pre">dataset</span></code>.</p></li>
+<li><p>Load <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Model configs</span>
+<span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">2e-5</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">model_checkpoint_dir</span> <span class="o">=</span> <span class="s1">&#39;MODELS/gpt2_squad_causal&#39;</span>
+
+<span class="c1"># Train dataset</span>
+<span class="n">schema</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/schema.json&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_train_dir</span><span class="p">)))</span>
+<span class="n">total_train_examples</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/stats.json&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_train_dir</span><span class="p">)))[</span><span class="s1">&#39;total_records&#39;</span><span class="p">]</span>
+
+
+<span class="n">all_files</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">gfile</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/*.tfrecord&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_train_dir</span><span class="p">))</span>
+<span class="n">tf_reader</span> <span class="o">=</span> <span class="n">TFReader</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">,</span> 
+                    <span class="n">tfrecord_files</span><span class="o">=</span><span class="n">all_files</span><span class="p">)</span>
+
+<span class="n">x_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>
+<span class="n">y_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">,</span> <span class="s1">&#39;labels_mask&#39;</span><span class="p">]</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">tf_reader</span><span class="o">.</span><span class="n">read_record</span><span class="p">(</span><span class="n">auto_batch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                                   <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> 
+                                   <span class="n">x_keys</span> <span class="o">=</span> <span class="n">x_keys</span><span class="p">,</span> 
+                                   <span class="n">y_keys</span> <span class="o">=</span> <span class="n">y_keys</span><span class="p">,</span>
+                                   <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
+                                  <span class="p">)</span>
+
+<span class="c1"># Total train examples</span>
+<span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="n">total_train_examples</span> <span class="o">//</span> <span class="n">batch_size</span>
+
+<span class="c1"># model</span>
+<span class="n">model_fn</span> <span class="o">=</span>  <span class="n">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">is_training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_dropout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mask_mode</span><span class="o">=</span><span class="s1">&#39;causal&#39;</span><span class="p">)</span>
+<span class="c1"># optimizer</span>
+<span class="n">optimizer_fn</span> <span class="o">=</span> <span class="n">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">total_train_examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">)</span>
+<span class="c1"># loss</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">get_loss</span><span class="p">()</span>
+<span class="c1"># trainer (multi gpu strategy)</span>
+<span class="n">trainer</span> <span class="o">=</span> <span class="n">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="o">=</span><span class="s1">&#39;mirrored&#39;</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Using MirroredStrategy with devices (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Using MirroredStrategy with devices (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="train-gpt2-causal">
+<h2>Train GPT2 Causal :-)<a class="headerlink" href="#train-gpt2-causal" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><ol class="simple">
+<li><p>Loss is coming down in epoch 1 itself.</p></li>
+</ol>
+</li>
+<li><ol class="simple">
+<li><p>Evaluation results clearly indicated how well model has learned.</p></li>
+</ol>
+</li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">history</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">model_fn</span><span class="o">=</span><span class="n">model_fn</span><span class="p">,</span>
+    <span class="n">optimizer_fn</span><span class="o">=</span><span class="n">optimizer_fn</span><span class="p">,</span>
+    <span class="n">train_dataset</span><span class="o">=</span><span class="n">train_dataset</span><span class="p">,</span>
+    <span class="n">train_loss_fn</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+    <span class="n">steps_per_epoch</span><span class="o">=</span><span class="n">steps_per_epoch</span><span class="p">,</span>
+    <span class="n">model_checkpoint_dir</span><span class="o">=</span><span class="n">model_checkpoint_dir</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+    <span class="n">steps_per_call</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">wandb</span><span class="o">=</span><span class="n">wandb</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Make sure `steps_per_epoch` should be less than or equal to number of batches in dataset.
+INFO:absl:Policy: ----&gt; float32
+INFO:absl:Strategy: ---&gt; &lt;tensorflow.python.distribute.mirrored_strategy.MirroredStrategy object at 0x7f86c42ad4d0&gt;
+INFO:absl:Num GPU Devices: ---&gt; 2
+INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /home/jovyan/.cache/huggingface/hub/tftransformers__gpt2.main.8843a828e80c53bb121d7e395d07e3821ba88ea5/ckpt-1
+INFO:absl:Successful ✅: Loaded model from tftransformers/gpt2
+INFO:absl:Using linear optimization warmup
+INFO:absl:Using Adamw optimizer
+INFO:absl:No ❌❌ checkpoint found in MODELS/gpt2_squad_causal
+Train: Epoch 1/6 --- Step 1/2737 --- total examples 0 , trainable variables 148:   0%|<span class=" -Color -Color-Green">          </span>| 0/2737 [00:00&lt;?, ?batch /s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:batch_all_reduce: 147 all-reduces with algorithm = nccl, num_packs = 1
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:batch_all_reduce: 147 all-reduces with algorithm = nccl, num_packs = 1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Efficient allreduce is not supported for 1 IndexedSlices
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Efficient allreduce is not supported for 1 IndexedSlices
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:GPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:GPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:batch_all_reduce: 147 all-reduces with algorithm = nccl, num_packs = 1
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:batch_all_reduce: 147 all-reduces with algorithm = nccl, num_packs = 1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Efficient allreduce is not supported for 1 IndexedSlices
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Efficient allreduce is not supported for 1 IndexedSlices
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:GPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:GPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;, &#39;/job:localhost/replica:0/task:0/device:GPU:1&#39;).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Reduce to /job:localhost/replica:0/task:0/device:CPU:0 then broadcast to (&#39;/job:localhost/replica:0/task:0/device:CPU:0&#39;,).
+Train: Epoch 1/6 --- Step 2737/2737 --- total examples 87552 , trainable variables 148: 100%|<span class=" -Color -Color-Green">██████████</span>| 2737/2737 [29:30&lt;00:00,  1.55batch /s, _runtime=1816, _timestamp=1.65e+9, learning_rate=1.6e-5, loss=0.293] 
+INFO:absl:Model saved at epoch 1 at MODELS/gpt2_squad_causal/ckpt-1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 2/6 --- Step 2737/2737 --- total examples 175136 , trainable variables 148: 100%|<span class=" -Color -Color-Green">██████████</span>| 2737/2737 [28:52&lt;00:00,  1.58batch /s, _runtime=3553, _timestamp=1.65e+9, learning_rate=1.2e-5, loss=0.226]  
+INFO:absl:Model saved at epoch 2 at MODELS/gpt2_squad_causal/ckpt-2
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 3/6 --- Step 2737/2737 --- total examples 262720 , trainable variables 148: 100%|<span class=" -Color -Color-Green">██████████</span>| 2737/2737 [28:53&lt;00:00,  1.58batch /s, _runtime=5290, _timestamp=1.65e+9, learning_rate=8e-6, loss=0.111]    
+INFO:absl:Model saved at epoch 3 at MODELS/gpt2_squad_causal/ckpt-3
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 4/6 --- Step 2737/2737 --- total examples 350304 , trainable variables 148: 100%|<span class=" -Color -Color-Green">██████████</span>| 2737/2737 [28:53&lt;00:00,  1.58batch /s, _runtime=7028, _timestamp=1.65e+9, learning_rate=4e-6, loss=0.0581]    
+INFO:absl:Model saved at epoch 4 at MODELS/gpt2_squad_causal/ckpt-4
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Train: Epoch 5/6 --- Step 2737/2737 --- total examples 437888 , trainable variables 148: 100%|<span class=" -Color -Color-Green">██████████</span>| 2737/2737 [28:53&lt;00:00,  1.58batch /s, _runtime=8765, _timestamp=1.65e+9, learning_rate=1.19e-12, loss=0.209] 
+INFO:absl:Model saved at epoch 5 at MODELS/gpt2_squad_causal/ckpt-5
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="evaluation-script-squad-v1-exact-match-f1-score">
+<h2>Evaluation Script (Squad V1) - Exact match, F1 score<a class="headerlink" href="#evaluation-script-squad-v1-exact-match-f1-score" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+
+<span class="k">def</span> <span class="nf">normalize_answer</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Lower text and remove punctuation, articles and extra whitespace.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">remove_articles</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\b(a|an|the)\b&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">white_space_fix</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">remove_punc</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">punctuation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">text</span> <span class="k">if</span> <span class="n">ch</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">white_space_fix</span><span class="p">(</span><span class="n">remove_articles</span><span class="p">(</span><span class="n">remove_punc</span><span class="p">(</span><span class="n">lower</span><span class="p">(</span><span class="n">s</span><span class="p">))))</span>
+
+
+<span class="k">def</span> <span class="nf">f1_score</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">):</span>
+    <span class="n">prediction_tokens</span> <span class="o">=</span> <span class="n">normalize_answer</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">ground_truth_tokens</span> <span class="o">=</span> <span class="n">normalize_answer</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">common</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">prediction_tokens</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">Counter</span><span class="p">(</span><span class="n">ground_truth_tokens</span><span class="p">)</span>
+    <span class="n">num_same</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">common</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">num_same</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="n">precision</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">num_same</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">prediction_tokens</span><span class="p">)</span>
+    <span class="n">recall</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="n">num_same</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">ground_truth_tokens</span><span class="p">)</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">precision</span> <span class="o">*</span> <span class="n">recall</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">precision</span> <span class="o">+</span> <span class="n">recall</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f1</span>
+
+
+<span class="k">def</span> <span class="nf">exact_match_score</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">normalize_answer</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span> <span class="o">==</span> <span class="n">normalize_answer</span><span class="p">(</span><span class="n">ground_truth</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">metric_max_over_ground_truths</span><span class="p">(</span><span class="n">metric_fn</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">ground_truths</span><span class="p">):</span>
+    <span class="n">scores_for_ground_truths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ground_truth</span> <span class="ow">in</span> <span class="n">ground_truths</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">metric_fn</span><span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">ground_truth</span><span class="p">)</span>
+        <span class="n">scores_for_ground_truths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">scores_for_ground_truths</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Squad evaluate</span>
+<span class="sd">    </span>
+<span class="sd">    dataset: Huggingface Dataset</span>
+<span class="sd">    predictions: List of predictions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">exact_match</span> <span class="o">=</span> <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
+        <span class="n">ground_truths</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;answers&#39;</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="c1"># list of answers</span>
+        <span class="n">prediction</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="n">total</span><span class="p">]</span>
+        <span class="n">exact_match</span> <span class="o">+=</span> <span class="n">metric_max_over_ground_truths</span><span class="p">(</span>
+            <span class="n">exact_match_score</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">ground_truths</span><span class="p">)</span>
+        <span class="n">f1</span> <span class="o">+=</span> <span class="n">metric_max_over_ground_truths</span><span class="p">(</span>
+            <span class="n">f1_score</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">ground_truths</span><span class="p">)</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">exact_match</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">exact_match</span> <span class="o">/</span> <span class="n">total</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">f1</span> <span class="o">/</span> <span class="n">total</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;exact_match&#39;</span><span class="p">:</span> <span class="n">exact_match</span><span class="p">,</span> <span class="s1">&#39;f1&#39;</span><span class="p">:</span> <span class="n">f1</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="evaluate-exact-match-and-f1-score-on-all-checkpoints-gpt2-causal">
+<h2>Evaluate ( exact match and F1 score ) on all checkpoints - GPT2 Causal<a class="headerlink" href="#evaluate-exact-match-and-f1-score-on-all-checkpoints-gpt2-causal" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">split_by_id</span><span class="p">(</span><span class="n">predicted_ids</span><span class="p">,</span> <span class="n">eos_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Split by EOS_ID to make decoding proper&quot;&quot;&quot;</span>
+    <span class="n">all_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">per_example_id</span> <span class="ow">in</span> <span class="n">predicted_ids</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">eos_id</span> <span class="ow">in</span> <span class="n">per_example_id</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">per_example_id</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">eos_id</span><span class="p">)</span>
+        <span class="n">sliced_ids</span> <span class="o">=</span> <span class="n">per_example_id</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">all_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sliced_ids</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">all_ids</span>
+
+<span class="k">def</span> <span class="nf">get_serialized_model_from_checkpoint</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">,</span> <span class="n">checkpoint_number</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load serialized model checkpoint&quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">GPT2Model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">use_auto_regressive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/ckpt-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">,</span> <span class="n">checkpoint_number</span><span class="p">))</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">save_transformers_serialized</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/saved_model&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">),</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="n">loaded</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">saved_model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/saved_model&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">loaded</span>
+
+<span class="c1"># Validation dataset</span>
+<span class="n">validation_files</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">gfile</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/*.tfrecord&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_validation_dir</span><span class="p">))</span>
+<span class="n">tf_reader</span> <span class="o">=</span> <span class="n">TFReader</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">validation_schema</span><span class="p">,</span> 
+                    <span class="n">tfrecord_files</span><span class="o">=</span><span class="n">validation_files</span><span class="p">)</span>
+
+<span class="n">x_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;input_ids&#39;</span><span class="p">]</span>
+<span class="n">y_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;original_answer&#39;</span><span class="p">]</span> <span class="c1"># not necessarily required</span>
+<span class="n">validation_dataset</span> <span class="o">=</span> <span class="n">tf_reader</span><span class="o">.</span><span class="n">read_record</span><span class="p">(</span><span class="n">auto_batch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                                   <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> 
+                                   <span class="n">x_keys</span> <span class="o">=</span> <span class="n">x_keys</span><span class="p">,</span> 
+                                   <span class="n">y_keys</span> <span class="o">=</span> <span class="n">y_keys</span><span class="p">,</span>
+                                   <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                   <span class="n">padded_values</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;input_ids&#39;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)}</span>
+                                  <span class="p">)</span>
+
+<span class="n">validation_results</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">checkpoint_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">epochs</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+    
+    <span class="c1"># get serialized model</span>
+    <span class="n">loaded</span>  <span class="o">=</span> <span class="n">get_serialized_model_from_checkpoint</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">,</span> <span class="n">checkpoint_number</span><span class="p">)</span>
+    
+    <span class="c1"># Load decoder</span>
+    <span class="n">decoder</span> <span class="o">=</span> <span class="n">TextDecoder</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">loaded</span><span class="p">)</span>
+    
+    <span class="c1"># greedy decoding</span>
+    <span class="n">predicted_answers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_labels</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">validation_dataset</span><span class="p">):</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">batch_inputs</span><span class="p">,</span> 
+                                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;greedy&#39;</span><span class="p">,</span> 
+                                 <span class="n">max_iterations</span><span class="o">=</span><span class="n">max_answer_length</span><span class="p">,</span> 
+                                 <span class="n">eos_id</span><span class="o">=</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">bos_token_id</span><span class="p">)</span>
+
+        <span class="n">predicted_ids</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;predicted_ids&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1"># Squeeze to 2D</span>
+        <span class="n">predicted_ids</span> <span class="o">=</span> <span class="n">split_by_id</span><span class="p">(</span><span class="n">predicted_ids</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">bos_token_id</span><span class="p">)</span>
+        <span class="c1"># Decode</span>
+        <span class="n">predicted_answers_batch</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">batch_decode</span><span class="p">(</span><span class="n">predicted_ids</span><span class="p">)</span>
+        <span class="n">predicted_answers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">predicted_answers_batch</span><span class="p">)</span>
+        
+    <span class="c1"># generation will start with &#39;answer:&#39;. remove that</span>
+    <span class="n">predicted_answers</span> <span class="o">=</span> <span class="p">[</span><span class="n">answer</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;answer: &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">answer</span> <span class="ow">in</span> <span class="n">predicted_answers</span><span class="p">]</span>
+    <span class="c1"># Exact match and f1 score</span>
+    <span class="n">val_result</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="s1">&#39;validation&#39;</span><span class="p">],</span> <span class="n">predicted_answers</span><span class="p">)</span>
+    <span class="n">validation_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val_result</span><span class="p">)</span>
+    
+<span class="k">for</span> <span class="n">checkpoint_number</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">validation_results</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checkpoint </span><span class="si">{}</span><span class="s2"> , </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">checkpoint_number</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">result</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Checkpoint 1 , {&#39;exact_match&#39;: 66.66982024597918, &#39;f1&#39;: 75.18278422439874}
+Checkpoint 2 , {&#39;exact_match&#39;: 69.59318826868495, &#39;f1&#39;: 78.53187632449746}
+Checkpoint 3 , {&#39;exact_match&#39;: 70.13245033112582, &#39;f1&#39;: 78.74015684895157}
+Checkpoint 4 , {&#39;exact_match&#39;: 69.93377483443709, &#39;f1&#39;: 78.93703082679076}
+Checkpoint 5 , {&#39;exact_match&#39;: 69.2336802270577, &#39;f1&#39;: 78.31863252452612}
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="6_prompt_engineering_clip.html" class="btn btn-neutral float-left" title="Prompt Engineering using CLIP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="8_code_code_java_to_csharp_t5.html" class="btn btn-neutral float-right" title="Code Java to C# using T5" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, The TFT Team, Licenced under the Apache License, Version 2.0.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+    <!-- Theme Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83738774-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-83738774-2', {
+          'anonymize_ip': false,
+      });
+    </script> 
+
+</body>
+</html>
