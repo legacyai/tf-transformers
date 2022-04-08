@@ -12,7 +12,7 @@ kernelspec:
   name: python3
 ---
 
-# CLIP Benchmark
+# Benchmark CLIP
 
 * This notebook measures the performance of CLIP Image Encoder on Imagenetv2 dataset using ```Pytorch``` and ```Tensorflow```
 

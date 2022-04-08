@@ -156,6 +156,9 @@ We have covered tutorials covering pre-training, finetuning, classfication, QA, 
 - [Dynamic MLM (on the fly pre-processing using tf-text) in TPU](https://github.com/legacyai/tf-transformers/blob/main/tutorials/3_masked_lm_tpu.ipynb)
 - [Image Classification ViT multi GPU mirrored](https://github.com/legacyai/tf-transformers/blob/main/tutorials/4_image_classification_vit_multi_gpu.ipynb)
 - [Sentence Embedding train from scratch using Quoara on Roberta + Zeroshot STS-B](https://github.com/legacyai/tf-transformers/blob/main/tutorials/5_sentence_embedding_roberta_quora_zeroshot.ipynb)
+- [Prompt Engineering using CLIP](https://github.com/legacyai/tf-transformers/blob/main/tutorials/6_prompt_engineering_clip.ipynb)
+- [Question Answering as Generation using Squad using GPT2](https://github.com/legacyai/tf-transformers/blob/main/tutorials/7_gpt2_question_answering_squad.ipynb)
+- [Code to Code translation (CodexGLUE - Java to C#) using T5](https://github.com/legacyai/tf-transformers/blob/main/tutorials/8_code_code_java_to_csharp_t5.ipynb)
 
 ## Model usage
 - [Text Generation using GPT2](https://github.com/legacyai/tf-transformers/blob/main/docs/source/model_usage/text_generation_using_gpt2.ipynb)
