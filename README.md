@@ -77,8 +77,8 @@ huggingface_pt  : 36 minutes
 huggingface_jax : 35 minutes
 ```
 
-From ```83 minutes``` to ```31 minutes``` is a significant speedup. ```167 %1``` speedup.
-On an average, **tf-transformers** is **80-90 times** faster than **HuggingFace** **Tensorflow** implementation and in most cases it is **comparable** or **faster** than **PyTorch**.
+From ```83 minutes``` to ```31 minutes``` is a significant speedup. ```92 %``` speedup.
+On an average, **tf-transformers** is **80-90 %** speedup than **HuggingFace** **Tensorflow** implementation and in most cases it is **comparable** or **faster** than **PyTorch**.
 
 More benchmarks can be found in [benchmark](https://github.com/legacyai/tf-transformers/tree/main/benchmarks)
 
