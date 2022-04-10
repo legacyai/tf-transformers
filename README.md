@@ -146,6 +146,24 @@ To serialize save and load model
 >>> loaded = tf.saved_model.load("/tmp/gpt2_serialized/")
 >>> model  = loaded.signatures['serving_default']
 ```
+
+## Model inputs and outputs
+In tf-transformers we mostly followed ```Functional API``` from keras.
+All models in ```tf-transformers``` are connected and always have following functionality.
+### Model inputs
+If ```tf.keras.Model``` or ```tf_transformers.core.LegacyModel```, use:
+```print(model.input)```.
+
+If ```tf.keras.Layer``` or ```tf_transformers.core.LegacyLayer```, use:
+ ```print(model.model_inputs)```.
+
+### Model outputs
+If ```tf.keras.Model``` or ```tf_transformers.core.LegacyModel```, use:
+```print(model.output)```.
+
+If ```tf.keras.Layer``` or ```tf_transformers.core.LegacyLayer```, use:
+ ```print(model.model_outputs)```.
+
 ## Tutorials
 
 We have covered tutorials covering pre-training, finetuning, classfication, QA, NER so much more.
