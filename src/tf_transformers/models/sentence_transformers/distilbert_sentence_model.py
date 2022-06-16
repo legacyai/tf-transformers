@@ -250,7 +250,7 @@ def convert_pt(model, config, model_name):
     inputs_tf["input_mask"] = inputs["attention_mask"]
     outputs_tf = model(inputs_tf)
 
-    tf.debugging.assert_near(tf.reduce_sum(outputs_hf), tf.reduce_sum(outputs_tf['sentence_vector']), rtol=1.0)
+    tf.debugging.assert_near(tf.reduce_sum(outputs_hf), tf.reduce_sum(outputs_tf['sentence_vector']), rtol=0.2)
 
 
 class SentenceBertEncoder(LegacyLayer):
@@ -303,14 +303,31 @@ class SentenceBertEncoder(LegacyLayer):
         # Initialize model
         self.model_inputs, self.model_outputs = self.get_model(initialize_only=True)
 
+    def get_mean_embeddings(self, token_embeddings, input_mask):
+        """
+        Mean embeddings
+        """
+        # mask PAD tokens
+        token_emb_masked = token_embeddings * tf.cast(tf.expand_dims(input_mask, 2), tf.float32)
+        total_non_padded_tokens_per_batch = tf.cast(tf.reduce_sum(input_mask, axis=1), tf.float32)
+        # Convert to 2D
+        total_non_padded_tokens_per_batch = tf.expand_dims(total_non_padded_tokens_per_batch, 1)
+        mean_embeddings = tf.reduce_sum(token_emb_masked, axis=1) / total_non_padded_tokens_per_batch
+        return mean_embeddings
+
     def call(self, inputs):
         """Call"""
         model_outputs = self.model(inputs)
-        sentence_vector = tf.reduce_mean(model_outputs['token_embeddings'], axis=1)  # over sequences
+        input_mask = inputs['input_mask']
+        token_embeddings = model_outputs['token_embeddings']
+        sentence_vector = self.get_mean_embeddings(token_embeddings, input_mask)  # over sequences
+        sentence_vector_normalized = tf.nn.l2_normalize(sentence_vector, axis=1)
         if self.return_all_outputs:
             model_outputs['sentence_vector'] = sentence_vector
+            model_outputs['sentence_vector_normalized'] = sentence_vector_normalized
+            return model_outputs
         else:
-            return {'sentence_vector': sentence_vector}
+            return {'sentence_vector': sentence_vector, 'sentence_vector_normalized': sentence_vector_normalized}
 
     def get_model(self, initialize_only=False):
         """Get model"""
