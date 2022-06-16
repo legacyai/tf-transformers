@@ -193,6 +193,8 @@ class UpBlock(tf.keras.layers.Layer):
 class UnetModel(LegacyLayer):
     def __init__(
         self,
+        text_embedding_dimension,
+        time_embedding_dimension,
         input_channels=3,
         out_channels=128,
         channel_mult=[1, 2, 3, 4],
@@ -203,8 +205,6 @@ class UnetModel(LegacyLayer):
         name: str = "unet",
         image_height=64,
         image_width=64,
-        text_embedding_dimension=512,
-        time_embedding_dimension=512,
         batch_size=None,
         sequence_length=None,
         use_dropout: bool = False,
@@ -247,6 +247,14 @@ class UnetModel(LegacyLayer):
                 tf.keras.layers.Dense(out_channels),
             ]
         )
+
+        self.time_embed_projection_layer = tf.keras.layers.Dense(
+            out_channels, activation="swish", name='time_projection'
+        )
+        self.time_embed_projection_layer2 = tf.keras.layers.Dense(
+            out_channels,
+        )
+
         # Text Embedding Projection Layer
 
         self.text_embed_projection_layer = tf.keras.Sequential(
@@ -328,7 +336,7 @@ class UnetModel(LegacyLayer):
         self.last_group_norm = tfa.layers.GroupNormalization(name='last_group_norm')
         self.last_activation = tf.keras.activations.get(activation)
         self.last_conv2d = tf.keras.layers.Conv2D(
-            out_channels, kernel_size=(3, 3), strides=(1, 1), use_bias=True, padding='SAME', name='last-conv2d'
+            input_channels, kernel_size=(3, 3), strides=(1, 1), use_bias=True, padding='SAME', name='last-conv2d'
         )
 
         # Initialize model

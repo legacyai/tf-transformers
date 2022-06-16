@@ -47,6 +47,10 @@ class BaseDiffusion(LegacyLayer):
         self._batch_size = batch_size
         self._sequence_length = sequence_length
 
+        self._is_training = is_training
+        self._use_dropout = use_dropout
+        self._model_name = name
+
         super(BaseDiffusion, self).__init__(
             is_training=self._is_training, use_dropout=self._use_dropout, name=name, **kwargs
         )
@@ -105,6 +109,16 @@ class BaseDiffusion(LegacyLayer):
             dtype=tf.float32,
             name="input_pixels",
         )
+        input_noise = tf.keras.layers.Input(
+            shape=(
+                self._config_dict['image_height'],
+                self._config_dict['image_width'],
+                self._config_dict['input_channels'],
+            ),
+            batch_size=self._batch_size,
+            dtype=tf.float32,
+            name="input_noise",
+        )
         input_ids = tf.keras.layers.Input(
             shape=(self._sequence_length,),
             batch_size=self._batch_size,
@@ -121,7 +135,7 @@ class BaseDiffusion(LegacyLayer):
         time_steps = tf.keras.layers.Input(
             shape=(self._batch_size,),
             batch_size=1,
-            dtype=tf.float32,
+            dtype=tf.int32,
             name="time_steps",
         )
 
@@ -130,6 +144,7 @@ class BaseDiffusion(LegacyLayer):
         inputs['input_ids'] = input_ids  # B x emb
         inputs['input_mask'] = input_mask  # B x S x emb_dim
         inputs['time_steps'] = time_steps  # B x emb_dim
+        inputs['noise'] = input_noise
 
         layer_outputs = self(inputs)
         if initialize_only:
@@ -146,9 +161,9 @@ class BaseDiffusion(LegacyLayer):
         Extract some coefficients at specified timesteps,
         then reshape to [batch_size, 1, 1, 1, 1, ...] for broadcasting purposes.
         """
-        (bs,) = t.shape
+        bs = tf.shape(t)[0]
         # assert x_shape[0] == bs
-        out = tf.gather(tf.convert_to_tensor(a, dtype=tf.float32), t)
+        out = tf.cast(tf.gather(a, t), tf.float32)
         # assert out.shape == [bs]
         return tf.reshape(out, [bs] + ((len(x_shape) - 1) * [1]))
 
@@ -156,8 +171,6 @@ class BaseDiffusion(LegacyLayer):
         """
         Diffuse the data (t == 0 means diffused for 1 step)
         """
-        if noise is None:
-            noise = tf.random.normal(shape=x_start.shape)
         # assert noise.shape == x_start.shape
         return (
             self._extract(self.sqrt_alphas_cumprod, t, x_start.shape) * x_start
@@ -183,9 +196,7 @@ class BaseDiffusion(LegacyLayer):
         input_mask = inputs['input_mask']  # B x S
         input_ids = inputs['input_ids']  # B x S
         time_steps = tf.squeeze(inputs['time_steps'], axis=0)  # 1 x d -> d
-
-        # Generate noise
-        noise = tf.random_normal(shape=x_start.shape, dtype=x_start.dtype)
+        noise = inputs['noise']
 
         # Get text token embeddings
         text_inputs = {'input_ids': input_ids, 'input_mask': input_mask}
@@ -200,7 +211,7 @@ class BaseDiffusion(LegacyLayer):
         x_t = self.q_sample(x_start, time_steps, noise)
 
         # Get time embeddings
-        time_embeddings = self.text_embedding_layer(time_steps)
+        time_embeddings = self.time_embedding_layer(time_steps)
 
         # Unet inputs
         unet_inputs = {}
@@ -212,4 +223,7 @@ class BaseDiffusion(LegacyLayer):
 
         unet_result = self.unet_model(unet_inputs)
 
-        return unet_result
+        result = {}
+        result.update(unet_result)
+        result['noise'] = noise
+        return result
