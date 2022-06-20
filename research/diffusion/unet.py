@@ -84,7 +84,7 @@ class DownBlock(tf.keras.layers.Layer):
 
         if self.use_self_attention:
             h, _, _ = self.self_attn_block([h, h])  # Image to Image
-        if self.use_cross_attention:
+        if self.use_cross_attention and text_token_embeddings is not None:
             h, _, _ = self.cross_attention([h, text_token_embeddings, text_input_mask])
 
         return h
@@ -187,7 +187,7 @@ class UpBlock(tf.keras.layers.Layer):
 
         if self.use_self_attention:
             h, _, _ = self.self_attn_block([h, h])  # Image to Image
-        if self.use_cross_attention:
+        if self.use_cross_attention and text_token_embeddings is not None:
             h, _, _ = self.cross_attention([h, text_token_embeddings, text_input_mask])
 
         return h
@@ -355,36 +355,41 @@ class UnetModel(LegacyLayer):
             dtype=tf.float32,
             name="input_pixels",
         )
-        text_input_mask = tf.keras.layers.Input(
-            shape=(self._sequence_length,),
-            batch_size=self._batch_size,
-            dtype=tf.int32,
-            name="text_input_mask",
-        )
-        text_token_embeddings = tf.keras.layers.Input(
-            shape=(self._sequence_length, self._text_emb_dim),
-            batch_size=self._batch_size,
-            dtype=tf.float32,
-            name="text_token_embeddings",
-        )
-        sentence_embeddings = tf.keras.layers.Input(
-            shape=(self._text_emb_dim,),
-            batch_size=self._batch_size,
-            dtype=tf.float32,
-            name="sentence_embeddings",
-        )
+        inputs = {}
+        if self._text_emb_dim:
+            text_input_mask = tf.keras.layers.Input(
+                shape=(self._sequence_length,),
+                batch_size=self._batch_size,
+                dtype=tf.int32,
+                name="text_input_mask",
+            )
+
+            text_token_embeddings = tf.keras.layers.Input(
+                shape=(self._sequence_length, self._text_emb_dim),
+                batch_size=self._batch_size,
+                dtype=tf.float32,
+                name="text_token_embeddings",
+            )
+            sentence_embeddings = tf.keras.layers.Input(
+                shape=(self._text_emb_dim,),
+                batch_size=self._batch_size,
+                dtype=tf.float32,
+                name="sentence_embeddings",
+            )
+
+            inputs['text_token_embeddings'] = text_token_embeddings  # B x S x emb_dim
+            inputs['sentence_embeddings'] = sentence_embeddings  # B x emb_dim
+            inputs['text_input_mask'] = text_input_mask  # B x S
+
         time_steps = tf.keras.layers.Input(
             shape=(self._batch_size,),
             batch_size=1,
             dtype=tf.int32,
             name="time_steps",
         )
-        inputs = {}
+
         inputs['input_pixels'] = input_pixels  # B x H x W x C
         inputs['time_steps'] = time_steps  # B x 1
-        inputs['text_token_embeddings'] = text_token_embeddings  # B x S x emb_dim
-        inputs['sentence_embeddings'] = sentence_embeddings  # B x emb_dim
-        inputs['text_input_mask'] = text_input_mask  # B x S
 
         layer_outputs = self(inputs)
         if initialize_only:
@@ -399,21 +404,29 @@ class UnetModel(LegacyLayer):
         """Forward Pass"""
         image = inputs['input_pixels']  # B x H x W x C
         time_steps = tf.squeeze(inputs['time_steps'], axis=0)
-        text_token_embeddings = inputs['text_token_embeddings']  # B x S x emb_dim
-        sentence_embeddings = inputs['sentence_embeddings']  # B x emb_dim
-        text_input_mask = inputs['text_input_mask']  # B x S
 
         # time embeddings
         time_embeddings = self.time_embedding_layer(time_steps)
         # time embeddings ( B x out_channels )
         time_embeddings_projected = self.time_embed_projection_layer(time_embeddings)
-        # text embeddings ( B x out_channels )
-        sentence_embeddings_projected = self.text_embed_projection_layer(sentence_embeddings)
         # image embeddings (B x H x W x out_channels)
         image_embeddings = self.image_projection_layer(image)
 
+        cemb = time_embeddings_projected
+
+        if self._text_emb_dim:
+            text_token_embeddings = inputs['text_token_embeddings']  # B x S x emb_dim
+            sentence_embeddings = inputs['sentence_embeddings']  # B x emb_dim
+            text_input_mask = inputs['text_input_mask']  # B x S
+            # text embeddings ( B x out_channels )
+            sentence_embeddings_projected = self.text_embed_projection_layer(sentence_embeddings)
+
+            cemb += sentence_embeddings_projected
+        else:
+            text_token_embeddings = None
+            text_input_mask = None
+
         # Conditional embeddings
-        cemb = time_embeddings_projected + sentence_embeddings_projected
         h = image_embeddings
 
         # Downblock

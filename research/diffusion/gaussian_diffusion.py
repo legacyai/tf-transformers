@@ -191,10 +191,10 @@ class GaussianDiffusion(LegacyLayer):
         Extract some coefficients at specified timesteps,
         then reshape to [batch_size, 1, 1, 1, 1, ...] for broadcasting purposes.
         """
-        (bs,) = t.shape
-        assert x_shape[0] == bs
+        bs = tf.shape(t)[0]
+        # assert x_shape[0] == bs
         out = tf.gather(a, t)
-        assert out.shape == [bs]
+        # assert out.shape == [bs]
         return tf.reshape(out, [bs] + ((len(x_shape) - 1) * [1]))
 
     def q_mean_variance(self, x_start, t):
@@ -209,7 +209,8 @@ class GaussianDiffusion(LegacyLayer):
         """
         if noise is None:
             noise = tf.random.normal(shape=x_start.shape)
-        assert noise.shape == x_start.shape
+
+        # assert noise.shape == x_start.shape
         return (
             self._extract(self.sqrt_alphas_cumprod, t, x_start.shape) * x_start
             + self._extract(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape) * noise
@@ -392,7 +393,7 @@ class GaussianDiffusion(LegacyLayer):
             input_ids = inputs['input_ids']  # B x S
             # Get text token embeddings
             text_inputs = {'input_ids': input_ids, 'input_mask': input_mask}
-            text_result = self.text_encoder(text_inputs)
+            text_result = self.text_encoder_model(text_inputs)
             text_token_embeddings = text_result['token_embeddings']
             if 'sentence_embeddings' not in text_result:
                 sentence_embeddings = self.get_mean_embeddings(text_token_embeddings, input_mask)
