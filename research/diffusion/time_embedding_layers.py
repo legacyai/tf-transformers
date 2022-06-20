@@ -1,7 +1,5 @@
 import tensorflow as tf
 
-from tf_transformers.activations import get_activation
-
 
 class TimeEmbedding(tf.keras.layers.Layer):
     """Creates a sinusoidal embedding.
@@ -13,7 +11,6 @@ class TimeEmbedding(tf.keras.layers.Layer):
     def __init__(
         self,
         n_channels,
-        scale_factor=1,
         initializer="glorot_uniform",
         bias_initializer='zeros',
         name="time_embeddings",
@@ -35,30 +32,9 @@ class TimeEmbedding(tf.keras.layers.Layer):
 
         assert (n_channels % 2) == 0
         self._n_channels = n_channels
-        self._scale_factor = scale_factor
         self._initializer = initializer
         self._bias_initializer = bias_initializer
-        self._projection_dim = n_channels * scale_factor
         self._dtype = dtype
-
-        if activation is not None:
-            self.activation = get_activation(activation)
-        self.dense1 = tf.keras.layers.Dense(
-            self._projection_dim,
-            use_bias=use_bias,
-            activation=self.activation,
-            kernel_initializer=self._initializer,
-            bias_initializer=self._bias_initializer,
-            name="dense1",
-        )
-        self.dense2 = tf.keras.layers.Dense(
-            self._projection_dim,
-            use_bias=use_bias,
-            activation=None,
-            kernel_initializer=self._initializer,
-            bias_initializer=self._bias_initializer,
-            name="dense2",
-        )
 
     def get_config(self):
         """Config based on init arguments
@@ -68,7 +44,6 @@ class TimeEmbedding(tf.keras.layers.Layer):
         """
         config = {
             "n_channels": self._n_channels,
-            "scale_factor": self._scale_factor,
             "initializer": self._initializer,
             "name": self._name,
             "dtype": self._dtype,
@@ -92,5 +67,4 @@ class TimeEmbedding(tf.keras.layers.Layer):
         emb = tf.cast(tf.expand_dims(timesteps, axis=1), self._dtype) * tf.expand_dims(emb, axis=0)  # B x half_dim
         emb = tf.concat([tf.sin(emb), tf.cos(emb)], axis=1)  # B x self._n_channels
 
-        emb = self.dense2(self.dense1(emb))
         return emb

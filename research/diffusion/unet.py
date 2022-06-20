@@ -80,12 +80,13 @@ class DownBlock(tf.keras.layers.Layer):
         h = image
         for resnet_block in self.resnet_blocks:
             h = resnet_block([h, cemb])
-        h = self.downsample_block(h)
 
         if self.use_self_attention:
             h, _, _ = self.self_attn_block([h, h])  # Image to Image
         if self.use_cross_attention and text_token_embeddings is not None:
             h, _, _ = self.cross_attention([h, text_token_embeddings, text_input_mask])
+        if self.use_downsample:
+            h = self.downsample_block(h)
 
         return h
 
@@ -181,14 +182,14 @@ class UpBlock(tf.keras.layers.Layer):
         h = image
         for resnet_block in self.resnet_blocks:
             h = resnet_block([h, cemb])
-        h = self.upsample_block(h)
-        if self.use_upsample:
-            h = self.upsample_conv2d(h)
-
         if self.use_self_attention:
             h, _, _ = self.self_attn_block([h, h])  # Image to Image
         if self.use_cross_attention and text_token_embeddings is not None:
             h, _, _ = self.cross_attention([h, text_token_embeddings, text_input_mask])
+
+        if self.use_upsample:
+            h = self.upsample_block(h)
+            h = self.upsample_conv2d(h)
 
         return h
 
@@ -249,30 +250,28 @@ class UnetModel(LegacyLayer):
         # Define Layers
         # Time Embedding Layer
         self.time_embedding_layer = TimeEmbedding(n_channels=out_channels)
-        self.time_embed_projection_layer = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(
-                    out_channels * 4,
-                    activation=activation,
-                    kernel_initializer=kernel_initializer,
-                    name='time_projection',
-                ),
-                tf.keras.layers.Dense(out_channels * 4, kernel_initializer=kernel_initializer),
-            ]
+        self.time_embed_projection_layer1 = tf.keras.layers.Dense(
+            out_channels * 4,
+            activation=activation,
+            kernel_initializer=kernel_initializer,
+            name='time_projection',
+        )
+        self.time_embed_projection_layer2 = tf.keras.layers.Dense(
+            out_channels * 4, kernel_initializer=kernel_initializer
         )
 
         # Text Embedding Projection Layer
-        self.text_embed_projection_layer = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(
-                    out_channels * 4,
-                    activation=activation,
-                    kernel_initializer=kernel_initializer,
-                    name='text_projection',
-                ),
-                tf.keras.layers.Dense(out_channels * 4, kernel_initializer=kernel_initializer),
-            ]
+        self.text_embed_projection_layer1 = tf.keras.layers.Dense(
+            out_channels * 4,
+            activation=activation,
+            kernel_initializer=kernel_initializer,
+            name='text_projection',
         )
+
+        self.text_embed_projection_layer2 = tf.keras.layers.Dense(
+            out_channels * 4, kernel_initializer=kernel_initializer
+        )
+
         # Image Projection Layers
         self.image_projection_layer = tf.keras.layers.Conv2D(
             out_channels,
@@ -403,12 +402,13 @@ class UnetModel(LegacyLayer):
     def call(self, inputs):
         """Forward Pass"""
         image = inputs['input_pixels']  # B x H x W x C
-        time_steps = tf.squeeze(inputs['time_steps'], axis=0)
+        time_steps = tf.squeeze(inputs['time_steps'], axis=1)
 
         # time embeddings
         time_embeddings = self.time_embedding_layer(time_steps)
         # time embeddings ( B x out_channels )
-        time_embeddings_projected = self.time_embed_projection_layer(time_embeddings)
+        time_embeddings_projected = self.time_embed_projection_layer1(time_embeddings)
+        time_embeddings_projected = self.time_embed_projection_layer2(time_embeddings_projected)
         # image embeddings (B x H x W x out_channels)
         image_embeddings = self.image_projection_layer(image)
 
@@ -419,7 +419,8 @@ class UnetModel(LegacyLayer):
             sentence_embeddings = inputs['sentence_embeddings']  # B x emb_dim
             text_input_mask = inputs['text_input_mask']  # B x S
             # text embeddings ( B x out_channels )
-            sentence_embeddings_projected = self.text_embed_projection_layer(sentence_embeddings)
+            sentence_embeddings_projected = self.text_embed_projection_layer1(sentence_embeddings)
+            sentence_embeddings_projected = self.text_embed_projection_layer2(sentence_embeddings_projected)
 
             cemb += sentence_embeddings_projected
         else:
