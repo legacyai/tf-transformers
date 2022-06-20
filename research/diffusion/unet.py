@@ -16,10 +16,13 @@
 # ==============================================================================
 """TF 2.0 UNET Model with Attention"""
 
+
 import tensorflow as tf
 import tensorflow_addons as tfa
 from attention import ImageSelfAttention, ImageTextCrossAttention
 from resnet import ResNetBlock
+from time_embedding_layers import TimeEmbedding
+from utils import get_initializer
 
 from tf_transformers.core import LegacyLayer, LegacyModel
 
@@ -30,11 +33,11 @@ class DownBlock(tf.keras.layers.Layer):
     def __init__(
         self,
         out_channels,
+        num_res_blocks,
         use_self_attention=False,
         use_cross_attention=False,
         use_scale_shift_norm=True,
         attention_emb=None,
-        num_res_blocks=1,
         use_downsample=False,
         name='down_block',
         dtype=tf.float32,
@@ -128,11 +131,11 @@ class UpBlock(tf.keras.layers.Layer):
     def __init__(
         self,
         out_channels,
+        num_res_blocks,
+        use_upsample=False,
         use_self_attention=False,
         use_cross_attention=False,
         attention_emb=None,
-        num_res_blocks=1,
-        use_upsample=False,
         use_scale_shift_norm=True,
         name='up_block',
         dtype=tf.float32,
@@ -193,18 +196,19 @@ class UpBlock(tf.keras.layers.Layer):
 class UnetModel(LegacyLayer):
     def __init__(
         self,
-        text_embedding_dimension,
         time_embedding_dimension,
+        text_embedding_dimension=None,
         input_channels=3,
         out_channels=128,
         channel_mult=[1, 2, 3, 4],
-        use_self_attention=[True, True, True, True],
-        use_cross_attention=[True, True, True, True],
+        attention_resolutions=[],
+        cross_attention_resolutions=[],
         activation='swish',
         num_res_blocks=3,
         name: str = "unet",
         image_height=64,
         image_width=64,
+        initializer='default',
         batch_size=None,
         sequence_length=None,
         use_dropout: bool = False,
@@ -213,15 +217,11 @@ class UnetModel(LegacyLayer):
         **kwargs,
     ):
 
-        # Asserting number of layers which requires attention is same as
-        # number of resolution scaling list
-        assert len(channel_mult) == len(use_self_attention) == len(use_cross_attention)
-
         self.input_channels = input_channels
         self.out_channels = out_channels
         self.channel_mult = channel_mult
-        self.use_self_attention = use_self_attention
-        self.use_cross_attention = use_cross_attention
+        self.attention_resolutions = attention_resolutions
+        self.cross_attention_resolutions = cross_attention_resolutions
         self.num_res_blocks = num_res_blocks
         self._is_training = is_training
         self._use_dropout = use_dropout
@@ -234,38 +234,53 @@ class UnetModel(LegacyLayer):
         self._time_emb_dim = time_embedding_dimension
         self._model_name = name
         self._use_scale_shift_norm = use_scale_shift_norm
+
+        if initializer == 'default':
+            kernel_initializer = get_initializer(scale=1.0)
+        else:
+            kernel_initializer = initializer
+
         super(UnetModel, self).__init__(
             is_training=self._is_training, use_dropout=self._use_dropout, name=name, **kwargs
         )
         self._config_dict = {"is_training": self._is_training}
+        self.activation_fn = tf.keras.activations.get(activation)
 
         # Define Layers
         # Time Embedding Layer
+        self.time_embedding_layer = TimeEmbedding(n_channels=out_channels)
         self.time_embed_projection_layer = tf.keras.Sequential(
             [
-                tf.keras.layers.Dense(out_channels, activation="swish", name='time_projection'),
-                tf.keras.layers.Dense(out_channels),
+                tf.keras.layers.Dense(
+                    out_channels * 4,
+                    activation=activation,
+                    kernel_initializer=kernel_initializer,
+                    name='time_projection',
+                ),
+                tf.keras.layers.Dense(out_channels * 4, kernel_initializer=kernel_initializer),
             ]
         )
 
-        self.time_embed_projection_layer = tf.keras.layers.Dense(
-            out_channels, activation="swish", name='time_projection'
-        )
-        self.time_embed_projection_layer2 = tf.keras.layers.Dense(
-            out_channels,
-        )
-
         # Text Embedding Projection Layer
-
         self.text_embed_projection_layer = tf.keras.Sequential(
             [
-                tf.keras.layers.Dense(out_channels, activation="swish", name='text_projection'),
-                tf.keras.layers.Dense(out_channels),
+                tf.keras.layers.Dense(
+                    out_channels * 4,
+                    activation=activation,
+                    kernel_initializer=kernel_initializer,
+                    name='text_projection',
+                ),
+                tf.keras.layers.Dense(out_channels * 4, kernel_initializer=kernel_initializer),
             ]
         )
         # Image Projection Layers
         self.image_projection_layer = tf.keras.layers.Conv2D(
-            out_channels, kernel_size=(3, 3), strides=(1, 1), use_bias=True, padding='SAME'
+            out_channels,
+            kernel_size=(3, 3),
+            strides=(1, 1),
+            use_bias=True,
+            padding='SAME',
+            kernel_initializer=kernel_initializer,
         )
 
         # Down blocks
@@ -273,17 +288,8 @@ class UnetModel(LegacyLayer):
 
         # Down block Layer
         self.d_blocks = []
-        # First block without downsample
-        self.d_blocks.append(
-            DownBlock(
-                out_channels,
-                use_self_attention=False,
-                use_cross_attention=False,
-                use_downsample=False,
-                use_scale_shift_norm=use_scale_shift_norm,
-            )
-        )
 
+        ds_res = image_height  # Set downsample_resolution to be same as image_height
         for index, ch_mult in enumerate(channel_mult):
             use_downsample = True
             if index == len(channel_mult) - 1:
@@ -292,32 +298,24 @@ class UnetModel(LegacyLayer):
             self.d_blocks.append(
                 DownBlock(
                     current_out_channel,
-                    use_self_attention=use_self_attention[index],
-                    use_cross_attention=use_cross_attention[index],
+                    num_res_blocks=num_res_blocks,
+                    use_self_attention=ds_res in attention_resolutions,
+                    use_cross_attention=ds_res in cross_attention_resolutions,
                     use_downsample=use_downsample,
                     use_scale_shift_norm=use_scale_shift_norm,
                 )
             )
+            if use_downsample:
+                ds_res = ds_res // 2
 
         # Middle block layer
         self.middle_block = MiddleBlock(current_out_channel)
 
+        up_res = ds_res  # Set downsample_resolution to be same as image_height
         # # Up block Layer
-        # We need to reverse it for up block and we have to skip the last one
-        # Because otherwise dimension mismatch will happen, when we
-        # contancate down block with up block hidden states
-        channel_mult_up_layer = channel_mult[::-1][1:] + [1]
         self.u_blocks = []
-        self.u_blocks.append(
-            UpBlock(
-                out_channels,
-                use_self_attention=False,
-                use_cross_attention=False,
-                use_upsample=False,
-                use_scale_shift_norm=use_scale_shift_norm,
-            )
-        )
-        for index, ch_mult in enumerate(channel_mult_up_layer):
+
+        for index, ch_mult in enumerate(channel_mult):
             use_upsample = True
             current_out_channel = ch_mult * out_channels
             if index == num_resolutions - 1:
@@ -325,16 +323,18 @@ class UnetModel(LegacyLayer):
             self.u_blocks.append(
                 UpBlock(
                     current_out_channel,
-                    use_self_attention=False,
-                    use_cross_attention=False,
+                    num_res_blocks=num_res_blocks,
+                    use_self_attention=up_res in attention_resolutions,
+                    use_cross_attention=up_res in attention_resolutions,
                     use_upsample=use_upsample,
                     use_scale_shift_norm=use_scale_shift_norm,
                 )
             )
+            if use_upsample:
+                up_res = up_res * 2
 
         # Last part
         self.last_group_norm = tfa.layers.GroupNormalization(name='last_group_norm')
-        self.last_activation = tf.keras.activations.get(activation)
         self.last_conv2d = tf.keras.layers.Conv2D(
             input_channels, kernel_size=(3, 3), strides=(1, 1), use_bias=True, padding='SAME', name='last-conv2d'
         )
@@ -373,15 +373,15 @@ class UnetModel(LegacyLayer):
             dtype=tf.float32,
             name="sentence_embeddings",
         )
-        time_embeddings = tf.keras.layers.Input(
-            shape=(self._time_emb_dim,),
-            batch_size=self._batch_size,
-            dtype=tf.float32,
-            name="time_embeddings",
+        time_steps = tf.keras.layers.Input(
+            shape=(self._batch_size,),
+            batch_size=1,
+            dtype=tf.int32,
+            name="time_steps",
         )
         inputs = {}
         inputs['input_pixels'] = input_pixels  # B x H x W x C
-        inputs['time_embeddings'] = time_embeddings  # B x emb
+        inputs['time_steps'] = time_steps  # B x 1
         inputs['text_token_embeddings'] = text_token_embeddings  # B x S x emb_dim
         inputs['sentence_embeddings'] = sentence_embeddings  # B x emb_dim
         inputs['text_input_mask'] = text_input_mask  # B x S
@@ -398,11 +398,13 @@ class UnetModel(LegacyLayer):
     def call(self, inputs):
         """Forward Pass"""
         image = inputs['input_pixels']  # B x H x W x C
-        time_embeddings = inputs['time_embeddings']  # B x emb
+        time_steps = tf.squeeze(inputs['time_steps'], axis=0)
         text_token_embeddings = inputs['text_token_embeddings']  # B x S x emb_dim
         sentence_embeddings = inputs['sentence_embeddings']  # B x emb_dim
         text_input_mask = inputs['text_input_mask']  # B x S
 
+        # time embeddings
+        time_embeddings = self.time_embedding_layer(time_steps)
         # time embeddings ( B x out_channels )
         time_embeddings_projected = self.time_embed_projection_layer(time_embeddings)
         # text embeddings ( B x out_channels )
@@ -417,21 +419,25 @@ class UnetModel(LegacyLayer):
         # Downblock
         hs = []
         for block in self.d_blocks:
-
             h = block([h, cemb, text_token_embeddings, text_input_mask])
             hs.append(h)
 
+        hs = hs[:-1]  # We drop last one to keep dimensions in alignmnet
+
         # Middleblock
         h = self.middle_block([h, cemb])
-
         # UpBlock
-        for block in self.u_blocks:
+        for block in self.u_blocks[:-1]:
             h_from_downblock = hs.pop()
             h_concatanated = tf.concat([h, h_from_downblock], axis=-1)
             h = block([h_concatanated, cemb, text_token_embeddings, text_input_mask])
+
+        # Last ublock
+        block = self.u_blocks[-1]
+        h = block([h, cemb, text_token_embeddings, text_input_mask])
         # End
         h = self.last_group_norm(h)
-        h = self.last_activation(h)
+        h = self.activation_fn(h)
         h = self.last_conv2d(h)
 
-        return {'h': h}
+        return {'xpred': h}

@@ -194,6 +194,7 @@ class ImageSelfAttention(tf.keras.layers.Layer):
         """
 
         from_tensor = inputs[0]  # 4D
+        from_tensor_copy = from_tensor
         to_tensor = inputs[1]  # 4D
         attention_mask = None
 
@@ -244,7 +245,7 @@ class ImageSelfAttention(tf.keras.layers.Layer):
         context_layer_merged = self.merge_attention_heads(context_layer)
         context_layer_merged = tf.reshape(context_layer_merged, (-1, H, W, C_scaled))
         context_projected_back = self._projection_dense_back(context_layer_merged)
-        context_layer_merged = self._attention_layer_norm(context_projected_back)
+        context_layer_merged = self._attention_layer_norm(context_projected_back + from_tensor_copy)
 
         return context_layer_merged, key_tensor, value_tensor
 
@@ -429,6 +430,7 @@ class ImageTextCrossAttention(tf.keras.layers.Layer):
         """
 
         from_tensor = inputs[0]  # 4D
+        from_tensor_copy = from_tensor
         to_tensor = inputs[1]  # 3D
         input_mask = inputs[2]  # 2D (batch_size x sequence_length)
 
@@ -489,6 +491,6 @@ class ImageTextCrossAttention(tf.keras.layers.Layer):
         context_layer_merged = self.merge_attention_heads(context_layer)
         context_layer_merged = tf.reshape(context_layer_merged, (-1, H, W, C_scaled))
         context_projected_back = self._projection_dense_back(context_layer_merged)
-        context_layer_merged = self._attention_layer_norm(context_projected_back)
+        context_layer_merged = self._attention_layer_norm(context_projected_back + from_tensor_copy)
 
         return context_layer_merged, key_tensor, value_tensor

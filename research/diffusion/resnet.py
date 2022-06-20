@@ -1,5 +1,6 @@
 import tensorflow as tf
 import tensorflow_addons as tfa
+from utils import get_initializer
 
 from tf_transformers.activations import get_activation
 
@@ -51,10 +52,22 @@ class ResNetBlock(tf.keras.layers.Layer):
         self.gp_norm2 = tfa.layers.GroupNormalization(name='group_norm_2')
 
         self.conv2d_layer1 = tf.keras.layers.Conv2D(
-            out_ch, kernel_size=kernel_size, strides=strides, use_bias=True, padding='SAME', name='conv_1'
+            out_ch,
+            kernel_size=kernel_size,
+            strides=strides,
+            use_bias=True,
+            padding='SAME',
+            name='conv_1',
+            kernel_initializer=get_initializer(scale=1.0),
         )
         self.conv2d_layer2 = tf.keras.layers.Conv2D(
-            out_ch, kernel_size=kernel_size, strides=strides, use_bias=True, padding='SAME', name='conv_2'
+            out_ch,
+            kernel_size=kernel_size,
+            strides=strides,
+            use_bias=True,
+            padding='SAME',
+            name='conv_2',
+            kernel_initializer=get_initializer(scale=1.0),
         )
 
         if self.use_scale_shift_norm:
@@ -79,7 +92,13 @@ class ResNetBlock(tf.keras.layers.Layer):
         self.dropout_layer = tf.keras.layers.Dropout(rate=dropout_rate)
 
         self.conv1d = tf.keras.layers.Conv2D(
-            self._out_ch, kernel_size=(1, 1), strides=(1, 1), use_bias=True, padding='SAME', name='conv_1d'
+            self._out_ch,
+            kernel_size=(1, 1),
+            strides=(1, 1),
+            use_bias=True,
+            padding='SAME',
+            kernel_initializer=get_initializer(scale=1.0),
+            name='conv_1d',
         )
 
     def build(self, input_shape):
@@ -136,9 +155,9 @@ class ResNetBlock(tf.keras.layers.Layer):
         Returns:
             [tf.Tensor]: embeddings 3D (b x s x h)
         """
-        image, cemb = inputs
+        image, cemb = inputs  # image - 4D (B x H x W x C) , cemb - 2D B x C
         # Time and Text Projection
-        cemb_projected = self.time_text_dense(cemb)
+        cemb_projected = self.activation(self.time_text_dense(cemb))
 
         h = self.activation(self.gp_norm1(image))
         h = self.conv2d_layer1(h)
