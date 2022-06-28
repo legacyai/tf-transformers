@@ -135,8 +135,8 @@ class GaussianDiffusion(LegacyLayer):
         )
 
         time_steps = tf.keras.layers.Input(
-            shape=(self._batch_size,),
-            batch_size=1,
+            shape=(1,),
+            batch_size=self._batch_size,
             dtype=tf.int32,
             name="time_steps",
         )
@@ -405,7 +405,7 @@ class GaussianDiffusion(LegacyLayer):
             unet_inputs['text_input_mask'] = input_mask  # B x S
 
         # Get noise version of image at defined time step
-        x_t = self.q_sample(x_start, tf.squeeze(time_steps, axis=1), noise)
+        x_t = self.q_sample(x_start, tf.squeeze(time_steps, axis=0), noise)
 
         unet_inputs['input_pixels'] = x_t  # B x H x W x C
         unet_inputs['time_steps'] = time_steps  # B x 1

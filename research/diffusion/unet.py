@@ -52,7 +52,7 @@ class DownBlock(tf.keras.layers.Layer):
 
         self.use_self_attention = use_self_attention
         self.use_cross_attention = use_cross_attention
-
+        self.use_downsample = use_downsample
         self.downsample_block = tf.identity
         self.resnet_blocks = []
         for resnet_counter in range(num_res_blocks):
@@ -138,6 +138,7 @@ class UpBlock(tf.keras.layers.Layer):
         use_cross_attention=False,
         attention_emb=None,
         use_scale_shift_norm=True,
+        upsample_channel=None,
         name='up_block',
         dtype=tf.float32,
         **kwargs,
@@ -164,9 +165,14 @@ class UpBlock(tf.keras.layers.Layer):
             )
 
         if use_upsample:
-            self.upsample_block = tf.keras.layers.UpSampling2D((2, 2), name='upsample')
-            self.upsample_conv2d = tf.keras.layers.Conv2D(
-                out_channels, kernel_size=(3, 3), strides=(1, 1), use_bias=True, padding='SAME', name='conv2d_upsample'
+            assert upsample_channel is not None
+            self.upsample_conv2d = tf.keras.layers.Conv2DTranspose(
+                upsample_channel,
+                kernel_size=(3, 3),
+                strides=(2, 2),
+                use_bias=False,
+                padding='SAME',
+                name='conv2d_upsample',
             )
         if use_self_attention:
             self.self_attn_block = ImageSelfAttention()
@@ -188,7 +194,6 @@ class UpBlock(tf.keras.layers.Layer):
             h, _, _ = self.cross_attention([h, text_token_embeddings, text_input_mask])
 
         if self.use_upsample:
-            h = self.upsample_block(h)
             h = self.upsample_conv2d(h)
 
         return h
@@ -200,12 +205,12 @@ class UnetModel(LegacyLayer):
         time_embedding_dimension,
         text_embedding_dimension=None,
         input_channels=3,
-        out_channels=128,
+        out_channels=64,
         channel_mult=[1, 2, 3, 4],
         attention_resolutions=[],
         cross_attention_resolutions=[],
         activation='swish',
-        num_res_blocks=3,
+        num_res_blocks=2,
         name: str = "unet",
         image_height=64,
         image_width=64,
@@ -285,15 +290,17 @@ class UnetModel(LegacyLayer):
         # Down blocks
         num_resolutions = len(self.channel_mult)
 
-        # Down block Layer
+        # Down block Layer (Decereasing Resolutions)
         self.d_blocks = []
-
+        current_out_channel = current_in_channel = out_channels
         ds_res = image_height  # Set downsample_resolution to be same as image_height
-        for index, ch_mult in enumerate(channel_mult):
-            use_downsample = True
-            if index == len(channel_mult) - 1:
-                use_downsample = False
-            current_out_channel = ch_mult * out_channels
+        for i in range(num_resolutions):
+
+            use_downsample = False
+            if i < num_resolutions - 1:
+                use_downsample = True
+
+            current_out_channel = current_in_channel * channel_mult[i]
             self.d_blocks.append(
                 DownBlock(
                     current_out_channel,
@@ -304,21 +311,26 @@ class UnetModel(LegacyLayer):
                     use_scale_shift_norm=use_scale_shift_norm,
                 )
             )
+            current_in_channel = current_out_channel
             if use_downsample:
                 ds_res = ds_res // 2
 
         # Middle block layer
         self.middle_block = MiddleBlock(current_out_channel)
 
-        up_res = ds_res  # Set downsample_resolution to be same as image_height
+        up_res = ds_res  # Set upsample_resolution to be same as image_height
         # # Up block Layer
         self.u_blocks = []
+        current_in_channel = current_out_channel
 
-        for index, ch_mult in enumerate(channel_mult):
-            use_upsample = True
-            current_out_channel = ch_mult * out_channels
-            if index == num_resolutions - 1:
-                use_upsample = False
+        for i in reversed(range(num_resolutions)):
+
+            use_upsample = False
+            if i < num_resolutions - 1:
+                use_upsample = True
+                up_res = up_res * 2
+
+            current_out_channel = current_in_channel
             self.u_blocks.append(
                 UpBlock(
                     current_out_channel,
@@ -327,10 +339,11 @@ class UnetModel(LegacyLayer):
                     use_cross_attention=up_res in attention_resolutions,
                     use_upsample=use_upsample,
                     use_scale_shift_norm=use_scale_shift_norm,
+                    upsample_channel=current_out_channel,
                 )
             )
-            if use_upsample:
-                up_res = up_res * 2
+            current_out_channel = current_in_channel // channel_mult[i]
+            current_in_channel = current_out_channel
 
         # Last part
         self.last_group_norm = tfa.layers.GroupNormalization(name='last_group_norm')
@@ -381,8 +394,8 @@ class UnetModel(LegacyLayer):
             inputs['text_input_mask'] = text_input_mask  # B x S
 
         time_steps = tf.keras.layers.Input(
-            shape=(self._batch_size,),
-            batch_size=1,
+            shape=(1,),
+            batch_size=self._batch_size,
             dtype=tf.int32,
             name="time_steps",
         )
@@ -402,7 +415,7 @@ class UnetModel(LegacyLayer):
     def call(self, inputs):
         """Forward Pass"""
         image = inputs['input_pixels']  # B x H x W x C
-        time_steps = tf.squeeze(inputs['time_steps'], axis=1)
+        time_steps = tf.squeeze(inputs['time_steps'], axis=0)
 
         # time embeddings
         time_embeddings = self.time_embedding_layer(time_steps)
@@ -431,24 +444,20 @@ class UnetModel(LegacyLayer):
         h = image_embeddings
 
         # Downblock
-        hs = []
+        hs = [image_embeddings]
         for block in self.d_blocks:
             h = block([h, cemb, text_token_embeddings, text_input_mask])
             hs.append(h)
 
-        hs = hs[:-1]  # We drop last one to keep dimensions in alignmnet
-
         # Middleblock
         h = self.middle_block([h, cemb])
+
         # UpBlock
-        for block in self.u_blocks[:-1]:
+        for block in self.u_blocks:
             h_from_downblock = hs.pop()
             h_concatanated = tf.concat([h, h_from_downblock], axis=-1)
             h = block([h_concatanated, cemb, text_token_embeddings, text_input_mask])
 
-        # Last ublock
-        block = self.u_blocks[-1]
-        h = block([h, cemb, text_token_embeddings, text_input_mask])
         # End
         h = self.last_group_norm(h)
         h = self.activation_fn(h)

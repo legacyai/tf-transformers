@@ -48,8 +48,8 @@ class ResNetBlock(tf.keras.layers.Layer):
         if activation is not None:
             self.activation = get_activation(activation)
 
-        self.gp_norm1 = tfa.layers.GroupNormalization(name='group_norm_1')
-        self.gp_norm2 = tfa.layers.GroupNormalization(name='group_norm_2')
+        self.gp_norm1 = tfa.layers.GroupNormalization(32, name='group_norm_1')
+        self.gp_norm2 = tfa.layers.GroupNormalization(32, name='group_norm_2')
 
         self.conv2d_layer1 = tf.keras.layers.Conv2D(
             out_ch,
