@@ -7,17 +7,18 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.13.5
 kernelspec:
-  display_name: Python 3
+  display_name: Python 3 (ipykernel)
+  language: python
   name: python3
 ---
 
-```{code-cell}
+```{code-cell} ipython3
 :id: oQJ4kzmr0QFb
 
 
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :id: O4TM_SHk0bvh
 
 
@@ -30,13 +31,13 @@ kernelspec:
 Tensorflow-Transformers makes it easy to read and write tfrecords in and from any data type.
 Here we will see how we can make use of it to write and read images as tfrecords
 
-```{code-cell}
+```{code-cell} ipython3
 :id: c4x5NBTg0eaW
 
 
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :id: 4SYpRIzc0fxm
 
 import json
@@ -49,7 +50,7 @@ from tf_transformers.data import TFWriter, TFReader
 from datasets import load_dataset
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :id: cqx86-bB0gNh
 
 
@@ -59,7 +60,7 @@ from datasets import load_dataset
 
 ### Load CelebA dataset from HF
 
-```{code-cell}
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -101,7 +102,7 @@ outputId: 63cbdf61-8846-4465-aad2-b50751ae89cc
 dataset = load_dataset("nielsr/CelebA-faces")
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :id: eKccExxh037G
 
 
@@ -113,7 +114,7 @@ dataset = load_dataset("nielsr/CelebA-faces")
 
 * We save image as string (bytes) along with original size and dimension, which helps us when we read it back
 
-```{code-cell}
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -157,7 +158,7 @@ train_parser_fn = parse_train()
 tfwriter.process(parse_fn=train_parser_fn)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :id: nlgmLbdZ1JZb
 
 
@@ -167,7 +168,7 @@ tfwriter.process(parse_fn=train_parser_fn)
 
 ### Read TFRecords
 
-```{code-cell}
+```{code-cell} ipython3
 :id: LbGRxS_91Qm-
 
 # Read TFRecord
@@ -203,7 +204,7 @@ for item in train_dataset:
     break
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :id: Jenb2yrf1WAJ
 
 
@@ -213,7 +214,7 @@ for item in train_dataset:
 
 ### Plot images after reading
 
-```{code-cell}
+```{code-cell} ipython3
 ---
 colab:
   base_uri: https://localhost:8080/
@@ -238,7 +239,7 @@ batch_images = [im.numpy() for im in item['image']]
 display_images(batch_images)
 ```
 
-```{code-cell}
+```{code-cell} ipython3
 :id: OJKOISIW85fj
 
 
