@@ -18,15 +18,9 @@ kernelspec:
 
 ```
 
-```{code-cell} ipython3
-:id: O4TM_SHk0bvh
-
-
-```
-
 +++ {"id": "sDAuhGSA0dze"}
 
-### Read and Write Images as TFRecords
+# Read and Write Images as TFRecords
 
 Tensorflow-Transformers makes it easy to read and write tfrecords in and from any data type.
 Here we will see how we can make use of it to write and read images as tfrecords
@@ -58,7 +52,7 @@ from datasets import load_dataset
 
 +++ {"id": "E-vLJ5M9003N"}
 
-### Load CelebA dataset from HF
+## Load CelebA dataset from HF
 
 ```{code-cell} ipython3
 ---
@@ -110,7 +104,7 @@ dataset = load_dataset("nielsr/CelebA-faces")
 
 +++ {"id": "NNCY6qTE06P4"}
 
-### Write TFRecords
+## Write TFRecords
 
 * We save image as string (bytes) along with original size and dimension, which helps us when we read it back
 
@@ -166,7 +160,7 @@ tfwriter.process(parse_fn=train_parser_fn)
 
 +++ {"id": "9O1LDkKE1RgA"}
 
-### Read TFRecords
+## Read TFRecords
 
 ```{code-cell} ipython3
 :id: LbGRxS_91Qm-
@@ -212,7 +206,7 @@ for item in train_dataset:
 
 +++ {"id": "3QG8w2rw1WyC"}
 
-### Plot images after reading
+## Plot images after reading
 
 ```{code-cell} ipython3
 ---
