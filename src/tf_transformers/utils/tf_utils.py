@@ -174,8 +174,17 @@ def assert_rank(tensor, expected_rank, name=None):
 
 
 def get_dtype():
+
     dtype = tf.float32
-    policy = tf.keras.mixed_precision.experimental.global_policy()
+    # let's handle the tf.keras.mixed_precision 'experimental' attributes a bit better
+    # after tensorflow 2.4, policy feature is no longer experimental
+    # ref: https://stackoverflow.com/questions/67037067/attributeerror-module-tensorflow-keras-mixed-precision-has-no-attribute-set
+    keras_mixed_precision_attributes = dir(tf.keras.mixed_precision)
+    if 'experimental' in keras_mixed_precision_attributes:
+        policy = tf.keras.mixed_precision.experimental.global_policy()
+    else:
+        policy = tf.keras.mixed_precision.global_policy()
+    
     if policy.name == "mixed_float16":
         dtype = tf.float16
     if policy.name == "mixed_bfloat16":
