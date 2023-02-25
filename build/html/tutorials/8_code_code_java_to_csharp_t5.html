@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -41,7 +41,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Albert TFlite" href="../tflite_tutorials/albert_tflite.html" />
+    <link rel="next" title="Read and Write Images as TFRecords" href="9_images_tfrecords.html" />
     <link rel="prev" title="GPT2 for QA using Squad V1 ( Causal LM )" href="7_gpt2_question_answering_squad.html" /> 
 </head>
 
@@ -100,6 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#evaluate-on-test-bleu-score">Evaluate on Test ( BLEU ) score</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -159,7 +160,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="code-java-to-c-using-t5">
+  <div class="section" id="code-java-to-c-using-t5">
 <h1>Code Java to C# using T5<a class="headerlink" href="#code-java-to-c-using-t5" title="Permalink to this headline">¶</a></h1>
 <p>This tutorial contains complete code to fine-tune T5 to perform Seq2Seq on CodexGLUE Code to Code dataset.
 In addition to training a model, you will learn how to preprocess text into an appropriate format.</p>
@@ -177,17 +178,17 @@ tokenizer from tf-transformers.</p></li>
 <p>If you’re new to working with the CodexGLUE dataset, please see <a class="reference external" href="https://huggingface.co/datasets/code_x_glue_cc_code_to_code_trans">CodexGLUE</a> for more details.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tf-transformers
 
-<span class="o">!</span>pip install sentencepiece
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>sentencepiece
 
-<span class="o">!</span>pip install tensorflow-text
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tensorflow-text
 
-<span class="o">!</span>pip install transformers
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>transformers
 
-<span class="o">!</span>pip install wandb
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>wandb
 
-<span class="o">!</span>pip install datasets
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>datasets
 </pre></div>
 </div>
 </div>
@@ -230,7 +231,7 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Model</span>
 <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
 
   <span class="k">def</span> <span class="nf">model_fn</span><span class="p">():</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">T5Model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
@@ -239,7 +240,7 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 
 <span class="c1"># Load Optimizer</span>
 <span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
     <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">examples</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
     <span class="n">num_train_steps</span> <span class="o">=</span> <span class="n">steps_per_epoch</span> <span class="o">*</span> <span class="n">epochs</span>
     <span class="n">warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">num_train_steps</span><span class="p">)</span>
@@ -252,7 +253,7 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 
 <span class="c1"># Load trainer</span>
 <span class="k">def</span> <span class="nf">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
     <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="n">num_gpus</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="n">tpu_address</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">trainer</span>
 
@@ -277,7 +278,7 @@ overhead of pre prepapre the data in the form of <code class="docutils literal n
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load dataset</span>
 <span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">      dataset; HuggingFace dataset</span>
 <span class="sd">      tokenizer_layer: tf-transformers tokenizer</span>
@@ -333,7 +334,7 @@ overhead of pre prepapre the data in the form of <code class="docutils literal n
 </div>
 <div class="section" id="prepare-dataset">
 <h2>Prepare Dataset<a class="headerlink" href="#prepare-dataset" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Set necessay hyperparameters.</p></li>
 <li><p>Prepare <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">validation</span> <span class="pre">dataset</span></code>.</p></li>
 <li><p>Load <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
@@ -377,9 +378,7 @@ overhead of pre prepapre the data in the form of <code class="docutils literal n
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:datasets.builder:Reusing dataset code_x_glue_cc_code_to_code_trans (/home/jovyan/.cache/huggingface/datasets/code_x_glue_cc_code_to_code_trans/default/0.0.0/86dd57d2b1e88c6e589646133b76f2fef9d56c82e933d7f276e8a5b60ab18c34)
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "bab78b75b8534d8f8e5ab85ecf18f10f", "version_major": 2, "version_minor": 0}
-</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Loading t5-small tokenizer to /tmp/tftransformers_tokenizer_cache/t5-small/spiece.model
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "bab78b75b8534d8f8e5ab85ecf18f10f", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Loading t5-small tokenizer to /tmp/tftransformers_tokenizer_cache/t5-small/spiece.model
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:tensorflow:Using MirroredStrategy with devices (&#39;/job:localhost/replica:0/task:0/device:GPU:0&#39;,)
@@ -507,7 +506,7 @@ INFO:absl:Model saved at epoch 10 at MODELS/t5_code_to_code/ckpt-10
 <div class="section" id="load-and-serialize-model-for-text-generation">
 <h2>Load and Serialize Model for Text Generation<a class="headerlink" href="#load-and-serialize-model-for-text-generation" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>Load T5Model with <code class="docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code></p></li>
 </ol>
 </li>
@@ -591,7 +590,7 @@ INFO:absl:Model saved at epoch 10 at MODELS/t5_code_to_code/ckpt-10
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="7_gpt2_question_answering_squad.html" class="btn btn-neutral float-left" title="GPT2 for QA using Squad V1 ( Causal LM )" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../tflite_tutorials/albert_tflite.html" class="btn btn-neutral float-right" title="Albert TFlite" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="9_images_tfrecords.html" class="btn btn-neutral float-right" title="Read and Write Images as TFRecords" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

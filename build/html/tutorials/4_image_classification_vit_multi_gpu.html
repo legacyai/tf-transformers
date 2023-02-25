@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -109,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -168,7 +169,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="classify-flowers-image-classification-with-vit-using-multi-gpu">
+  <div class="section" id="classify-flowers-image-classification-with-vit-using-multi-gpu">
 <h1>Classify Flowers (Image Classification) with ViT using multi-GPU<a class="headerlink" href="#classify-flowers-image-classification-with-vit-using-multi-gpu" title="Permalink to this headline">¶</a></h1>
 <p>This tutorial contains complete code to fine-tune ViT to perform image classification on (Flowers) dataset.
 In addition to training a model, you will learn how to preprocess text into an appropriate format.</p>
@@ -187,11 +188,11 @@ feature extractor from tf-transformers.</p></li>
 <p>If you’re new to working with the MNLI dataset, please see <a class="reference external" href="http://download.tensorflow.org/example_images/flower_photos.tgz">Flowers Dataset</a> for more details.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tf-transformers
 
-<span class="o">!</span>pip install transformers
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>transformers
 
-<span class="o">!</span>pip install wandb
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>wandb
 </pre></div>
 </div>
 </div>
@@ -240,14 +241,14 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 </div>
 <div class="section" id="prepare-data">
 <h2>Prepare Data<a class="headerlink" href="#prepare-data" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Download Flowers dataset from the above link</p></li>
 <li><p>Extract it to a folder by <code class="docutils literal notranslate"><span class="pre">tar</span> <span class="pre">-xvf</span> <span class="pre">flower_photos.tgz</span></code></p></li>
 </ol>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_train_and_test_sets</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Split the data into train and test sets and get the label classes.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split the data into train and test sets and get the label classes.&quot;&quot;&quot;</span>
     <span class="n">train_examples</span><span class="p">,</span> <span class="n">test_examples</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
     <span class="n">shuffler</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">Random</span><span class="p">(</span><span class="n">RANDOM_SEED</span><span class="p">)</span>
     <span class="n">is_root</span> <span class="o">=</span> <span class="kc">True</span>
@@ -298,24 +299,24 @@ There are 736 test images
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_label</span><span class="p">(</span><span class="n">example</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get the label (number) for given example.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the label (number) for given example.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">example</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="k">def</span> <span class="nf">get_class</span><span class="p">(</span><span class="n">example</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get the class (string) of given example.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the class (string) of given example.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">CLASSES</span><span class="p">[</span><span class="n">get_label</span><span class="p">(</span><span class="n">example</span><span class="p">)]</span>
 
 <span class="k">def</span> <span class="nf">get_encoded_image</span><span class="p">(</span><span class="n">example</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get the image data (encoded jpg) of given example.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the image data (encoded jpg) of given example.&quot;&quot;&quot;</span>
     <span class="n">image_path</span> <span class="o">=</span> <span class="n">example</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">gfile</span><span class="o">.</span><span class="n">GFile</span><span class="p">(</span><span class="n">image_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
 <span class="k">def</span> <span class="nf">get_image</span><span class="p">(</span><span class="n">example</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get image as np.array of pixels for given example.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get image as np.array of pixels for given example.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">plt</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">get_encoded_image</span><span class="p">(</span><span class="n">example</span><span class="p">)),</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;jpg&#39;</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">display_images</span><span class="p">(</span><span class="n">images_and_classes</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Display given images and their labels in a grid.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display given images and their labels in a grid.&quot;&quot;&quot;</span>
     <span class="n">rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images_and_classes</span><span class="p">)</span> <span class="o">/</span> <span class="n">cols</span><span class="p">))</span>
     <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="n">cols</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="n">rows</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
@@ -332,7 +333,7 @@ There are 736 test images
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/4_image_classification_vit_multi_gpu_10_0.png" src="../_images/4_image_classification_vit_multi_gpu_10_0.png" />
+<img alt="../_images/8ee63aa94bc25fdde91bee5cead69a9dc7dac74806c36c622df1d0b25921389c.png" src="../_images/8ee63aa94bc25fdde91bee5cead69a9dc7dac74806c36c622df1d0b25921389c.png" />
 </div>
 </div>
 </div>
@@ -347,7 +348,7 @@ There are 736 test images
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Model</span>
 <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">model_fn</span><span class="p">():</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">ViTModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
         <span class="n">classification_model</span> <span class="o">=</span> <span class="n">Classification_Model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">NUM_CLASSES</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;cls_output&#39;</span><span class="p">)</span>
@@ -357,7 +358,7 @@ There are 736 test images
 
 <span class="c1"># Load Optimizer</span>
 <span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
     <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">examples</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
     <span class="n">num_train_steps</span> <span class="o">=</span> <span class="n">steps_per_epoch</span> <span class="o">*</span> <span class="n">epochs</span>
     <span class="n">warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">num_train_steps</span><span class="p">)</span>
@@ -370,7 +371,7 @@ There are 736 test images
 
 <span class="c1"># Load trainer</span>
 <span class="k">def</span> <span class="nf">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
     <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="n">num_gpus</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="n">tpu_address</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">trainer</span>
 </pre></div>
@@ -386,7 +387,7 @@ overhead of pre prepapre the data in the form of <code class="docutils literal n
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load dataset</span>
 <span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">feature_extractor</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">      dataset; tf dataset</span>
 <span class="sd">      batch_size: int (batch_size)</span>
@@ -450,7 +451,7 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
 </div>
 <div class="section" id="prepare-dataset">
 <h2>Prepare Dataset<a class="headerlink" href="#prepare-dataset" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Set necessay hyperparameters.</p></li>
 <li><p>Prepare <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">validation</span> <span class="pre">dataset</span></code>.</p></li>
 <li><p>Load <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
@@ -962,7 +963,7 @@ INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from MODELS/vi
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">show_confusion_matrix</span><span class="p">(</span><span class="n">test_labels</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute confusion matrix and normalize.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute confusion matrix and normalize.&quot;&quot;&quot;</span>
     <span class="n">test_labels</span> <span class="o">=</span> <span class="n">test_labels</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">)]</span> <span class="c1"># last batch has not been considerednfor evaluation by mistake</span>
     <span class="n">confusion</span> <span class="o">=</span> <span class="n">sk_metrics</span><span class="o">.</span><span class="n">confusion_matrix</span><span class="p">(</span>
     <span class="n">test_labels</span><span class="p">,</span> <span class="n">predictions</span><span class="p">)</span>
@@ -980,7 +981,7 @@ INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from MODELS/vi
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/4_image_classification_vit_multi_gpu_40_0.png" src="../_images/4_image_classification_vit_multi_gpu_40_0.png" />
+<img alt="../_images/dcd1504a10a88368d456dbddcf60c1f7d0f1a5c112052d9d0ea2227625ca5474.png" src="../_images/dcd1504a10a88368d456dbddcf60c1f7d0f1a5c112052d9d0ea2227625ca5474.png" />
 </div>
 </div>
 </div>

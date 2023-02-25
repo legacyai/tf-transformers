@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -90,6 +90,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -155,7 +156,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="benchmark-clip">
+  <div class="section" id="benchmark-clip">
 <h1>Benchmark CLIP<a class="headerlink" href="#benchmark-clip" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p>This notebook measures the performance of CLIP Image Encoder on Imagenetv2 dataset using <code class="docutils literal notranslate"><span class="pre">Pytorch</span></code> and <code class="docutils literal notranslate"><span class="pre">Tensorflow</span></code></p></li>
@@ -167,7 +168,7 @@
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>import numpy as np
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>import numpy as np
 import torch
 import clip
 from tqdm.notebook import tqdm
@@ -199,7 +200,7 @@ with torch.no_grad():
 <h2>Load CLIP Model tf-transformers<a class="headerlink" href="#load-clip-model-tf-transformers" title="Permalink to this headline">¶</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tf_transformers.models.clip</span> <span class="kn">import</span> <span class="n">CLIPModel</span><span class="p">,</span> <span class="n">CLIPFeatureExtractorTF</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tf_transformers.models.clip</span> <span class="kn">import</span> <span class="n">CLIPModel</span><span class="p">,</span> <span class="n">CLIPFeatureExtractorTF</span>
 <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">CLIPTokenizer</span>
 
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
@@ -222,7 +223,7 @@ with torch.no_grad():
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">images</span> <span class="o">=</span> <span class="n">ImageNetV2Dataset</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="n">preprocess</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">images</span> <span class="o">=</span> <span class="n">ImageNetV2Dataset</span><span class="p">(</span><span class="n">transform</span><span class="o">=</span><span class="n">preprocess</span><span class="p">)</span>
 <span class="n">loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">loader</span><span class="p">)):</span>
@@ -240,7 +241,7 @@ with torch.no_grad():
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">img_height</span> <span class="o">=</span> <span class="mi">224</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">img_height</span> <span class="o">=</span> <span class="mi">224</span>
 <span class="n">img_width</span> <span class="o">=</span> <span class="mi">224</span>
 <span class="n">rescaler</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Rescaling</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">255.0</span><span class="p">)</span>
 <span class="n">mean</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.48145466</span><span class="p">,</span> <span class="mf">0.4578275</span><span class="p">,</span> <span class="mf">0.40821073</span><span class="p">]</span>
@@ -252,7 +253,7 @@ with torch.no_grad():
     <span class="k">return</span> <span class="n">image_data</span>
 
 <span class="k">def</span> <span class="nf">read_process_resize</span><span class="p">(</span><span class="n">image_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Read, decode and process&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read, decode and process&quot;&quot;&quot;</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">decode_jpeg</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">[</span><span class="n">img_height</span><span class="p">,</span> <span class="n">img_width</span><span class="p">])</span>

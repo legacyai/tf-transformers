@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -102,6 +102,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -161,7 +162,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="gpt2-for-qa-using-squad-v1-causal-lm">
+  <div class="section" id="gpt2-for-qa-using-squad-v1-causal-lm">
 <h1>GPT2 for QA using Squad V1 ( Causal LM )<a class="headerlink" href="#gpt2-for-qa-using-squad-v1-causal-lm" title="Permalink to this headline">¶</a></h1>
 <p>This tutorial contains complete code to fine-tune GPT2 to finetune for Question Answering using Squad V1 data.
 In addition to training a model, you will learn how to preprocess text into an appropriate format.</p>
@@ -179,13 +180,13 @@ tokenizer from transformers.</p></li>
 <p>If you’re new to working with the Quora dataset, please see <a class="reference external" href="https://huggingface.co/datasets/squad">SQUAD</a> for more details.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tf-transformers
 
-<span class="o">!</span>pip install transformers
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>transformers
 
-<span class="o">!</span>pip install wandb
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>wandb
 
-<span class="o">!</span>pip install datasets
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>datasets
 </pre></div>
 </div>
 </div>
@@ -251,19 +252,19 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 <div class="section" id="prepare-training-tfrecords-and-validation-tfrecords-using-squad-causal-and-prefix">
 <h2>Prepare Training TFRecords and Validation TFRecords using Squad ( causal and prefix )<a class="headerlink" href="#prepare-training-tfrecords-and-validation-tfrecords-using-squad-causal-and-prefix" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>We combine <code class="docutils literal notranslate"><span class="pre">(question</span> <span class="pre">+</span> <span class="pre">context</span> <span class="pre">+</span> <span class="pre">answer)</span></code></p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="2">
 <li><p>For <code class="docutils literal notranslate"><span class="pre">mask_mode=causal</span></code>, we don’t need any mask. For <code class="docutils literal notranslate"><span class="pre">mask_mode=prefix</span></code>, we need <code class="docutils literal notranslate"><span class="pre">input_mask</span></code>.</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="3">
 <li><p>For <code class="docutils literal notranslate"><span class="pre">prefix</span></code>, we will mask only <code class="docutils literal notranslate"><span class="pre">question</span> <span class="pre">+</span> <span class="pre">context</span></code>, as <code class="docutils literal notranslate"><span class="pre">answer</span></code> is supposed to be generated, we shouldn’t mask it, means its causal.</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="4">
 <li><p>Note how <code class="docutils literal notranslate"><span class="pre">labels_mask</span></code> is prepared and how it is different from <code class="docutils literal notranslate"><span class="pre">input_mask</span></code>.</p></li>
 </ol>
 </li>
@@ -271,7 +272,7 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_train</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_question_length</span><span class="p">,</span> <span class="n">max_passage_length</span><span class="p">,</span> <span class="n">max_answer_length</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Function to parse examples which are is_duplicate=1</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function to parse examples which are is_duplicate=1</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (:obj:`dataet`): HF dataset</span>
@@ -347,7 +348,7 @@ INFO:absl:All writer objects closed
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_dev</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_question_length</span><span class="p">,</span> <span class="n">max_passage_length</span><span class="p">,</span> <span class="n">max_answer_length</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Function to parse examples</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function to parse examples</span>
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (:obj:`dataet`): HF dataset</span>
 <span class="sd">        tokenizer (:obj:`tokenizer`): HF Tokenizer</span>
@@ -425,7 +426,7 @@ INFO:absl:All writer objects closed
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Model</span>
 <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="p">,</span> <span class="n">mask_mode</span><span class="o">=</span><span class="s1">&#39;causal&#39;</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
 
   <span class="k">def</span> <span class="nf">model_fn</span><span class="p">():</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">GPT2Model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">mask_mode</span><span class="o">=</span><span class="n">mask_mode</span><span class="p">)</span> <span class="c1">#causal by default</span>
@@ -434,7 +435,7 @@ INFO:absl:All writer objects closed
 
 <span class="c1"># Load Optimizer</span>
 <span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
     <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">examples</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
     <span class="n">num_train_steps</span> <span class="o">=</span> <span class="n">steps_per_epoch</span> <span class="o">*</span> <span class="n">epochs</span>
     <span class="n">warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">num_train_steps</span><span class="p">)</span>
@@ -447,7 +448,7 @@ INFO:absl:All writer objects closed
 
 <span class="c1"># Load trainer</span>
 <span class="k">def</span> <span class="nf">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
     <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="n">num_gpus</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="n">tpu_address</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">trainer</span>
 
@@ -463,7 +464,7 @@ INFO:absl:All writer objects closed
 </div>
 <div class="section" id="set-hyperparameters-and-configs">
 <h2>Set Hyperparameters and Configs<a class="headerlink" href="#set-hyperparameters-and-configs" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Set necessay hyperparameters.</p></li>
 <li><p>Prepare <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">validation</span> <span class="pre">dataset</span></code>.</p></li>
 <li><p>Load <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
@@ -520,11 +521,11 @@ INFO:absl:All writer objects closed
 <div class="section" id="train-gpt2-causal">
 <h2>Train GPT2 Causal :-)<a class="headerlink" href="#train-gpt2-causal" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>Loss is coming down in epoch 1 itself.</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="2">
 <li><p>Evaluation results clearly indicated how well model has learned.</p></li>
 </ol>
 </li>
@@ -656,7 +657,7 @@ INFO:absl:Model saved at epoch 5 at MODELS/gpt2_squad_causal/ckpt-5
 
 
 <span class="k">def</span> <span class="nf">normalize_answer</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Lower text and remove punctuation, articles and extra whitespace.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Lower text and remove punctuation, articles and extra whitespace.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">remove_articles</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\b(a|an|the)\b&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
 
@@ -699,7 +700,7 @@ INFO:absl:Model saved at epoch 5 at MODELS/gpt2_squad_causal/ckpt-5
 
 
 <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Squad evaluate</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Squad evaluate</span>
 <span class="sd">    </span>
 <span class="sd">    dataset: Huggingface Dataset</span>
 <span class="sd">    predictions: List of predictions</span>
@@ -728,7 +729,7 @@ INFO:absl:Model saved at epoch 5 at MODELS/gpt2_squad_causal/ckpt-5
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">split_by_id</span><span class="p">(</span><span class="n">predicted_ids</span><span class="p">,</span> <span class="n">eos_id</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Split by EOS_ID to make decoding proper&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split by EOS_ID to make decoding proper&quot;&quot;&quot;</span>
     <span class="n">all_ids</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">per_example_id</span> <span class="ow">in</span> <span class="n">predicted_ids</span><span class="p">:</span>
         <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -739,7 +740,7 @@ INFO:absl:Model saved at epoch 5 at MODELS/gpt2_squad_causal/ckpt-5
     <span class="k">return</span> <span class="n">all_ids</span>
 
 <span class="k">def</span> <span class="nf">get_serialized_model_from_checkpoint</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">,</span> <span class="n">checkpoint_number</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Load serialized model checkpoint&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load serialized model checkpoint&quot;&quot;&quot;</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">GPT2Model</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">use_auto_regressive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">load_checkpoint</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/ckpt-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_checkpoint_dir</span><span class="p">,</span> <span class="n">checkpoint_number</span><span class="p">))</span>
 

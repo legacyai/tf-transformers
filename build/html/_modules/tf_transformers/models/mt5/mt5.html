@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
@@ -75,6 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -297,7 +298,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">initialize_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MT5Encoder.get_model"><a class="viewcode-back" href="../../../../model_doc/mt5.html#tf_transformers.models.MT5Encoder.get_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">LegacyLayer</span><span class="p">,</span> <span class="n">initialize_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.</span>
 <span class="sd">        Args:</span>
 <span class="sd">            self: Model layer</span>
 <span class="sd">            initialize_only: If False, model (LegacyModel) wont be returned.</span>
@@ -675,16 +676,16 @@
         <span class="k">return</span> <span class="n">outputs</span></div>
 
 <div class="viewcode-block" id="MT5Encoder.get_embedding_table"><a class="viewcode-back" href="../../../../model_doc/mt5.html#tf_transformers.models.MT5Encoder.get_embedding_table">[docs]</a>    <span class="k">def</span> <span class="nf">get_embedding_table</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return Embedding Table&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return Embedding Table&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_embedding_layer</span><span class="o">.</span><span class="n">embeddings</span></div>
 
 <div class="viewcode-block" id="MT5Encoder.get_config"><a class="viewcode-back" href="../../../../model_doc/mt5.html#tf_transformers.models.MT5Encoder.get_config">[docs]</a>    <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return Configuration dict&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return Configuration dict&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config_dict</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">transformer_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of Transformer layers in the encoder.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of Transformer layers in the encoder.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transformer_layers</span>
 
 <div class="viewcode-block" id="MT5Encoder.from_config"><a class="viewcode-back" href="../../../../model_doc/mt5.html#tf_transformers.models.MT5Encoder.from_config">[docs]</a>    <span class="nd">@classmethod</span>

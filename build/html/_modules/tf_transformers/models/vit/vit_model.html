@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
@@ -75,6 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -203,7 +204,7 @@
 
 
 <div class="viewcode-block" id="ViTModel"><a class="viewcode-back" href="../../../../model_doc/vit.html#tf_transformers.models.ViTModel">[docs]</a><span class="k">class</span> <span class="nc">ViTModel</span><span class="p">(</span><span class="n">ModelWrapper</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;ViT Encoder Wrapper</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;ViT Encoder Wrapper</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model_name (:obj:`str`): Name of the model</span>
@@ -219,7 +220,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="ViTModel.update_config"><a class="viewcode-back" href="../../../../model_doc/vit.html#tf_transformers.models.ViTModel.update_config">[docs]</a>    <span class="k">def</span> <span class="nf">update_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tft_config</span><span class="p">,</span> <span class="n">hf_config</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update tft config with hf config</span>
 
 <span class="sd">        Args:</span>
@@ -246,7 +247,7 @@
 
 <div class="viewcode-block" id="ViTModel.get_config"><a class="viewcode-back" href="../../../../model_doc/vit.html#tf_transformers.models.ViTModel.get_config">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get config from model name.</span>
 <span class="sd">        Args:</span>
 <span class="sd">            model_name (:obj:`str`): Name of the model</span>

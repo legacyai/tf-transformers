@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
@@ -75,6 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -160,7 +161,7 @@
 
 
 <span class="k">def</span> <span class="nf">assert_shapes</span><span class="p">(</span><span class="n">encoder_embeddings</span><span class="p">,</span> <span class="n">decoder_embeddings</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Assert shapes</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Assert shapes</span>
 
 
 <span class="sd">    Args:</span>
@@ -181,7 +182,7 @@
 
 
 <span class="k">def</span> <span class="nf">share_embedding_layers</span><span class="p">(</span><span class="n">encoder_layer</span><span class="p">,</span> <span class="n">decoder_layer</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Share Embeddings Layers</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Share Embeddings Layers</span>
 <span class="sd">    Args:</span>
 <span class="sd">        encoder_layer ([tf.keras.layers.Layer]): Encoder</span>
 <span class="sd">        decoder_layer ([tf.keras.layers.Layer]): Decoder</span>
@@ -211,7 +212,7 @@
 
 
 <span class="k">def</span> <span class="nf">share_encoder_layers</span><span class="p">(</span><span class="n">encoder_layer</span><span class="p">,</span> <span class="n">decoder_layer</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Share Encoder layers with Decoder</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Share Encoder layers with Decoder</span>
 <span class="sd">    Args:</span>
 <span class="sd">        encoder_layer ([tf.keras.layers.Layer]): Encoder</span>
 <span class="sd">        decoder_layer ([tf.keras.layers.Layer]): Decoder</span>
@@ -260,7 +261,7 @@
 
 
 <div class="viewcode-block" id="EncoderDecoder"><a class="viewcode-back" href="../../../../model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder">[docs]</a><span class="k">class</span> <span class="nc">EncoderDecoder</span><span class="p">(</span><span class="n">LegacyLayer</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Encoder Decoder Model&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Encoder Decoder Model&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -273,7 +274,7 @@
         <span class="n">decoder_start_token_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        EncoderDecoder is a wrapper to wrap and connect all Models.</span>
 <span class="sd">        .. note::</span>
 
@@ -354,7 +355,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_ouputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">initialize_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="EncoderDecoder.get_model"><a class="viewcode-back" href="../../../../model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.get_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialize_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.</span>
 <span class="sd">        Args:</span>
 <span class="sd">            self: model (tf.keras.Layer) instance</span>
 <span class="sd">            initialize_only: bool</span>
@@ -436,7 +437,7 @@
         <span class="k">return</span> <span class="n">model</span></div>
 
 <div class="viewcode-block" id="EncoderDecoder.call_forward"><a class="viewcode-back" href="../../../../model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.call_forward">[docs]</a>    <span class="k">def</span> <span class="nf">call_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Forward pass of an EncoderDecoder Model</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass of an EncoderDecoder Model</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            inputs ([dict of tf.Tensor]): This is the input to the model.</span>
@@ -496,7 +497,7 @@
         <span class="k">return</span> <span class="n">decoder_outputs</span></div>
 
 <div class="viewcode-block" id="EncoderDecoder.call_auto_regressive"><a class="viewcode-back" href="../../../../model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.call_auto_regressive">[docs]</a>    <span class="k">def</span> <span class="nf">call_auto_regressive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Forward pass of an EncoderDecoder Model</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass of an EncoderDecoder Model</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            inputs ([dict of tf.Tensor]): This is the input to the model.</span>
@@ -581,7 +582,7 @@
         <span class="k">return</span> <span class="n">decoder_outputs</span></div>
 
 <div class="viewcode-block" id="EncoderDecoder.call"><a class="viewcode-back" href="../../../../model_doc/encoder_decoder.html#tf_transformers.models.EncoderDecoder.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Call</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            inputs : dict of tf.tensor</span>

@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -158,7 +159,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="text-generation-using-gpt2">
+  <div class="section" id="text-generation-using-gpt2">
 <h1>Text Generation using GPT2<a class="headerlink" href="#text-generation-using-gpt2" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p>This tutorial is intended to provide, a familiarity in how to use <code class="docutils literal notranslate"><span class="pre">GPT2</span></code> for text-generation tasks.</p></li>
@@ -166,9 +167,9 @@
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tf-transformers
 
-<span class="o">!</span>pip install transformers
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>transformers
 </pre></div>
 </div>
 </div>
@@ -198,7 +199,7 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 <div class="section" id="load-gpt2-model">
 <h2>Load GPT2 Model<a class="headerlink" href="#load-gpt2-model" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>Note <code class="docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code>, argument. This is required for any models to enable text-generation.</p></li>
 </ol>
 </li>
@@ -213,27 +214,7 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 </div>
 </div>
 <div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "908d508d110b4f76a90003c1d8d8cb57", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "1c819708c6b64f09bd9b639f09143526", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "253dad0dff2e4766a0e7ceb2b8910897", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "736425c17c2c4ed9b43020f6e8a694e0", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "e91106b1c473471a8ade4aa768875388", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "d4e28535dbb64873981ea7f648b62e6a", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "35e97efddd2c45689391962f471636ce", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "3cd7277182eb46cbbcc75f63fa874ccb", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "a99c8db21bc14a7db6b5d4e2d99be45f", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "aaa9f28a2b8945fa83c31589a93adba6", "version_major": 2, "version_minor": 0}
-</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Metal device set to: Apple M1
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "908d508d110b4f76a90003c1d8d8cb57", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "1c819708c6b64f09bd9b639f09143526", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "253dad0dff2e4766a0e7ceb2b8910897", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "736425c17c2c4ed9b43020f6e8a694e0", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "e91106b1c473471a8ade4aa768875388", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "d4e28535dbb64873981ea7f648b62e6a", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "35e97efddd2c45689391962f471636ce", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "3cd7277182eb46cbbcc75f63fa874ccb", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "a99c8db21bc14a7db6b5d4e2d99be45f", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "aaa9f28a2b8945fa83c31589a93adba6", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Metal device set to: Apple M1
 WARNING:tensorflow:Inconsistent references when loading the checkpoint into this object graph. Either the Trackable object references in the Python program have changed in an incompatible way, or the checkpoint was generated in an incompatible program.
 
 Two checkpoint references resolved to different objects (&lt;tf_transformers.models.gpt2.gpt2.GPT2Encoder object at 0x2908a54c0&gt; and &lt;keras.engine.input_layer.InputLayer object at 0x2979a3a30&gt;).

@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul class="current">
@@ -161,17 +162,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="roberta-tflite">
+  <div class="section" id="roberta-tflite">
 <h1>Roberta TFLite<a class="headerlink" href="#roberta-tflite" title="Permalink to this headline">¶</a></h1>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tf-transformers
 
-<span class="o">!</span>pip install sentencepiece
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>sentencepiece
 
-<span class="o">!</span>pip install tensorflow-text
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tensorflow-text
 
-<span class="o">!</span>pip install transformers
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>transformers
 </pre></div>
 </div>
 </div>
@@ -199,7 +200,7 @@
 <p>The most important thing to notice here is that, if we want to convert a model to <code class="docutils literal notranslate"><span class="pre">tflite</span></code>, we have to ensure that <code class="docutils literal notranslate"><span class="pre">inputs</span></code> to the model are <strong>deterministic</strong>, which means inputs should not be dynamic. We have to fix  <strong>batch_size</strong>, <strong>sequence_length</strong> and other related input constraints depends on the model of interest.</p>
 <div class="section" id="load-roberta-model">
 <h3>Load Roberta Model<a class="headerlink" href="#load-roberta-model" title="Permalink to this headline">¶</a></h3>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Fix the inputs</p></li>
 <li><p>We can always check the <code class="docutils literal notranslate"><span class="pre">model</span></code> <strong>inputs</strong> and <strong>output</strong> by using <code class="docutils literal notranslate"><span class="pre">model.input</span></code> and <code class="docutils literal notranslate"><span class="pre">model.output</span></code>.</p></li>
 <li><p>We use <code class="docutils literal notranslate"><span class="pre">batch_size=1</span></code> and <code class="docutils literal notranslate"><span class="pre">sequence_length=64</span></code>.)</p></li>
@@ -214,17 +215,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "648c083eda83425893800f7bb7eb1c7d", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "1c26c357f40f422ebd355af346d5a870", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "c9d915d484584e7f911af2e84eb33392", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "f98d141b7cae45f8abeccb76ea408099", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "6f073c18415940358f72122ac1cbdc23", "version_major": 2, "version_minor": 0}
-</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /root/.cache/huggingface/hub/tftransformers--roberta-base-no-mlm.main.9e4aa91ba5936c6ac98586f85c152831e421d0ec/ckpt-1
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "648c083eda83425893800f7bb7eb1c7d", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "1c26c357f40f422ebd355af346d5a870", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "c9d915d484584e7f911af2e84eb33392", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "f98d141b7cae45f8abeccb76ea408099", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "6f073c18415940358f72122ac1cbdc23", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from /root/.cache/huggingface/hub/tftransformers--roberta-base-no-mlm.main.9e4aa91ba5936c6ac98586f85c152831e421d0ec/ckpt-1
 INFO:absl:Successful ✅: Loaded model from tftransformers/roberta-base-no-mlm
 </pre></div>
 </div>
@@ -331,7 +322,7 @@ WARNING:absl:&lt;tf_transformers.layers.attention.bert_attention.MultiHeadAttent
 <h2>Assert TFlite Model and Keras Model outputs<a class="headerlink" href="#assert-tflite-model-and-keras-model-outputs" title="Permalink to this headline">¶</a></h2>
 <p>After conversion we have to assert the model outputs using
 <code class="docutils literal notranslate"><span class="pre">tflite</span></code> and <code class="docutils literal notranslate"><span class="pre">Keras</span></code> model, to ensure proper conversion.</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Create examples using <code class="docutils literal notranslate"><span class="pre">tf.random.uniform</span></code>.</p></li>
 <li><p>Check outputs using both models.</p></li>
 <li><p>Note: We need slightly higher <code class="docutils literal notranslate"><span class="pre">rtol</span></code> here to assert.</p></li>

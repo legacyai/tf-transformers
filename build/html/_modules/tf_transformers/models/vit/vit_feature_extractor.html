@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
@@ -75,6 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -169,7 +170,7 @@
 
 
 <div class="viewcode-block" id="ViTFeatureExtractorTF"><a class="viewcode-back" href="../../../../model_doc/vit_feature_extractor.html#tf_transformers.models.ViTFeatureExtractorTF">[docs]</a><span class="k">class</span> <span class="nc">ViTFeatureExtractorTF</span><span class="p">(</span><span class="n">LegacyLayer</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    VitFeatureExtractor using Tensorflow Ops, which allows complete serialization</span>
 
 <span class="sd">    Args:</span>
@@ -226,14 +227,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">initialize_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ViTFeatureExtractorTF.read_process_resize"><a class="viewcode-back" href="../../../../model_doc/vit_feature_extractor.html#tf_transformers.models.ViTFeatureExtractorTF.read_process_resize">[docs]</a>    <span class="k">def</span> <span class="nf">read_process_resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Read, decode and process&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read, decode and process&quot;&quot;&quot;</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">decode_image</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span><span class="p">)</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">img_height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_width</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">img</span></div>
 
 <div class="viewcode-block" id="ViTFeatureExtractorTF.call"><a class="viewcode-back" href="../../../../model_doc/vit_feature_extractor.html#tf_transformers.models.ViTFeatureExtractorTF.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Main call&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Main call&quot;&quot;&quot;</span>
         <span class="n">image_path</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;image&#39;</span><span class="p">]</span>
         <span class="n">image_processed</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">read_process_resize</span><span class="p">,</span> <span class="n">image_path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;batch_processing&#39;</span><span class="p">,</span> <span class="n">fn_output_signature</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span>
@@ -246,7 +247,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;input_pixels&#39;</span><span class="p">:</span> <span class="n">image_processed</span><span class="p">}</span></div>
 
 <div class="viewcode-block" id="ViTFeatureExtractorTF.get_config"><a class="viewcode-back" href="../../../../model_doc/vit_feature_extractor.html#tf_transformers.models.ViTFeatureExtractorTF.get_config">[docs]</a>    <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return config&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return config&quot;&quot;&quot;</span>
         <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;img_height&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_height</span><span class="p">,</span>
             <span class="s2">&quot;img_width&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">img_width</span><span class="p">,</span>

@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
@@ -75,6 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -200,7 +201,7 @@
 
 
 <span class="k">def</span> <span class="nf">get_vocab</span><span class="p">(</span><span class="n">model_proto</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get vocab from sentencpiece model&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get vocab from sentencpiece model&quot;&quot;&quot;</span>
     <span class="n">sp_model</span> <span class="o">=</span> <span class="n">sentencepiece</span><span class="o">.</span><span class="n">SentencePieceProcessor</span><span class="p">()</span>
     <span class="n">sp_model</span><span class="o">.</span><span class="n">LoadFromSerializedProto</span><span class="p">(</span><span class="n">model_proto</span><span class="p">)</span>
     <span class="n">vocab</span> <span class="o">=</span> <span class="p">{</span><span class="n">sp_model</span><span class="o">.</span><span class="n">IdToPiece</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sp_model</span><span class="o">.</span><span class="n">GetPieceSize</span><span class="p">())}</span>
@@ -208,7 +209,7 @@
 
 
 <div class="viewcode-block" id="T5TokenizerLayer"><a class="viewcode-back" href="../../../../model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer">[docs]</a><span class="k">class</span> <span class="nc">T5TokenizerLayer</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Layer</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initializes a SentencepieceTokenizer layer.</span>
 
 <span class="sd">    Args:</span>
@@ -332,14 +333,14 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either dynamic_padding is True, or pack_model_inputs is True. Don&#39;t set them together&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_create_tokenizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return sentencepiece tokenizer.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return sentencepiece tokenizer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">tf_text</span><span class="o">.</span><span class="n">SentencepieceTokenizer</span><span class="p">(</span>
             <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_serialized_proto</span><span class="p">,</span> <span class="n">out_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">out_type</span><span class="p">,</span> <span class="n">nbest_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nbest_size</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_alpha</span>
         <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vocab_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return vocab size.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return vocab size.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">()</span>
 
 <div class="viewcode-block" id="T5TokenizerLayer.encode"><a class="viewcode-back" href="../../../../model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span>
@@ -352,7 +353,7 @@
         <span class="n">max_pad_length</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">return_tensors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;ragged&#39;</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calls `text.SentencepieceTokenizer` on inputs.</span>
 
 <span class="sd">        Args:</span>
@@ -445,7 +446,7 @@
         <span class="n">num_special_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># For EOS</span>
         <span class="n">truncator</span><span class="o">=</span><span class="s2">&quot;round_robin&quot;</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pad tokenized inputs.</span>
 
 <span class="sd">        Args:</span>
@@ -506,7 +507,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="T5TokenizerLayer.preprocess"><a class="viewcode-back" href="../../../../model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.preprocess">[docs]</a>    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Preprocess text like normalization, lower case etc&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Preprocess text like normalization, lower case etc&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strip_diacritics</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenize_with_offsets</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -521,7 +522,7 @@
         <span class="k">return</span> <span class="n">inputs</span></div>
 
 <div class="viewcode-block" id="T5TokenizerLayer.call_encode"><a class="viewcode-back" href="../../../../model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.call_encode">[docs]</a>    <span class="k">def</span> <span class="nf">call_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;Encode function used for serialization&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Encode function used for serialization&quot;&quot;&quot;</span>
 
         <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>  <span class="c1"># Get from dictionary</span>
         <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
@@ -584,12 +585,12 @@
                 <span class="k">return</span> <span class="n">tokens</span></div>
 
 <div class="viewcode-block" id="T5TokenizerLayer.decode"><a class="viewcode-back" href="../../../../model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">RaggedTensor</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;Encode function used for serialization&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Encode function used for serialization&quot;&quot;&quot;</span>
         <span class="n">decoded_tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokenizer</span><span class="o">.</span><span class="n">detokenize</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">decoded_tokens</span></div>
 
 <div class="viewcode-block" id="T5TokenizerLayer.call"><a class="viewcode-back" href="../../../../model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Call&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call&quot;&quot;&quot;</span>
         <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">call_encode</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">results</span></div>
 
@@ -599,7 +600,7 @@
         <span class="k">return</span> <span class="p">{}</span></div>
 
     <span class="k">def</span> <span class="nf">_add_special_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add special tokens&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add special tokens&quot;&quot;&quot;</span>
         <span class="c1">#         batch_size = tokens.shape[0]</span>
         <span class="c1">#         print(batch_size, self.eos_token_id)</span>
         <span class="c1">#         eos_tokens_batch = tf.cast(tf.ones(shape=(batch_size, 1)), self.out_type) * self.eos_token_id</span>
@@ -612,7 +613,7 @@
         <span class="k">return</span> <span class="n">tokens</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
 
 <div class="viewcode-block" id="T5TokenizerLayer.get_model"><a class="viewcode-back" href="../../../../model_doc/t5_tokenizer.html#tf_transformers.models.T5TokenizerLayer.get_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert Keras Layer to Model&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert Keras Layer to Model&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">tf_transformers.core</span> <span class="kn">import</span> <span class="n">LegacyModel</span>
 
         <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span>
@@ -629,7 +630,7 @@
 
 
 <span class="k">def</span> <span class="nf">create_cache_dir</span><span class="p">(</span><span class="n">cache_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Create Cache Directory</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create Cache Directory</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        cache_path : Path</span>
@@ -676,7 +677,7 @@
         <span class="n">dynamic_padding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load HuggingFace tokenizer and pass to TFtext</span>
 
 <span class="sd">        Args:</span>

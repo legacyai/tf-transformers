@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -107,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -166,7 +167,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="create-sentence-embedding-roberta-model-zeroshot-from-scratch">
+  <div class="section" id="create-sentence-embedding-roberta-model-zeroshot-from-scratch">
 <h1>Create Sentence Embedding Roberta Model + Zeroshot from Scratch<a class="headerlink" href="#create-sentence-embedding-roberta-model-zeroshot-from-scratch" title="Permalink to this headline">¶</a></h1>
 <p>This tutorial contains complete code to fine-tune Roberta to build meaningful sentence transformers using Quora Dataset from HuggingFace.
 In addition to training a model, you will learn how to preprocess text into an appropriate format.</p>
@@ -184,13 +185,13 @@ tokenizer from transformers.</p></li>
 <p>If you’re new to working with the Quora dataset, please see <a class="reference external" href="https://huggingface.co/datasets/quora">QUORA</a> for more details.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tf-transformers
 
-<span class="o">!</span>pip install transformers
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>transformers
 
-<span class="o">!</span>pip install wandb
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>wandb
 
-<span class="o">!</span>pip install datasets
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>datasets
 </pre></div>
 </div>
 </div>
@@ -252,27 +253,23 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 Reusing dataset quora (/home/jovyan/.cache/huggingface/datasets/quora/default/0.0.0/36ba4cd42107f051a158016f1bea6ae3f4685c5df843529108a54e42d86c1e04)
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "629843610aa143b5844179e02574e5f6", "version_major": 2, "version_minor": 0}
-</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reusing dataset stsb_multi_mt (/home/jovyan/.cache/huggingface/datasets/stsb_multi_mt/en/1.0.0/a5d260e4b7aa82d1ab7379523a005a366d9b124c76a5a5cf0c4c5365458b0ba9)
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "629843610aa143b5844179e02574e5f6", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reusing dataset stsb_multi_mt (/home/jovyan/.cache/huggingface/datasets/stsb_multi_mt/en/1.0.0/a5d260e4b7aa82d1ab7379523a005a366d9b124c76a5a5cf0c4c5365458b0ba9)
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "b30cba25a78b4b0c9428d646f905f55c", "version_major": 2, "version_minor": 0}
-</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b30cba25a78b4b0c9428d646f905f55c", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="section" id="prepare-training-tfrecords-using-quora">
 <h2>Prepare Training TFRecords using Quora<a class="headerlink" href="#prepare-training-tfrecords-using-quora" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>Download Quora dataset.</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="2">
 <li><p>We will take only those row where <code class="docutils literal notranslate"><span class="pre">is_duplicate=True</span></code>. The model will be trained using <code class="docutils literal notranslate"><span class="pre">in-batch</span></code> negative loss.</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="3">
 <li><p>Example data looks like a pair of sentences
 <code class="docutils literal notranslate"><span class="pre">sentence1</span> <span class="pre">(left</span> <span class="pre">sentence):</span> <span class="pre">What</span> <span class="pre">is</span> <span class="pre">the</span> <span class="pre">best</span> <span class="pre">Android</span> <span class="pre">smartphone?,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">sentence2</span> <span class="pre">(right</span> <span class="pre">sentence):</span> <span class="pre">What</span> <span class="pre">is</span> <span class="pre">the</span> <span class="pre">best</span> <span class="pre">Android</span> <span class="pre">smartphone</span> <span class="pre">ever?</span></code></p></li>
 </ol>
@@ -281,7 +278,7 @@ Reusing dataset quora (/home/jovyan/.cache/huggingface/datasets/quora/default/0.
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_train</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_passage_length</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Function to parse examples which are is_duplicate=1</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function to parse examples which are is_duplicate=1</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (:obj:`dataet`): HF dataset</span>
@@ -335,14 +332,14 @@ INFO:absl:All writer objects closed
 </div>
 <div class="section" id="prepare-validation-tfrecords-using-sts-b">
 <h2>Prepare Validation TFRecords using STS-b<a class="headerlink" href="#prepare-validation-tfrecords-using-sts-b" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Download STS dataset.</p></li>
 <li><p>We will use this dataset to measure sentence embeddings by measuring the correlation</p></li>
 </ol>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_dev</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_passage_length</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Function to parse examples which are is_duplicate=1</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function to parse examples which are is_duplicate=1</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (:obj:`dataet`): HF dataset</span>
@@ -497,7 +494,7 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
         <span class="n">use_dropout</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Simple Sentence Embedding using Keras Layer</span>
 
 <span class="sd">        Args:</span>
@@ -524,7 +521,7 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
         <span class="bp">self</span><span class="o">.</span><span class="n">model_inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">initialize_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         
     <span class="k">def</span> <span class="nf">get_mean_embeddings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_embeddings</span><span class="p">,</span> <span class="n">input_mask</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Mean embeddings</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cls_embeddings</span> <span class="o">=</span> <span class="n">token_embeddings</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="c1"># 0 is CLS (&lt;s&gt;)</span>
@@ -537,7 +534,7 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
         <span class="k">return</span> <span class="n">mean_embeddings</span>
 
     <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Call&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call&quot;&quot;&quot;</span>
         
         <span class="c1"># Extract left and right input pairs</span>
         <span class="n">left_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_left&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;left&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">}</span>
@@ -566,7 +563,7 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
         
 
     <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialize_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get model&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get model&quot;&quot;&quot;</span>
         <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">input</span>
         <span class="c1"># Left and Right inputs</span>
         <span class="n">main_inputs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -596,11 +593,11 @@ To enable them in other operations, rebuild TensorFlow with the appropriate comp
 <h2>Load Model, Optimizer , Trainer<a class="headerlink" href="#load-model-optimizer-trainer" title="Permalink to this headline">¶</a></h2>
 <p>Our Trainer expects <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> and <code class="docutils literal notranslate"><span class="pre">loss</span></code> to be a function.</p>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>We will use <code class="docutils literal notranslate"><span class="pre">Roberta</span></code> as the base model and pass it to <code class="docutils literal notranslate"><span class="pre">Sentence_Embedding_Model</span></code>, layer we built</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="2">
 <li><p>We will use <code class="docutils literal notranslate"><span class="pre">in-batch</span></code> loss as the loss function, where every diagonal entry in the output is positive
 and rest is negative</p></li>
 </ol>
@@ -610,7 +607,7 @@ and rest is negative</p></li>
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Model</span>
 <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">model_fn</span><span class="p">():</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">RobertaModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
         <span class="n">sentence_transformers_model</span> <span class="o">=</span> <span class="n">Sentence_Embedding_Model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -620,7 +617,7 @@ and rest is negative</p></li>
 
 <span class="c1"># Load Optimizer</span>
 <span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
     <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">examples</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
     <span class="n">num_train_steps</span> <span class="o">=</span> <span class="n">steps_per_epoch</span> <span class="o">*</span> <span class="n">epochs</span>
     <span class="n">warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">num_train_steps</span><span class="p">)</span>
@@ -633,7 +630,7 @@ and rest is negative</p></li>
 
 <span class="c1"># Load trainer</span>
 <span class="k">def</span> <span class="nf">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
     <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="n">num_gpus</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="n">tpu_address</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">trainer</span>
 
@@ -673,15 +670,15 @@ and rest is negative</p></li>
 <div class="section" id="zero-shot-on-sts-before-training">
 <h2>Zero-Shot on STS before Training<a class="headerlink" href="#zero-shot-on-sts-before-training" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>Lets evaluate how good <code class="docutils literal notranslate"><span class="pre">Roberta</span></code> is to capture sentence embeddings before <code class="docutils literal notranslate"><span class="pre">fine-tuning</span></code> with Quora.</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="2">
 <li><p>This gives us an indication whether the model is learning something or not on downstream fine-tuning.</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="3">
 <li><p>We use <code class="docutils literal notranslate"><span class="pre">CLS_OUTPUT</span></code>, pooler output of <code class="docutils literal notranslate"><span class="pre">Roberta</span></code> model as sentence embedding and evaluate using
 <code class="docutils literal notranslate"><span class="pre">pearson</span></code> and <code class="docutils literal notranslate"><span class="pre">spearman</span></code> correlation.</p></li>
 </ol>
@@ -921,7 +918,7 @@ Dot-Product-Similarity:	Pearson: -0.0079	Spearman: -0.0050
 </div>
 <div class="section" id="set-hyperparameters-and-configs">
 <h2>Set Hyperparameters and Configs<a class="headerlink" href="#set-hyperparameters-and-configs" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Set necessay hyperparameters.</p></li>
 <li><p>Prepare <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">validation</span> <span class="pre">dataset</span></code>.</p></li>
 <li><p>Load <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
@@ -961,16 +958,16 @@ Dot-Product-Similarity:	Pearson: -0.0079	Spearman: -0.0050
 <div class="section" id="train">
 <h2>Train :-)<a class="headerlink" href="#train" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>Loss is coming down in epoch 1 itself.</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="2">
 <li><p>Zershot evaluation after <code class="docutils literal notranslate"><span class="pre">epoch</span> <span class="pre">1</span></code> shows that, <code class="docutils literal notranslate"><span class="pre">pearson</span></code> and <code class="docutils literal notranslate"><span class="pre">spearman</span></code> correlation increases to
 <code class="docutils literal notranslate"><span class="pre">0.80</span></code>, which is significant improvemnet over <code class="docutils literal notranslate"><span class="pre">Roberta</span></code> base model, where we got <code class="docutils literal notranslate"><span class="pre">0.43</span></code>.</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="3">
 <li><p>Without training on <code class="docutils literal notranslate"><span class="pre">STS-B</span></code>, we got a good evaluation score on <code class="docutils literal notranslate"><span class="pre">STS-B</span> <span class="pre">dev</span></code> using Zeroshot.</p></li>
 </ol>
 </li>
@@ -1194,7 +1191,7 @@ INFO:absl:Callback score {&#39;pearson_cosine_cls&#39;: 0.8118276970012877, &#39
 <div class="section" id="load-trained-model-for-testing-and-save-it-as-serialzed-model">
 <h2>Load Trained Model for Testing and Save it as serialzed model<a class="headerlink" href="#load-trained-model-for-testing-and-save-it-as-serialzed-model" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>To get good sentence embedding , we need only <code class="docutils literal notranslate"><span class="pre">Roberta</span></code> model, which has been used as the <code class="docutils literal notranslate"><span class="pre">base</span></code> for
 <code class="docutils literal notranslate"><span class="pre">Sentence_Embedding_Model</span></code> .</p></li>
 </ol>
@@ -1234,11 +1231,11 @@ INFO:absl:Callback score {&#39;pearson_cosine_cls&#39;: 0.8118276970012877, &#39
 <div class="section" id="model-serialization-production">
 <h2>Model Serialization (Production)<a class="headerlink" href="#model-serialization-production" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>Lets see how we can use this model to extract sentence embeddings</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="2">
 <li><p>Print top K similar sentences from our embeddings from Quora Dataset</p></li>
 </ol>
 </li>

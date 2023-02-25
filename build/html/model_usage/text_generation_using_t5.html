@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -160,7 +161,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="text-generation-using-t5">
+  <div class="section" id="text-generation-using-t5">
 <h1>Text Generation using T5<a class="headerlink" href="#text-generation-using-t5" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p>This tutorial is intended to provide, a familiarity in how to use <code class="docutils literal notranslate"><span class="pre">T5</span></code> for text-generation tasks.</p></li>
@@ -168,9 +169,9 @@
 </ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tf-transformers
 
-<span class="o">!</span>pip install transformers
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>transformers
 </pre></div>
 </div>
 </div>
@@ -200,7 +201,7 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 <div class="section" id="load-t5-model">
 <h2>Load T5 Model<a class="headerlink" href="#load-t5-model" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>Note <code class="docutils literal notranslate"><span class="pre">use_auto_regressive=True</span></code>, argument. This is required for any models to enable text-generation.</p></li>
 </ol>
 </li>
@@ -215,26 +216,14 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 </div>
 </div>
 <div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "2bf18e0b91af4b5984a0bc1412960cf2", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "f34463285e0545ea881fae01b53ed1f3", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "aa40618dc2194e4f8ea78d368527ef01", "version_major": 2, "version_minor": 0}
-</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Saving t5-small tokenizer to /var/folders/vq/4fxns8l55gq8_msgygbyb51h0000gn/T/tftransformers_tokenizer_cache/t5-small
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "2bf18e0b91af4b5984a0bc1412960cf2", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "f34463285e0545ea881fae01b53ed1f3", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "aa40618dc2194e4f8ea78d368527ef01", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Saving t5-small tokenizer to /var/folders/vq/4fxns8l55gq8_msgygbyb51h0000gn/T/tftransformers_tokenizer_cache/t5-small
 INFO:absl:Loading t5-small tokenizer to /var/folders/vq/4fxns8l55gq8_msgygbyb51h0000gn/T/tftransformers_tokenizer_cache/t5-small/spiece.model
 </pre></div>
 </div>
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Metal device set to: Apple M1
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "409e6c62a0d84661a64547ba48f5a844", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "1c71328a883d44289bc3a541f751f644", "version_major": 2, "version_minor": 0}
-</script><script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "d03a8ca4ffbe4d49b698337ea9f6942e", "version_major": 2, "version_minor": 0}
-</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Inconsistent references when loading the checkpoint into this object graph. Either the Trackable object references in the Python program have changed in an incompatible way, or the checkpoint was generated in an incompatible program.
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "409e6c62a0d84661a64547ba48f5a844", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "1c71328a883d44289bc3a541f751f644", "version_major": 2, "version_minor": 0}</script><script type="application/vnd.jupyter.widget-view+json">{"model_id": "d03a8ca4ffbe4d49b698337ea9f6942e", "version_major": 2, "version_minor": 0}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:tensorflow:Inconsistent references when loading the checkpoint into this object graph. Either the Trackable object references in the Python program have changed in an incompatible way, or the checkpoint was generated in an incompatible program.
 
 Two checkpoint references resolved to different objects (&lt;tf_transformers.models.encoder_decoder.encoder_decoder.EncoderDecoder object at 0x17b752e20&gt; and &lt;keras.engine.input_layer.InputLayer object at 0x17b752340&gt;).
 </pre></div>
@@ -416,11 +405,11 @@ INFO:absl:Successful ✅: Loaded model from tftransformers/t5-small
 <h2>Load Advanced Model and Generate text<a class="headerlink" href="#load-advanced-model-and-generate-text" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>How nice is it? All done by model, no overhead of anything (tokenization, decoding, generating)</p></li>
-<li><ol class="simple">
+<li><ol class="arabic simple">
 <li><p>TextDecoderSerializable - very advances serializable decoder written in pure tensorflow ops</p></li>
 </ol>
 </li>
-<li><ol class="simple">
+<li><ol class="arabic simple" start="2">
 <li><p>TextGenerationChainer -  very simple <code class="docutils literal notranslate"><span class="pre">tf.keras.layers.Layer</span></code> wrapper.</p></li>
 </ol>
 </li>

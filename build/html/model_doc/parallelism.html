@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -163,12 +164,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<div class="tex2jax_ignore mathjax_ignore section" id="model-parallelism">
+<div class="section" id="model-parallelism">
 <h1>Model Parallelism<a class="headerlink" href="#model-parallelism" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="parallelism-overview">
 <h2>Parallelism overview<a class="headerlink" href="#parallelism-overview" title="Permalink to this headline">¶</a></h2>
 <p>In the modern machine learning the various approaches to parallelism are used to:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>fit very large models onto limited hardware - e.g. t5-11b is 45GB in just model params</p></li>
 <li><p>significantly speed up training - finish training that would take a year in hours</p></li>
 </ol>
@@ -178,7 +179,7 @@ limitations under the License.
 <div class="section" id="concepts">
 <h2>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h2>
 <p>The following is the brief description of the main concepts that will be described later in depth in this document.</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>DataParallel (DP) - the same setup is replicated multiple times, and each being fed a slice of the data. The processing is done in parallel and all setups are synchronized at the end of each training step.</p></li>
 <li><p>TensorParallel (TP) - each tensor is split up into multiple chunks, so instead of having the whole tensor reside on a single gpu, each shard of the tensor resides on its designated gpu. During processing each shard gets processed separately and in parallel on different GPUs and the results are synced at the end of the step. This is what one may call horizontal parallelism, as the splitting happens on horizontal level.</p></li>
 <li><p>PipelineParallel (PP) - the model is split up vertically (layer-level) across multiple GPUs, so that only one or several layers of the model are places on a single gpu. Each gpu processes in parallel different stages of the pipeline and working on a small chunk of the batch.</p></li>
@@ -237,7 +238,7 @@ limitations under the License.
 <p>As soon as the calculation is done, the data that is no longer needed gets dropped - it’s only used during the calculation. The reconstruction is done efficiently via a pre-fetch.</p>
 <p>And the whole process is repeated for layer Lb, then Lc forward-wise, and then backward Lc -&gt; Lb -&gt; La.</p>
 <p>To me this sounds like an efficient group backpacking weight distribution strategy:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>person A carries the tent</p></li>
 <li><p>person B carries the stove</p></li>
 <li><p>person C carries the axe</p></li>
@@ -364,7 +365,7 @@ by <a class="reference external" href="https://github.com/anton-l">&#64;anton-l<
 </div>
 <div class="section" id="dp-pp-tp-zero">
 <h2>DP+PP+TP+ZeRO<a class="headerlink" href="#dp-pp-tp-zero" title="Permalink to this headline">¶</a></h2>
-<p>One of the main features of DeepSpeed is ZeRO, which is a super-scalable extension of DP. It has already been discussed in <a class="reference external" href="#zero-data-parallel">ZeRO Data Parallel</a>. Normally it’s a standalone feature that doesn’t require PP or TP. But it can be combined with PP and TP.</p>
+<p>One of the main features of DeepSpeed is ZeRO, which is a super-scalable extension of DP. It has already been discussed in <span class="xref myst">ZeRO Data Parallel</span>. Normally it’s a standalone feature that doesn’t require PP or TP. But it can be combined with PP and TP.</p>
 <p>When ZeRO-DP is combined with PP (and optinally TP) it typically enables only ZeRO stage 1 (optimizer sharding).</p>
 <p>While it’s theoretically possible to use ZeRO stage 2 (gradient sharding) with Pipeline Parallelism, it will have bad performance impacts. There would need to be an additional reduce-scatter collective for every micro-batch to aggregate the gradients before sharding, which adds a potentially significant communication overhead. By nature of Pipeline Parallelism, small micro-batches are used and instead the focus is on trying to balance arithmetic intensity (micro-batch size) with minimizing the Pipeline bubble (number of micro-batches). Therefore those communication costs are going to hurt.</p>
 <p>In addition, There are already fewer layers than normal due to PP and so the memory savings won’t be huge. PP already reduces gradient size by <code class="docutils literal notranslate"><span class="pre">1/PP</span></code>, and so gradient sharding savings on top of that are less significant than pure DP.</p>
@@ -381,7 +382,7 @@ by <a class="reference external" href="https://github.com/anton-l">&#64;anton-l<
 <p><a class="reference external" href="https://github.com/flexflow/FlexFlow">FlexFlow</a> also solves the parallelization problem in a slightly different approach.</p>
 <p>Paper: <a class="reference external" href="https://arxiv.org/abs/1807.05358">“Beyond Data and Model Parallelism for Deep Neural Networks” by Zhihao Jia, Matei Zaharia, Alex Aiken</a></p>
 <p>It performs a sort of 4D Parallelism over Sample-Operator-Attribute-Parameter.</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Sample = Data Parallelism</p></li>
 <li><p>Operator = part vertical Layer Parallelism, but it can split the layer too - more refined level</p></li>
 <li><p>Attribute = horizontal Model Parallelism (Megatron-LM style)</p></li>
@@ -400,12 +401,12 @@ by <a class="reference external" href="https://github.com/anton-l">&#64;anton-l<
 <p><strong>⇨ Single GPU</strong></p>
 <ul class="simple">
 <li><p>Model fits onto a single GPU:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Normal use</p></li>
 </ol>
 </li>
 <li><p>Model doesn’t fit onto a single GPU:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>ZeRO + Offload CPU and optionally NVMe</p></li>
 </ol>
 </li>
@@ -413,13 +414,13 @@ by <a class="reference external" href="https://github.com/anton-l">&#64;anton-l<
 <p><strong>⇨ Single Node / Multi-GPU</strong></p>
 <ul>
 <li><p>Model fits onto a single GPU:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>DDP - Distributed DP</p></li>
 <li><p>ZeRO - may or may not be faster depending on the situation and configuration used</p></li>
 </ol>
 </li>
 <li><p>Model doesn’t fit onto a single GPU:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>PP</p></li>
 <li><p>ZeRO</p></li>
 <li><p>TP</p></li>
@@ -430,13 +431,13 @@ by <a class="reference external" href="https://github.com/anton-l">&#64;anton-l<
 <p><strong>⇨ Multi-Node / Multi-GPU</strong></p>
 <ul class="simple">
 <li><p>When you have fast inter-node connectivity:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>ZeRO - as it requires close to no modifications to the model</p></li>
 <li><p>PP+TP+DP - less communications, but requires massive changes to the model</p></li>
 </ol>
 </li>
 <li><p>when you have slow inter-node connectivity and still low on GPU memory:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>DP+PP+TP+ZeRO-1</p></li>
 </ol>
 </li>

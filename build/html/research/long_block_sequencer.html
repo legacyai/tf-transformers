@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -174,7 +175,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<div class="tex2jax_ignore mathjax_ignore section" id="long-block-sequencer">
+<div class="section" id="long-block-sequencer">
 <h1>Long Block Sequencer<a class="headerlink" href="#long-block-sequencer" title="Permalink to this headline">¶</a></h1>
 <p>Long Block Sequencer is a very simple yet an efficient way to make use of longer sequence in Attention based Transformer
 models. The main reason, why Transformers are not able to scale to longer sequences is it because of the computational
@@ -188,7 +189,7 @@ into equal chunks. Lets say <code class="docutils literal notranslate"><span cla
 <img alt="long-block-sequencer" src="../_images/long_block_sequencer.gif" /></p>
 <div class="section" id="advantages">
 <h2>Advantages<a class="headerlink" href="#advantages" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>This approach allows us to train models very easily and with no Out of Memory in most cases.</p></li>
 <li><p>After training we can use same old architecture for inference for no or minimal changes.</p></li>
 <li><p>Any existing pre-trained models can be used as base model for this approach, so its a very generelizable approach.
@@ -215,47 +216,47 @@ able to have <code class="docutils literal notranslate"><span class="pre">Rogue-
 <h2>Rogue SCORE<a class="headerlink" href="#rogue-score" title="Permalink to this headline">¶</a></h2>
 <table class="colwidths-auto docutils align-default">
 <thead>
-<tr class="row-odd"><th class="text-align:right head"><p></p></th>
-<th class="text-align:right head"><p>Model</p></th>
-<th class="text-align:right head"><p>seq_length</p></th>
-<th class="text-align:right head"><p>Params</p></th>
-<th class="text-align:right head"><p>R-2</p></th>
-<th class="text-align:right head"><p>R-1</p></th>
-<th class="text-align:right head"><p>R-l</p></th>
+<tr class="row-odd"><th class="text-right head"><p></p></th>
+<th class="text-right head"><p>Model</p></th>
+<th class="text-right head"><p>seq_length</p></th>
+<th class="text-right head"><p>Params</p></th>
+<th class="text-right head"><p>R-2</p></th>
+<th class="text-right head"><p>R-1</p></th>
+<th class="text-right head"><p>R-l</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td class="text-align:right"><p>0</p></td>
-<td class="text-align:right"><p>t5-small</p></td>
-<td class="text-align:right"><p>512</p></td>
-<td class="text-align:right"><p>60M</p></td>
-<td class="text-align:right"><p>0.07</p></td>
-<td class="text-align:right"><p>N/A</p></td>
-<td class="text-align:right"><p>N/A</p></td>
+<tr class="row-even"><td class="text-right"><p>0</p></td>
+<td class="text-right"><p>t5-small</p></td>
+<td class="text-right"><p>512</p></td>
+<td class="text-right"><p>60M</p></td>
+<td class="text-right"><p>0.07</p></td>
+<td class="text-right"><p>N/A</p></td>
+<td class="text-right"><p>N/A</p></td>
 </tr>
-<tr class="row-odd"><td class="text-align:right"><p>0</p></td>
-<td class="text-align:right"><p>LB-t5-small</p></td>
-<td class="text-align:right"><p>4096</p></td>
-<td class="text-align:right"><p>60M</p></td>
-<td class="text-align:right"><p>17.41</p></td>
-<td class="text-align:right"><p>41.89</p></td>
-<td class="text-align:right"><p>26.44</p></td>
+<tr class="row-odd"><td class="text-right"><p>0</p></td>
+<td class="text-right"><p>LB-t5-small</p></td>
+<td class="text-right"><p>4096</p></td>
+<td class="text-right"><p>60M</p></td>
+<td class="text-right"><p>17.41</p></td>
+<td class="text-right"><p>41.89</p></td>
+<td class="text-right"><p>26.44</p></td>
 </tr>
-<tr class="row-even"><td class="text-align:right"><p>0</p></td>
-<td class="text-align:right"><p>Pegasus-base</p></td>
-<td class="text-align:right"><p>1024</p></td>
-<td class="text-align:right"><p>120M</p></td>
-<td class="text-align:right"><p>15.15</p></td>
-<td class="text-align:right"><p>39.98</p></td>
-<td class="text-align:right"><p>25.23</p></td>
+<tr class="row-even"><td class="text-right"><p>0</p></td>
+<td class="text-right"><p>Pegasus-base</p></td>
+<td class="text-right"><p>1024</p></td>
+<td class="text-right"><p>120M</p></td>
+<td class="text-right"><p>15.15</p></td>
+<td class="text-right"><p>39.98</p></td>
+<td class="text-right"><p>25.23</p></td>
 </tr>
-<tr class="row-odd"><td class="text-align:right"><p>0</p></td>
-<td class="text-align:right"><p>BigBird-Roberta-B</p></td>
-<td class="text-align:right"><p>4096</p></td>
-<td class="text-align:right"><p>120M</p></td>
-<td class="text-align:right"><p>19.32</p></td>
-<td class="text-align:right"><p>43.70</p></td>
-<td class="text-align:right"><p>39.99</p></td>
+<tr class="row-odd"><td class="text-right"><p>0</p></td>
+<td class="text-right"><p>BigBird-Roberta-B</p></td>
+<td class="text-right"><p>4096</p></td>
+<td class="text-right"><p>120M</p></td>
+<td class="text-right"><p>19.32</p></td>
+<td class="text-right"><p>43.70</p></td>
+<td class="text-right"><p>39.99</p></td>
 </tr>
 </tbody>
 </table>

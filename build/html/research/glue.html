@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -187,7 +188,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<div class="tex2jax_ignore mathjax_ignore section" id="glue-model-evaluation">
+<div class="section" id="glue-model-evaluation">
 <h1>Glue Model Evaluation<a class="headerlink" href="#glue-model-evaluation" title="Permalink to this headline">¶</a></h1>
 <p>GLUE, the General Language Understanding Evaluation benchmark (https://gluebenchmark.com/) is a collection of resources for training, evaluating, and analyzing natural language understanding systems.
 The leaderboard for the GLUE benchmark can be found <a class="reference external" href="https://gluebenchmark.com/">at this address</a>. It comprises the following tasks:</p>
@@ -272,29 +273,29 @@ Output folder looks like this <code class="docutils literal notranslate"><span c
 <h2>GLUE SCORE calculated<a class="headerlink" href="#glue-score-calculated" title="Permalink to this headline">¶</a></h2>
 <table class="colwidths-auto docutils align-default">
 <thead>
-<tr class="row-odd"><th class="text-align:right head"><p></p></th>
-<th class="text-align:right head"><p>cola</p></th>
-<th class="text-align:right head"><p>mnli</p></th>
-<th class="text-align:right head"><p>mrpc</p></th>
-<th class="text-align:right head"><p>qnli</p></th>
-<th class="text-align:right head"><p>qqp</p></th>
-<th class="text-align:right head"><p>rte</p></th>
-<th class="text-align:right head"><p>sst2</p></th>
-<th class="text-align:right head"><p>stsb</p></th>
-<th class="text-align:right head"><p>glue_score</p></th>
+<tr class="row-odd"><th class="text-right head"><p></p></th>
+<th class="text-right head"><p>cola</p></th>
+<th class="text-right head"><p>mnli</p></th>
+<th class="text-right head"><p>mrpc</p></th>
+<th class="text-right head"><p>qnli</p></th>
+<th class="text-right head"><p>qqp</p></th>
+<th class="text-right head"><p>rte</p></th>
+<th class="text-right head"><p>sst2</p></th>
+<th class="text-right head"><p>stsb</p></th>
+<th class="text-right head"><p>glue_score</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td class="text-align:right"><p>0</p></td>
-<td class="text-align:right"><p>0.574227</p></td>
-<td class="text-align:right"><p>0.8481</p></td>
-<td class="text-align:right"><p>0.890</p></td>
-<td class="text-align:right"><p>0.916</p></td>
-<td class="text-align:right"><p>0.889</p></td>
-<td class="text-align:right"><p>0.725</p></td>
-<td class="text-align:right"><p>0.919</p></td>
-<td class="text-align:right"><p>0.901</p></td>
-<td class="text-align:right"><p>0.833384</p></td>
+<tr class="row-even"><td class="text-right"><p>0</p></td>
+<td class="text-right"><p>0.574227</p></td>
+<td class="text-right"><p>0.8481</p></td>
+<td class="text-right"><p>0.890</p></td>
+<td class="text-right"><p>0.916</p></td>
+<td class="text-right"><p>0.889</p></td>
+<td class="text-right"><p>0.725</p></td>
+<td class="text-right"><p>0.919</p></td>
+<td class="text-right"><p>0.901</p></td>
+<td class="text-right"><p>0.833384</p></td>
 </tr>
 </tbody>
 </table>
@@ -303,150 +304,150 @@ Output folder looks like this <code class="docutils literal notranslate"><span c
 <h2>GLUE SCORE calculated<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <table class="colwidths-auto docutils align-default">
 <thead>
-<tr class="row-odd"><th class="text-align:left head"><p></p></th>
-<th class="text-align:right head"><p>cola</p></th>
-<th class="text-align:right head"><p>mnli</p></th>
-<th class="text-align:right head"><p>mrpc</p></th>
-<th class="text-align:right head"><p>qnli</p></th>
-<th class="text-align:right head"><p>qqp</p></th>
-<th class="text-align:right head"><p>rte</p></th>
-<th class="text-align:right head"><p>sst2</p></th>
-<th class="text-align:right head"><p>stsb</p></th>
-<th class="text-align:right head"><p>glue_score</p></th>
+<tr class="row-odd"><th class="text-left head"><p></p></th>
+<th class="text-right head"><p>cola</p></th>
+<th class="text-right head"><p>mnli</p></th>
+<th class="text-right head"><p>mrpc</p></th>
+<th class="text-right head"><p>qnli</p></th>
+<th class="text-right head"><p>qqp</p></th>
+<th class="text-right head"><p>rte</p></th>
+<th class="text-right head"><p>sst2</p></th>
+<th class="text-right head"><p>stsb</p></th>
+<th class="text-right head"><p>glue_score</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td class="text-align:left"><p>layer_1</p></td>
-<td class="text-align:right"><p>0</p></td>
-<td class="text-align:right"><p>0.581514</p></td>
-<td class="text-align:right"><p>0.748025</p></td>
-<td class="text-align:right"><p>0.612484</p></td>
-<td class="text-align:right"><p>0.730661</p></td>
-<td class="text-align:right"><p>0.552347</p></td>
-<td class="text-align:right"><p>0.807339</p></td>
-<td class="text-align:right"><p>0.0593384</p></td>
-<td class="text-align:right"><p>0.511464</p></td>
+<tr class="row-even"><td class="text-left"><p>layer_1</p></td>
+<td class="text-right"><p>0</p></td>
+<td class="text-right"><p>0.581514</p></td>
+<td class="text-right"><p>0.748025</p></td>
+<td class="text-right"><p>0.612484</p></td>
+<td class="text-right"><p>0.730661</p></td>
+<td class="text-right"><p>0.552347</p></td>
+<td class="text-right"><p>0.807339</p></td>
+<td class="text-right"><p>0.0593384</p></td>
+<td class="text-right"><p>0.511464</p></td>
 </tr>
-<tr class="row-odd"><td class="text-align:left"><p>layer_2</p></td>
-<td class="text-align:right"><p>0.0181483</p></td>
-<td class="text-align:right"><p>0.737464</p></td>
-<td class="text-align:right"><p>0.777894</p></td>
-<td class="text-align:right"><p>0.822259</p></td>
-<td class="text-align:right"><p>0.834173</p></td>
-<td class="text-align:right"><p>0.570397</p></td>
-<td class="text-align:right"><p>0.869266</p></td>
-<td class="text-align:right"><p>0.8295</p></td>
-<td class="text-align:right"><p>0.682388</p></td>
+<tr class="row-odd"><td class="text-left"><p>layer_2</p></td>
+<td class="text-right"><p>0.0181483</p></td>
+<td class="text-right"><p>0.737464</p></td>
+<td class="text-right"><p>0.777894</p></td>
+<td class="text-right"><p>0.822259</p></td>
+<td class="text-right"><p>0.834173</p></td>
+<td class="text-right"><p>0.570397</p></td>
+<td class="text-right"><p>0.869266</p></td>
+<td class="text-right"><p>0.8295</p></td>
+<td class="text-right"><p>0.682388</p></td>
 </tr>
-<tr class="row-even"><td class="text-align:left"><p>layer_3</p></td>
-<td class="text-align:right"><p>0.253889</p></td>
-<td class="text-align:right"><p>0.78251</p></td>
-<td class="text-align:right"><p>0.809552</p></td>
-<td class="text-align:right"><p>0.859418</p></td>
-<td class="text-align:right"><p>0.863381</p></td>
-<td class="text-align:right"><p>0.588448</p></td>
-<td class="text-align:right"><p>0.881881</p></td>
-<td class="text-align:right"><p>0.862159</p></td>
-<td class="text-align:right"><p>0.737655</p></td>
+<tr class="row-even"><td class="text-left"><p>layer_3</p></td>
+<td class="text-right"><p>0.253889</p></td>
+<td class="text-right"><p>0.78251</p></td>
+<td class="text-right"><p>0.809552</p></td>
+<td class="text-right"><p>0.859418</p></td>
+<td class="text-right"><p>0.863381</p></td>
+<td class="text-right"><p>0.588448</p></td>
+<td class="text-right"><p>0.881881</p></td>
+<td class="text-right"><p>0.862159</p></td>
+<td class="text-right"><p>0.737655</p></td>
 </tr>
-<tr class="row-odd"><td class="text-align:left"><p>layer_4</p></td>
-<td class="text-align:right"><p>0.378279</p></td>
-<td class="text-align:right"><p>0.810607</p></td>
-<td class="text-align:right"><p>0.845078</p></td>
-<td class="text-align:right"><p>0.883397</p></td>
-<td class="text-align:right"><p>0.874679</p></td>
-<td class="text-align:right"><p>0.631769</p></td>
-<td class="text-align:right"><p>0.905963</p></td>
-<td class="text-align:right"><p>0.877547</p></td>
-<td class="text-align:right"><p>0.775915</p></td>
+<tr class="row-odd"><td class="text-left"><p>layer_4</p></td>
+<td class="text-right"><p>0.378279</p></td>
+<td class="text-right"><p>0.810607</p></td>
+<td class="text-right"><p>0.845078</p></td>
+<td class="text-right"><p>0.883397</p></td>
+<td class="text-right"><p>0.874679</p></td>
+<td class="text-right"><p>0.631769</p></td>
+<td class="text-right"><p>0.905963</p></td>
+<td class="text-right"><p>0.877547</p></td>
+<td class="text-right"><p>0.775915</p></td>
 </tr>
-<tr class="row-even"><td class="text-align:left"><p>layer_5</p></td>
-<td class="text-align:right"><p>0.478266</p></td>
-<td class="text-align:right"><p>0.82725</p></td>
-<td class="text-align:right"><p>0.867434</p></td>
-<td class="text-align:right"><p>0.896394</p></td>
-<td class="text-align:right"><p>0.882526</p></td>
-<td class="text-align:right"><p>0.642599</p></td>
-<td class="text-align:right"><p>0.916284</p></td>
-<td class="text-align:right"><p>0.889308</p></td>
-<td class="text-align:right"><p>0.800008</p></td>
+<tr class="row-even"><td class="text-left"><p>layer_5</p></td>
+<td class="text-right"><p>0.478266</p></td>
+<td class="text-right"><p>0.82725</p></td>
+<td class="text-right"><p>0.867434</p></td>
+<td class="text-right"><p>0.896394</p></td>
+<td class="text-right"><p>0.882526</p></td>
+<td class="text-right"><p>0.642599</p></td>
+<td class="text-right"><p>0.916284</p></td>
+<td class="text-right"><p>0.889308</p></td>
+<td class="text-right"><p>0.800008</p></td>
 </tr>
-<tr class="row-odd"><td class="text-align:left"><p>layer_6</p></td>
-<td class="text-align:right"><p>0.518539</p></td>
-<td class="text-align:right"><p>0.835905</p></td>
-<td class="text-align:right"><p>0.879525</p></td>
-<td class="text-align:right"><p>0.909024</p></td>
-<td class="text-align:right"><p>0.886847</p></td>
-<td class="text-align:right"><p>0.67509</p></td>
-<td class="text-align:right"><p>0.918578</p></td>
-<td class="text-align:right"><p>0.894333</p></td>
-<td class="text-align:right"><p>0.81473</p></td>
+<tr class="row-odd"><td class="text-left"><p>layer_6</p></td>
+<td class="text-right"><p>0.518539</p></td>
+<td class="text-right"><p>0.835905</p></td>
+<td class="text-right"><p>0.879525</p></td>
+<td class="text-right"><p>0.909024</p></td>
+<td class="text-right"><p>0.886847</p></td>
+<td class="text-right"><p>0.67509</p></td>
+<td class="text-right"><p>0.918578</p></td>
+<td class="text-right"><p>0.894333</p></td>
+<td class="text-right"><p>0.81473</p></td>
 </tr>
-<tr class="row-even"><td class="text-align:left"><p>layer_7</p></td>
-<td class="text-align:right"><p>0.561713</p></td>
-<td class="text-align:right"><p>0.842418</p></td>
-<td class="text-align:right"><p>0.890978</p></td>
-<td class="text-align:right"><p>0.913051</p></td>
-<td class="text-align:right"><p>0.888815</p></td>
-<td class="text-align:right"><p>0.700361</p></td>
-<td class="text-align:right"><p>0.918578</p></td>
-<td class="text-align:right"><p>0.898398</p></td>
-<td class="text-align:right"><p>0.826789</p></td>
+<tr class="row-even"><td class="text-left"><p>layer_7</p></td>
+<td class="text-right"><p>0.561713</p></td>
+<td class="text-right"><p>0.842418</p></td>
+<td class="text-right"><p>0.890978</p></td>
+<td class="text-right"><p>0.913051</p></td>
+<td class="text-right"><p>0.888815</p></td>
+<td class="text-right"><p>0.700361</p></td>
+<td class="text-right"><p>0.918578</p></td>
+<td class="text-right"><p>0.898398</p></td>
+<td class="text-right"><p>0.826789</p></td>
 </tr>
-<tr class="row-odd"><td class="text-align:left"><p>layer_8</p></td>
-<td class="text-align:right"><p>0.573798</p></td>
-<td class="text-align:right"><p>0.845268</p></td>
-<td class="text-align:right"><p>0.892842</p></td>
-<td class="text-align:right"><p>0.915431</p></td>
-<td class="text-align:right"><p>0.889218</p></td>
-<td class="text-align:right"><p>0.689531</p></td>
-<td class="text-align:right"><p>0.917431</p></td>
-<td class="text-align:right"><p>0.898625</p></td>
-<td class="text-align:right"><p>0.827768</p></td>
+<tr class="row-odd"><td class="text-left"><p>layer_8</p></td>
+<td class="text-right"><p>0.573798</p></td>
+<td class="text-right"><p>0.845268</p></td>
+<td class="text-right"><p>0.892842</p></td>
+<td class="text-right"><p>0.915431</p></td>
+<td class="text-right"><p>0.889218</p></td>
+<td class="text-right"><p>0.689531</p></td>
+<td class="text-right"><p>0.917431</p></td>
+<td class="text-right"><p>0.898625</p></td>
+<td class="text-right"><p>0.827768</p></td>
 </tr>
-<tr class="row-even"><td class="text-align:left"><p>layer_9</p></td>
-<td class="text-align:right"><p>0.571642</p></td>
-<td class="text-align:right"><p>0.846082</p></td>
-<td class="text-align:right"><p>0.897044</p></td>
-<td class="text-align:right"><p>0.914882</p></td>
-<td class="text-align:right"><p>0.889671</p></td>
-<td class="text-align:right"><p>0.700361</p></td>
-<td class="text-align:right"><p>0.918578</p></td>
-<td class="text-align:right"><p>0.901202</p></td>
-<td class="text-align:right"><p>0.829933</p></td>
+<tr class="row-even"><td class="text-left"><p>layer_9</p></td>
+<td class="text-right"><p>0.571642</p></td>
+<td class="text-right"><p>0.846082</p></td>
+<td class="text-right"><p>0.897044</p></td>
+<td class="text-right"><p>0.914882</p></td>
+<td class="text-right"><p>0.889671</p></td>
+<td class="text-right"><p>0.700361</p></td>
+<td class="text-right"><p>0.918578</p></td>
+<td class="text-right"><p>0.901202</p></td>
+<td class="text-right"><p>0.829933</p></td>
 </tr>
-<tr class="row-odd"><td class="text-align:left"><p>layer_10</p></td>
-<td class="text-align:right"><p>0.566903</p></td>
-<td class="text-align:right"><p>0.847608</p></td>
-<td class="text-align:right"><p>0.895647</p></td>
-<td class="text-align:right"><p>0.915614</p></td>
-<td class="text-align:right"><p>0.889495</p></td>
-<td class="text-align:right"><p>0.714801</p></td>
-<td class="text-align:right"><p>0.919725</p></td>
-<td class="text-align:right"><p>0.902506</p></td>
-<td class="text-align:right"><p>0.831537</p></td>
+<tr class="row-odd"><td class="text-left"><p>layer_10</p></td>
+<td class="text-right"><p>0.566903</p></td>
+<td class="text-right"><p>0.847608</p></td>
+<td class="text-right"><p>0.895647</p></td>
+<td class="text-right"><p>0.915614</p></td>
+<td class="text-right"><p>0.889495</p></td>
+<td class="text-right"><p>0.714801</p></td>
+<td class="text-right"><p>0.919725</p></td>
+<td class="text-right"><p>0.902506</p></td>
+<td class="text-right"><p>0.831537</p></td>
 </tr>
-<tr class="row-even"><td class="text-align:left"><p>layer_11</p></td>
-<td class="text-align:right"><p>0.574227</p></td>
-<td class="text-align:right"><p>0.848117</p></td>
-<td class="text-align:right"><p>0.890978</p></td>
-<td class="text-align:right"><p>0.916712</p></td>
-<td class="text-align:right"><p>0.889708</p></td>
-<td class="text-align:right"><p>0.725632</p></td>
-<td class="text-align:right"><p>0.919725</p></td>
-<td class="text-align:right"><p>0.901971</p></td>
-<td class="text-align:right"><p>0.833384</p></td>
+<tr class="row-even"><td class="text-left"><p>layer_11</p></td>
+<td class="text-right"><p>0.574227</p></td>
+<td class="text-right"><p>0.848117</p></td>
+<td class="text-right"><p>0.890978</p></td>
+<td class="text-right"><p>0.916712</p></td>
+<td class="text-right"><p>0.889708</p></td>
+<td class="text-right"><p>0.725632</p></td>
+<td class="text-right"><p>0.919725</p></td>
+<td class="text-right"><p>0.901971</p></td>
+<td class="text-right"><p>0.833384</p></td>
 </tr>
-<tr class="row-odd"><td class="text-align:left"><p>layer_12</p></td>
-<td class="text-align:right"><p>0.573001</p></td>
-<td class="text-align:right"><p>0.848117</p></td>
-<td class="text-align:right"><p>0.887111</p></td>
-<td class="text-align:right"><p>0.91598</p></td>
-<td class="text-align:right"><p>0.889409</p></td>
-<td class="text-align:right"><p>0.722022</p></td>
-<td class="text-align:right"><p>0.920872</p></td>
-<td class="text-align:right"><p>0.899414</p></td>
-<td class="text-align:right"><p>0.831991</p></td>
+<tr class="row-odd"><td class="text-left"><p>layer_12</p></td>
+<td class="text-right"><p>0.573001</p></td>
+<td class="text-right"><p>0.848117</p></td>
+<td class="text-right"><p>0.887111</p></td>
+<td class="text-right"><p>0.91598</p></td>
+<td class="text-right"><p>0.889409</p></td>
+<td class="text-right"><p>0.722022</p></td>
+<td class="text-right"><p>0.920872</p></td>
+<td class="text-right"><p>0.899414</p></td>
+<td class="text-right"><p>0.831991</p></td>
 </tr>
 </tbody>
 </table>

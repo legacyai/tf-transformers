@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -96,6 +96,7 @@
 <li class="toctree-l1"><a class="reference internal" href="6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -155,7 +156,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="writing-and-reading-tfrecords">
+  <div class="section" id="writing-and-reading-tfrecords">
 <h1>Writing and Reading TFRecords<a class="headerlink" href="#writing-and-reading-tfrecords" title="Permalink to this headline">¶</a></h1>
 <p>Tensoflow-Transformers has off the shelf support to write and read tfrecord with so much ease.
 It also allows you to shard, shuffle and batch your data most of the times, with minimal code.</p>
@@ -164,7 +165,7 @@ It also allows you to shard, shuffle and batch your data most of the times, with
 GPT2 Tokenizer. TFRecords are useful for efficient training pipelines.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tf_transformers.data</span> <span class="kn">import</span> <span class="n">TFWriter</span><span class="p">,</span> <span class="n">TFReader</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tf_transformers.data</span> <span class="kn">import</span> <span class="n">TFWriter</span><span class="p">,</span> <span class="n">TFReader</span>
 <span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">GPT2TokenizerFast</span>
 
 <span class="kn">from</span> <span class="nn">datasets</span> <span class="kn">import</span> <span class="n">load_dataset</span>
@@ -182,7 +183,7 @@ GPT2 Tokenizer. TFRecords are useful for efficient training pipelines.</p>
 It is important to make sure we have limit the length within the allowed limit of each models.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Dataset</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Dataset</span>
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;squad&quot;</span><span class="p">)</span>
 <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">GPT2TokenizerFast</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">&#39;gpt2&#39;</span><span class="p">)</span>
 
@@ -204,8 +205,8 @@ It is important to make sure we have limit the length within the allowed limit o
 We can also pad it accordingly after reading.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_train</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_passage_length</span><span class="p">,</span> <span class="n">max_question_length</span><span class="p">,</span> <span class="n">max_answer_length</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Function o to parse examples</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">parse_train</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_passage_length</span><span class="p">,</span> <span class="n">max_question_length</span><span class="p">,</span> <span class="n">max_answer_length</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function o to parse examples</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dataset (:obj:`dataet`): HF dataset</span>
@@ -280,7 +281,7 @@ We can also pad it accordingly after reading.</p>
 We can also <strong>auto_batch</strong>, <strong>shuffle</strong>, choose the optional keys (not all keys in tfrecords) might not be required while reading, etc in a single function.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read TFRecord</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read TFRecord</span>
 
 <span class="n">schema</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/schema.json&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_train_dir</span><span class="p">)))</span>
 <span class="n">all_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/*.tfrecord&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tfrecord_train_dir</span><span class="p">))</span>
@@ -304,7 +305,7 @@ We can also <strong>auto_batch</strong>, <strong>shuffle</strong>, choose the op
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_labels</span><span class="p">)</span> <span class="ow">in</span> <span class="n">train_dataset</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_labels</span><span class="p">)</span> <span class="ow">in</span> <span class="n">train_dataset</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">batch_inputs</span><span class="p">,</span> <span class="n">batch_labels</span><span class="p">)</span>
     <span class="k">break</span>
 </pre></div>

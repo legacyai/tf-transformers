@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -172,7 +173,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<div class="tex2jax_ignore mathjax_ignore section" id="benchmark-gpt2">
+<div class="section" id="benchmark-gpt2">
 <h1>Benchmark GPT2<a class="headerlink" href="#benchmark-gpt2" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/legacyai/tf-transformers/tree/main/benchmark/gpt2">Code - GPT2 Benchmark</a></p></li>
@@ -189,7 +190,7 @@ the benchmark script.</p>
 <div class="section" id="tensorflow-transformers-tft">
 <h2>Tensorflow-Transformers. (tft)<a class="headerlink" href="#tensorflow-transformers-tft" title="Permalink to this headline">¶</a></h2>
 <p>The default benchmark mode is <code class="docutils literal notranslate"><span class="pre">tft</span></code>.</p>
-<ol>
+<ol class="arabic">
 <li><p>To execute <code class="docutils literal notranslate"><span class="pre">Greedy</span> <span class="pre">Decoding</span></code> (default) :
 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">run.py</span> <span class="pre">benchmark=tft</span></code></p></li>
 <li><p>To execute <code class="docutils literal notranslate"><span class="pre">Beam</span> <span class="pre">Decoding</span></code> :
@@ -208,7 +209,7 @@ using <code class="docutils literal notranslate"><span class="pre">+</span></cod
 </div>
 <div class="section" id="huggingface-tensorflow-hf-tf">
 <h2>HuggingFace-Tensorflow. (hf-tf)<a class="headerlink" href="#huggingface-tensorflow-hf-tf" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>To execute <code class="docutils literal notranslate"><span class="pre">Greedy</span> <span class="pre">Decoding</span></code> (default) :
 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">run.py</span> <span class="pre">benchmark=hf</span> <span class="pre">benchmark.model.type=tf</span></code></p></li>
 <li><p>To execute <code class="docutils literal notranslate"><span class="pre">Beam</span> <span class="pre">Decoding</span></code> :
@@ -219,7 +220,7 @@ using <code class="docutils literal notranslate"><span class="pre">+</span></cod
 </div>
 <div class="section" id="huggingface-pytorch-hf-pt">
 <h2>HuggingFace-PyTorch. (hf-pt)<a class="headerlink" href="#huggingface-pytorch-hf-pt" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>To execute <code class="docutils literal notranslate"><span class="pre">Greedy</span> <span class="pre">Decoding</span></code> (default) :
 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">run.py</span> <span class="pre">benchmark=hf</span> <span class="pre">benchmark.model.type=pt</span></code></p></li>
 <li><p>To execute <code class="docutils literal notranslate"><span class="pre">Beam</span> <span class="pre">Decoding</span></code> :
@@ -228,7 +229,7 @@ using <code class="docutils literal notranslate"><span class="pre">+</span></cod
 </div>
 <div class="section" id="huggingface-jax-hf-jax">
 <h2>HuggingFace-JAX. (hf-jax)<a class="headerlink" href="#huggingface-jax-hf-jax" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>To execute <code class="docutils literal notranslate"><span class="pre">Greedy</span> <span class="pre">Decoding</span></code> (default) :
 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">run.py</span> <span class="pre">benchmark=hf</span> <span class="pre">benchmark.model.type=jax</span></code></p></li>
 <li><p>To execute <code class="docutils literal notranslate"><span class="pre">Beam</span> <span class="pre">Decoding</span></code> :

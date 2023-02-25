@@ -21,8 +21,8 @@
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/custom_from_huggingface.css" type="text/css" /><link rel="shortcut icon" href="../_static/favicon.ico"/>
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -101,6 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="6_prompt_engineering_clip.html">Prompt Engineering using CLIP</a></li>
 <li class="toctree-l1"><a class="reference internal" href="7_gpt2_question_answering_squad.html">GPT2 for QA using Squad V1 ( Causal LM )</a></li>
 <li class="toctree-l1"><a class="reference internal" href="8_code_code_java_to_csharp_t5.html">Code Java to C# using T5</a></li>
+<li class="toctree-l1"><a class="reference internal" href="9_images_tfrecords.html">Read and Write Images as TFRecords</a></li>
 </ul>
 <p class="caption"><span class="caption-text">TFLite</span></p>
 <ul>
@@ -160,7 +161,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="tex2jax_ignore mathjax_ignore section" id="train-masked-language-model-with-tf-transformers-in-tpu">
+  <div class="section" id="train-masked-language-model-with-tf-transformers-in-tpu">
 <h1>Train (Masked Language Model) with tf-transformers in TPU<a class="headerlink" href="#train-masked-language-model-with-tf-transformers-in-tpu" title="Permalink to this headline">¶</a></h1>
 <p>This tutorial contains complete code to train MLM model on C4 EN 10K dataset.
 In addition to training a model, you will learn how to preprocess text into an appropriate format.</p>
@@ -177,17 +178,17 @@ tokenizer from tf-transformers.</p></li>
 <p>If you’re new to working with the C4 dataset, please see <a class="reference external" href="https://www.tensorflow.org/datasets/catalog/c4">C4</a> for more details.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install tf-transformers
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tf-transformers
 
-<span class="o">!</span>pip install sentencepiece
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>sentencepiece
 
-<span class="o">!</span>pip install tensorflow-text
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>tensorflow-text
 
-<span class="o">!</span>pip install transformers
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>transformers
 
-<span class="o">!</span>pip install wandb
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>wandb
 
-<span class="o">!</span>pip install datasets
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>datasets
 </pre></div>
 </div>
 </div>
@@ -361,7 +362,7 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load Model</span>
 <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">vocab_size</span><span class="p">,</span> <span class="n">is_training</span><span class="p">,</span> <span class="n">use_dropout</span><span class="p">,</span> <span class="n">num_hidden_layers</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Get Model&quot;&quot;&quot;</span>
 
   <span class="k">def</span> <span class="nf">model_fn</span><span class="p">():</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">GPT2Model</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
@@ -378,7 +379,7 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 
 <span class="c1"># Load Optimizer</span>
 <span class="k">def</span> <span class="nf">get_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">examples</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">use_constant_lr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get optimizer&quot;&quot;&quot;</span>
     <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">examples</span> <span class="o">/</span> <span class="n">batch_size</span><span class="p">)</span>
     <span class="n">num_train_steps</span> <span class="o">=</span> <span class="n">steps_per_epoch</span> <span class="o">*</span> <span class="n">epochs</span>
     <span class="n">warmup_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">num_train_steps</span><span class="p">)</span>
@@ -391,7 +392,7 @@ Devices [PhysicalDevice(name=&#39;/physical_device:CPU:0&#39;, device_type=&#39;
 
 <span class="c1"># Load trainer</span>
 <span class="k">def</span> <span class="nf">get_trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get Trainer&quot;&quot;&quot;</span>
     <span class="n">trainer</span> <span class="o">=</span> <span class="n">Trainer</span><span class="p">(</span><span class="n">distribution_strategy</span><span class="p">,</span> <span class="n">num_gpus</span><span class="o">=</span><span class="n">num_gpus</span><span class="p">,</span> <span class="n">tpu_address</span><span class="o">=</span><span class="n">tpu_address</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">trainer</span>
 </pre></div>
@@ -407,7 +408,7 @@ overhead of pre prepapre the data in the form of <code class="docutils literal n
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load dataset</span>
 <span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">tokenizer_layer</span><span class="p">,</span> <span class="n">max_seq_len</span><span class="p">,</span> <span class="n">max_predictions_per_seq</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">      dataset; HuggingFace dataset</span>
 <span class="sd">      tokenizer_layer: tf-transformers tokenizer</span>
@@ -439,7 +440,7 @@ overhead of pre prepapre the data in the form of <code class="docutils literal n
 </div>
 <div class="section" id="prepare-dataset">
 <h2>Prepare Dataset<a class="headerlink" href="#prepare-dataset" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>Set necessay hyperparameters.</p></li>
 <li><p>Prepare <code class="docutils literal notranslate"><span class="pre">train</span> <span class="pre">dataset</span></code></p></li>
 <li><p>Load <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, <code class="docutils literal notranslate"><span class="pre">loss</span></code> and <code class="docutils literal notranslate"><span class="pre">trainer</span></code>.</p></li>
@@ -487,9 +488,7 @@ overhead of pre prepapre the data in the form of <code class="docutils literal n
 <div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING:datasets.builder:Reusing dataset c4_en10k (/root/.cache/huggingface/datasets/stas___c4_en10k/plain_text/1.0.0/edbf1ff8b8ee35a9751a7752b5e93a4873cc7905ffae010ad334a2c96f81e1cd)
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "d5c1adfe09f7461c89e172b9743af081", "version_major": 2, "version_minor": 0}
-</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Loading albert-base-v2 tokenizer to /tmp/tftransformers_tokenizer_cache/albert-base-v2/spiece.model
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d5c1adfe09f7461c89e172b9743af081", "version_major": 2, "version_minor": 0}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:absl:Loading albert-base-v2 tokenizer to /tmp/tftransformers_tokenizer_cache/albert-base-v2/spiece.model
 </pre></div>
 </div>
 </div>
@@ -544,9 +543,9 @@ overhead of pre prepapre the data in the form of <code class="docutils literal n
 </pre></div>
 </div>
 <div class="output text_html">
-Syncing run <strong><a href="https://wandb.ai/legacyai/TUTORIALS/runs/pofm3ng5" target="_blank">mlm_tpu</a></strong> to <a href="https://wandb.ai/legacyai/TUTORIALS" target="_blank">Weights & Biases</a> (<a href="https://docs.wandb.com/integrations/jupyter.html" target="_blank">docs</a>).<br/>
+                    Syncing run <strong><a href="https://wandb.ai/legacyai/TUTORIALS/runs/pofm3ng5" target="_blank">mlm_tpu</a></strong> to <a href="https://wandb.ai/legacyai/TUTORIALS" target="_blank">Weights & Biases</a> (<a href="https://docs.wandb.com/integrations/jupyter.html" target="_blank">docs</a>).<br/>
 
-</div><div class="output text_html"><button onClick="this.nextSibling.style.display='block';this.style.display='none';">Display W&B run</button><iframe src="https://wandb.ai/legacyai/TUTORIALS/runs/pofm3ng5?jupyter=true" style="border:none;width:100%;height:420px;display:none;"></iframe></div></div>
+                </div><div class="output text_html"><button onClick="this.nextSibling.style.display='block';this.style.display='none';">Display W&B run</button><iframe src="https://wandb.ai/legacyai/TUTORIALS/runs/pofm3ng5?jupyter=true" style="border:none;width:100%;height:420px;display:none;"></iframe></div></div>
 </div>
 </div>
 <div class="section" id="train">
@@ -626,7 +625,7 @@ INFO:absl:Successful ✅✅: Model checkpoints matched and loaded from gs://lega
 </div>
 <div class="section" id="test-model-performance">
 <h2>Test Model performance<a class="headerlink" href="#test-model-performance" title="Permalink to this headline">¶</a></h2>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>We can assess model performance by checking how it predicts masked word on sample sentences.</p></li>
 <li><p>As we see the following result, its clear that model starts learning.</p></li>
 </ol>
