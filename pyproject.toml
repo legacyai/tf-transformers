@@ -19,7 +19,7 @@ keywords = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 tqdm = "^4.62.3"
 transformers = "^4.15.0"
 sentencepiece = "^0.1.96"
