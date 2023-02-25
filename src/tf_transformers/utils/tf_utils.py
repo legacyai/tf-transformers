@@ -175,7 +175,10 @@ def assert_rank(tensor, expected_rank, name=None):
 
 def get_dtype():
     dtype = tf.float32
-    policy = tf.keras.mixed_precision.experimental.global_policy()
+    try:
+        policy = tf.keras.mixed_precision.experimental.global_policy()
+    except:
+        policy = tf.keras.mixed_precision.global_policy()
     if policy.name == "mixed_float16":
         dtype = tf.float16
     if policy.name == "mixed_bfloat16":

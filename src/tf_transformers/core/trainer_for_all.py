@@ -24,6 +24,7 @@ from absl import logging
 
 from tf_transformers.core import keras_utils
 from tf_transformers.core.distribute_utils import get_distribution_strategy
+from tf_transformers.core.model_utils_for_all import load_checkpoint_custom
 from tf_transformers.core.performance_utils import (
     configure_optimizer,
     get_tf_dtype,
@@ -475,7 +476,7 @@ def train_and_eval(
     return training_history, validation_history, all_callback_scores
 
 
-class Trainer:
+class TrainerforAll:
     """Trainer for the Models"""
 
     def __init__(
@@ -488,7 +489,7 @@ class Trainer:
         num_packs: int = 1,
         loss_scale: str = 'dynamic',
     ):
-        """Trainer class
+        """Trainer for any keras model class
 
         Args:
             distribution_strategy (:obj:`str`): a string specifying which distribution strategy to
@@ -627,7 +628,8 @@ class Trainer:
                 optimizer = configure_optimizer(optimizer, use_float16=self.use_float16, loss_scale=self.loss_scale)
 
             # Load and restore
-            ckpt = model.load_checkpoint(
+            ckpt = load_checkpoint_custom(
+                model,
                 checkpoint_dir=model_checkpoint_dir,
                 checkpoint_path=latest_checkpoint,
                 opt=optimizer,
