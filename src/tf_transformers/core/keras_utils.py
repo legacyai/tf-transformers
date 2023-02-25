@@ -33,7 +33,10 @@ first_batch_end_time = first_batch_time_gauge.get_cell('end')
 
 
 def get_policy_name():
-    policy = tf.keras.mixed_precision.experimental.global_policy()
+    try:
+        policy = tf.keras.mixed_precision.experimental.global_policy()
+    except:
+        policy = tf.keras.mixed_precision.global_policy()
     return policy.name
 
 

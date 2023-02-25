@@ -193,18 +193,18 @@ def convert_gpt2_tf(model, config, model_name):
 
     # From vars (Transformer variables)
     from_model_vars = [
-        "tfgp_t2model/transformer/h_._{}/ln_1/gamma:0",
-        "tfgp_t2model/transformer/h_._{}/ln_1/beta:0",
-        "tfgp_t2model/transformer/h_._{}/attn/c_attn/weight:0",
-        "tfgp_t2model/transformer/h_._{}/attn/c_attn/bias:0",
-        "tfgp_t2model/transformer/h_._{}/attn/c_proj/weight:0",
-        "tfgp_t2model/transformer/h_._{}/attn/c_proj/bias:0",
-        "tfgp_t2model/transformer/h_._{}/ln_2/gamma:0",
-        "tfgp_t2model/transformer/h_._{}/ln_2/beta:0",
-        "tfgp_t2model/transformer/h_._{}/mlp/c_fc/weight:0",
-        "tfgp_t2model/transformer/h_._{}/mlp/c_fc/bias:0",
-        "tfgp_t2model/transformer/h_._{}/mlp/c_proj/weight:0",
-        "tfgp_t2model/transformer/h_._{}/mlp/c_proj/bias:0",
+        "tfgpt2_model/transformer/h_._{}/ln_1/gamma:0",
+        "tfgpt2_model/transformer/h_._{}/ln_1/beta:0",
+        "tfgpt2_model/transformer/h_._{}/attn/c_attn/weight:0",
+        "tfgpt2_model/transformer/h_._{}/attn/c_attn/bias:0",
+        "tfgpt2_model/transformer/h_._{}/attn/c_proj/weight:0",
+        "tfgpt2_model/transformer/h_._{}/attn/c_proj/bias:0",
+        "tfgpt2_model/transformer/h_._{}/ln_2/gamma:0",
+        "tfgpt2_model/transformer/h_._{}/ln_2/beta:0",
+        "tfgpt2_model/transformer/h_._{}/mlp/c_fc/weight:0",
+        "tfgpt2_model/transformer/h_._{}/mlp/c_fc/bias:0",
+        "tfgpt2_model/transformer/h_._{}/mlp/c_proj/weight:0",
+        "tfgpt2_model/transformer/h_._{}/mlp/c_proj/bias:0",
     ]
 
     # To vars (Transformer variables)
@@ -232,13 +232,13 @@ def convert_gpt2_tf(model, config, model_name):
             mapping_dict[from_model_vars[index].format(i)] = to_model_vars[index].format(i)
 
     # Word Embeddings
-    mapping_dict["tfgp_t2model/transformer/wte/weight:0"] = "tf_transformers/gpt2/word_embeddings/embeddings:0"
+    mapping_dict["tfgpt2_model/transformer/wte/weight:0"] = "tf_transformers/gpt2/word_embeddings/embeddings:0"
     # Positional Embedding
     mapping_dict[
-        "tfgp_t2model/transformer/wpe/embeddings:0"
+        "tfgpt2_model/transformer/wpe/embeddings:0"
     ] = "tf_transformers/gpt2/positional_embeddings/embeddings:0"
-    mapping_dict["tfgp_t2model/transformer/ln_f/gamma:0"] = "tf_transformers/gpt2/ln_f/layer_norm/gamma:0"
-    mapping_dict["tfgp_t2model/transformer/ln_f/beta:0"] = "tf_transformers/gpt2/ln_f/layer_norm/beta:0"
+    mapping_dict["tfgpt2_model/transformer/ln_f/gamma:0"] = "tf_transformers/gpt2/ln_f/layer_norm/gamma:0"
+    mapping_dict["tfgpt2_model/transformer/ln_f/beta:0"] = "tf_transformers/gpt2/ln_f/layer_norm/beta:0"
 
     # GPT2Model
     from transformers import TFGPT2Model
@@ -257,7 +257,7 @@ def convert_gpt2_tf(model, config, model_name):
         # replace above mapping here, only for positional embeddings
         if var.name == "tf_transformers/gpt2/cond/positional_embeddings/embeddings:0":
             mapping_dict[
-                "tfgp_t2model/transformer/wpe/embeddings:0"
+                "tfgpt2_model/transformer/wpe/embeddings:0"
             ] = "tf_transformers/gpt2/cond/positional_embeddings/embeddings:0"
 
     # Start assigning HF values to tf_transformers
