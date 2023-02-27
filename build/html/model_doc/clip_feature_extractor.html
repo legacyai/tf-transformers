@@ -170,66 +170,6 @@ This feature extractors works in sync with <code class="xref py py-class docutil
 </div>
 <div class="section" id="clipfeatureextractortf">
 <h2>CLIPFeatureExtractorTF<a class="headerlink" href="#clipfeatureextractortf" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="tf_transformers.models.CLIPFeatureExtractorTF">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">tf_transformers.models.</span></code><code class="sig-name descname"><span class="pre">CLIPFeatureExtractorTF</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_feature_extractor.html#CLIPFeatureExtractorTF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPFeatureExtractorTF" title="Permalink to this definition">¶</a></dt>
-<dd><p>CLIPFeatureExtractor using Tensorflow Ops, which allows complete serialization</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>img_height</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Image Height to resize.</p></li>
-<li><p><strong>img_width</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Image Width to resize.</p></li>
-<li><p><strong>num_channels</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Number of image channels.</p></li>
-<li><p><strong>centre_crop</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To centre_crop the image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
-<li><p><strong>rescale</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To rescale the image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
-<li><p><strong>normalize</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – To normalize the image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>).</p></li>
-<li><p><strong>return_layer</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Whether to return tf.keras.layers.Layer/LegacyLayer.</p></li>
-<li><p><strong>scale_value</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Used for rescaling image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">1.0/255.0</span></code>).</p></li>
-<li><p><strong>mean</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Used for normalize image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">0.5</span></code>).</p></li>
-<li><p><strong>variance</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Used for normalize image. default (<code class="xref py py-obj docutils literal notranslate"><span class="pre">0.5</span></code>).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>LegacyModel/LegacyLayer.</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt id="tf_transformers.models.CLIPFeatureExtractorTF.call">
-<code class="sig-name descname"><span class="pre">call</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_feature_extractor.html#CLIPFeatureExtractorTF.call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPFeatureExtractorTF.call" title="Permalink to this definition">¶</a></dt>
-<dd><p>Main call</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="tf_transformers.models.CLIPFeatureExtractorTF.get_config">
-<code class="sig-name descname"><span class="pre">get_config</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_feature_extractor.html#CLIPFeatureExtractorTF.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPFeatureExtractorTF.get_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return config</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="tf_transformers.models.CLIPFeatureExtractorTF.get_model">
-<code class="sig-name descname"><span class="pre">get_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialize_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_feature_extractor.html#CLIPFeatureExtractorTF.get_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPFeatureExtractorTF.get_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert tf.keras.Layer to a tf.keras.Model/LegacyModel.
-:param initialize_only [bool]: If True, just initialize the model, but wont return model object.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="tf_transformers.models.CLIPFeatureExtractorTF.read_process_resize">
-<code class="sig-name descname"><span class="pre">read_process_resize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tf_transformers/models/clip/clip_feature_extractor.html#CLIPFeatureExtractorTF.read_process_resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tf_transformers.models.CLIPFeatureExtractorTF.read_process_resize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read, decode and process</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 </div>
 
