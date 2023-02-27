@@ -46,7 +46,6 @@ def convert_byt5_pt(model, config, model_name):
 
     model_hf = PTT5Model.from_pretrained(model_name)
 
-
     from_model_vars = [
         "encoder.block.{}.layer.0.SelfAttention.q.weight",
         "encoder.block.{}.layer.0.SelfAttention.k.weight",
@@ -128,7 +127,6 @@ def convert_byt5_pt(model, config, model_name):
         model.variables[index].assign(from_to_variable_dict.get(original_var))
         assigned_map.append((original_var, legacy_var))
 
-
     # Decoder Side
     # From vars (Transformer variables)
 
@@ -148,7 +146,6 @@ def convert_byt5_pt(model, config, model_name):
         "decoder.block.{}.layer.2.DenseReluDense.wo.weight",
         "decoder.block.{}.layer.2.layer_norm.weight",
     ]
-
 
     to_model_vars = [
         "tf_transformers/byt5_decoder/transformer/layer_{}/self_attention/query/kernel:0",
@@ -338,7 +335,6 @@ def convert_t5_tf(model, config, model_name):
     assigned_map = []
     # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
-
         index = tf_transformers_model_index_dict[legacy_var]
         # If not in mapping_dict, then mostly it is from attention layer
         if "query/kernel:0" in legacy_var or "key/kernel:0" in legacy_var or "value/kernel:0" in legacy_var:
@@ -421,7 +417,6 @@ def convert_t5_tf(model, config, model_name):
     assigned_map = []
     # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
-
         index = tf_transformers_model_index_dict[legacy_var]
         # If not in mapping_dict, then mostly it is from attention layer
         if "query/kernel:0" in legacy_var or "key/kernel:0" in legacy_var or "value/kernel:0" in legacy_var:

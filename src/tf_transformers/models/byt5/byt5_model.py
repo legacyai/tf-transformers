@@ -25,22 +25,18 @@ from tf_transformers.core.read_from_hub import (
     get_config_only,
     load_pretrained_model,
 )
-from tf_transformers.models.encoder_decoder import EncoderDecoder
 from tf_transformers.models.byt5 import ByT5Encoder as Encoder
 from tf_transformers.models.byt5.configuration_byt5 import ByT5Config as ModelConfig
 from tf_transformers.models.byt5.convert import convert_byt5_pt as convert_pt
+from tf_transformers.models.byt5.convert import convert_byt5_tf as convert_tf
+from tf_transformers.models.encoder_decoder import EncoderDecoder
 from tf_transformers.utils.docstring_file_utils import add_start_docstrings
 from tf_transformers.utils.docstring_utils import (
     ENCODER_MODEL_CONFIG_DOCSTRING,
     ENCODER_PRETRAINED_DOCSTRING,
 )
 
-MODEL_TO_HF_URL = {
-
-    'byt5-small': 'tftransformers/byt5-small',
-    'google/byt5-small': 'tftransformers/byt5-small'
-
-}
+MODEL_TO_HF_URL = {'byt5-small': 'tftransformers/byt5-small', 'google/byt5-small': 'tftransformers/byt5-small'}
 
 code_example = r'''
 
@@ -69,7 +65,6 @@ class ByT5Model(ModelWrapper):
     """
 
     def __init__(self, model_name='byt5', cache_dir=None, save_checkpoint_cache=True):
-
         super(ByT5Model, self).__init__(
             model_name=model_name, cache_dir=cache_dir, save_checkpoint_cache=save_checkpoint_cache
         )
@@ -113,7 +108,7 @@ class ByT5Model(ModelWrapper):
         """
         # Check if it is under tf_transformers
         if model_name in MODEL_TO_HF_URL:
-            URL = MODEL_TO_HFURL[model_name]
+            URL = MODEL_TO_HF_URL[model_name]
             config_dict = get_config_only(URL)
             return config_dict
         else:
@@ -135,7 +130,9 @@ class ByT5Model(ModelWrapper):
     @classmethod
     @add_start_docstrings(
         "ByT5 Model from config :",
-        ENCODER_MODEL_CONFIG_DOCSTRING.format("transformers.models.ByT5Encoder", "tf_transformers.models.byt5.ByT5Config"),
+        ENCODER_MODEL_CONFIG_DOCSTRING.format(
+            "transformers.models.ByT5Encoder", "tf_transformers.models.byt5.ByT5Config"
+        ),
     )
     def from_config(
         cls,

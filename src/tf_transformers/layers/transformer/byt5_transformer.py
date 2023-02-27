@@ -282,7 +282,7 @@ class TransformerByT5(LegacyLayer):
         attention_output = self._attention_layer_norm(input_tensor + attention_output)
         # mixed precision stability requires Normalization to be in tf.ffloat32
         attention_output = tf.cast(attention_output, dtype=tf_utils.get_dtype())
-        intermediate_output_gelu  = self._intermediate_dense(attention_output)
+        intermediate_output_gelu = self._intermediate_dense(attention_output)
 
         intermediate_output = self._intermediate_dense2(attention_output)
 
@@ -325,7 +325,12 @@ class TransformerByT5(LegacyLayer):
             encoder_output,
             decoder_encoder_mask,
         ]
-        (attention_output, decoder_encoder_position_bias, _, _,) = self._cross_attention_layer(
+        (
+            attention_output,
+            decoder_encoder_position_bias,
+            _,
+            _,
+        ) = self._cross_attention_layer(
             attention_inputs_for_decoder,
             position_bias=decoder_encoder_position_bias,
             cache_key=cache_key,
@@ -339,7 +344,7 @@ class TransformerByT5(LegacyLayer):
         attention_output = attention_output + attention_output_copy
 
         attention_output_normed = self._attention_layer_norm(attention_output)
-        intermediate_output_gelu  = self._intermediate_dense(attention_output_normed)
+        intermediate_output_gelu = self._intermediate_dense(attention_output_normed)
         intermediate_output = self._intermediate_dense2(attention_output_normed)
         intermediate_output = intermediate_output_gelu * intermediate_output
         layer_output = self._output_dense(intermediate_output)
@@ -364,7 +369,6 @@ class TransformerByT5(LegacyLayer):
         cache_key=None,
         cache_value=None,
     ):
-
         """Call
 
         Args:

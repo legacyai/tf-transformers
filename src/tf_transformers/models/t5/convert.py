@@ -239,7 +239,7 @@ def convert_t5_pt(model, config, model_name):
         tf.debugging.assert_near(outputs_hf, outputs_tf, rtol=1.0)
 
 
-def convert_t5_tf(model, config, model_name):
+def convert_byt5_tf(model, config, model_name):
     """TF converter
     Args:
         model_hf: HuggingFace Model (TF)
@@ -329,7 +329,6 @@ def convert_t5_tf(model, config, model_name):
     assigned_map = []
     # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
-
         index = tf_transformers_model_index_dict[legacy_var]
         # If not in mapping_dict, then mostly it is from attention layer
         if "query/kernel:0" in legacy_var or "key/kernel:0" in legacy_var or "value/kernel:0" in legacy_var:
@@ -412,7 +411,6 @@ def convert_t5_tf(model, config, model_name):
     assigned_map = []
     # assigned_map_values = []
     for original_var, legacy_var in mapping_dict.items():
-
         index = tf_transformers_model_index_dict[legacy_var]
         # If not in mapping_dict, then mostly it is from attention layer
         if "query/kernel:0" in legacy_var or "key/kernel:0" in legacy_var or "value/kernel:0" in legacy_var:
