@@ -213,6 +213,9 @@ class EncoderDecoder(LegacyLayer):
         else:
             self._encoder_decoder_projection = tf.identity
 
+        self._config_dict = {}
+        self._config_dict['encoder'] = self._encoder_config_dict
+        self._config_dict['decoder'] = self._decoder_config_dict
         # Initialize model
         self.model_inputs, self.model_ouputs = self.get_model(initialize_only=True)
 

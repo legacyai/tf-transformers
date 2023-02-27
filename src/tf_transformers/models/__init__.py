@@ -50,6 +50,11 @@ from tf_transformers.models.t5 import (
     T5TokenizerLayer,
     T5TokenizerTFText,
 )
+from tf_transformers.models.byt5 import (
+    ByT5Config,
+    ByT5Encoder,
+    ByT5Model,
+)
 from tf_transformers.models.tasks import (
     Classification_Model,
     MaskedLMModel,
