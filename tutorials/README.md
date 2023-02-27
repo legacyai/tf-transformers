@@ -7,7 +7,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.13.5
+    jupytext_version: 1.14.4
 ---
 
 We use jupytext to keep copies of notebook in sync with Markdown equivalent.
