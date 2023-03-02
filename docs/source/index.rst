@@ -159,6 +159,7 @@ Supported models
     tutorials/7_gpt2_question_answering_squad
     tutorials/8_code_code_java_to_csharp_t5
     tutorials/9_images_tfrecords
+    tutorials/push_model_to_hub
 
 .. toctree::
     :maxdepth: 2
